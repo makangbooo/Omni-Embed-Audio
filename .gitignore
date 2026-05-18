@@ -1,0 +1,49 @@
+# Byte-compiled / cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+
+# Local data and outputs that should not be committed
+outputs/
+logs/
+wandb/
+.cache/
+huggingface_cache/
+*.tar.gz
+
+# Per-user secrets — never commit these
+.env
+*.api_key
+*token*.txt
+
+# Local data trees (users provide their own copy of the audio datasets)
+data/AudioCaps/
+data/Clotho2.0/
+data/_mecat/
+data/laion_freesound/
+data/wavcaps/
+data/FSD50K/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Large precomputed embeddings
+*.npz
+!data/UIQ/**/*.jsonl

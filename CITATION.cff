@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this software, the UIQ benchmark, or our pretrained OEA checkpoints, please cite the following paper."
+title: "Omni-Embed-Audio: Leveraging Multimodal LLMs for Robust Audio-Text Retrieval"
+authors:
+  - family-names: "Yoo"
+    given-names: "HaeJun"
+    affiliation: "Sogang University"
+  - family-names: "Shin"
+    given-names: "Yongseop"
+    affiliation: "Sogang University"
+  - family-names: "Lee"
+    given-names: "Insung"
+    affiliation: "Sogang University"
+  - family-names: "Koo"
+    given-names: "Myoung-Wan"
+    affiliation: "Sogang University"
+  - family-names: "Chang"
+    given-names: "Du-Seong"
+    affiliation: "Sogang University"
+preferred-citation:
+  type: conference-paper
+  title: "Omni-Embed-Audio: Leveraging Multimodal LLMs for Robust Audio-Text Retrieval"
+  year: 2026
+  notes: "Oral presentation"
+  conference:
+    name: "Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL)"
+  authors:
+    - family-names: "Yoo"
+      given-names: "HaeJun"
+      affiliation: "Sogang University"
+    - family-names: "Shin"
+      given-names: "Yongseop"
+      affiliation: "Sogang University"
+    - family-names: "Lee"
+      given-names: "Insung"
+      affiliation: "Sogang University"
+    - family-names: "Koo"
+      given-names: "Myoung-Wan"
+      affiliation: "Sogang University"
+    - family-names: "Chang"
+      given-names: "Du-Seong"
+      affiliation: "Sogang University"

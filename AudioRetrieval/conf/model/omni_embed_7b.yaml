@@ -1,0 +1,20 @@
+# @package _global_
+model:
+  name: omni_embed
+  display_name: Omni-Embed Nemotron-7B (Qwen2.5-Omni-7B)
+  repo_id: ModelCheckpoint/Qwen2.5-Omni-7B
+  cache_dir: null
+  local_path: null
+  trust_remote_code: true
+  torch_dtype: auto
+  text_max_length: 2048
+  device_map: null
+  device: ${eval.device}
+  attn_implementation: null
+  passage_prefix: "passage:"
+  query_prefix: "query:"
+  audio_max_length: null
+
+eval:
+  batch_size_audio: 2
+  batch_size_text: 8

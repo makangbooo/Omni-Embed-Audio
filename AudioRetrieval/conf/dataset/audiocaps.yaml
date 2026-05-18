@@ -1,0 +1,11 @@
+# @package _global_
+dataset:
+  name: audiocaps
+  display_name: AudioCaps
+
+  # Dataset paths
+  audio_dir: AudioCaps/audiocaps_raw_audio
+  captions_csv: AudioCaps/v2_meta_data/test.csv
+
+  # Dataset-specific settings
+  captions_per_audio: 1

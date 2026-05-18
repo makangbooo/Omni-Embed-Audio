@@ -1,0 +1,35 @@
+# Base configuration for audio retrieval evaluation
+defaults:
+  - model: laion_clap
+  - dataset: clotho
+  - reranker: none
+  - _self_
+
+# Evaluation settings
+eval:
+  mode: captionwise  # captionwise | caption_avg | caption_pool
+  metrics_k: [1, 5, 10]
+  batch_size_audio: 64
+  batch_size_text: 256
+  device: cuda
+  sample_size: null   # Set to an integer to evaluate on a subset of clips
+  sample_seed: 0      # Seed used when sampling clips
+  sample_start: null  # Optional inclusive clip start index when slicing deterministically
+  sample_end: null    # Optional exclusive clip end index when slicing deterministically
+  allow_t2t_audio_rerank: false
+  tasks:
+    - text_to_audio
+    - audio_to_text
+    - text_to_text
+
+# Output settings
+output:
+  save_results: true
+  results_dir: results
+
+# Hydra settings
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  job:
+    chdir: false

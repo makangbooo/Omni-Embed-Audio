@@ -1,0 +1,62 @@
+seed: 42
+device: cuda
+batch_size: 256  # Higher batch ok with pooled CLAP embeddings
+batch_size_contrastive: 0  # Unused (epochs_contrastive=0)
+batch_size_diffusion: 256
+num_workers: 4
+pin_memory: true
+epochs_contrastive: 0  # Skip contrastive stage entirely
+epochs_diffusion: 20
+temperature: 0.07
+
+# Use raw MGA-CLAP pooled embeddings (1024-dim) with identity heads
+audio_input_dim: 1024
+text_input_dim: 1024
+projection_dim: 1024
+projection_architecture: identity
+
+output_dir: outputs/diffatr_clap/audiocaps_identity
+log_every: 50
+use_amp: true
+
+# CLAP embedding directories
+dataset_train:
+  audio_dir: results/clap_embeddings/audiocaps_train/audio
+  text_dir: results/clap_embeddings/audiocaps_train/text
+  index_path: results/clap_embeddings/audiocaps_train/index.json
+
+dataset_val:
+  audio_dir: results/clap_embeddings/audiocaps_val/audio
+  text_dir: results/clap_embeddings/audiocaps_val/text
+  index_path: results/clap_embeddings/audiocaps_val/index.json
+
+optimizer:
+  learning_rate: 5.0e-5
+  weight_decay: 1.0e-5
+
+diffusion:
+  steps: 50
+  beta_start: 1.0e-3
+  beta_end: 5.0e-2
+  schedule: cosine
+  hidden_dim: 512
+  mlp_dim: 1024
+  dropout: 0.1
+  contrastive_weight: 0.0  # No auxiliary contrastive term since heads are identity
+
+logger:
+  enabled: false
+  project: diffatr-clap
+  log_last_checkpoint: true
+
+_eval_common: &eval_common
+  enabled: true
+  every_n_steps: 500
+  max_batches: 64
+  patience_diffusion: 5
+
+eval:
+  <<: *eval_common
+
+# Checkpoint settings
+save_every_steps: 1000

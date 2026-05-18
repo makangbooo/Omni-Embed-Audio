@@ -1,0 +1,33 @@
+# Default Hydra configuration for ColAF projection-head training.
+
+defaults:
+  - dataset: clotho_colaf
+  - optimizer: default
+  - eval: default
+  - logger: disabled
+  - _self_
+
+seed: 42
+device: cuda
+batch_size: 32
+num_workers: 0
+audio_input_dim: 3584
+text_input_dim: 3584
+projection_dim: 256
+dropout: 0.1
+symmetric_loss: true
+temperature: 0.07
+log_every: 50
+output_dir: outputs/colaf_heads/${dataset.name}
+
+dataset_train: ${dataset.train}
+dataset_val: ${dataset.val}
+optimizer: ${optimizer}
+eval: ${eval}
+logger: ${logger}
+
+hydra:
+  run:
+    dir: ${output_dir}/hydra/${now:%Y%m%d_%H%M%S}
+  job:
+    chdir: false

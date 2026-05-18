@@ -1,0 +1,11 @@
+# @package _global_
+dataset:
+  name: clotho
+  display_name: Clotho
+
+  # Dataset paths
+  audio_dir: Clotho1.0/evaluation_audio
+  captions_csv: Clotho1.0/evaluation_meta/clotho_captions_evaluation.csv
+
+  # Dataset-specific settings
+  captions_per_audio: 5

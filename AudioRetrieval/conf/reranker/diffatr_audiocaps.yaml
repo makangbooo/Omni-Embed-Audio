@@ -1,0 +1,21 @@
+# @package _global_
+# DiffATR reranker configuration for AudioCaps
+reranker:
+  enabled: true
+  name: diffatr_audiocaps
+  mode: diffatr
+  top_k: 50
+  client:
+    name: diffatr
+    params:
+      checkpoint_path: outputs/diffatr/audiocaps/diffatr_checkpoint.pt
+      embedding_root: results/late_interaction_flamingo
+      dataset: audiocaps_val_v2
+      model: audio-flamingo-3
+      audio_subdir: audio
+      caption_subdir: captions
+      device: cuda
+      diffusion_steps: 50        # Must match training
+      ddim_steps: 10              # Fewer steps for faster inference (10-20 typical)
+      blend_with_initial: 0.5     # Balance between first-stage and diffusion
+      use_contrastive_score: true # Use both contrastive + diffusion scores

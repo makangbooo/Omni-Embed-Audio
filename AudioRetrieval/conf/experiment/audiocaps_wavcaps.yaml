@@ -1,0 +1,29 @@
+# @package _global_
+# Experiment: Evaluate WavCaps on AudioCaps dataset
+
+defaults:
+  - override /model: wavcaps
+  - override /dataset: audiocaps
+
+# Override dataset paths
+dataset:
+  audio_dir: /path/to/audiocaps/test
+  captions_csv: /path/to/audiocaps/test.csv
+
+# Model configuration
+model:
+  repo_path: /path/to/WavCaps-master
+  ckpt_path: /path/to/wavcaps_cnn14_bert_ft.pt
+  seconds: 10.0
+  sr: 32000
+
+# Evaluation settings (caption_avg works well for single captions)
+eval:
+  mode: caption_avg
+  metrics_k: [1, 5, 10]
+  device: cuda
+
+# Save results
+output:
+  save_results: true
+  results_dir: results/audiocaps

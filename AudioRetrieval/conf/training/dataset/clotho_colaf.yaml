@@ -1,0 +1,23 @@
+name: clotho_colaf
+
+train:
+  audio_dir: results/late_interaction_flamingo/clotho_development/audio-flamingo-3/audio
+  text_dir: results/late_interaction_flamingo/clotho_development/audio-flamingo-3/captions
+  index_path: results/late_interaction_flamingo/clotho_development/audio-flamingo-3/index.json
+  audio_prefix_tokens: 0
+  text_prefix_tokens: 0
+  max_audio_tokens: null  # No truncation - use full sequence
+  max_text_tokens: null   # No truncation - use full sequence
+  shuffle: true
+  limit_examples: null
+
+val:
+  audio_dir: results/late_interaction_flamingo/clotho_validation/audio-flamingo-3/audio
+  text_dir: results/late_interaction_flamingo/clotho_validation/audio-flamingo-3/captions
+  index_path: results/late_interaction_flamingo/clotho_validation/audio-flamingo-3/index.json
+  audio_prefix_tokens: 0
+  text_prefix_tokens: 0
+  max_audio_tokens: null  # No truncation - use full sequence
+  max_text_tokens: null   # No truncation - use full sequence
+  shuffle: false
+  limit_examples: null

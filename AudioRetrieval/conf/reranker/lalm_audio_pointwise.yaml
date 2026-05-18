@@ -1,0 +1,9 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: lalm_audio_pointwise
+  mode: audio_native_pointwise
+  top_k: 50
+  client:
+    name: mock
+    params: {}

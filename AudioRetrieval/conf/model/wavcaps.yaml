@@ -1,0 +1,10 @@
+# @package _global_
+model:
+  name: wavcaps
+  display_name: WavCaps (CNN14-BERT-FT)
+
+  # Model parameters
+  repo_path: AudioRetrieval/models/wavcaps
+  ckpt_path: ModelCheckpoint/wavcaps/Cnn14-BERT-FT-Clotho.pt
+  seconds: 10.0
+  sr: 32000

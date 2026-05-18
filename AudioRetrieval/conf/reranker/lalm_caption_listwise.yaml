@@ -1,0 +1,9 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: lalm_caption_listwise
+  mode: caption_proxy_listwise
+  top_k: 50
+  client:
+    name: mock
+    params: {}

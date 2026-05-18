@@ -1,0 +1,27 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+The User-Intent Queries (UIQ) text data in this directory ("the Work") is
+made available under the Creative Commons Attribution 4.0 International
+License. The full legal text is at:
+
+    https://creativecommons.org/licenses/by/4.0/legalcode
+
+Under CC BY 4.0 you are free to:
+  - Share — copy and redistribute the Work in any medium or format
+  - Adapt — remix, transform, and build upon the Work
+
+For any purpose, even commercially, under the following terms:
+  - Attribution — You must give appropriate credit, provide a link to the
+    license, and indicate if changes were made. You may do so in any
+    reasonable manner, but not in any way that suggests the licensor
+    endorses you or your use.
+
+Cite as:
+  HaeJun Yoo, Yongseop Shin, Insung Lee, Myoung-Wan Koo, and Du-Seong Chang.
+  "Omni-Embed-Audio: Leveraging Multimodal LLMs for Robust Audio-Text
+  Retrieval." ACL 2026 (Oral). Sogang University.
+
+This license applies only to the text query data under this directory.
+The underlying source audio (AudioCaps, Clotho, MECAT) is NOT covered by
+this license and must be obtained from its original distributor under its
+own license.

@@ -1,0 +1,25 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: mgaclap_late_interaction_audiocaps_t2a_pure
+  mode: late_interaction
+  top_k: 50
+  client:
+    name: late_interaction
+    params:
+      embedding_root: results/mgaclap_tokens
+      dataset: audiocaps
+      model: null
+      audio_subdir: audio
+      caption_subdir: text
+      aggregation: mean
+      blend_with_initial: 1.0
+      query_source: caption
+      candidate_source: audio
+      filter_prefix_tokens: false
+      projection_checkpoint: null
+      projection_device: cpu
+      audio_prefix_tokens: 0
+      text_prefix_tokens: 0
+      audio_max_tokens: null
+      text_max_tokens: null

@@ -1,0 +1,31 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: lalm_caption_listwise_qwen
+  mode: caption_proxy_listwise
+  top_k: 50
+  client:
+    name: qwen_caption
+    params:
+      model_name: Qwen/Qwen2.5-3B-Instruct
+      device_map: auto
+      dtype: bfloat16
+      max_new_tokens: 64
+      cache_dir: ./Qwen2.5-3B-Instruct
+      local_files_only: true
+      system_prompt: >
+        You are an expert audio retrieval judge. Rate how well captions match the query and order them.
+      caption_score_prompt_template: >
+        Query: {query}
+        Caption: {caption}
+        Provide a relevance score between 0 and 1 using the exact format SCORE:<value>.
+      default_score: 0.0
+      listwise_prompt_template: |
+        You will be given several captions describing audio clips and a retrieval query.
+        Query: {query}
+
+        Captions:
+        {enumerated_captions}
+
+        Respond with their order from most to least relevant using ORDER: i1,i2,... where each index refers to the caption above.
+      listwise_response_pattern: ORDER\s*:?\s*\[?([0-9,\s]+)\]?

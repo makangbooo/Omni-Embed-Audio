@@ -1,0 +1,25 @@
+# @package _global_
+# Experiment: Evaluate LAION-CLAP on Clotho dataset
+
+defaults:
+  - override /model: laion_clap
+  - override /dataset: clotho
+
+# Override dataset paths for your setup
+dataset:
+  audio_dir: /path/to/clotho/evaluation
+  captions_csv: /path/to/clotho/clotho_captions_evaluation.csv
+
+# Override model settings if needed
+model:
+  ckpt_path: null  # Use default LAION-CLAP weights
+
+# Evaluation settings
+eval:
+  mode: captionwise
+  metrics_k: [1, 5, 10]
+
+# Save results
+output:
+  save_results: true
+  results_dir: results/clotho

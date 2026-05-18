@@ -1,0 +1,61 @@
+seed: 42
+device: cuda
+batch_size: 64  # Can be larger for CLAP (no token sequences!)
+batch_size_contrastive: 64
+batch_size_diffusion: 32
+num_workers: 4
+pin_memory: true
+epochs_contrastive: 5
+epochs_diffusion: 10
+temperature: 0.07
+
+# MGA-CLAP embeddings are 512-dimensional
+audio_input_dim: 512
+text_input_dim: 512
+projection_dim: 512
+projection_architecture: mlp_deep
+dropout: 0.1
+
+output_dir: outputs/diffatr_clap/clotho
+log_every: 50
+use_amp: true
+
+# CLAP embedding directories
+dataset_train:
+  audio_dir: results/clap_embeddings/clotho_development/audio
+  text_dir: results/clap_embeddings/clotho_development/text
+  index_path: results/clap_embeddings/clotho_development/index.json
+
+dataset_val:
+  audio_dir: results/clap_embeddings/clotho_validation/audio
+  text_dir: results/clap_embeddings/clotho_validation/text
+  index_path: results/clap_embeddings/clotho_validation/index.json
+
+optimizer:
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-5
+
+diffusion:
+  steps: 50
+  beta_start: 1.0e-3
+  beta_end: 5.0e-2
+  schedule: cosine
+  hidden_dim: 512
+  mlp_dim: 1024
+  dropout: 0.1
+  contrastive_weight: 0.1
+
+logger:
+  enabled: false
+  project: diffatr-clap
+  log_last_checkpoint: true
+
+eval:
+  enabled: true
+  every_n_steps: 500
+  max_batches: 64
+  patience_contrastive: 3
+  patience_diffusion: 3
+
+# Checkpoint settings
+save_every_steps: 1000

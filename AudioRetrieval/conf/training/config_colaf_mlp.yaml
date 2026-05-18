@@ -1,0 +1,35 @@
+# ColAF_MLP Training Configuration
+# Improved architecture with larger projection dimension and deeper network
+
+# Model architecture
+audio_input_dim: 3584
+text_input_dim: 3584
+projection_dim: 512  # Increased from 256 → 512 for better info preservation
+dropout: 0.1
+architecture: mlp_deep  # Use ColAF_MLP_Deep architecture
+
+# Loss settings
+symmetric_loss: true
+temperature: 0.07
+
+# Training settings
+seed: 42
+device: cuda
+batch_size: 128  # Reduced from 256 due to larger model (adjust if OOM)
+use_amp: true
+log_every: 50
+save_every_steps: 200
+early_stop_patience: 5
+distinct_audio_per_batch: true
+
+# DataLoader settings
+num_workers: 0
+prefetch_factor: 0
+pin_memory: null
+
+# Defaults (will be overridden by dataset/optimizer/eval/logger configs)
+defaults:
+  - dataset: audiocaps_colaf
+  - optimizer: default
+  - eval: default
+  - logger: wandb

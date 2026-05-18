@@ -1,0 +1,30 @@
+# @package _global_
+# Multi-run experiment: Evaluate all models on Clotho dataset
+# Usage: python eval_hydra.py --multirun experiment=clotho_all_models model=laion_clap,wavcaps,mga_clap,cacophony
+
+defaults:
+  - override /dataset: clotho
+
+# Dataset paths
+dataset:
+  audio_dir: /path/to/clotho/evaluation
+  captions_csv: /path/to/clotho/clotho_captions_evaluation.csv
+
+# Common evaluation settings
+eval:
+  mode: captionwise
+  metrics_k: [1, 5, 10, 50]
+  batch_size_audio: 64
+  batch_size_text: 256
+  device: cuda
+
+# Save results
+output:
+  save_results: true
+  results_dir: results/clotho_comparison
+
+# Hydra multirun configuration
+hydra:
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${model.name}

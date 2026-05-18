@@ -1,0 +1,12 @@
+enabled: true
+project: colaf_training
+entity: null
+run_name: null
+group: null
+job_type: null
+tags: []
+dir: null
+mode: null
+notes: null
+log_best_checkpoint: true
+log_last_checkpoint: false

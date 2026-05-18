@@ -1,0 +1,17 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: late_interaction_flamingo
+  mode: late_interaction
+  top_k: 50
+  client:
+    name: late_interaction
+    params:
+      embedding_root: results/late_interaction_flamingo
+      dataset: clotho
+      model: audio-flamingo-3
+      audio_subdir: audio
+      caption_subdir: captions
+      aggregation: mean
+      blend_with_initial: 1.0
+      filter_prefix_tokens: true  # Filter out instruction prefix tokens for cleaner late-interaction

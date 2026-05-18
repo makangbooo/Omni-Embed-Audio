@@ -1,0 +1,64 @@
+# Preprocessing: Embedding Precomputation Configuration
+# Usage: python eval_hydra.py +preprocessing=embeddings preprocessing.model=laion_clap
+
+defaults:
+  - _self_
+
+# Model selection
+model: laion_clap  # laion_clap, mga_clap, oea, robust_clap
+
+# Common settings
+device: cuda
+batch_size_audio: 64
+batch_size_text: 256
+
+# Dataset settings
+dataset_type: clotho  # clotho, audiocaps
+split: eval
+
+# Paths (override these)
+audio_dir: ???
+captions_csv: ???
+output_dir: ???
+uiq_jsonl: null
+
+# UIQ categories to compute
+uiq_categories:
+  - Pragmatic
+  - Subjective
+  - Contextual
+  - Negative/Contrastive
+  - Cross-domain
+
+# Model-specific settings
+
+# LAION-CLAP
+laion_clap:
+  ckpt_path: ModelCheckpoint/laion-clap/630k-audioset-best.pt
+  amodel: HTSAT-tiny
+  tmodel: roberta
+  enable_fusion: false
+
+# MGA-CLAP
+mga_clap:
+  repo_path: AudioRetrieval/models/mga_clap
+  ckpt_path: ModelCheckpoint/mga_clap/mga-clap.pt
+  seconds: 10.0
+
+# OEA (Omni-Embed Audio)
+oea:
+  checkpoint: ???  # Required for OEA
+  repo_id: nvidia/omni-embed-nemotron-3b
+  local_path: null
+  lora_rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  projection_dim: 512
+
+# Robust-CLAP
+robust_clap:
+  ckpt_path: ModelCheckpoint/robust-clap/630k-audioset-best.pt
+  amodel: HTSAT-tiny
+  tmodel: roberta
+  enable_fusion: true
+  repo_root: null

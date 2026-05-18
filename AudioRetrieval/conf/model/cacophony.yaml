@@ -1,0 +1,9 @@
+# @package _global_
+model:
+  name: cacophony
+  display_name: Cacophony
+
+  # Model parameters
+  repo_path: ???  # Required: Path to cloned Cacophony repo
+  ckpt_path: ???  # Required: Path to Cacophony checkpoint
+  seconds: 10.0

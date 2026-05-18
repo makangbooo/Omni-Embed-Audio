@@ -1,0 +1,37 @@
+# Preprocessing: Hard Negative Mining Configuration
+# Usage: python -m AudioRetrieval preprocess hard-negatives ...
+
+defaults:
+  - _self_
+
+# Dataset settings
+dataset_type: clotho  # clotho, audiocaps
+
+# Paths (override these)
+metadata_csv: ???
+audio_dir: ???
+output_dir: ???
+
+# Stage 1: Acoustic Mining (MGA-CLAP)
+acoustic:
+  mga_repo: AudioRetrieval/models/mga_clap
+  mga_ckpt: ModelCheckpoint/mga_clap/mga-clap.pt
+  seconds: 10.0
+  topk: 50
+  batch_size: 512
+  embedding_cache: null  # Optional path to cache audio embeddings
+  overwrite_cache: false
+
+# Stage 2: Semantic Filtering (BGE)
+semantic:
+  model_name: BAAI/bge-large-en-v1.5
+  threshold: 0.7  # Max semantic similarity to keep
+  max_negatives: 50  # Max negatives per sample
+  batch_size: 64
+
+# Device settings
+device: cuda
+
+# Pipeline settings
+skip_stage1: false  # Skip acoustic mining (use existing output)
+stage1_output: null  # Path to existing stage1 output

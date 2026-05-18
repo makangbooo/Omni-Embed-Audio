@@ -1,0 +1,25 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: late_interaction_flamingo_colaf_t2t
+  mode: late_interaction
+  top_k: 50
+  client:
+    name: late_interaction
+    params:
+      embedding_root: results/late_interaction_flamingo
+      dataset: clotho_evaluation
+      model: audio-flamingo-3
+      audio_subdir: audio
+      caption_subdir: captions
+      aggregation: mean
+      blend_with_initial: 1.0
+      query_source: caption
+      candidate_source: caption
+      filter_prefix_tokens: true
+      projection_checkpoint: outputs/colaf_heads/clotho_colaf/best.pt
+      projection_device: cpu
+      audio_prefix_tokens: 0
+      text_prefix_tokens: 0
+      audio_max_tokens: null  # No truncation - use full sequence (must match training)
+      text_max_tokens: null   # No truncation - use full sequence (must match training)

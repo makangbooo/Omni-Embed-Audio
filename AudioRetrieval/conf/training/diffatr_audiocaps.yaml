@@ -1,0 +1,54 @@
+seed: 42
+device: cuda
+batch_size: 32
+batch_size_contrastive: 32
+batch_size_diffusion: 32
+num_workers: 0
+pin_memory: true
+epochs_contrastive: 5
+epochs_diffusion: 10
+temperature: 0.07
+audio_input_dim: 3584
+text_input_dim: 3584
+projection_dim: 512
+projection_architecture: mlp_deep
+dropout: 0.1
+output_dir: outputs/diffatr/audiocaps
+log_every: 50
+use_amp: true
+
+dataset_train:
+  audio_dir: results/late_interaction_flamingo/audiocaps_train_v2/audio-flamingo-3/audio
+  text_dir: results/late_interaction_flamingo/audiocaps_train_v2/audio-flamingo-3/captions
+  index_path: results/late_interaction_flamingo/audiocaps_train_v2/audio-flamingo-3/index.json
+
+dataset_val:
+  audio_dir: results/late_interaction_flamingo/audiocaps_val_v2/audio-flamingo-3/audio
+  text_dir: results/late_interaction_flamingo/audiocaps_val_v2/audio-flamingo-3/captions
+  index_path: results/late_interaction_flamingo/audiocaps_val_v2/audio-flamingo-3/index.json
+
+optimizer:
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-5
+
+diffusion:
+  steps: 50
+  beta_start: 1.0e-3
+  beta_end: 5.0e-2
+  schedule: cosine
+  hidden_dim: 512
+  mlp_dim: 1024
+  dropout: 0.1
+  contrastive_weight: 0.1
+
+logger:
+  enabled: false
+  project: diffatr
+  log_last_checkpoint: true
+
+eval:
+  enabled: true
+  every_n_steps: 500
+  max_batches: 64
+  patience_contrastive: 3
+  patience_diffusion: 3

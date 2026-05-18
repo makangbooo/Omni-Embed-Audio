@@ -1,0 +1,11 @@
+# @package _global_
+model:
+  name: laion_clap
+  display_name: LAION-CLAP
+
+  # Model parameters
+  ckpt_path: null  # Path to checkpoint (optional)
+  amodel: HTSAT-tiny
+  tmodel: roberta
+  resample_sr: 48000
+  audio_duration_sec: 10.0

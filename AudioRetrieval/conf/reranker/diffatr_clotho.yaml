@@ -1,0 +1,21 @@
+# @package _global_
+# DiffATR reranker configuration for Clotho
+reranker:
+  enabled: true
+  name: diffatr_clotho
+  mode: diffatr
+  top_k: 50
+  client:
+    name: diffatr
+    params:
+      checkpoint_path: outputs/diffatr/clotho/diffatr_checkpoint.pt
+      embedding_root: results/late_interaction_flamingo
+      dataset: clotho_evaluation
+      model: audio-flamingo-3
+      audio_subdir: audio
+      caption_subdir: captions
+      device: cuda
+      diffusion_steps: 50
+      ddim_steps: 10
+      blend_with_initial: 0.5
+      use_contrastive_score: true

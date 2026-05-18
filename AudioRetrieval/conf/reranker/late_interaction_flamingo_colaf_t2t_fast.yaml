@@ -1,0 +1,46 @@
+# @package _global_
+
+# ColAF T2T (Text-to-Text/Caption) - FAST
+# Optimized for first-stage text-to-caption retrieval
+#
+# Expected speedup: ~15-20× over baseline
+# Expected accuracy loss: ~5%
+
+reranker:
+  enabled: true
+  name: late_interaction_flamingo_colaf_t2t_fast
+  mode: late_interaction
+  top_k: 50
+
+  client:
+    name: late_interaction
+    params:
+      embedding_root: results/late_interaction_flamingo
+      dataset: clotho_evaluation
+      model: audio-flamingo-3
+      audio_subdir: audio
+      caption_subdir: captions
+      aggregation: mean
+      blend_with_initial: 1.0
+
+      # T2T specific
+      query_source: caption
+      candidate_source: caption
+      filter_prefix_tokens: true
+
+      # Projection settings
+      projection_checkpoint: outputs/colaf_heads/clotho_colaf_ft/best.pt
+      projection_device: cpu
+
+      # Token prefix/max settings
+      audio_prefix_tokens: 0
+      text_prefix_tokens: 0
+      audio_max_tokens: null
+      text_max_tokens: null
+
+      # Token optimization parameters (Phase 1)
+      token_pool_factor: 3           # Pool 3 consecutive tokens
+      audio_token_stride: 1          # Not used for T2T
+      text_token_stride: 1           # No text striding (both query and candidate are text)
+      query_token_keep_ratio: 0.7    # Keep top 70% of query tokens
+      query_pruning_method: norm     # Use L2 norm for importance

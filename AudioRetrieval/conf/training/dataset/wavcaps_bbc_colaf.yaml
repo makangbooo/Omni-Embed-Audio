@@ -1,0 +1,28 @@
+name: wavcaps_bbc_colaf
+
+train:
+  audio_dir: results/late_interaction_flamingo/wavcaps/BBC_Sound_Effects/wavcaps_BBC_Sound_Effects/audio-flamingo-3/audio
+  text_dir: results/late_interaction_flamingo/wavcaps/BBC_Sound_Effects/wavcaps_BBC_Sound_Effects/audio-flamingo-3/captions
+  index_path: results/late_interaction_flamingo/wavcaps/BBC_Sound_Effects/wavcaps_BBC_Sound_Effects/audio-flamingo-3/index.json
+  audio_prefix_tokens: 0
+  text_prefix_tokens: 0
+  max_audio_tokens: null
+  max_text_tokens: null
+  audio_token_stride: 1
+  text_token_stride: 1
+  shuffle: true
+  limit_examples: null
+
+val:
+  audio_dir: results/late_interaction_flamingo/wavcaps/BBC_Sound_Effects/wavcaps_BBC_Sound_Effects/audio-flamingo-3/audio
+  text_dir: results/late_interaction_flamingo/wavcaps/BBC_Sound_Effects/wavcaps_BBC_Sound_Effects/audio-flamingo-3/captions
+  index_path: results/late_interaction_flamingo/wavcaps/BBC_Sound_Effects/wavcaps_BBC_Sound_Effects/audio-flamingo-3/index.json
+  audio_prefix_tokens: 0
+  text_prefix_tokens: 0
+  max_audio_tokens: null
+  max_text_tokens: null
+  audio_token_stride: 1
+  text_token_stride: 1
+  shuffle: false
+  limit_examples: null
+

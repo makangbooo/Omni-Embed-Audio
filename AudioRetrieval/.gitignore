@@ -1,0 +1,9 @@
+*.json
+*.pyc
+
+__pycache__/
+wavcaps/
+cacophony/
+mga_clap/
+logs/
+outputs/

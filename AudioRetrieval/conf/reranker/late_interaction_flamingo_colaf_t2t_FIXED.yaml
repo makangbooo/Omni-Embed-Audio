@@ -1,0 +1,26 @@
+# @package _global_
+# FIXED configuration with proper score blending
+reranker:
+  enabled: true
+  name: late_interaction_flamingo_colaf_t2t_FIXED
+  mode: late_interaction
+  top_k: 50
+  client:
+    name: late_interaction
+    params:
+      embedding_root: results/late_interaction_flamingo
+      dataset: clotho_evaluation
+      model: audio-flamingo-3
+      audio_subdir: audio
+      caption_subdir: captions
+      aggregation: mean
+      blend_with_initial: 0.5  # FIXED: Was 1.0 (ignored first-stage), now 0.5 (balanced blend)
+      query_source: caption
+      candidate_source: caption
+      filter_prefix_tokens: true
+      projection_checkpoint: outputs/colaf_heads/clotho_colaf/best.pt
+      projection_device: cpu
+      audio_prefix_tokens: 0
+      text_prefix_tokens: 0
+      audio_max_tokens: null
+      text_max_tokens: null

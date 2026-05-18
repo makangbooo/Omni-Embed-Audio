@@ -1,0 +1,47 @@
+# @package _global_
+
+# ColAF Late-Interaction Reranker - FAST (Phase 1 Optimizations)
+# Optimized for first-stage retrieval speed with minimal accuracy loss
+#
+# Optimizations enabled:
+# - Token pooling: 3× reduction (66.7% fewer tokens)
+# - Audio striding: 2× reduction (50% fewer audio tokens)
+# - Query pruning: 70% kept (30% reduction)
+#
+# Expected speedup: ~15-20× over baseline
+# Expected accuracy loss: ~5%
+
+reranker:
+  enabled: true
+  name: late_interaction_flamingo_colaf_fast
+  mode: late_interaction
+  top_k: 50
+
+  client:
+    name: late_interaction
+    params:
+      embedding_root: results/late_interaction_flamingo
+      dataset: clotho_evaluation
+      model: audio-flamingo-3
+      audio_subdir: audio
+      caption_subdir: captions
+      aggregation: mean
+      blend_with_initial: 1.0
+      filter_prefix_tokens: true
+
+      # Projection settings
+      projection_checkpoint: outputs/colaf_heads/clotho_colaf_ft/best.pt
+      projection_device: cpu
+
+      # Token prefix/max settings
+      audio_prefix_tokens: 0
+      text_prefix_tokens: 0
+      audio_max_tokens: null  # No truncation
+      text_max_tokens: null
+
+      # Token optimization parameters (Phase 1)
+      token_pool_factor: 3           # Pool 3 consecutive tokens → 66.7% reduction
+      audio_token_stride: 2          # Stride audio by 2 → additional 50% reduction
+      text_token_stride: 1           # No text striding (text is already compact)
+      query_token_keep_ratio: 0.7    # Keep top 70% query tokens
+      query_pruning_method: norm     # Use L2 norm for importance

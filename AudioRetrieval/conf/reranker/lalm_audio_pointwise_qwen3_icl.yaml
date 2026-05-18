@@ -1,0 +1,37 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: lalm_audio_pointwise_qwen3_icl
+  mode: audio_native_pointwise
+  top_k: 50
+  client:
+    name: qwen3_omni
+    params:
+      # Model
+      model_name: Qwen/Qwen3-Omni-30B-A3B-Instruct
+      device_map: cuda:0
+      dtype: bfloat16
+      max_new_tokens: 8
+      attn_implementation: sdpa
+      system_prompt: >
+        You are an expert audio retrieval judge. Rate how well query text
+        matches audio clips on a 0-1 scale. Be concise and obey format.
+      score_prompt_template: >
+        Query: {query}
+        Listen to the audio clip and respond strictly with
+        "SCORE:<value>" where <value> is a float between 0 and 1.
+      default_score: 0.0
+      target_sample_rate: 16000
+      cache_dir: ./Qwen3-Omni-30B-A3B-Instruct
+      local_files_only: true
+      batch_size: 1
+
+      # In-context learning (XACLE)
+      icl_enabled: true
+      icl_dataset_dir: ./XACLE_dataset
+      icl_split: train
+      icl_k: 4
+      icl_selection: jaccard
+      icl_include_answers: true
+      icl_use_average: true
+      icl_seed: 0

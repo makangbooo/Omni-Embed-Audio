@@ -1,0 +1,22 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: xacle_audio_pointwise
+  mode: audio_native_pointwise
+  top_k: 50
+  client:
+    name: xacle_baseline
+    params:
+      checkpoint_dir: ./xacle_baseline_checkpoint
+      dataset_root: ./XACLE_dataset
+      tokenizer_name: roberta-large
+      tokenizer_cache_dir: ./ModelCheckpoint/roberta-large
+      tokenizer_local_files_only: true
+      normalizer_split: train
+      normalizer_cache: ./xacle_baseline_checkpoint/normalizer_stats.pt
+      normalizer_max_files: null
+      max_audio_seconds: 10.0
+      sample_rate: 16000
+      device: cuda:0
+      dtype: float32
+      batch_size: 2

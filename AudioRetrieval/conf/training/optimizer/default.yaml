@@ -1,0 +1,6 @@
+learning_rate: 5e-4
+weight_decay: 0.01
+beta1: 0.9
+beta2: 0.999
+epochs: 3
+grad_clip: 1.0

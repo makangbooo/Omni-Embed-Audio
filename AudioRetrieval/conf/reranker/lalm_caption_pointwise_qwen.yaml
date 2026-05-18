@@ -1,0 +1,22 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: lalm_caption_pointwise_qwen
+  mode: caption_proxy_pointwise
+  top_k: 50
+  client:
+    name: qwen_caption
+    params:
+      model_name: Qwen/Qwen2.5-3B-Instruct
+      device_map: auto
+      dtype: bfloat16
+      max_new_tokens: 64
+      cache_dir: ./Qwen2.5-3B-Instruct
+      local_files_only: true
+      system_prompt: >
+        You are an expert audio retrieval judge. Rate how well a caption matches the query.
+      caption_score_prompt_template: >
+        Query: {query}
+        Caption: {caption}
+        Provide a relevance score between 0 and 1 using the exact format SCORE:<value>.
+      default_score: 0.0

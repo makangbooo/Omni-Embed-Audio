@@ -1,0 +1,9 @@
+# @package _global_
+model:
+  name: mga_clap
+  display_name: MGA-CLAP
+
+  # Model parameters
+  repo_path: AudioRetrieval/models/mga_clap
+  ckpt_path: ModelCheckpoint/mga_clap/mga-clap.pt
+  seconds: 10.0

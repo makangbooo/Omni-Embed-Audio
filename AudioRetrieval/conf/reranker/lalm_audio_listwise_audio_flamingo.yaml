@@ -1,0 +1,35 @@
+
+# @package _global_
+reranker:
+  enabled: true
+  name: lalm_audio_listwise_audio_flamingo
+  mode: audio_native_listwise
+  top_k: 50
+  client:
+    name: audio_flamingo
+    params:
+      model_name: ./audio-flamingo-3
+      device_map: auto
+      dtype: bfloat16
+      max_new_tokens: 32
+      system_prompt: >
+        You are an expert audio retrieval judge. Rate how well query text
+        matches audio clips on a 0-1 scale.
+      score_prompt_template: >
+        Query: {query}
+        Listen to the audio clip and respond strictly with
+        "SCORE:<value>" where <value> is a float between 0 and 1.
+      default_score: 0.0
+      target_sample_rate: 16000
+      cache_dir: ./audio-flamingo-3
+      local_files_only: true
+      listwise_prompt_template: |
+        You will be given several audio clips and a retrieval query.
+        Query: {query}
+
+        Clips:
+        {enumerated_clips}
+
+        After listening to every clip, respond with their order from most to least relevant.
+        Use the format ORDER: i1,i2,... where each number refers to the clip index above.
+      listwise_response_pattern: ORDER\s*:?\s*\[?([0-9,\s]+)\]?

@@ -1,0 +1,23 @@
+# @package _global_
+# DiffATR-CLAP reranker configuration for Text-to-Audio (T2A) retrieval
+reranker:
+  enabled: true
+  name: diffatr_clap_t2a
+  mode: diffatr
+  top_k: 50
+  client:
+    name: diffatr
+    params:
+      checkpoint_path: outputs/diffatr_clap/audiocaps/diffusion_best.pt
+      embedding_root: results/clap_embeddings
+      dataset: audiocaps_test
+      model: null  # CLAP embeddings are directly under dataset/audio and dataset/text
+      audio_subdir: audio
+      caption_subdir: text
+      device: cuda
+      diffusion_steps: 50        # Must match training
+      ddim_steps: 10              # Fewer steps for faster inference (10-20 typical)
+      blend_with_initial: 0.5     # Balance between contrastive and diffusion scores
+      use_contrastive_score: true # Use both contrastive + diffusion scores
+      query_source: caption       # Query: text captions
+      candidate_source: audio     # Candidates: audio clips

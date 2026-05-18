@@ -1,0 +1,14 @@
+# @package _global_
+reranker:
+  enabled: true
+  name: caption_listwise_text_embed
+  mode: caption_proxy_listwise
+  top_k: 50
+  client:
+    name: text_embedding_caption
+    params:
+      embedding_bundle_dir: results/embeddings/clotho/sentence-transformers_paraphrase-multilingual-MiniLM-L12-v2
+      model_name: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+      device: auto
+      normalize: true
+      batch_size: 128
