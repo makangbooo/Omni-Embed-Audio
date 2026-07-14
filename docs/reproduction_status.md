@@ -6,11 +6,11 @@
 
 | 阶段 | 任务 | 状态 | 当前 Commit | 远程状态 | 阻塞原因 | 下一步 |
 |---|---|---|---|---|---|---|
-| 0 项目审计 | 完整阅读论文正文/附录/表/图/脚注 | COMPLETED | 本次审计 commit 待创建 | 待推送 | 无 | 固定 inventory |
-| 0 项目审计 | 审计 README、依赖、训练/评测、数据、UIQ、HN、指标 | COMPLETED | 本次审计 commit 待创建 | 待推送 | 无 | 提交审计文档 |
-| 0 项目审计 | 31 条实验/图/派生分析 inventory | COMPLETED | 本次审计 commit 待创建 | 待推送 | 无 | 用户确认复现边界 |
-| 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `b261ad0743dbfac67cb6b20016fd951a366b3f35` | 本地分支存在 | 无 | 配置 fork 为 origin |
-| 0 GitHub | commit 并 push 第一阶段审计 | IN_PROGRESS | working tree 待提交 | 设备登录与 push 测试进行中 | 无 | 验证代理认证后 commit、push 并记录远程 commit |
+| 0 项目审计 | 完整阅读论文正文/附录/表/图/脚注 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 固定 inventory |
+| 0 项目审计 | 审计 README、依赖、训练/评测、数据、UIQ、HN、指标 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认审计结论 |
+| 0 项目审计 | 31 条实验/图/派生分析 inventory | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认复现边界 |
+| 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `48d7a50` | 本地与 fork 分支均存在 | 无 | 后续提交仅推送该分支 |
+| 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
 | 1 环境 | 远程 A100 系统信息与网络检查 | WAITING_USER | N/A | 未开始 | 尚未获得具体服务器输出/显存规格 | 选择一台 A100，运行只读检查 |
 | 1 环境 | 创建 `oea-repro` 与 lock 文件 | TODO | N/A | 未开始 | 等待系统信息 | 核对 Driver 后锁 Python/PyTorch/CUDA/transformers |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | TODO | N/A | 未开始 | 环境未完成 | 修正实际 checkpoint 文件名并前向 |
@@ -28,8 +28,8 @@
 
 ## 当前焦点
 
-- 当前阶段：项目审计完成，正在向用户 fork 发布第一阶段审计；随后等待远程 A100 系统信息。
+- 当前阶段：项目审计与 GitHub 发布测试完成，等待远程 A100 系统信息。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：论文/代码参数冲突审计、UIQ release 完整性统计、六个 HF checkpoint 实际文件/revision/大小核验。
-- 当前阻塞：GitHub 设备授权尚待完成；尚无远程系统信息；关键数据/HN pairing 未提供。
-- 下一步：完成第一阶段 commit/push 并验证远程分支；随后只做环境检查与 5 样例官方权重 smoke，不下载数据集或启动训练。
+- 当前阻塞：尚无远程系统信息；关键数据/HN pairing 未提供。
+- 下一步：用户确认第一阶段审计后，先做环境检查与 5 样例官方权重 smoke，不下载数据集或启动训练。
