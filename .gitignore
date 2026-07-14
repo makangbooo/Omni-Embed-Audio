@@ -28,6 +28,15 @@ wandb/
 huggingface_cache/
 *.tar.gz
 
+# Reproduction data/model/result trees (root-local)
+/data/raw/
+/datasets/
+/checkpoints/
+/models/
+/outputs/
+/wandb/
+/.cache/
+
 # Per-user secrets — never commit these
 .env
 *.api_key
@@ -47,3 +56,16 @@ data/FSD50K/
 # Large precomputed embeddings
 *.npz
 !data/UIQ/**/*.jsonl
+
+# Model weights, checkpoints, embeddings, indexes, and large logs
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.npy
+*.faiss
+*.log
+
+# Additional secret-file conventions
+secrets.*

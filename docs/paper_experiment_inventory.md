@@ -1,0 +1,78 @@
+# Omni-Embed-Audio 论文实验清单
+
+## 审计口径
+
+- 论文：*Omni-Embed-Audio: Leveraging Multimodal LLMs for Robust Audio-Text Retrieval*，ACL 2026，17 页（正文、参考文献、附录 A–M）。
+- 论文 PDF SHA256：`E76BBD96C82AC78568ED75EAEDCBC62E389358C4BB226457AC45B55AB63CFE38`。
+- 官方源码快照：`JudeJiwoo/Omni-Embed-Audio@b261ad0743dbfac67cb6b20016fd951a366b3f35`（2026-05-18）。
+- 计数规则：25 个需要独立执行/采集的实验协议，3 个派生汇总分析，3 个图或方法核验项，共 31 个可审计条目。表 5 与表 16 是同一效率实验的正文/附录版本，不重复计为两组。
+- 来源标签：`[PAPER]` 论文明确给出；`[CODE]` 官方代码、配置、官方模型仓库或发布数据给出；`[INFERRED]` 为待验证推断；`[MISSING]` 论文和代码均未给出。
+- 可复现性：A=官方代码和数据完整；B=需要额外公开资源或小型兼容补丁；C=缺少配置/映射，只能近似或需作者补充；D=人工评测或闭源 API，不能完全自动复现。
+
+## 全量清单
+
+| ID | 论文位置 | 实验 | 数据集 | 模型 | 指标 | 官方命令 | 所需资源 | 可复现性 | 状态 |
+|---|---|---|---|---|---|---|---|---|---|
+| FIG-01 | 图 1 | 代表模型综合结果可视化 | AudioCaps、Clotho、MECAT | OEA-Qwen7B (+Cl)、M2D-CLAP | 三数据集 mean R@5、HNSR@10 | `[MISSING]` 无绘图脚本 | DER-01、DER-02、EXP-17 的结果 | B（派生图） | TODO |
+| FIG-02 | 图 2；§3.1；附录 A | 架构核验：共享 backbone、LoRA、双投影头、512 维、L2 | 5 个附带 Clotho 样例可做 smoke | 三种 OEA backbone | 结构与参数形状 | `[CODE] python examples/encode_example.py`，但 checkpoint 文件名错误 | 1 个 base model、对应 checkpoint | B（需修正文件名/加载路径） | TODO |
+| FIG-03 | 图 3；§3.3；附录 L | 否定查询指标示意与人工构造单元测试 | 合成排名样例 | 与模型无关 | R@k、HNSR、HNSR@k、TFR、TFR-HN@k、Δ-Rank | `[MISSING]` README 声称存在，源码无实现 | 无 GPU；测试向量 | C（需实现） | TODO |
+| EXP-01 | §3.2.2；附录 D；表 8–9 | 生成五类 UIQ | AudioCaps、Clotho、MECAT captions + HN captions | GPT-5.1 | 输出数量、格式、长度约束、语义有效率 | `[CODE] python -m AudioRetrieval generate-uiq ...`，但默认 GPT-4/0.7/100 tokens 且 prompt 不同 | GPT-5.1 API、完整 captions、HN 配对 | D（闭源 API；官方代码不匹配论文 prompt） | TODO |
+| EXP-02 | §3.2.3；附录 C/E；表 1、7 | 人工 UIQ 有效性评测 | 75 样例 × 5 类型；9 人；675 ratings | 人工标注者 | 5 点 Likert 均值/标准差、分数据集结果 | `[MISSING]` 无界面、样例抽样清单或原始 ratings | 75 样例 ID、音频、标注者与协议 | D | BLOCKED |
+| EXP-03 | §3.2.3；附录 E；表 1、10 | LLM UIQ 有效性评测 | 与 EXP-02 相同的 75 样例 | Claude Opus 4.5 | 5 点 Likert、Human–LLM agreement（正文报告 r/p） | `[MISSING]` 无评测脚本或原始响应 | Claude Opus 4.5 API、75 样例清单 | D | BLOCKED |
+| EXP-04 | §3.2.3；附录 I | UIQ 与真实 Freesound 查询 token-length 分析 | UIQ 13,053 条；Freesound 查询统计 | 分词器 `[MISSING]` | token 数分布、均值；对照文献 1.8 tokens | `[MISSING]` 无脚本、无真实查询日志/分词定义 | Freesound 查询数据或文献可复算统计 | C | BLOCKED |
+| EXP-05 | §3.3；附录 K | 四阶段 hard-negative mining + 人工复核 | 三个评测集 | MGA-CLAP + BGE-large-en-v1.5 | Top-20、声学相似度、语义相似度、保留率、最终配对数 | `[CODE] preprocess hard-negatives` 默认 Top-50；另有 LAION-CLAP 替代脚本 Top-20 | MGA-CLAP 权重、BGE、完整音频/captions、人工复核记录 | C（动态阈值与最终配对未发布） | BLOCKED |
+| EXP-06 | 附录 B.1；表 6 | 数据来源与潜在污染关系审计 | WavCaps 子集与 7 个评测集 | 文件/来源匹配 | 来源对应关系 | `[MISSING]` 无 provenance 脚本 | 各数据集 metadata | B | TODO |
+| EXP-07 | §4.1；附录 B.2 | AudioCaps test–WavCaps AudioSet_SL 重叠 | 975 AudioCaps test clips；108,317 WavCaps AudioSet_SL | 规范化 YouTube ID 精确匹配 | 173/975=17.7%；865 caption rows；占 WavCaps 0.16% | `[MISSING]` 无重叠或 blocklist 脚本 | 两侧 metadata；明确版本 | B | TODO |
+| EXP-08 | §4.1；附录 B.3 | Clotho evaluation–WavCaps Freesound 重叠 | 1,045 Clotho evaluation clips | filename case-insensitive 精确匹配；可扩展 fingerprint | 638/1,045=61.0% | `[MISSING]` 无重叠或 blocklist 脚本 | Clotho v2.1 metadata、WavCaps Freesound metadata | B | TODO |
+| EXP-09 | §4.1；附录 B.4 | MECAT–WavCaps 无显著重叠核验 | MECAT 与 WavCaps | filename + embedding 检查，具体阈值 `[MISSING]` | 重叠数/率 | `[MISSING]` 无实现 | MECAT 精确评测 manifest、WavCaps metadata、嵌入模型/阈值 | C | BLOCKED |
+| EXP-10 | §5.1；表 2 | caption Text-to-Audio 完整基线 | AudioCaps 975、Clotho 1,045、MECAT 847（发布 UIQ 为 848，需澄清） | 4 CLAP + 3 vanilla LALM + 6 OEA | R@1/5/10 | README 把 Hydra `key=value` 语法传给 argparse CLI，命令会报参数错误；即使改调 `eval_hydra.py` 也只加载裸 backbone；主 evaluator 不支持 MECAT | 13 模型/权重、3 数据集、统一候选集 | C（需评测入口补全） | TODO |
+| EXP-11 | §5.2；表 3 | caption Text-to-Text 完整基线 | 同 EXP-10 captions/candidates | 同 EXP-10 | R@1/5/10 | `[CODE] eval_core.py` 有 T2T；无论文全矩阵命令/manifest | 13 模型/权重、自动/人工 captions 的确切版本 | C | TODO |
+| EXP-12 | 附录 G.1；表 12 | Question UIQ T2A | AudioCaps/Clotho/MECAT-UIQ | 4 CLAP + 6 OEA | 每数据集 R@1/5/10 | README UIQ 命令语法与 argparse CLI 不兼容，`clotho_all` config 也不存在；CLI schema 与发布 JSONL 不兼容 | 正查询已发布；需音频、模型和 schema adapter | B（数据公开，需补丁） | TODO |
+| EXP-13 | 附录 G.2；表 13 | Imperative UIQ T2A | 同 EXP-12 | 同 EXP-12 | 每数据集 R@1/5/10 | 同 EXP-12 | 同 EXP-12 | B | TODO |
+| EXP-14 | 附录 G.3；表 14 | Paraphrase UIQ T2A | 同 EXP-12 | 同 EXP-12 | 每数据集 R@1/5/10 | 同 EXP-12 | 同 EXP-12 | B | TODO |
+| EXP-15 | 附录 G.4；表 15 | Keyphrase/`tagging` UIQ T2A | 同 EXP-12 | 同 EXP-12 | 每数据集 R@1/5/10 | 同 EXP-12 | 同 EXP-12 | B | TODO |
+| EXP-16 | §5.3.2；表 17 | Negative UIQ 普通检索 | 630/542/409 条 negative rows | 4 CLAP + 6 OEA | mean R@5、R@10 | `NegativeQueryRunner` 读取旧 schema，且不是论文指标实现 | 音频、negative queries、target 映射 | C | BLOCKED |
+| EXP-17 | §3.3/§5.3.2；附录 L/M；表 4、17 | Hard-negative discrimination | 同 EXP-16 + target/HN 音频 ID | 4 CLAP + 6 OEA | Δ-Rank、HNSR、HNSR@10、TFR、TFR-HN@10 | `[MISSING]` 源码无 HNSR/TFR；发布 negative JSONL 无 HN audio ID | 作者 target–HN 配对或可审计重建映射 | C | BLOCKED |
+| EXP-18 | §5.4；附录 H；表 5、16 | 推理效率 | Clotho 1,045 clips | LAION/MGA/M2D + 3 OEA | audio ms/clip、text ms/query、peak GPU GB | `[MISSING]` 无 benchmark 脚本 | A100-SXM4-80GB、固定 batch/warmup/repetitions（均 `[MISSING]`） | C | TODO |
+| EXP-19 | §3.1/§5.4；表 5、16 | 训练参数量/占比 | 不依赖数据 | 3 OEA + 3 CLAP | trainable params、占总参数百分比 | `[CODE]` PEFT 可统计；无论文表生成脚本 | 所有模型结构/权重 | B | TODO |
+| EXP-20 | §4.1/4.2；附录 A | OEA-Nemo3B：WavCaps → AudioCaps | WavCaps 275,618（≤31s、去泄漏）→ AudioCaps v2 91,256 | Omni-Embed-Nemotron-3B | train loss、val R@10、表 2/3/12–17 | `[MISSING]` 无 Nemo 完整 stage config；通用 trainer 可近似 | 数据、base 权重、blocklists、完整超参 | C | BLOCKED |
+| EXP-21 | §4.1/4.2；附录 A | OEA-Nemo3B (+Cl)：追加 Clotho v2 | EXP-20 + 3,839 Clotho clips | 同上 | 同上 | `[MISSING]` 无 stage-3 命令 | EXP-20 checkpoint、Clotho dev/train/val 选择 | C | BLOCKED |
+| EXP-22 | §4.1/4.2；附录 A | OEA-Qwen3B：WavCaps → AudioCaps | 同 EXP-20 | Qwen2.5-Omni-3B | 同 EXP-20 | `[CODE] wavcaps_3b.sh` 仅覆盖 WavCaps，未给 AudioCaps stage | 数据、权重、完整超参、DDP 修复 | C | BLOCKED |
+| EXP-23 | §4.1/4.2；附录 A | OEA-Qwen3B (+Cl)：追加 Clotho v2 | 同 EXP-21 | Qwen2.5-Omni-3B | 同上 | `[MISSING]` 无 stage-3 命令 | EXP-22 checkpoint、Clotho 配置 | C | BLOCKED |
+| EXP-24 | §4.1/4.2；附录 A | OEA-Qwen7B：WavCaps → AudioCaps | 同 EXP-20 | Qwen2.5-Omni-7B | 同 EXP-20 | `[MISSING]` 无 7B stage config | 数据、权重、完整超参、8 卡训练 | C | BLOCKED |
+| EXP-25 | §4.1/4.2；附录 A | OEA-Qwen7B (+Cl)：追加 Clotho v2 | 同 EXP-21 | Qwen2.5-Omni-7B | 同上 | `[MISSING]` 无 stage-3 命令 | EXP-24 checkpoint、Clotho 配置 | C | BLOCKED |
+| DER-01 | 附录 F；表 11 | 三数据集 T2A/T2T 均值汇总 | EXP-10、EXP-11 | 所有基线/OEA | mean R@1/5/10 | `[MISSING]` 无汇总脚本 | EXP-10/11 raw metrics | B（派生） | TODO |
+| DER-02 | §5.3；表 4 | 三数据集 UIQ 均值与 Avg UIQ | EXP-12–17 | 4 CLAP + 6 OEA | 四类 R@5、negative HNSR@10、Avg UIQ | `[MISSING]` 无表生成脚本 | UIQ 分数据集 raw metrics | B（派生） | TODO |
+| DER-03 | §5.4；附录 J | backbone 泛化与 retrieval-specific scaling | 表 2/3/11、EXP-18/19 | Nemo3B、Qwen3B、Qwen7B | 跨数据集趋势、3B/7B 差值、效率 | `[MISSING]` 无分析脚本 | 已复现主表及效率结果 | B（派生） | TODO |
+
+## 官方仓库覆盖结论
+
+### 已提供
+
+- `[CODE]` 六个 Hugging Face 模型仓库和 base-model 映射；但根 README 所称“每个仓库包含 `step_40.pt`”不符合实际文件名。
+- `[CODE]` 13,053 条 UIQ JSONL：Question、Imperative、Paraphrase、`tagging`、Negative，覆盖三个数据集。
+- `[CODE]` OEA adapter、LoRA attachment、双投影头、mean pooling、L2 normalization、InfoNCE trainer、WavCaps manifest builder。
+- `[CODE]` LAION-CLAP、Robust-CLAP、MGA-CLAP、M2D-CLAP adapter 文件；但统一 CLI/Hydra 未暴露全部 adapter，权重获取与 revision 未固定。
+- `[CODE]` 两套 hard-negative mining 路径：MGA-CLAP 通用 pipeline（默认 Top-50）与 LAION-CLAP 预计算替代脚本（Top-20）。
+
+### 关键缺口
+
+1. `[CODE]` README 的 OEA 评测命令把 Hydra `key=value` 参数传给 argparse CLI，按当前入口会直接报错；若改为直接执行 `eval_hydra.py`，仍只加载裸 backbone，未加载 LoRA 和 projection heads，不能生成表 2–4/12–17 的 OEA 数字。
+2. `[CODE]` `python -m AudioRetrieval train` 只打印提示并返回成功，实际训练必须直接调用 trainer。
+3. `[CODE]` 统一 evaluator 不支持 MECAT；官方仓库也没有 MECAT dataset config/manifest。
+4. `[CODE]` 发布 UIQ schema 是 `audio_id/generated_query/query_type`；`UIQRunner` 读取旧的 `clip_id/uiq[].bucket/query` schema。
+5. `[CODE]` 三个 negative JSONL 的 1,581 行均没有 hard-negative audio ID，只有 `negative_captions`；无法直接计算 HNSR/TFR/Δ-Rank。
+6. `[CODE]` README 声称 `evaluation/` 实现 HNSR/TFR/Δ-Rank，但 Python 源码没有这些函数。
+7. `[PAPER]` 训练使用 PyTorch DDP、BF16、validation R@10 early stopping；`[CODE]` trainer 无 DDP、无 seed、无 scheduler/warmup/grad clipping，autocast 未显式指定 BF16，并按 validation loss 早停。
+8. `[PAPER]` 音频输入使用 `passage:`；`[CODE]` `_build_audio_messages` 明确忽略 `passage_prefix`。这是论文方法与公开实现的实质差异，需用官方 checkpoint smoke test 判定实际训练口径。
+9. `[PAPER]` WavCaps 过滤到 ≤31 秒并应用泄漏 blocklist；`[CODE]` manifest 默认 `--max-duration=None`，没有生成或应用论文 blocklist 的实现。
+10. `[PAPER]` hard-negative Stage 2 使用动态声学阈值保留约 3×最终数量；`[CODE]` 替代脚本直接保留 Top-3，通用 pipeline 默认 Top-50，均不能证明等同论文。
+11. `[PAPER]` AudioCaps v2 训练为 91,256 samples；`[CODE]` 没有下载来源、revision 或 manifest，公开 AudioCaps 版本与论文口径无法对应。
+12. `[PAPER]/[CODE]` 正文 MECAT 为 847 对，UIQ 发布为 848 个正查询 ID；需作者 manifest 解释 1 条差异。
+
+## 第一轮结论
+
+- A 类：没有一张论文主表可在当前公开仓库中“不补代码、不补映射”直接完整复现。
+- B 类：架构 smoke、正向 UIQ 四类型、数据来源/精确重叠、参数量与派生表；需要公开数据和小型兼容补丁。
+- C 类：论文主表评测、negative discrimination、三阶段训练、效率、MECAT、hard-negative mining；需要补实现且部分配置/映射缺失。
+- D 类：GPT-5.1 UIQ 再生成、Claude Opus 4.5 评测、9 人人工评测。
