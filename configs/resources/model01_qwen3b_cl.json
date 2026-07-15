@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "name": "qwen2_5_omni_3b",
+      "repo_id": "Qwen/Qwen2.5-Omni-3B",
+      "repo_type": "model",
+      "revision": "f75b40e3da2003cdd6e1829b1f420ca70797c34e",
+      "local_subdir": "Qwen2.5-Omni-3B",
+      "allow_patterns": null,
+      "required_files": [
+        "config.json",
+        "model.safetensors.index.json",
+        "model-00001-of-00003.safetensors",
+        "model-00002-of-00003.safetensors",
+        "model-00003-of-00003.safetensors",
+        "preprocessor_config.json",
+        "tokenizer.json"
+      ]
+    },
+    {
+      "name": "oea_qwen3b_cl",
+      "repo_id": "JudeJiwoo/OEA-Qwen3B-Cl",
+      "repo_type": "model",
+      "revision": "54ccd008d4a1340d2a1f8edcd5dd0e82c61367a4",
+      "local_subdir": "OEA-Qwen3B-Cl",
+      "allow_patterns": [
+        ".gitattributes",
+        "README.md",
+        "step_40.pt"
+      ],
+      "required_files": [
+        "step_40.pt"
+      ]
+    }
+  ]
+}
