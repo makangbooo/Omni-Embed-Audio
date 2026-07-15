@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
 
 ENV_NAME="oea-repro"
-PYTORCH_INDEX="${PYTORCH_INDEX_URL:-https://mirrors.aliyun.com/pytorch-wheels/cu126}"
+PYTORCH_WHEELHOUSE="${PYTORCH_WHEELHOUSE_URL:-https://mirrors.aliyun.com/pytorch-wheels/cu126}"
 PYPI_INDEX="${PYPI_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}"
 RUN_ID="environment_resume_$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/${RUN_ID}"
@@ -46,12 +46,14 @@ python --version
 python -m pip --version
 
 echo "[INFO] Installing PyTorch 2.7.1 CUDA 12.6 wheels"
-echo "[INFO] PyTorch index: ${PYTORCH_INDEX}"
+echo "[INFO] PyTorch wheelhouse: ${PYTORCH_WHEELHOUSE}"
+echo "[INFO] Dependency index: ${PYPI_INDEX}"
 python -m pip install \
-  torch==2.7.1 \
-  torchvision==0.22.1 \
-  torchaudio==2.7.1 \
-  --index-url "${PYTORCH_INDEX}"
+  'torch==2.7.1+cu126' \
+  'torchvision==0.22.1+cu126' \
+  'torchaudio==2.7.1+cu126' \
+  --find-links "${PYTORCH_WHEELHOUSE}" \
+  --index-url "${PYPI_INDEX}"
 
 echo "[INFO] Installing the audited direct dependency candidates"
 echo "[INFO] PyPI index: ${PYPI_INDEX}"

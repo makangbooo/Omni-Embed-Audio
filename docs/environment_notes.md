@@ -59,7 +59,7 @@
 - CPU-02：创建或恢复 `oea-repro`，安装 PyTorch cu126 与核心依赖，检查 imports、音频解码/重采样，并保存解析后的依赖和日志；
 - GPU-02：只在 4090/A100 容器中运行 CUDA、BF16、NCCL 和最小矩阵运算验证，不再安装依赖。
 
-默认下载源为阿里云 PyTorch cu126 wheel 索引和清华 PyPI 镜像；版本仍由本项目固定。可分别通过 `PYTORCH_INDEX_URL`、`PYPI_INDEX_URL` 临时覆盖，脚本会把实际 URL 写入日志。镜像选择标记为 `[INFERRED]`，不属于论文或官方代码配置。
+默认下载源为阿里云 PyTorch cu126 wheel 目录和清华 PyPI 镜像；版本仍由本项目固定。阿里云页面是 wheel 列表而不是 PEP 503 simple index，因此脚本通过 `--find-links` 使用它，普通依赖通过清华 `--index-url` 解析。可分别通过 `PYTORCH_WHEELHOUSE_URL`、`PYPI_INDEX_URL` 临时覆盖，脚本会把实际 URL 写入日志。镜像选择标记为 `[INFERRED]`，不属于论文或官方代码配置。
 
 - 阿里云索引：<https://mirrors.aliyun.com/pytorch-wheels/cu126/>
 - 清华 PyPI 使用说明：<https://mirrors.tuna.tsinghua.edu.cn/help/pypi/>

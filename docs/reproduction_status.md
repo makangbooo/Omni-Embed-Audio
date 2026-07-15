@@ -14,7 +14,7 @@
 | 1 环境 | CPU-01：CPU/内存/存储/编译器/网络审计 | COMPLETED | `20770d0` | 远程完成；原始日志未进 Git | Zenodo 返回 503；容器 `nproc=2` | 在共享目录挂载到 A100 后执行 GPU-01 |
 | 1 环境 | GPU-01：A100/Driver/CUDA/NCCL 基础审计 | COMPLETED | `905e84d` | 1×A100-SXM4-80GB 远程完成；原始日志未进 Git | 多卡 GPU–GPU 拓扑留待 DDP smoke | 固定环境候选并执行 GPU-02 |
 | 1 环境 | 生成环境候选、安装脚本与无模型检查 | COMPLETED | `c61fecb` | fork 已同步 | 完整 transitive lock 必须在 Linux solve 后生成 | 等待用户运行 GPU-02 |
-| 1 环境 | CPU-02：全新创建 `oea-repro` 并生成 resolved lock | WAITING_USER | `1f21b2f` | 首次慢速安装已由用户停止，未完成环境已移除 | 等待用户运行国内镜像安装命令 | 执行 `scripts/setup_environment.sh` |
+| 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | FAILED | `1f21b2f` | 基础环境已创建；PyTorch 安装失败，错误日志已保留 | 阿里云 wheel 目录被错误用作 PEP 503 `--index-url` | 最小补丁后执行 `scripts/resume_environment.sh` |
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | TODO | N/A | 未开始 | CPU-02 尚未完成 | 使用 1×4090 或 A100 做无模型 GPU smoke |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | TODO | N/A | 未开始 | 环境未完成 | 修正实际 checkpoint 文件名并前向 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
@@ -31,7 +31,7 @@
 
 ## 当前焦点
 
-- 当前阶段：CPU-01/GPU-01 审计完成；首次慢速环境安装已停止且未完成环境已移除，等待通过国内镜像全新安装。
+- 当前阶段：CPU-01/GPU-01 审计完成；`oea-repro` 基础环境已创建，PyTorch 国内镜像参数错误已定位，等待最小补丁后恢复安装。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：确认 A100-SXM4-80GB、Driver 580.95.05、CUDA Toolkit 12.6、NCCL 2.23.4、NVLink/RoCE 设备与 GPU 容器资源；发现官方 `tokenizers>=0.22` 与 base-model Transformers commit 的 `<0.22` 冲突。
 - 当前阻塞：完整 Linux transitive lock 尚未解析；多卡 GPU–GPU 拓扑留待 DDP smoke；关键数据/HN pairing 未提供。
