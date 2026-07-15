@@ -50,13 +50,16 @@ def package_version(distribution: str) -> str:
 
 
 def command_output(command: list[str]) -> str:
-    completed = subprocess.run(
-        command,
-        check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+    except OSError as exc:
+        return f"UNAVAILABLE: {exc!r}"
     return completed.stdout.strip()
 
 
