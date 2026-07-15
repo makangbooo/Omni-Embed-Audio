@@ -11,6 +11,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -27,7 +28,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    return parser.parse_args()
+    parser.add_argument("--max-download-attempts", type=int, default=5)
+    parser.add_argument("--retry-backoff-seconds", type=int, default=30)
+    args = parser.parse_args()
+    if args.max_download_attempts < 1:
+        parser.error("--max-download-attempts must be at least 1")
+    if args.retry_backoff_seconds < 0:
+        parser.error("--retry-backoff-seconds must be non-negative")
+    return args
 
 
 def utc_now() -> str:
@@ -85,6 +93,87 @@ def ensure_external_model_root(model_root: Path) -> None:
         )
 
 
+def exception_chain(exc: BaseException) -> list[BaseException]:
+    chain: list[BaseException] = []
+    seen: set[int] = set()
+    current: BaseException | None = exc
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        chain.append(current)
+        current = current.__cause__ or current.__context__
+    return chain
+
+
+def is_retryable_network_error(exc: BaseException) -> bool:
+    retryable_names = {
+        "ChunkedEncodingError",
+        "ConnectError",
+        "ConnectionError",
+        "IncompleteRead",
+        "ProtocolError",
+        "ReadError",
+        "ReadTimeout",
+        "RemoteDisconnected",
+        "Timeout",
+    }
+    retryable_modules = ("http.client", "httpcore", "httpx", "requests", "urllib3")
+    for item in exception_chain(exc):
+        if isinstance(item, (ConnectionError, TimeoutError)):
+            return True
+        item_type = type(item)
+        if item_type.__name__ in retryable_names and item_type.__module__.startswith(
+            retryable_modules
+        ):
+            return True
+    return False
+
+
+def download_snapshot_with_retries(
+    *,
+    download_kwargs: dict[str, Any],
+    asset_report: dict[str, Any],
+    report: dict[str, Any],
+    output: Path,
+    max_attempts: int,
+    backoff_seconds: int,
+) -> None:
+    attempts: list[dict[str, Any]] = asset_report.setdefault(
+        "download_attempts", []
+    )
+    for attempt_number in range(1, max_attempts + 1):
+        attempt: dict[str, Any] = {
+            "attempt": attempt_number,
+            "started_at": utc_now(),
+            "finished_at": None,
+            "status": "running",
+        }
+        attempts.append(attempt)
+        write_json(output, report)
+        try:
+            snapshot_download(**download_kwargs)
+        except Exception as exc:  # noqa: BLE001 - classify before retrying
+            retryable = is_retryable_network_error(exc)
+            attempt.update(
+                {
+                    "finished_at": utc_now(),
+                    "status": "retryable_error" if retryable else "failed",
+                    "error": repr(exc),
+                }
+            )
+            if retryable and attempt_number < max_attempts:
+                delay = backoff_seconds * 2 ** (attempt_number - 1)
+                attempt["retry_delay_seconds"] = delay
+                write_json(output, report)
+                time.sleep(delay)
+                continue
+            write_json(output, report)
+            raise
+        else:
+            attempt.update({"finished_at": utc_now(), "status": "complete"})
+            write_json(output, report)
+            return
+
+
 def main() -> int:
     args = parse_args()
     manifest_path = args.manifest.resolve()
@@ -105,6 +194,8 @@ def main() -> int:
         "model_root": str(model_root),
         "hf_endpoint": os.environ.get("HF_ENDPOINT", "https://huggingface.co"),
         "huggingface_hub_version": huggingface_hub_version,
+        "max_download_attempts": args.max_download_attempts,
+        "retry_backoff_seconds": args.retry_backoff_seconds,
         "assets": [],
     }
     write_json(output, report)
@@ -190,17 +281,25 @@ def main() -> int:
                 "expected_download_bytes": expected_bytes,
                 "remote_files": remote_files,
                 "status": "downloading",
+                "download_attempts": [],
                 "local_files": [],
             }
             report["assets"].append(asset_report)
             write_json(output, report)
 
-            snapshot_download(
-                repo_id=repo_id,
-                repo_type=asset.get("repo_type", "model"),
-                revision=revision,
-                local_dir=destination,
-                allow_patterns=patterns,
+            download_snapshot_with_retries(
+                download_kwargs={
+                    "repo_id": repo_id,
+                    "repo_type": asset.get("repo_type", "model"),
+                    "revision": revision,
+                    "local_dir": destination,
+                    "allow_patterns": patterns,
+                },
+                asset_report=asset_report,
+                report=report,
+                output=output,
+                max_attempts=args.max_download_attempts,
+                backoff_seconds=args.retry_backoff_seconds,
             )
 
             missing = [

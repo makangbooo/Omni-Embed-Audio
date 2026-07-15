@@ -7,7 +7,7 @@ import tempfile
 import types
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 fake_huggingface_hub = types.ModuleType("huggingface_hub")
@@ -16,9 +16,13 @@ fake_huggingface_hub.__version__ = "test"
 fake_huggingface_hub.snapshot_download = lambda **_: None
 
 with patch.dict(sys.modules, {"huggingface_hub": fake_huggingface_hub}):
+    import scripts.download_model_assets as download_module
+
     from scripts.download_model_assets import (
         REPOSITORY_ROOT,
+        download_snapshot_with_retries,
         ensure_external_model_root,
+        is_retryable_network_error,
         local_files,
         selected,
         sha256_file,
@@ -26,6 +30,43 @@ with patch.dict(sys.modules, {"huggingface_hub": fake_huggingface_hub}):
 
 
 class DownloadModelAssetsTest(unittest.TestCase):
+    def test_chunked_encoding_error_is_retryable(self) -> None:
+        chunked_error_type = type(
+            "ChunkedEncodingError", (Exception,), {"__module__": "requests.exceptions"}
+        )
+        self.assertTrue(is_retryable_network_error(chunked_error_type("broken")))
+
+    def test_snapshot_download_resumes_after_network_error(self) -> None:
+        chunked_error_type = type(
+            "ChunkedEncodingError", (Exception,), {"__module__": "requests.exceptions"}
+        )
+        report = {"status": "running", "assets": []}
+        asset_report = {"download_attempts": []}
+        report["assets"].append(asset_report)
+        downloader = Mock(side_effect=[chunked_error_type("broken"), None])
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "manifest.json"
+            with (
+                patch.object(download_module, "snapshot_download", downloader),
+                patch.object(download_module.time, "sleep") as sleep,
+            ):
+                download_snapshot_with_retries(
+                    download_kwargs={"repo_id": "owner/model"},
+                    asset_report=asset_report,
+                    report=report,
+                    output=output,
+                    max_attempts=3,
+                    backoff_seconds=30,
+                )
+
+        self.assertEqual(downloader.call_count, 2)
+        sleep.assert_called_once_with(30)
+        self.assertEqual(
+            [attempt["status"] for attempt in asset_report["download_attempts"]],
+            ["retryable_error", "complete"],
+        )
+
     def test_model_root_inside_repository_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "outside the Git repository"):
             ensure_external_model_root(REPOSITORY_ROOT / "models")
