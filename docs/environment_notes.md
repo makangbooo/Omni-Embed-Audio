@@ -70,3 +70,5 @@
 全新安装使用 `scripts/setup_environment.sh`；之前安装被中断且环境已经存在时，使用 `scripts/resume_environment.sh`。恢复前必须保证没有任何其他服务器正在写共享的 `oea-repro`。两个脚本均不下载模型或数据、不安装 FlashAttention、不运行训练。
 
 CPU-02 实测依赖安装和 `pip check` 已通过；随后发现 CPU 实例上的 `nvidia-smi` 会以 `Exec format error` 失败。环境检查器现将此类 `OSError` 记录为 `UNAVAILABLE`，CPU 模式不会因不可用的 GPU 管理命令崩溃；严格 CUDA/BF16/NCCL 判定仍留在 GPU 模式。
+
+GPU-02 使用 `bash scripts/validate_gpu_environment.sh`，自动保存 commit、Git 状态、GPU 信息、完整日志和严格模式 JSON；不下载模型或数据。
