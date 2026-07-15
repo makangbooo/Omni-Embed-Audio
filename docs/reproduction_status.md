@@ -35,4 +35,4 @@
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：确认 A100-SXM4-80GB、Driver 580.95.05、CUDA Toolkit 12.6、NCCL 2.23.4、NVLink/RoCE 设备与 GPU 容器资源；发现官方 `tokenizers>=0.22` 与 base-model Transformers commit 的 `<0.22` 冲突。
 - 当前阻塞：单卡 CUDA/BF16/NCCL 尚未验证；多卡 GPU–GPU 拓扑留待 DDP smoke；关键数据/HN pairing 未提供。
-- 下一步：不使用 GPU，通过已核实的国内镜像全新创建环境；完成后再临时使用单卡验证 CUDA。
+- 下一步：使用一张 GPU 运行严格模式检查，验证 CUDA、BF16、NCCL availability 与最小矩阵运算。
