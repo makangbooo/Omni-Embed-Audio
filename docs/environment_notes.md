@@ -52,13 +52,16 @@
 3. `[PAPER]` 使用 BF16/DDP；`[CODE]` trainer 尚未实现真实 DDP，且 autocast dtype 路径不明确。环境可用不代表训练实现已经符合论文。
 4. `[MISSING]` 论文未给训练 GPU 数量。8×A100-80GB 是后续全量训练的资源候选，不是论文事实。
 
-## 4. GPU-02 范围
+## 4. CPU-02 安装与 GPU-02 验证范围
 
-GPU-02 只完成：
+共享用户目录允许 CPU/GPU 容器读取同一个 Conda 环境，因此环境工作拆成：
 
-- 创建全新的 `oea-repro`；
-- 安装 PyTorch cu126 与核心依赖；
-- 检查 imports、CUDA、BF16、NCCL availability、音频解码/重采样；
-- 保存完整解析后的依赖和日志。
+- CPU-02：创建或恢复 `oea-repro`，安装 PyTorch cu126 与核心依赖，检查 imports、音频解码/重采样，并保存解析后的依赖和日志；
+- GPU-02：只在 4090/A100 容器中运行 CUDA、BF16、NCCL 和最小矩阵运算验证，不再安装依赖。
 
-GPU-02 不下载任何模型或数据，不安装 FlashAttention，不运行训练。若环境已存在，安装脚本会拒绝覆盖。
+默认下载源为阿里云 PyTorch cu126 wheel 索引和清华 PyPI 镜像；版本仍由本项目固定。可分别通过 `PYTORCH_INDEX_URL`、`PYPI_INDEX_URL` 临时覆盖，脚本会把实际 URL 写入日志。镜像选择标记为 `[INFERRED]`，不属于论文或官方代码配置。
+
+- 阿里云索引：<https://mirrors.aliyun.com/pytorch-wheels/cu126/>
+- 清华 PyPI 使用说明：<https://mirrors.tuna.tsinghua.edu.cn/help/pypi/>
+
+全新安装使用 `scripts/setup_environment.sh`；之前安装被中断且环境已经存在时，使用 `scripts/resume_environment.sh`。恢复前必须保证没有任何其他服务器正在写共享的 `oea-repro`。两个脚本均不下载模型或数据、不安装 FlashAttention、不运行训练。

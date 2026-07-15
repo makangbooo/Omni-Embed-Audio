@@ -63,6 +63,12 @@ def command_output(command: list[str]) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--mode",
+        choices=("cpu", "gpu"),
+        default="gpu",
+        help="CPU checks imports/audio only; GPU additionally requires CUDA, BF16, and NCCL.",
+    )
     return parser.parse_args()
 
 
@@ -79,6 +85,7 @@ def main() -> int:
     args = parse_args()
     report: dict[str, Any] = {
         "python": sys.version,
+        "mode": args.mode,
         "executable": sys.executable,
         "platform": platform.platform(),
         "environment": {
@@ -139,7 +146,11 @@ def main() -> int:
     }
 
     if not torch.cuda.is_available():
-        report["checks"]["cuda"] = "FAILED: torch.cuda.is_available() is false"
+        report["checks"]["cuda"] = (
+            "NOT_TESTED: no GPU is visible during the CPU installation check"
+            if args.mode == "cpu"
+            else "FAILED: torch.cuda.is_available() is false"
+        )
     else:
         device = torch.device("cuda:0")
         properties = torch.cuda.get_device_properties(device)
@@ -190,9 +201,10 @@ def main() -> int:
     write_report(args.output, report)
 
     failed = bool(import_errors)
-    failed = failed or not torch.cuda.is_available()
-    failed = failed or not torch.cuda.is_bf16_supported()
-    failed = failed or not torch.distributed.is_nccl_available()
+    if args.mode == "gpu":
+        failed = failed or not torch.cuda.is_available()
+        failed = failed or not torch.cuda.is_bf16_supported()
+        failed = failed or not torch.distributed.is_nccl_available()
     return 1 if failed else 0
 
 
