@@ -11,7 +11,7 @@ import subprocess
 import time
 import traceback
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PosixPath
 from typing import Any
 
 
@@ -158,18 +158,33 @@ def main() -> int:
             "get_unsafe_globals_in_checkpoint",
             None,
         )
-        report["unsafe_globals"] = (
-            sorted(unsafe_globals_fn(checkpoint)) if unsafe_globals_fn else "API_UNAVAILABLE"
+        if unsafe_globals_fn is None:
+            raise RuntimeError(
+                "torch.serialization.get_unsafe_globals_in_checkpoint is unavailable"
+            )
+        unsafe_globals = sorted(unsafe_globals_fn(checkpoint))
+        report["unsafe_globals"] = unsafe_globals
+        approved_globals = {"pathlib.PosixPath": PosixPath}
+        unexpected_globals = sorted(set(unsafe_globals) - set(approved_globals))
+        report["approved_safe_globals"] = sorted(
+            set(unsafe_globals) & set(approved_globals)
         )
+        report["unexpected_unsafe_globals"] = unexpected_globals
+        if unexpected_globals:
+            raise RuntimeError(
+                f"checkpoint contains unapproved globals: {unexpected_globals}"
+            )
         write_json(output, report)
 
         load_started = time.monotonic()
-        state = torch.load(
-            checkpoint,
-            map_location="meta",
-            mmap=True,
-            weights_only=True,
-        )
+        safe_global_objects = [approved_globals[name] for name in unsafe_globals]
+        with torch.serialization.safe_globals(safe_global_objects):
+            state = torch.load(
+                checkpoint,
+                map_location="meta",
+                mmap=True,
+                weights_only=True,
+            )
         report["load_elapsed_seconds"] = time.monotonic() - load_started
         if not isinstance(state, dict):
             raise TypeError(f"checkpoint top level is {type(state).__name__}, expected dict")
