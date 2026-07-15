@@ -30,8 +30,8 @@
 |---|---|---|---|
 | Python | 3.11 | `[CODE]` | 官方 `requirements.txt` 注明来自 `.venv-oea311`；不使用 base 的 Python 3.13 |
 | PyTorch/TorchVision/TorchAudio | 2.7.1/0.22.1/2.7.1 + cu126 | `[INFERRED]` | 官方仅要求 torch/torchaudio ≥2.5 并建议 cu124；服务器安装 CUDA 12.6，PyTorch 官方提供匹配的 cu126 wheel |
-| Transformers | peeled commit `cb39f7d` | `[CODE]` | Qwen2.5-Omni 与 NVIDIA Omni-Embed 官方 model card 均指定 tag `v4.51.3-Qwen2.5-Omni-preview` |
-| Tokenizers | 0.21.4 | `[INFERRED]` | 上述 Transformers commit 要求 `>=0.21,<0.22` |
+| Transformers | 4.52.4 | `[INFERRED]` | model card 的 preview commit 无法导入 `[CODE]` 要求的 PEFT 0.18.0；PEFT 0.18.0 官方示例固定 4.52.4，且该版本包含 Qwen2.5-Omni 与 `modeling_layers` |
+| Tokenizers | 0.21.4 | `[INFERRED]` | Transformers 4.52.4 要求 `>=0.21,<0.22` |
 | PEFT | 0.18.0 | `[CODE]` | 官方仓库要求 `peft>=0.18.0`；先固定最低公开版本 |
 | Accelerate | 1.10.1 | `[INFERRED]` | 满足官方 `>=1.0.0` 和 PEFT/Transformers 要求，固定 2025 年稳定版本 |
 | FlashAttention | GPU-02 不安装 | `[INFERRED]` | NVIDIA model card 推荐，但官方 OEA adapter 允许不指定；先验证 SDPA，避免把编译问题与核心环境混在一起 |
@@ -44,6 +44,8 @@
 - [Qwen2.5-Omni-3B model card](https://huggingface.co/Qwen/Qwen2.5-Omni-3B)
 - [NVIDIA Omni-Embed-Nemotron-3B model card](https://huggingface.co/nvidia/omni-embed-nemotron-3b)
 - [Pinned Transformers commit](https://github.com/huggingface/transformers/tree/cb39f7dd5ba874ee1859b47283b08cd3a6ab5a0d)
+- [Transformers 4.52.4](https://github.com/huggingface/transformers/tree/v4.52.4)
+- [PEFT 0.18.0 official example requirements](https://github.com/huggingface/peft/blob/v0.18.0/examples/int8_training/requirements.txt)
 
 ## 3. 已发现的官方依赖冲突
 
@@ -51,6 +53,7 @@
 2. `[CODE]` 官方只给宽松下界，不能作为可审计 lock。`requirements-lock.txt` 当前只是直接依赖候选；GPU-02 成功后必须保存完整 `pip freeze --all` 和 conda export，再由本地审计后升级为最终 lock。
 3. `[PAPER]` 使用 BF16/DDP；`[CODE]` trainer 尚未实现真实 DDP，且 autocast dtype 路径不明确。环境可用不代表训练实现已经符合论文。
 4. `[MISSING]` 论文未给训练 GPU 数量。8×A100-80GB 是后续全量训练的资源候选，不是论文事实。
+5. `[CODE]` 官方仓库同时给出 `transformers>=4.47.0` 与 `peft>=0.18.0`，而 base-model card 指定的 Transformers preview commit 缺少 PEFT 0.18.0 导入的 `transformers.modeling_layers`。首次 CPU-02 实测复现了该冲突。`[INFERRED]` 采用 PEFT 0.18.0 官方示例使用的 Transformers 4.52.4；它仍满足仓库下界并包含 Qwen2.5-Omni。此差异必须在最终报告中保留。
 
 ## 4. CPU-02 安装与 GPU-02 验证范围
 

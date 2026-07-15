@@ -16,6 +16,11 @@ from pathlib import Path
 from typing import Any
 
 
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+
 REQUIRED_IMPORTS = {
     "accelerate": "accelerate",
     "einops": "einops",
@@ -39,6 +44,13 @@ REQUIRED_IMPORTS = {
     "torchvision": "torchvision",
     "transformers": "transformers",
     "wandb": "wandb",
+}
+
+REQUIRED_INTERFACES = {
+    "peft": ("LoraConfig", "TaskType", "get_peft_model"),
+    "transformers.models.qwen2_5_omni": (
+        "Qwen2_5OmniThinkerForConditionalGeneration",
+    ),
 }
 
 
@@ -106,6 +118,19 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001 - preserve every import failure
             import_errors[module_name] = repr(exc)
         report["packages"][distribution] = package_version(distribution)
+
+    interface_checks: dict[str, str] = {}
+    for module_name, attributes in REQUIRED_INTERFACES.items():
+        try:
+            module = importlib.import_module(module_name)
+            missing = [name for name in attributes if not hasattr(module, name)]
+            if missing:
+                raise AttributeError(f"missing required attributes: {missing}")
+            interface_checks[module_name] = f"OK: {', '.join(attributes)}"
+        except Exception as exc:  # noqa: BLE001 - preserve every interface failure
+            interface_checks[module_name] = repr(exc)
+            import_errors[f"{module_name} interface"] = repr(exc)
+    report["checks"]["required_interfaces"] = interface_checks
 
     try:
         importlib.import_module("AudioRetrieval")

@@ -5,15 +5,16 @@
 # `conda env export`; those resolved files will be audited before this file is
 # promoted to the final lock.
 #
-# PyTorch is installed separately by scripts/setup_environment.sh from the
-# official cu126 index:
-#   torch==2.7.1
-#   torchvision==0.22.1
-#   torchaudio==2.7.1
+# PyTorch is installed separately by scripts/setup_environment.sh:
+#   torch==2.7.1+cu126
+#   torchvision==0.22.1+cu126
+#   torchaudio==2.7.1+cu126
 
-# [CODE] The official Qwen2.5-Omni and NVIDIA base-model cards request the
-# v4.51.3-Qwen2.5-Omni-preview Transformers tag. The peeled commit is pinned.
-transformers @ git+https://github.com/huggingface/transformers.git@cb39f7dd5ba874ee1859b47283b08cd3a6ab5a0d
+# [INFERRED] The base-model cards request the older Qwen2.5-Omni preview
+# commit, but it cannot import the repository-required PEFT 0.18.0. The PEFT
+# 0.18.0 official examples pin Transformers 4.52.4, which also contains the
+# Qwen2.5-Omni implementation and modeling_layers required by PEFT.
+transformers==4.52.4
 tokenizers==0.21.4
 huggingface-hub==0.36.0
 safetensors==0.7.0
