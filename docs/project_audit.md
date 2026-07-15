@@ -77,6 +77,8 @@ OEA 使用同一个具备原生音频理解能力的多模态 LLM 处理文本�
 
 六个 checkpoint 合计 73.75 GB；三个 base-model 权重合计约 43.74 GB。模型卡统一写 `step_40.pt` 并称 base weights 不在 checkpoint 中，但实际 checkpoint 大小接近完整 backbone；下载与加载策略必须按真实文件处理。
 
+`[CODE]` `OEA-Qwen3B-Cl/step_40.pt` 的静态安全扫描仅发现 `pathlib.PosixPath` 一个非默认 global，来源于随 checkpoint 保存的路径配置。`[INFERRED]` 在当前 PyTorch 2.7.1 环境中，官方示例直接调用未显式设置 `weights_only` 的 `torch.load` 会因 PyTorch 2.6+ 默认安全模式而失败。复现检查器仅 allowlist 该标准库类型，继续保持 `weights_only=True`；不使用可执行任意 pickle 代码的 `weights_only=False`。
+
 ## 7. 结论与复现边界
 
 核心结论可以尝试复现，但公开发布不足以直接重跑论文全部表格。第一优先级不是训练，而是：固定环境；修复官方 checkpoint 加载/文件名；建立三个数据集的 canonical manifest；补 UIQ schema adapter 和 metric unit tests；在一个 3B checkpoint 上完成端到端官方权重评测。只有该闭环通过后，才进入单个 3B 训练链。
