@@ -81,6 +81,10 @@ OEA 使用同一个具备原生音频理解能力的多模态 LLM 处理文本�
 
 首次 allowlist 后的 `map_location=meta` 检查进程在无 Python traceback 的情况下终止；cgroup 上限 8 GiB、`oom=0`、`oom_kill=0`、`max=0`，主机 available memory 441 GiB，因此不能归因为 OOM。后续元数据检查改用 `[INFERRED]` PyTorch 官方推荐的 `FakeTensorMode`，并显式记录 Python/wrapper 退出码和 HUP/INT/TERM 信号。
 
+`[CODE]` `step_40.pt` 的 `lora_state_dict` 有 1,986 个 tensors、4,716,080,128 个参数、9,457,391,616 bytes。其中真正名称含 `lora_` 的只有 544 个 FP32 tensors、12,615,680 个参数、50,462,720 bytes；其余 1,442 个 BF16 tensors、4,703,464,448 个参数、9,406,928,896 bytes 是冻结 backbone。音频/文本 projection head 各有 1,049,600 个 FP32 参数（`linear.weight=[512,2048]`，LayerNorm weight/bias 各 512）。因此实际可训练/推理增量权重合计 14,714,880 个参数、58,859,520 bytes，而官方 checkpoint 重复保存了完整 base tensors。
+
+`[CODE]` Qwen3B-Cl checkpoint 内训练配置进一步给出：Clotho stage、`batch_size=6`、`grad_accum=256`、30 epochs、每 5 step 验证、LR `3e-4`、weight decay `0.01`、early-stop patience 3、每 10 step 保存、BF16/AMP、InfoNCE、对称损失、temperature `0.07`，并从 AudioCaps `step_350.pt` 继续。`[MISSING]` checkpoint 不含 world size 和 seed，因此 global batch 只能写为 `6 × 256 × world_size`，不能确定具体数值。
+
 ## 7. 结论与复现边界
 
 核心结论可以尝试复现，但公开发布不足以直接重跑论文全部表格。第一优先级不是训练，而是：固定环境；修复官方 checkpoint 加载/文件名；建立三个数据集的 canonical manifest；补 UIQ schema adapter 和 metric unit tests；在一个 3B checkpoint 上完成端到端官方权重评测。只有该闭环通过后，才进入单个 3B 训练链。
