@@ -130,7 +130,8 @@ def main() -> int:
         "expected_sha256": args.expected_sha256,
         "load_policy": {
             "weights_only": True,
-            "map_location": "meta",
+            "fake_tensor_mode": True,
+            "map_location": None,
             "mmap": True,
         },
     }
@@ -176,12 +177,16 @@ def main() -> int:
             )
         write_json(output, report)
 
+        from torch._subclasses.fake_tensor import FakeTensorMode
+
         load_started = time.monotonic()
         safe_global_objects = [approved_globals[name] for name in unsafe_globals]
-        with torch.serialization.safe_globals(safe_global_objects):
+        with (
+            torch.serialization.safe_globals(safe_global_objects),
+            FakeTensorMode(),
+        ):
             state = torch.load(
                 checkpoint,
-                map_location="meta",
                 mmap=True,
                 weights_only=True,
             )

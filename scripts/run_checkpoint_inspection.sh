@@ -15,6 +15,21 @@ EXPECTED_SHA256="d5f2648c19b07fe5b33c22873098f9b9d749dfe2fb48e5d3dedfcea827c39b5
 
 mkdir -p "${RUN_DIR}"
 
+record_wrapper_exit() {
+  local exit_code=$?
+  printf '%s\n' "${exit_code}" > "${RUN_DIR}/wrapper_exit_code.txt"
+}
+record_signal() {
+  local signal_name=$1
+  local exit_code=$2
+  printf '%s\n' "${signal_name}" > "${RUN_DIR}/termination_signal.txt"
+  exit "${exit_code}"
+}
+trap record_wrapper_exit EXIT
+trap 'record_signal SIGHUP 129' HUP
+trap 'record_signal SIGINT 130' INT
+trap 'record_signal SIGTERM 143' TERM
+
 {
   printf 'MODEL_ROOT=%q CHECKPOINT=%q ' "${MODEL_ROOT}" "${CHECKPOINT}"
   printf '%q ' "$0" "$@"
@@ -40,11 +55,20 @@ echo "[INFO] Checkpoint: ${CHECKPOINT}"
 conda activate "${ENV_NAME}"
 export CUDA_VISIBLE_DEVICES=""
 
+set +e
 python scripts/inspect_oea_checkpoint.py \
   --checkpoint "${CHECKPOINT}" \
   --expected-size "${EXPECTED_SIZE}" \
   --expected-sha256 "${EXPECTED_SHA256}" \
   --output "${RUN_DIR}/checkpoint_inspection.json"
+INSPECTION_EXIT_CODE=$?
+set -e
+
+printf '%s\n' "${INSPECTION_EXIT_CODE}" > "${RUN_DIR}/inspection_exit_code.txt"
+if [[ "${INSPECTION_EXIT_CODE}" -ne 0 ]]; then
+  echo "[ERROR] Checkpoint inspection exited with code ${INSPECTION_EXIT_CODE}" >&2
+  exit "${INSPECTION_EXIT_CODE}"
+fi
 
 python -m pip freeze > "${RUN_DIR}/requirements-freeze.txt"
 echo "[INFO] Checkpoint inspection completed"
