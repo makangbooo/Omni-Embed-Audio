@@ -17,7 +17,7 @@
 | 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | COMPLETED | `11f20d2` | `pip check`、必需接口、仓库导入、音频 I/O/重采样均通过；resolved artifacts 已生成 | 无 | 在单卡实例执行 GPU-02 |
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
-| 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | WAITING_USER | `ff9d56e` | 首次安全检查确认唯一非默认 global 为 `pathlib.PosixPath`；精确 allowlist 补丁已就绪 | 等待重新运行 CPU/meta 检查 | 核对 state dict 后做单卡 GPU 最小加载 |
+| 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | WAITING_USER | `3f5e6bb` | 已排除 cgroup/主机 OOM；`FakeTensorMode` 检查和退出码/信号审计已就绪 | 等待重新运行 CPU 元数据检查 | 核对 state dict 后做单卡 GPU 最小加载 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | TODO | N/A | 未开始 | 无 | 实现 HNSR/TFR/Δ-Rank 并用合成例验证 |
 | 2 UIQ | Tables 12–15 正向 UIQ | BLOCKED | N/A | 未开始 | loader schema 不匹配；音频未准备 | 加 schema adapter 与数据校验 |
@@ -32,8 +32,8 @@
 
 ## 当前焦点
 
-- 当前阶段：环境与首批官方权重已就绪；等待使用精确安全 allowlist 重跑 CPU/meta checkpoint 结构检查。
+- 当前阶段：环境与首批官方权重已就绪；等待使用 `FakeTensorMode` 重跑 CPU checkpoint 结构检查。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：在 A100-SXM4-80GB 上确认 PyTorch CUDA 12.6、BF16、NCCL 2.26.2、必需 Qwen/PEFT 接口、仓库导入和音频 I/O 均通过；固定首批模型的不可变 Hugging Face revision。
-- 当前阻塞：首次 `weights_only=True` 检查按预期拒绝 checkpoint 中的 `pathlib.PosixPath`；静态扫描未发现其他非默认 global，已提交仅允许该标准库类型的补丁。
-- 下一步：用户拉取 `ff9d56e` 并重跑安全 CPU/meta 检查器；核对顶层键、tensor 数量/形状/字节量后，再执行单卡 GPU 最小加载和 5 样例前向。
+- 当前阻塞：allowlist 后的 `map_location=meta` 子进程无 traceback 终止；cgroup `oom/oom_kill/max` 均为 0，旧 wrapper 未记录退出码，精确外部信号不可追溯。
+- 下一步：用户拉取 `3f5e6bb`，用 PyTorch 官方 `FakeTensorMode` 路径重跑；新 wrapper 将记录 Python/包装器退出码及 HUP/INT/TERM。

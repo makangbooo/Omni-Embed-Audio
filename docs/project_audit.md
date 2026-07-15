@@ -79,6 +79,8 @@ OEA 使用同一个具备原生音频理解能力的多模态 LLM 处理文本�
 
 `[CODE]` `OEA-Qwen3B-Cl/step_40.pt` 的静态安全扫描仅发现 `pathlib.PosixPath` 一个非默认 global，来源于随 checkpoint 保存的路径配置。`[INFERRED]` 在当前 PyTorch 2.7.1 环境中，官方示例直接调用未显式设置 `weights_only` 的 `torch.load` 会因 PyTorch 2.6+ 默认安全模式而失败。复现检查器仅 allowlist 该标准库类型，继续保持 `weights_only=True`；不使用可执行任意 pickle 代码的 `weights_only=False`。
 
+首次 allowlist 后的 `map_location=meta` 检查进程在无 Python traceback 的情况下终止；cgroup 上限 8 GiB、`oom=0`、`oom_kill=0`、`max=0`，主机 available memory 441 GiB，因此不能归因为 OOM。后续元数据检查改用 `[INFERRED]` PyTorch 官方推荐的 `FakeTensorMode`，并显式记录 Python/wrapper 退出码和 HUP/INT/TERM 信号。
+
 ## 7. 结论与复现边界
 
 核心结论可以尝试复现，但公开发布不足以直接重跑论文全部表格。第一优先级不是训练，而是：固定环境；修复官方 checkpoint 加载/文件名；建立三个数据集的 canonical manifest；补 UIQ schema adapter 和 metric unit tests；在一个 3B checkpoint 上完成端到端官方权重评测。只有该闭环通过后，才进入单个 3B 训练链。
