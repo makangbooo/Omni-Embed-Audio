@@ -12,8 +12,9 @@
 | 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `48d7a50` | 本地与 fork 分支均存在 | 无 | 后续提交仅推送该分支 |
 | 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
 | 1 环境 | CPU-01：CPU/内存/存储/编译器/网络审计 | COMPLETED | `20770d0` | 远程完成；原始日志未进 Git | Zenodo 返回 503；容器 `nproc=2` | 在共享目录挂载到 A100 后执行 GPU-01 |
-| 1 环境 | GPU-01：A100/Driver/CUDA/NCCL 拓扑审计 | WAITING_USER | `20770d0` | 未开始 | 尚未获得 A100 显存、Driver、CUDA 与拓扑 | 选择一台 8×A100，运行只读检查 |
-| 1 环境 | 创建 `oea-repro` 与 lock 文件 | TODO | N/A | 未开始 | 等待系统信息 | 核对 Driver 后锁 Python/PyTorch/CUDA/transformers |
+| 1 环境 | GPU-01：A100/Driver/CUDA/NCCL 基础审计 | COMPLETED | `905e84d` | 1×A100-SXM4-80GB 远程完成；原始日志未进 Git | 多卡 GPU–GPU 拓扑留待 DDP smoke | 固定环境候选并执行 GPU-02 |
+| 1 环境 | 生成环境候选、安装脚本与无模型检查 | COMPLETED | 本次环境 commit 待创建 | 待推送 | 完整 transitive lock 必须在 Linux solve 后生成 | 审查并推送；等待用户运行 GPU-02 |
+| 1 环境 | GPU-02：创建 `oea-repro` 并生成 resolved lock | WAITING_USER | 本次环境 commit 待创建 | 未开始 | 等待用户确认安装命令 | 单卡 A100 安装并执行无模型 smoke |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | TODO | N/A | 未开始 | 环境未完成 | 修正实际 checkpoint 文件名并前向 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | TODO | N/A | 未开始 | 无 | 实现 HNSR/TFR/Δ-Rank 并用合成例验证 |
@@ -29,8 +30,8 @@
 
 ## 当前焦点
 
-- 当前阶段：CPU-01 环境审计完成，等待 GPU-01 A100 只读检查。
+- 当前阶段：CPU-01/GPU-01 审计完成，本地环境候选与 GPU-02 脚本已准备，等待审查和发布。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：Ubuntu 22.04/glibc 2.35、共享 DPC 存储、GCC 11.4、conda、CPU/内存与 GitHub/Hugging Face/ACL 网络审计；发现 CPU 容器实际 `nproc=2`，Zenodo 暂时返回 503。
-- 当前阻塞：尚无 A100 显存、Driver、CUDA/NCCL 拓扑；关键数据/HN pairing 未提供。
-- 下一步：在一台 8×A100 服务器挂载同一用户目录并执行 GPU-01；此时不安装依赖、不下载模型或数据。
+- 最近完成：确认 A100-SXM4-80GB、Driver 580.95.05、CUDA Toolkit 12.6、NCCL 2.23.4、NVLink/RoCE 设备与 GPU 容器资源；发现官方 `tokenizers>=0.22` 与 base-model Transformers commit 的 `<0.22` 冲突。
+- 当前阻塞：完整 Linux transitive lock 尚未解析；多卡 GPU–GPU 拓扑留待 DDP smoke；关键数据/HN pairing 未提供。
+- 下一步：推送环境候选后，由用户在 1×A100-80GB 执行 GPU-02；不下载模型或数据、不运行训练。

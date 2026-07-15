@@ -1,0 +1,12 @@
+name: oea-repro
+channels:
+  - conda-forge
+dependencies:
+  # [CODE] The official requirements were generated from `.venv-oea311`.
+  - python=3.11
+  - pip
+  # Runtime tools used by the audio processors. Exact builds are captured after
+  # the first successful Linux solve rather than guessed on Windows.
+  - ffmpeg
+  - libsndfile
+  - git
