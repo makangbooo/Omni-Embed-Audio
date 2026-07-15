@@ -13,9 +13,10 @@
 | 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
 | 1 环境 | CPU-01：CPU/内存/存储/编译器/网络审计 | COMPLETED | `20770d0` | 远程完成；原始日志未进 Git | Zenodo 返回 503；容器 `nproc=2` | 在共享目录挂载到 A100 后执行 GPU-01 |
 | 1 环境 | GPU-01：A100/Driver/CUDA/NCCL 基础审计 | COMPLETED | `905e84d` | 1×A100-SXM4-80GB 远程完成；原始日志未进 Git | 多卡 GPU–GPU 拓扑留待 DDP smoke | 固定环境候选并执行 GPU-02 |
-| 1 环境 | 生成环境候选、安装脚本与无模型检查 | COMPLETED | `c61fecb` | fork 已同步 | 完整 transitive lock 必须在 Linux solve 后生成 | 等待用户运行 GPU-02 |
+| 1 环境 | 生成环境候选、安装脚本与无模型检查 | COMPLETED | `c61fecb` | fork 已同步 | 完整 transitive lock 必须在 Linux solve 后生成 | 固定首批模型资源 |
 | 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | COMPLETED | `11f20d2` | `pip check`、必需接口、仓库导入、音频 I/O/重采样均通过；resolved artifacts 已生成 | 无 | 在单卡实例执行 GPU-02 |
-| 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | WAITING_USER | `11f20d2` | 未开始 | 等待用户提供单卡 GPU 实例执行结果 | 运行严格 GPU 模式检查 |
+| 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
+| 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | WAITING_USER | `c44a567` | 下载尚未开始 | 等待用户在任意联网实例运行无 GPU 下载脚本 | 校验约 21.5 GB 模型文件与 SHA256 清单 |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | TODO | N/A | 未开始 | 环境未完成 | 修正实际 checkpoint 文件名并前向 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | TODO | N/A | 未开始 | 无 | 实现 HNSR/TFR/Δ-Rank 并用合成例验证 |
@@ -31,8 +32,8 @@
 
 ## 当前焦点
 
-- 当前阶段：CPU-02 已完成，固定依赖、必需接口、仓库导入和音频栈均通过；等待单卡 GPU-02 严格验证。
+- 当前阶段：环境创建与单卡 GPU-02 严格验证均已完成；进入官方权重下载与最小 smoke test 准备阶段。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：确认 A100-SXM4-80GB、Driver 580.95.05、CUDA Toolkit 12.6、NCCL 2.23.4、NVLink/RoCE 设备与 GPU 容器资源；发现官方 `tokenizers>=0.22` 与 base-model Transformers commit 的 `<0.22` 冲突。
-- 当前阻塞：单卡 CUDA/BF16/NCCL 尚未验证；多卡 GPU–GPU 拓扑留待 DDP smoke；关键数据/HN pairing 未提供。
-- 下一步：使用一张 GPU 运行严格模式检查，验证 CUDA、BF16、NCCL availability 与最小矩阵运算。
+- 最近完成：在 A100-SXM4-80GB 上确认 PyTorch CUDA 12.6、BF16、NCCL 2.26.2、必需 Qwen/PEFT 接口、仓库导入和音频 I/O 均通过；固定首批模型的不可变 Hugging Face revision。
+- 当前阻塞：首批 Qwen3B base 与 OEA-Qwen3B-Cl checkpoint 尚未下载；多卡 GPU–GPU 拓扑留待 DDP smoke；关键数据/HN pairing 未提供。
+- 下一步：在无需 GPU 的联网实例下载并校验约 21.5 GB 首批模型资源，随后使用一张 GPU 做 5 个样例的前向 smoke test。
