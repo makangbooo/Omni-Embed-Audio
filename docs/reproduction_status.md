@@ -16,7 +16,7 @@
 | 1 环境 | 生成环境候选、安装脚本与无模型检查 | COMPLETED | `c61fecb` | fork 已同步 | 完整 transitive lock 必须在 Linux solve 后生成 | 固定首批模型资源 |
 | 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | COMPLETED | `11f20d2` | `pip check`、必需接口、仓库导入、音频 I/O/重采样均通过；resolved artifacts 已生成 | 无 | 在单卡实例执行 GPU-02 |
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
-| 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | WAITING_USER | `c44a567` | 下载尚未开始 | 等待用户在任意联网实例运行无 GPU 下载脚本 | 校验约 21.5 GB 模型文件与 SHA256 清单 |
+| 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | RUNNING_REMOTE | `bdb13a0` | `model01_download_20260715_191028` 正通过 `hf-mirror.com` 下载；约 1.0 MB/s | 无；大分片下载中 | 等待约 21.5 GB 下载及 SHA256 校验完成 |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | TODO | N/A | 未开始 | 环境未完成 | 修正实际 checkpoint 文件名并前向 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | TODO | N/A | 未开始 | 无 | 实现 HNSR/TFR/Δ-Rank 并用合成例验证 |
@@ -32,8 +32,8 @@
 
 ## 当前焦点
 
-- 当前阶段：环境创建与单卡 GPU-02 严格验证均已完成；进入官方权重下载与最小 smoke test 准备阶段。
+- 当前阶段：环境创建与单卡 GPU-02 严格验证均已完成；首批官方权重正在远程下载。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：在 A100-SXM4-80GB 上确认 PyTorch CUDA 12.6、BF16、NCCL 2.26.2、必需 Qwen/PEFT 接口、仓库导入和音频 I/O 均通过；固定首批模型的不可变 Hugging Face revision。
-- 当前阻塞：首批 Qwen3B base 与 OEA-Qwen3B-Cl checkpoint 尚未下载；多卡 GPU–GPU 拓扑留待 DDP smoke；关键数据/HN pairing 未提供。
-- 下一步：在无需 GPU 的联网实例下载并校验约 21.5 GB 首批模型资源，随后使用一张 GPU 做 5 个样例的前向 smoke test。
+- 当前阻塞：无即时阻塞；下载带宽约 1.0 MB/s，多卡 GPU–GPU 拓扑留待 DDP smoke，关键数据/HN pairing 尚未提供。
+- 下一步：等待约 21.5 GB 首批模型资源下载并完成 SHA256 校验，随后使用一张 GPU 做 5 个样例的前向 smoke test。
