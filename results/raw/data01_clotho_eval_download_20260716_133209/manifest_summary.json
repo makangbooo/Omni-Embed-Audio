@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "resource_id": "DATA-01",
+  "status": "complete",
+  "not_a_paper_table_result": true,
+  "dataset": "Clotho",
+  "version": "2.1",
+  "split": "evaluation",
+  "expected_examples": 1045,
+  "source_record": "https://zenodo.org/records/4783391",
+  "remote_data_root": "/home/jg525/datasets/oea/clotho_v2.1/source",
+  "primary_run": {
+    "remote_audit_directory": "/home/jg525/Omni-Embed-Audio/logs/data01_clotho_eval_download_20260716_133209",
+    "git_commit": "6bccb9593dbba9283c43e605276033ae9c011cb9",
+    "git_status_short": "",
+    "started_at": "2026-07-16T05:32:20.346521+00:00",
+    "finished_at": "2026-07-16T06:56:48.977534+00:00",
+    "asset_status": "downloaded_and_verified"
+  },
+  "verification_reruns": [
+    {
+      "remote_audit_directory": "/home/jg525/Omni-Embed-Audio/logs/data01_clotho_eval_download_20260716_145729",
+      "git_commit": "aff03e4228503e9bf00cc9ff890144c2afab9323",
+      "git_status_short": "",
+      "asset_status": "verified_existing"
+    },
+    {
+      "remote_audit_directory": "/home/jg525/Omni-Embed-Audio/logs/data01_clotho_eval_download_20260716_145927",
+      "git_commit": "aff03e4228503e9bf00cc9ff890144c2afab9323",
+      "git_status_short": "",
+      "asset_status": "verified_existing"
+    }
+  ],
+  "assets": [
+    {
+      "name": "clotho_audio_evaluation.7z",
+      "size_bytes": 1249726503,
+      "md5": "4569624ccadf96223f19cb59fe4f849f"
+    },
+    {
+      "name": "clotho_captions_evaluation.csv",
+      "size_bytes": 361995,
+      "md5": "1b16b9e57cf7bdb7f13a13802aeb57e2"
+    },
+    {
+      "name": "clotho_metadata_evaluation.csv",
+      "size_bytes": 225311,
+      "md5": "13946f054d4e1bf48079813aac61bf77"
+    }
+  ],
+  "duplicate_download_audit": {
+    "active_download_processes": 0,
+    "canonical_complete_file_count": 3,
+    "canonical_total_human_size": "1.2G",
+    "actual_download_runs": 1,
+    "verified_existing_runs": 2,
+    "duplicate_created_by_reruns": false,
+    "notes": "The two reruns checksum-verified the same canonical files and did not download new copies."
+  },
+  "source_tags": {
+    "version": "[INFERRED] paper says Clotho v2; use repaired official v2.1 release",
+    "expected_examples": "[PAPER][CODE] 1045 evaluation clips",
+    "checksums": "[MISSING] absent from paper/code; pinned from official Zenodo metadata"
+  }
+}
