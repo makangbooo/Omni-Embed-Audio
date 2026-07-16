@@ -17,7 +17,7 @@
 | 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | COMPLETED | `11f20d2` | `pip check`、必需接口、仓库导入、音频 I/O/重采样均通过；resolved artifacts 已生成 | 无 | 在单卡实例执行 GPU-02 |
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
-| 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | IN_PROGRESS | `d0a2b70` | inference-only checkpoint 已生成：59,068,647 bytes，544 LoRA + 双 head 逐 tensor 相等，无 unsafe globals | 无；GPU smoke 本地加载脚本尚未固定 | 实现本地离线加载并做单卡 GPU 最小前向 |
+| 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | WAITING_USER | `b6b6de2` | 严格离线 GPU smoke、固定资源配置和 3 个单元测试已同步；待远程单卡运行 | 需要用户在任一单 GPU 实例拉取并执行 | 校验本地 base/checkpoint、LoRA/head、5 音频/5 查询前向和显存峰值 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | TODO | N/A | 未开始 | 无 | 实现 HNSR/TFR/Δ-Rank 并用合成例验证 |
 | 2 UIQ | Tables 12–15 正向 UIQ | BLOCKED | N/A | 未开始 | loader schema 不匹配；音频未准备 | 加 schema adapter 与数据校验 |
@@ -32,8 +32,8 @@
 
 ## 当前焦点
 
-- 当前阶段：环境、首批官方权重、checkpoint 结构审计和 inference-only 权重提取已完成；进入单卡 GPU smoke 准备。
+- 当前阶段：环境、首批官方权重、checkpoint 结构审计和 inference-only 权重提取已完成；单卡 GPU smoke 已进入 `WAITING_USER`。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：在 A100-SXM4-80GB 上确认 PyTorch CUDA 12.6、BF16、NCCL 2.26.2、必需 Qwen/PEFT 接口、仓库导入和音频 I/O 均通过；固定首批模型的不可变 Hugging Face revision。
-- 当前阻塞：无资源阻塞；官方 example 会在线重新下载并整体加载 9.47 GB checkpoint，尚未适配本地 base 与 59 MB inference-only 权重。
-- 下一步：本地实现严格离线 checkpoint/base 加载和 GPU 峰值审计，测试后提交，再请求一张 GPU 运行 5 个 Clotho 样例。
+- 当前阻塞：无资源缺失；需要在任一单 GPU 实例执行已固定的严格离线 smoke。脚本只读取本地 12 GB base 和 59 MB inference-only checkpoint，不会联网下载。
+- 下一步：拉取 `b6b6de2`，用 1 张 A100-80GB 运行 5 个 Clotho 样例；根据原始日志做最小兼容修复或确认首个官方权重前向闭环。
