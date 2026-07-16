@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "resource_id": "MODEL-03",
+  "description": "Immutable full snapshots for the Nemotron-3B base and both official OEA-Nemo3B checkpoints",
+  "source_tags": {
+    "repositories": "[CODE] author-linked official Hugging Face repositories",
+    "revisions": "[CODE] immutable Hugging Face revisions audited from repository metadata",
+    "file_inventory": "[MISSING] checkpoint filename documentation is not consistent enough to preselect a file; download and audit the entire pinned snapshot"
+  },
+  "assets": [
+    {
+      "name": "omni_embed_nemotron_3b",
+      "repo_id": "nvidia/omni-embed-nemotron-3b",
+      "repo_type": "model",
+      "revision": "865db1bb57e369a85357cf114cbd6b3c5322d19d",
+      "local_subdir": "omni-embed-nemotron-3b",
+      "allow_patterns": null,
+      "required_files": ["config.json"]
+    },
+    {
+      "name": "oea_nemo3b_ac",
+      "repo_id": "JudeJiwoo/OEA-Nemo3B-AC",
+      "repo_type": "model",
+      "revision": "8ed66aa77bc6f2001b807b5d2bd3e60503d89535",
+      "local_subdir": "OEA-Nemo3B-AC",
+      "allow_patterns": null,
+      "required_files": ["README.md"]
+    },
+    {
+      "name": "oea_nemo3b_cl",
+      "repo_id": "JudeJiwoo/OEA-Nemo3B-Cl",
+      "repo_type": "model",
+      "revision": "9588912298afca0b11f5895b864ae28083f35022",
+      "local_subdir": "OEA-Nemo3B-Cl",
+      "allow_patterns": null,
+      "required_files": ["README.md"]
+    }
+  ]
+}

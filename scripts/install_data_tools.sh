@@ -37,7 +37,7 @@ git status --short > "${RUN_DIR}/git_status_before.txt"
 hostname > "${RUN_DIR}/hostname.txt"
 pgrep -af '[c]onda.*(install|create|update)|[p]ython.*-m pip|[p]ip install' \
   > "${RUN_DIR}/package_manager_processes_before.txt" || true
-pgrep -af '[d]ownload_model_assets.py|[s]moke_oea|[v]alidate_clotho_evaluation.py|[t]orchrun|[a]ccelerate launch' \
+pgrep -af '[d]ownload_model_assets.py|[d]ownload_http_assets.py|[s]moke_oea|[v]alidate_clotho_evaluation.py|[t]orchrun|[a]ccelerate launch' \
   > "${RUN_DIR}/oea_processes_before.txt" || true
 
 if [[ -s "${RUN_DIR}/package_manager_processes_before.txt" ]]; then

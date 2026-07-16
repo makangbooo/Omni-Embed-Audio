@@ -36,6 +36,30 @@ class DownloadModelAssetsTest(unittest.TestCase):
         )
         self.assertTrue(is_retryable_network_error(chunked_error_type("broken")))
 
+    def test_wrapped_gateway_timeout_is_retryable(self) -> None:
+        http_error_type = type(
+            "HTTPError", (Exception,), {"__module__": "requests.exceptions"}
+        )
+        local_entry_error_type = type(
+            "LocalEntryNotFoundError",
+            (Exception,),
+            {"__module__": "huggingface_hub.errors"},
+        )
+        response = types.SimpleNamespace(status_code=504)
+        cause = http_error_type("gateway timeout")
+        cause.response = response
+        wrapper = local_entry_error_type("not in local cache")
+        wrapper.__cause__ = cause
+        self.assertTrue(is_retryable_network_error(wrapper))
+
+    def test_non_retryable_http_status_is_not_retried(self) -> None:
+        http_error_type = type(
+            "HTTPError", (Exception,), {"__module__": "requests.exceptions"}
+        )
+        error = http_error_type("not found")
+        error.response = types.SimpleNamespace(status_code=404)
+        self.assertFalse(is_retryable_network_error(error))
+
     def test_snapshot_download_resumes_after_network_error(self) -> None:
         chunked_error_type = type(
             "ChunkedEncodingError", (Exception,), {"__module__": "requests.exceptions"}
@@ -115,6 +139,33 @@ class DownloadModelAssetsTest(unittest.TestCase):
                 "lfs_sha256": "afb22d02e610016184fa0e2b4314fe0de191ebcc909184e9e128d36abade4b44",
             },
         )
+
+    def test_parallel_model_manifests_pin_full_immutable_snapshots(self) -> None:
+        expected = {
+            "model03_nemo3b.json": {
+                "nvidia/omni-embed-nemotron-3b": "865db1bb57e369a85357cf114cbd6b3c5322d19d",
+                "JudeJiwoo/OEA-Nemo3B-AC": "8ed66aa77bc6f2001b807b5d2bd3e60503d89535",
+                "JudeJiwoo/OEA-Nemo3B-Cl": "9588912298afca0b11f5895b864ae28083f35022",
+            },
+            "model04_qwen7b.json": {
+                "Qwen/Qwen2.5-Omni-7B": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+                "JudeJiwoo/OEA-Qwen7B-AC": "f44f247020a7192affe6927db91d0778d33b9791",
+                "JudeJiwoo/OEA-Qwen7B-Cl": "30c6e97cfdf451b1948013d2839befe0c3022c46",
+            },
+        }
+        for filename, repositories in expected.items():
+            with self.subTest(manifest=filename):
+                manifest = REPOSITORY_ROOT / "configs/resources" / filename
+                specification = json.loads(manifest.read_text(encoding="utf-8"))
+                self.assertEqual(len(specification["assets"]), 3)
+                self.assertEqual(
+                    {asset["repo_id"]: asset["revision"] for asset in specification["assets"]},
+                    repositories,
+                )
+                for asset in specification["assets"]:
+                    self.assertIsNone(asset["allow_patterns"])
+                    self.assertEqual(len(asset["revision"]), 40)
+                    int(asset["revision"], 16)
 
 
 if __name__ == "__main__":

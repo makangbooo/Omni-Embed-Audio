@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "resource_id": "DATA-03",
+  "dataset": "Clotho",
+  "version": "2.1",
+  "split": "development+validation",
+  "local_subdir": "clotho_v2.1/source",
+  "source_record": "https://zenodo.org/records/4783391",
+  "source_tags": {
+    "version": "[INFERRED] paper says Clotho v2; use repaired official v2.1 release from Zenodo record 4783391",
+    "development_examples": "[PAPER] 3839 development clips used for the +Cl stage",
+    "checksums": "[MISSING] absent from paper/code; pinned from official Zenodo record 4783391 file metadata"
+  },
+  "expected_examples": 4884,
+  "files": [
+    {
+      "name": "clotho_audio_development.7z",
+      "url": "https://zenodo.org/records/4783391/files/clotho_audio_development.7z?download=1",
+      "md5": "c8b05bc7acdb13895bb3c6a29608667e",
+      "kind": "audio_archive"
+    },
+    {
+      "name": "clotho_audio_validation.7z",
+      "url": "https://zenodo.org/records/4783391/files/clotho_audio_validation.7z?download=1",
+      "md5": "7dba730be08bada48bd15dc4e668df59",
+      "kind": "audio_archive"
+    },
+    {
+      "name": "clotho_captions_development.csv",
+      "url": "https://zenodo.org/records/4783391/files/clotho_captions_development.csv?download=1",
+      "md5": "d4090b39ce9f2491908eebf4d5b09bae",
+      "kind": "captions"
+    },
+    {
+      "name": "clotho_captions_validation.csv",
+      "url": "https://zenodo.org/records/4783391/files/clotho_captions_validation.csv?download=1",
+      "md5": "5879e023032b22a2c930aaa0528bead4",
+      "kind": "captions"
+    },
+    {
+      "name": "clotho_metadata_development.csv",
+      "url": "https://zenodo.org/records/4783391/files/clotho_metadata_development.csv?download=1",
+      "md5": "170d20935ecfdf161ce1bb154118cda5",
+      "kind": "metadata"
+    },
+    {
+      "name": "clotho_metadata_validation.csv",
+      "url": "https://zenodo.org/records/4783391/files/clotho_metadata_validation.csv?download=1",
+      "md5": "2e010427c56b1ce6008b0f03f41048ce",
+      "kind": "metadata"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "resource_id": "MODEL-04",
+  "description": "Immutable full snapshots for the Qwen2.5-Omni-7B base and both official OEA-Qwen7B checkpoints",
+  "source_tags": {
+    "repositories": "[CODE] author-linked official Hugging Face repositories",
+    "revisions": "[CODE] immutable Hugging Face revisions audited from repository metadata",
+    "file_inventory": "[MISSING] pinned Qwen7B-AC model card names step_40.pt while earlier resource notes named a different step; download and audit the entire pinned snapshot"
+  },
+  "assets": [
+    {
+      "name": "qwen2_5_omni_7b",
+      "repo_id": "Qwen/Qwen2.5-Omni-7B",
+      "repo_type": "model",
+      "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+      "local_subdir": "Qwen2.5-Omni-7B",
+      "allow_patterns": null,
+      "required_files": ["config.json"]
+    },
+    {
+      "name": "oea_qwen7b_ac",
+      "repo_id": "JudeJiwoo/OEA-Qwen7B-AC",
+      "repo_type": "model",
+      "revision": "f44f247020a7192affe6927db91d0778d33b9791",
+      "local_subdir": "OEA-Qwen7B-AC",
+      "allow_patterns": null,
+      "required_files": ["README.md"]
+    },
+    {
+      "name": "oea_qwen7b_cl",
+      "repo_id": "JudeJiwoo/OEA-Qwen7B-Cl",
+      "repo_type": "model",
+      "revision": "30c6e97cfdf451b1948013d2839befe0c3022c46",
+      "local_subdir": "OEA-Qwen7B-Cl",
+      "allow_patterns": null,
+      "required_files": ["README.md"]
+    }
+  ]
+}

@@ -4,6 +4,7 @@
   "dataset": "Clotho",
   "version": "2.1",
   "split": "evaluation",
+  "local_subdir": "clotho_v2.1/source",
   "source_record": "https://zenodo.org/records/4783391",
   "source_tags": {
     "version": "[INFERRED] paper says Clotho v2; use repaired official v2.1 release from Zenodo record 4783391",

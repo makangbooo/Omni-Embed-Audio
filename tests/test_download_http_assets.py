@@ -33,6 +33,7 @@ class DownloadHttpAssetsTest(unittest.TestCase):
         validate_specification(specification)
         self.assertEqual(specification["version"], "2.1")
         self.assertEqual(specification["split"], "evaluation")
+        self.assertEqual(specification["local_subdir"], "clotho_v2.1/source")
         self.assertEqual(specification["expected_examples"], 1045)
         self.assertEqual(
             {asset["name"]: asset["md5"] for asset in specification["files"]},
@@ -43,9 +44,30 @@ class DownloadHttpAssetsTest(unittest.TestCase):
             },
         )
 
+    def test_trainval_manifest_has_exact_official_assets(self) -> None:
+        manifest = REPOSITORY_ROOT / "configs/resources/data03_clotho_trainval.json"
+        specification = json.loads(manifest.read_text(encoding="utf-8"))
+        validate_specification(specification)
+        self.assertEqual(specification["version"], "2.1")
+        self.assertEqual(specification["split"], "development+validation")
+        self.assertEqual(specification["local_subdir"], "clotho_v2.1/source")
+        self.assertEqual(specification["expected_examples"], 4884)
+        self.assertEqual(
+            {asset["name"]: asset["md5"] for asset in specification["files"]},
+            {
+                "clotho_audio_development.7z": "c8b05bc7acdb13895bb3c6a29608667e",
+                "clotho_audio_validation.7z": "7dba730be08bada48bd15dc4e668df59",
+                "clotho_captions_development.csv": "d4090b39ce9f2491908eebf4d5b09bae",
+                "clotho_captions_validation.csv": "5879e023032b22a2c930aaa0528bead4",
+                "clotho_metadata_development.csv": "170d20935ecfdf161ce1bb154118cda5",
+                "clotho_metadata_validation.csv": "2e010427c56b1ce6008b0f03f41048ce",
+            },
+        )
+
     def test_manifest_rejects_path_traversal(self) -> None:
         specification = {
             "schema_version": 1,
+            "local_subdir": "clotho_v2.1/source",
             "files": [
                 {
                     "name": "../escape",

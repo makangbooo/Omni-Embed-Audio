@@ -121,6 +121,15 @@ def is_retryable_network_error(exc: BaseException) -> bool:
         if isinstance(item, (ConnectionError, TimeoutError)):
             return True
         item_type = type(item)
+        if item_type.__name__ == "HTTPError" and item_type.__module__.startswith(
+            "requests"
+        ):
+            response = getattr(item, "response", None)
+            status_code = getattr(response, "status_code", None)
+            if status_code in {408, 429} or (
+                isinstance(status_code, int) and 500 <= status_code <= 599
+            ):
+                return True
         if item_type.__name__ in retryable_names and item_type.__module__.startswith(
             retryable_modules
         ):

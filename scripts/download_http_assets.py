@@ -73,6 +73,13 @@ def validate_specification(specification: dict[str, Any]) -> None:
     files = specification.get("files")
     if not isinstance(files, list) or not files:
         raise ValueError("resource manifest must contain a non-empty files list")
+    local_subdir = specification.get("local_subdir")
+    if (
+        not isinstance(local_subdir, str)
+        or Path(local_subdir).is_absolute()
+        or ".." in Path(local_subdir).parts
+    ):
+        raise ValueError(f"unsafe or invalid local_subdir: {local_subdir!r}")
     names: set[str] = set()
     for asset in files:
         name = asset.get("name")
@@ -129,7 +136,7 @@ def main() -> int:
 
     specification = json.loads(manifest_path.read_text(encoding="utf-8"))
     validate_specification(specification)
-    destination = data_root / "clotho_v2.1" / "source"
+    destination = data_root / specification["local_subdir"]
     destination.mkdir(parents=True, exist_ok=True)
 
     report: dict[str, Any] = {

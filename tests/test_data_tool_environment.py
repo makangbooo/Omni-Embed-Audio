@@ -22,6 +22,7 @@ class DataToolEnvironmentTest(unittest.TestCase):
         )
         self.assertIn('SEVEN_ZIP_SPEC="7zip=26.02"', installer)
         self.assertIn("[d]ownload_model_assets.py", installer)
+        self.assertIn("[d]ownload_http_assets.py", installer)
 
 
 if __name__ == "__main__":
