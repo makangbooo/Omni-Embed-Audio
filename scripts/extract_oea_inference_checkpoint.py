@@ -132,7 +132,11 @@ def main() -> int:
         "source_size_bytes": source.stat().st_size,
         "expected_source_size_bytes": args.expected_source_size,
         "expected_source_sha256": args.expected_source_sha256,
-        "load_policy": {"weights_only": True, "mmap": True},
+        "load_policy": {
+            "weights_only": True,
+            "mmap": True,
+            "map_location": "cpu",
+        },
     }
     write_json(audit_output, report)
 
@@ -160,7 +164,12 @@ def main() -> int:
 
         load_started = time.monotonic()
         with torch.serialization.safe_globals([PosixPath]):
-            state = torch.load(source, mmap=True, weights_only=True)
+            state = torch.load(
+                source,
+                mmap=True,
+                map_location="cpu",
+                weights_only=True,
+            )
         report["source_load_elapsed_seconds"] = time.monotonic() - load_started
         if not isinstance(state, dict):
             raise TypeError("source checkpoint top level is not a dict")
