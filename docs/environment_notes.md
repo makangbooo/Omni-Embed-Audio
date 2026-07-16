@@ -1,6 +1,6 @@
 # Omni-Embed-Audio 环境说明
 
-最后更新：2026-07-15（Asia/Shanghai）
+最后更新：2026-07-16（Asia/Shanghai）
 
 ## 1. 已审计硬件
 
@@ -75,3 +75,7 @@ CPU-02 实测依赖安装和 `pip check` 已通过；随后发现 CPU 实例上�
 GPU-02 使用 `bash scripts/validate_gpu_environment.sh`，自动保存 commit、Git 状态、GPU 信息、完整日志和严格模式 JSON；不下载模型或数据。
 
 DATA-02 预检确认共享环境与服务器均没有 `7zz`、`7z` 或 `7za`。数据工具通过 `scripts/install_data_tools.sh` 单独安装，默认使用清华 conda-forge 镜像并固定 `7zip=26.02`。该步骤只修改共享的 `oea-repro` Conda 环境，不使用 GPU，也不解压或修改数据；安装前会拒绝与另一个 Conda/Pip 安装并发执行，并保存安装前后包清单、explicit lock、resolved environment 和退出码。
+
+## 5. Conda 环境检查误报修复
+
+2026-07-16 的 MODEL-02 重启在下载前错误报告 `oea-repro` 不存在；原始失败目录为 `logs/model02_download_20260716_164527`。远程证据确认该环境处于 active 状态、环境目录和 Python 均存在，并且 `conda run -n oea-repro` 能加载 Torch 2.7.1。根因是脚本启用 `set -o pipefail` 后，使用 `grep -q` 检查 `conda env list`：匹配成功时 `grep` 提前退出，使上游进程收到 SIGPIPE，管道被误判失败。最小修复是去掉 quiet 模式并将完整匹配输出重定向到 `/dev/null`；同类检查在六个脚本中统一修复。该补丁只影响启动前环境存在性判断，不改变模型、数据、训练参数或实验结果。

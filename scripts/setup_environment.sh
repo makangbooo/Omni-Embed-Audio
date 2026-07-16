@@ -29,7 +29,7 @@ CONDA_BASE="$(conda info --base)"
 # shellcheck disable=SC1091
 source "${CONDA_BASE}/etc/profile.d/conda.sh"
 
-if conda env list | awk 'NF && $1 !~ /^#/ {print $1}' | grep -Fxq "${ENV_NAME}"; then
+if conda env list | awk 'NF && $1 !~ /^#/ {print $1}' | grep -Fx "${ENV_NAME}" >/dev/null; then
   echo "[ERROR] Conda environment '${ENV_NAME}' already exists." | tee "${RUN_DIR}/stderr.log" >&2
   echo "[ERROR] Refusing to modify or overwrite it; inspect it first." | tee -a "${RUN_DIR}/stderr.log" >&2
   exit 3
