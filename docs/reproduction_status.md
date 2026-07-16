@@ -16,7 +16,7 @@
 | 1 环境 | 生成环境候选、安装脚本与无模型检查 | COMPLETED | `c61fecb` | fork 已同步 | 完整 transitive lock 必须在 Linux solve 后生成 | 固定首批模型资源 |
 | 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | COMPLETED | `11f20d2` | `pip check`、必需接口、仓库导入、音频 I/O/重采样均通过；resolved artifacts 已生成 | 无 | 在单卡实例执行 GPU-02 |
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
-| 1 环境 | CPU-03：安装 DATA-02 的 7-Zip 工具 | WAITING_USER | `99b88a3` | MODEL-02 已退出，当前可执行安装 | 无；必须先于新一批并行下载执行 | 安装固定 `7zip=26.02` 后再启动并行下载 |
+| 1 环境 | CPU-03：安装 DATA-02 的 7-Zip 工具 | COMPLETED | `a54cf5e` | `7zip=26.02` 已在共享 `oea-repro` 可用；install/wrapper exit 均为 0 | 无；Conda 报告目标包已安装，未发生依赖 transaction | 启动并行资源下载 |
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
 | 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | FAILED | `30f003a` | `logs/model02_download_20260716_150343` 已保留；镜像 HEAD 连续返回 HTTP 504 | Hugging Face 将底层 504 包装为 `LocalEntryNotFoundError`，外层未重试 | 拉取 HTTP 5xx 分类补丁后断点续传 |
 | 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | WAITING_USER | `5d65345` | 未启动 | 无；固定 revision 完整快照约 28.4 GB `[INFERRED]` | CPU-03 后在独立 CPU 终端启动 |
@@ -29,7 +29,7 @@
 | 3 数据 | WavCaps ≤31s + leakage blocklists | BLOCKED | N/A | 未开始 | 精确 manifest/blocklists 未发布 | 先做 metadata-only overlap audit |
 | 3 数据 | AudioCaps v2 91,256 manifest | BLOCKED | N/A | 未开始 | 数据版本/下载源未公开 | 请求作者或获得用户已有文件 |
 | 3 数据 | Clotho v2.1 evaluation 下载与 checksum | COMPLETED | `aff03e4` | DATA-01 首次下载及两次幂等复核完成；3 个 MD5 全部匹配 | 无；两次复核均为 `verified_existing`，未重复下载 | DATA-02 安全解压、1,045 条 WAV/CSV/UIQ ID 校验 |
-| 3 数据 | DATA-02：Clotho evaluation 解压与完整性校验 | BLOCKED | `e938cb5` | CPU 预检已完成 | 服务器及共享环境无 `7zz`/`7z`/`7za` | CPU-03 安装固定 extractor 后运行完整校验 |
+| 3 数据 | DATA-02：Clotho evaluation 解压与完整性校验 | WAITING_USER | `e938cb5` | CPU 预检完成且 `7zz 26.02` 已可用 | 无 | 并行下载启动后安排完整校验 |
 | 3 数据 | DATA-03：Clotho development/validation 下载与 checksum | WAITING_USER | `5d65345` | 未启动 | 无；六个 Zenodo 文件约 5.8 GB `[INFERRED]` | CPU-03 后与模型任务并行下载 |
 | 3 数据 | MECAT 847/848 manifest | BLOCKED | N/A | 未开始 | 论文与 UIQ release 数量不一致 | 固定官方评测子集 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
