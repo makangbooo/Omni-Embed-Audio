@@ -85,6 +85,8 @@ OEA 使用同一个具备原生音频理解能力的多模态 LLM 处理文本�
 
 `[CODE]` Qwen3B-Cl checkpoint 内训练配置进一步给出：Clotho stage、`batch_size=6`、`grad_accum=256`、30 epochs、每 5 step 验证、LR `3e-4`、weight decay `0.01`、early-stop patience 3、每 10 step 保存、BF16/AMP、InfoNCE、对称损失、temperature `0.07`，并从 AudioCaps `step_350.pt` 继续。`[MISSING]` checkpoint 不含 world size 和 seed，因此 global batch 只能写为 `6 × 256 × world_size`，不能确定具体数值。
 
+为避免推理时重复加载冻结 backbone，复现流程从已验证源 SHA256 `d5f2648c...c39b5c` 提取了 inference-only checkpoint：59,068,647 bytes，SHA256 `f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a`。派生文件仅含 544 个 LoRA tensors、两套 3-tensor projection heads、配置/指标/step；逐 tensor 与源文件相等，静态扫描无 unsafe globals。该文件是可审计派生物，不冒充作者原始发布物。
+
 ## 7. 结论与复现边界
 
 核心结论可以尝试复现，但公开发布不足以直接重跑论文全部表格。第一优先级不是训练，而是：固定环境；修复官方 checkpoint 加载/文件名；建立三个数据集的 canonical manifest；补 UIQ schema adapter 和 metric unit tests；在一个 3B checkpoint 上完成端到端官方权重评测。只有该闭环通过后，才进入单个 3B 训练链。
