@@ -3,6 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
+# shellcheck source=scripts/lib/conda.sh
+source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 ENV_NAME="oea-repro"
 MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
@@ -47,7 +49,7 @@ for FILE in memory.current memory.max memory.events; do
   fi
 done
 
-CONDA_BASE="$(conda info --base)"
+CONDA_BASE="$(resolve_conda_base)"
 # shellcheck disable=SC1091
 source "${CONDA_BASE}/etc/profile.d/conda.sh"
 exec > >(tee "${RUN_DIR}/stdout.log") 2> >(tee "${RUN_DIR}/stderr.log" >&2)

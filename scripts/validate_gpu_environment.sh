@@ -3,6 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
+# shellcheck source=scripts/lib/conda.sh
+source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 ENV_NAME="oea-repro"
 RUN_ID="environment_gpu_validation_$(date +%Y%m%d_%H%M%S)"
@@ -19,12 +21,12 @@ git status --short > "${RUN_DIR}/git_status.txt"
 hostname > "${RUN_DIR}/hostname.txt"
 nvidia-smi > "${RUN_DIR}/gpu_info.txt" 2>&1
 
-if ! command -v conda >/dev/null 2>&1; then
+if ! resolve_conda_executable >/dev/null 2>&1; then
   echo "[ERROR] conda is not available." | tee "${RUN_DIR}/stderr.log" >&2
   exit 2
 fi
 
-CONDA_BASE="$(conda info --base)"
+CONDA_BASE="$(resolve_conda_base)"
 # shellcheck disable=SC1091
 source "${CONDA_BASE}/etc/profile.d/conda.sh"
 

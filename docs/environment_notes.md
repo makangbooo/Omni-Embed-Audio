@@ -79,3 +79,5 @@ DATA-02 预检确认共享环境与服务器均没有 `7zz`、`7z` 或 `7za`。�
 ## 5. Conda 环境检查误报修复
 
 2026-07-16 的 MODEL-02 重启在下载前错误报告 `oea-repro` 不存在；原始失败目录为 `logs/model02_download_20260716_164527`。远程证据确认该环境处于 active 状态、环境目录和 Python 均存在，并且 `conda run -n oea-repro` 能加载 Torch 2.7.1。根因是脚本启用 `set -o pipefail` 后，使用 `grep -q` 检查 `conda env list`：匹配成功时 `grep` 提前退出，使上游进程收到 SIGPIPE，管道被误判失败。最小修复是去掉 quiet 模式并将完整匹配输出重定向到 `/dev/null`；同类检查在六个脚本中统一修复。该补丁只影响启动前环境存在性判断，不改变模型、数据、训练参数或实验结果。
+
+随后 MODEL-04 在 tmux 子 shell 中触发了第二类环境解析问题。交互 shell 的 `conda` function 指向 `/home/jg525/miniconda3`，但其 `PATH` 中可执行文件解析为 `/opt/conda/bin/conda`；未导出的 function 不会自动进入 `bash scripts/...` 子进程，wrapper 因而从错误的 Conda base 激活环境。统一修复后的 wrapper 优先使用 Conda 导出的 `CONDA_EXE`，其次根据 `CONDA_PREFIX` 推导 base，最后才回退到 `PATH`。该补丁同样只影响环境定位，不修改任何实验配置或资源内容。

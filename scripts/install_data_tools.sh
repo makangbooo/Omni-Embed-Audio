@@ -3,6 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
+# shellcheck source=scripts/lib/conda.sh
+source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 ENV_NAME="oea-repro"
 CONDA_CHANNEL="${CONDA_CHANNEL_URL:-https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge}"
@@ -51,7 +53,7 @@ if [[ -s "${RUN_DIR}/oea_processes_before.txt" ]]; then
   exit 5
 fi
 
-CONDA_BASE="$(conda info --base)"
+CONDA_BASE="$(resolve_conda_base)"
 # shellcheck disable=SC1091
 source "${CONDA_BASE}/etc/profile.d/conda.sh"
 
