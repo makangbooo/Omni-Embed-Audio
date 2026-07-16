@@ -16,7 +16,7 @@
 | 1 环境 | 生成环境候选、安装脚本与无模型检查 | COMPLETED | `c61fecb` | fork 已同步 | 完整 transitive lock 必须在 Linux solve 后生成 | 固定首批模型资源 |
 | 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | COMPLETED | `11f20d2` | `pip check`、必需接口、仓库导入、音频 I/O/重采样均通过；resolved artifacts 已生成 | 无 | 在单卡实例执行 GPU-02 |
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
-| 1 环境 | CPU-03：安装 DATA-02 的 7-Zip 工具 | WAITING_USER | `N/A` | 预检确认 `7zz`/`7z`/`7za` 均不存在 | DATA-02 无可用 extractor | 在共享 `oea-repro` 中从清华 conda-forge 镜像安装固定 `7zip=26.02` |
+| 1 环境 | CPU-03：安装 DATA-02 的 7-Zip 工具 | WAITING_USER | `b178adf` | 预检确认 `7zz`/`7z`/`7za` 均不存在 | DATA-02 无可用 extractor | 在共享 `oea-repro` 中从清华 conda-forge 镜像安装固定 `7zip=26.02` |
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
 | 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | WAITING_USER | `30f003a` | 等待 CPU 服务器并行下载 | 尚未下载固定 revision 的 `step_350.pt` | 与 DATA-01 分开启动，返回下载 manifest 和 LFS SHA256 |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
