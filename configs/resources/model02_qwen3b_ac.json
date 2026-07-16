@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "resource_id": "MODEL-02",
+  "description": "Official OEA-Qwen3B AudioCaps checkpoint; reuses the MODEL-01 Qwen2.5-Omni-3B base model",
+  "assets": [
+    {
+      "name": "oea_qwen3b_ac",
+      "repo_id": "JudeJiwoo/OEA-Qwen3B-AC",
+      "repo_type": "model",
+      "revision": "f6c4b3b86385fd7ecbe3bacf45548a2259af8db4",
+      "local_subdir": "OEA-Qwen3B-AC",
+      "allow_patterns": [
+        ".gitattributes",
+        "README.md",
+        "step_350.pt"
+      ],
+      "required_files": [
+        "step_350.pt"
+      ],
+      "expected_primary_file": {
+        "path": "step_350.pt",
+        "size_bytes": 9466835918,
+        "lfs_sha256": "afb22d02e610016184fa0e2b4314fe0de191ebcc909184e9e128d36abade4b44"
+      },
+      "source_tags": {
+        "checkpoint_identity": "[CODE] official Hugging Face repository linked by the authors",
+        "revision_and_lfs_metadata": "[CODE] pinned Hugging Face repository revision and LFS metadata"
+      }
+    }
+  ]
+}

@@ -263,6 +263,29 @@ def main() -> int:
                 if lfs_sha256:
                     remote_sha256[sibling.rfilename] = lfs_sha256
 
+            expected_primary = asset.get("expected_primary_file")
+            if expected_primary is not None:
+                matching_remote = next(
+                    (
+                        item
+                        for item in remote_files
+                        if item["path"] == expected_primary["path"]
+                    ),
+                    None,
+                )
+                if matching_remote is None:
+                    raise RuntimeError(
+                        f"expected primary file is absent for {name}: "
+                        f"{expected_primary['path']}"
+                    )
+                for field in ("size_bytes", "lfs_sha256"):
+                    if matching_remote[field] != expected_primary[field]:
+                        raise RuntimeError(
+                            f"pinned metadata mismatch for {name}/"
+                            f"{expected_primary['path']} field {field}: "
+                            f"{matching_remote[field]} != {expected_primary[field]}"
+                        )
+
             free_bytes = shutil.disk_usage(model_root).free
             required_free = int(expected_bytes * 1.2) + 5 * 1024**3
             if expected_bytes and free_bytes < required_free:

@@ -99,6 +99,23 @@ class DownloadModelAssetsTest(unittest.TestCase):
             self.assertEqual(len(revision), 40)
             int(revision, 16)
 
+    def test_second_download_manifest_pins_qwen3b_ac_checkpoint(self) -> None:
+        manifest = REPOSITORY_ROOT / "configs/resources/model02_qwen3b_ac.json"
+        specification = json.loads(manifest.read_text(encoding="utf-8"))
+        self.assertEqual(len(specification["assets"]), 1)
+        asset = specification["assets"][0]
+        self.assertEqual(
+            asset["revision"], "f6c4b3b86385fd7ecbe3bacf45548a2259af8db4"
+        )
+        self.assertEqual(
+            asset["expected_primary_file"],
+            {
+                "path": "step_350.pt",
+                "size_bytes": 9466835918,
+                "lfs_sha256": "afb22d02e610016184fa0e2b4314fe0de191ebcc909184e9e128d36abade4b44",
+            },
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
