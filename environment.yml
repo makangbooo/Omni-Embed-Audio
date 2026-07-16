@@ -9,4 +9,6 @@ dependencies:
   # the first successful Linux solve rather than guessed on Windows.
   - ffmpeg
   - libsndfile
+  # [INFERRED] Reproduction tooling required to extract the official Clotho .7z archive.
+  - 7zip=26.02
   - git

@@ -35,6 +35,7 @@
 | PEFT | 0.18.0 | `[CODE]` | 官方仓库要求 `peft>=0.18.0`；先固定最低公开版本 |
 | Accelerate | 1.10.1 | `[INFERRED]` | 满足官方 `>=1.0.0` 和 PEFT/Transformers 要求，固定 2025 年稳定版本 |
 | FlashAttention | GPU-02 不安装 | `[INFERRED]` | NVIDIA model card 推荐，但官方 OEA adapter 允许不指定；先验证 SDPA，避免把编译问题与核心环境混在一起 |
+| 7-Zip | 26.02 | `[INFERRED]` | 官方 Clotho evaluation 音频以 `.7z` 发布；CPU 预检确认服务器无系统 extractor，因此固定 conda-forge `7zip` 并通过 `7zz` 解压 |
 
 主要来源：
 
@@ -72,3 +73,5 @@
 CPU-02 实测依赖安装和 `pip check` 已通过；随后发现 CPU 实例上的 `nvidia-smi` 会以 `Exec format error` 失败。环境检查器现将此类 `OSError` 记录为 `UNAVAILABLE`，CPU 模式不会因不可用的 GPU 管理命令崩溃；严格 CUDA/BF16/NCCL 判定仍留在 GPU 模式。
 
 GPU-02 使用 `bash scripts/validate_gpu_environment.sh`，自动保存 commit、Git 状态、GPU 信息、完整日志和严格模式 JSON；不下载模型或数据。
+
+DATA-02 预检确认共享环境与服务器均没有 `7zz`、`7z` 或 `7za`。数据工具通过 `scripts/install_data_tools.sh` 单独安装，默认使用清华 conda-forge 镜像并固定 `7zip=26.02`。该步骤只修改共享的 `oea-repro` Conda 环境，不使用 GPU，也不解压或修改数据；安装前会拒绝与另一个 Conda/Pip 安装并发执行，并保存安装前后包清单、explicit lock、resolved environment 和退出码。
