@@ -180,6 +180,7 @@ def main() -> int:
         "source_config": str(config_path),
     }
     write_json(output_dir / "config.yaml", resolved_config)
+    memory_snapshots: list[dict[str, Any]] = []
 
     try:
         import gc
@@ -528,6 +529,8 @@ def main() -> int:
         print(json.dumps(report, indent=2, ensure_ascii=False))
         return 0
     except BaseException as exc:
+        if memory_snapshots:
+            write_json(output_dir / "gpu_memory.json", memory_snapshots)
         report.update(
             {
                 "status": "failed",

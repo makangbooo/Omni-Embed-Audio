@@ -28,6 +28,9 @@ import logging
 from contextlib import contextmanager
 
 from AudioRetrieval.eval_core import BaseRetrievalModel
+from AudioRetrieval.models.chat_template_utils import (
+    normalize_single_chat_template_output,
+)
 
 
 @dataclass(frozen=True)
@@ -357,7 +360,7 @@ class OmniEmbedAdapter(BaseRetrievalModel):
                     add_generation_prompt=False,
                     tokenize=False,
                 )
-                texts.append(txt)
+                texts.append(normalize_single_chat_template_output(txt))
         return texts
 
     def _prepare_batch(
