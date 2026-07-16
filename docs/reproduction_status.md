@@ -17,6 +17,7 @@
 | 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | COMPLETED | `11f20d2` | `pip check`、必需接口、仓库导入、音频 I/O/重采样均通过；resolved artifacts 已生成 | 无 | 在单卡实例执行 GPU-02 |
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
+| 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | WAITING_USER | `30f003a` | 等待 CPU 服务器并行下载 | 尚未下载固定 revision 的 `step_350.pt` | 与 DATA-01 分开启动，返回下载 manifest 和 LFS SHA256 |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 在 canonical negative evaluator 中接入已验证指标 |
@@ -36,4 +37,4 @@
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：在 A100-SXM4-80GB 上确认 PyTorch CUDA 12.6、BF16、NCCL 2.26.2、必需 Qwen/PEFT 接口、仓库导入和音频 I/O 均通过；固定首批模型的不可变 Hugging Face revision。
 - 当前阻塞：正式论文表格评测仍缺完整 AudioCaps、Clotho 和 MECAT/UIQ 数据；当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
-- 下一步：在 CPU 服务器下载并校验 Clotho v2.1 evaluation 的音频压缩包、captions CSV 和 metadata CSV；校验成功后再提交独立的解压、1,045 条 WAV 解码与 UIQ ID 对齐步骤。
+- 下一步：并行执行 DATA-01（Clotho v2.1 evaluation）和 MODEL-02（OEA-Qwen3B-AC）；数据校验成功后再提交独立的解压、1,045 条 WAV 解码与 UIQ ID 对齐步骤。
