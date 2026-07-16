@@ -156,6 +156,10 @@ class OmniEmbedAdapter(BaseRetrievalModel):
         model_path = local_path if local_path else repo_id
         load_kwargs = {
             "trust_remote_code": trust_remote_code,
+            # A local directory is authoritative during reproducibility runs.  This
+            # also makes an accidentally incomplete model fail instead of reaching
+            # out to the Hub and silently changing the resource set.
+            "local_files_only": bool(local_path),
         }
         if cache_dir:
             load_kwargs["cache_dir"] = cache_dir
@@ -179,9 +183,15 @@ class OmniEmbedAdapter(BaseRetrievalModel):
                 key = torch_dtype.lower()
                 if key not in dtype_map:
                     raise ValueError(f"Unsupported torch_dtype '{torch_dtype}'.")
-                load_kwargs["dtype"] = dtype_map[key]
+                # Transformers 4.52.4 consumes `torch_dtype` in
+                # PreTrainedModel.from_pretrained.  Passing the newer `dtype`
+                # spelling leaks into the model constructor in this pinned
+                # environment and can fail before any weights are loaded.
+                load_kwargs["torch_dtype"] = dtype_map[key]
             else:
-                load_kwargs["dtype"] = torch.bfloat16 if self.device.type == "cuda" else torch.float32
+                load_kwargs["torch_dtype"] = (
+                    torch.bfloat16 if self.device.type == "cuda" else torch.float32
+                )
 
         try:
             try:
@@ -190,12 +200,14 @@ class OmniEmbedAdapter(BaseRetrievalModel):
                     trust_remote_code=trust_remote_code,
                     cache_dir=cache_dir,
                     use_fast=False,
+                    local_files_only=bool(local_path),
                 )
             except TypeError:
                 self.processor = AutoProcessor.from_pretrained(
                     model_path,
                     trust_remote_code=trust_remote_code,
                     cache_dir=cache_dir,
+                    local_files_only=bool(local_path),
                 )
         except OSError as exc:
             raise RuntimeError(
@@ -238,10 +250,10 @@ class OmniEmbedAdapter(BaseRetrievalModel):
                 self.device = torch.device("cpu")
                 cpu_kwargs = dict(load_kwargs)
                 cpu_kwargs.pop("attn_implementation", None)
-                cpu_kwargs.pop("dtype", None)
+                cpu_kwargs.pop("torch_dtype", None)
                 cpu_kwargs["low_cpu_mem_usage"] = True
                 cpu_kwargs["device_map"] = None
-                cpu_kwargs["dtype"] = torch.float32
+                cpu_kwargs["torch_dtype"] = torch.float32
                 self.model = _load_model(cpu_kwargs)
             else:
                 raise
