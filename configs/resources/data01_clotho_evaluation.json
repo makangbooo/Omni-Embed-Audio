@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "resource_id": "DATA-01",
+  "dataset": "Clotho",
+  "version": "2.1",
+  "split": "evaluation",
+  "source_record": "https://zenodo.org/records/4783391",
+  "source_tags": {
+    "version": "[INFERRED] paper says Clotho v2; use repaired official v2.1 release from Zenodo record 4783391",
+    "expected_examples": "[PAPER][CODE] 1045 evaluation clips",
+    "checksums": "[MISSING] absent from paper/code; pinned from official Zenodo record 4783391 file metadata"
+  },
+  "expected_examples": 1045,
+  "files": [
+    {
+      "name": "clotho_audio_evaluation.7z",
+      "url": "https://zenodo.org/records/4783391/files/clotho_audio_evaluation.7z?download=1",
+      "md5": "4569624ccadf96223f19cb59fe4f849f",
+      "kind": "audio_archive"
+    },
+    {
+      "name": "clotho_captions_evaluation.csv",
+      "url": "https://zenodo.org/records/4783391/files/clotho_captions_evaluation.csv?download=1",
+      "md5": "1b16b9e57cf7bdb7f13a13802aeb57e2",
+      "kind": "captions"
+    },
+    {
+      "name": "clotho_metadata_evaluation.csv",
+      "url": "https://zenodo.org/records/4783391/files/clotho_metadata_evaluation.csv?download=1",
+      "md5": "13946f054d4e1bf48079813aac61bf77",
+      "kind": "metadata"
+    }
+  ]
+}
