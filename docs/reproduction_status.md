@@ -17,7 +17,7 @@
 | 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | COMPLETED | `11f20d2` | `pip check`、必需接口、仓库导入、音频 I/O/重采样均通过；resolved artifacts 已生成 | 无 | 在单卡实例执行 GPU-02 |
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
-| 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | WAITING_USER | `c483ba4` | 首次运行 `..._20260716_125636` 失败证据已保留；资源、base、544 LoRA 和双 head 均通过；Qwen 单 conversation 返回 `list[str]` 的兼容补丁已同步 | 需要用户拉取补丁后重新运行；尚未完成第一个音频前向 | 用相同单卡命令生成新的实验目录并验证完整前向 |
+| 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | TODO | N/A | 未开始 | 无 | 实现 HNSR/TFR/Δ-Rank 并用合成例验证 |
 | 2 UIQ | Tables 12–15 正向 UIQ | BLOCKED | N/A | 未开始 | loader schema 不匹配；音频未准备 | 加 schema adapter 与数据校验 |
@@ -32,8 +32,8 @@
 
 ## 当前焦点
 
-- 当前阶段：环境、首批官方权重、checkpoint 结构审计和 inference-only 权重提取已完成；单卡 GPU smoke 已进入 `WAITING_USER`。
+- 当前阶段：环境、首批官方权重、checkpoint 结构审计、inference-only 权重提取及单卡 GPU smoke 已完成。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：在 A100-SXM4-80GB 上确认 PyTorch CUDA 12.6、BF16、NCCL 2.26.2、必需 Qwen/PEFT 接口、仓库导入和音频 I/O 均通过；固定首批模型的不可变 Hugging Face revision。
-- 当前阻塞：首次 GPU smoke 在音频 processor 前失败；根因是 Transformers 4.52.4 Qwen processor 对单 conversation 返回单元素 batch，而 adapter 形成了二维文本列表。最小规范化补丁及 3 个回归测试已提交。
-- 下一步：拉取 `c483ba4`，用同一张 A100-80GB 重新运行；新运行会独立建目录，并在失败时也保存已有显存快照。
+- 当前阻塞：正式论文表格评测仍缺完整 AudioCaps、Clotho 和 MECAT/UIQ 数据；当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
+- 下一步：实现 HNSR、TFR、TFR-HN 和 Δ-Rank 的合成指标单元测试，同时准备第一批正式评测数据资源清单。

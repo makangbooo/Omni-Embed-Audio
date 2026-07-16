@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "smoke_passed": true,
+  "started_at": "2026-07-16T05:06:41.647623+00:00",
+  "finished_at": "2026-07-16T05:07:53.845095+00:00",
+  "git_commit": "fba8c3c457ad46dd01ff9070694558ebde89acc1",
+  "git_status_short": "",
+  "remote_experiment_dir": "/home/jg525/Omni-Embed-Audio/outputs/experiments/oea_qwen3b_cl_clotho5_smoke_seed42_20260716_130619",
+  "strict_offline": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1"
+  },
+  "not_a_paper_table_result": true,
+  "error": null,
+  "software": {
+    "python": "3.11.15",
+    "torch": "2.7.1+cu126"
+  },
+  "gpu": {
+    "name": "NVIDIA A100-SXM4-80GB",
+    "total_memory_bytes": 85094825984,
+    "bf16_supported": true,
+    "visible_device_count": 1
+  },
+  "verified_files": [
+    {
+      "path": "/file_system/jg525/model_cache/oea/Qwen2.5-Omni-3B/model-00001-of-00003.safetensors",
+      "size_bytes": 4994850880,
+      "sha256": "349972cebff443030e9e96e1e930d7230979c6961cf046fa29fc580e4bcf49a6"
+    },
+    {
+      "path": "/file_system/jg525/model_cache/oea/Qwen2.5-Omni-3B/model-00002-of-00003.safetensors",
+      "size_bytes": 4999787448,
+      "sha256": "b29a76dfefb3aa33a5bd0faa19c681d039a44de57223653ea0e933df728c6d8c"
+    },
+    {
+      "path": "/file_system/jg525/model_cache/oea/Qwen2.5-Omni-3B/model-00003-of-00003.safetensors",
+      "size_bytes": 1978024880,
+      "sha256": "8f2138170a87ec604b53232491a96d6dcf19e0724aca37e69aace143e508b170"
+    },
+    {
+      "path": "/file_system/jg525/model_cache/oea/OEA-Qwen3B-Cl/step_40_inference_only.pt",
+      "size_bytes": 59068647,
+      "sha256": "f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a"
+    }
+  ],
+  "base_model_load_elapsed_seconds": 13.910788289969787,
+  "checkpoint_load": {
+    "unsafe_globals": [],
+    "lora_tensor_count": 544,
+    "model_lora_tensor_count": 544,
+    "missing_lora_keys": [],
+    "extra_lora_keys": [],
+    "missing_non_lora_base_keys": 1442,
+    "unexpected_keys": [],
+    "hidden_size": 2048,
+    "projection_dim": 512
+  },
+  "seed": 42,
+  "candidate_count": 5,
+  "query_count": 5,
+  "candidate_embedding_shape": [5, 512],
+  "query_embedding_shape": [5, 512],
+  "candidate_backbone_embedding_shape": [5, 2048],
+  "query_backbone_embedding_shape": [5, 2048],
+  "candidate_norm_min": 0.9999999403953552,
+  "candidate_norm_max": 1.0,
+  "query_norm_min": 0.9999999403953552,
+  "query_norm_max": 1.0,
+  "target_audio": "water_stream.wav",
+  "target_top1_count": 5,
+  "target_top1_rate": 1.0,
+  "audio_timings": [
+    {
+      "file": "clock_windup_bell.wav",
+      "elapsed_seconds": 15.763496023137122,
+      "warnings": []
+    },
+    {
+      "file": "spotted_owl.wav",
+      "elapsed_seconds": 0.847377265105024,
+      "warnings": []
+    },
+    {
+      "file": "gas_stove.wav",
+      "elapsed_seconds": 0.7485331550706178,
+      "warnings": []
+    },
+    {
+      "file": "wall_clock_ticking.wav",
+      "elapsed_seconds": 1.985348735935986,
+      "warnings": []
+    },
+    {
+      "file": "water_stream.wav",
+      "elapsed_seconds": 0.689532226882875,
+      "warnings": []
+    }
+  ],
+  "text_timings": [
+    {
+      "type": "question",
+      "elapsed_seconds": 1.0441136490553617
+    },
+    {
+      "type": "imperative",
+      "elapsed_seconds": 0.8830941580235958
+    },
+    {
+      "type": "paraphrase",
+      "elapsed_seconds": 0.06609884998761117
+    },
+    {
+      "type": "keyphrase",
+      "elapsed_seconds": 0.06652653706260026
+    },
+    {
+      "type": "negative",
+      "elapsed_seconds": 0.06851394707337022
+    }
+  ],
+  "gpu_peak_allocated_bytes": 9815436288,
+  "gpu_peak_reserved_bytes": 10158604288,
+  "gpu_peak_allocated_gib": 9.141,
+  "gpu_peak_reserved_gib": 9.461,
+  "pass_criteria": {
+    "exact_lora_key_match": true,
+    "strict_projection_head_load": true,
+    "expected_embedding_shapes": true,
+    "all_embeddings_finite": true,
+    "all_projected_embeddings_l2_normalized": true,
+    "retrieval_ranking_is_not_a_pass_criterion": true
+  },
+  "remote_artifacts": {
+    "metrics.json": 4136,
+    "gpu_memory.json": 3443,
+    "rankings.json": 4064,
+    "similarity.csv": 945,
+    "candidate_embeddings.npy": 10368,
+    "query_embeddings.npy": 10368,
+    "candidate_backbone_embeddings.npy": 41088,
+    "query_backbone_embeddings.npy": 41088,
+    "stdout.log": 4537,
+    "stderr.log": 724
+  },
+  "provenance_note": "Copied from the complete remote terminal output supplied by the user; large/binary artifacts remain in the remote experiment directory."
+}
