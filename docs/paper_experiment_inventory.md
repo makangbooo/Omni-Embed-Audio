@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|---|---|---|
 | FIG-01 | 图 1 | 代表模型综合结果可视化 | AudioCaps、Clotho、MECAT | OEA-Qwen7B (+Cl)、M2D-CLAP | 三数据集 mean R@5、HNSR@10 | `[MISSING]` 无绘图脚本 | DER-01、DER-02、EXP-17 的结果 | B（派生图） | TODO |
 | FIG-02 | 图 2；§3.1；附录 A | 架构核验：共享 backbone、LoRA、双投影头、512 维、L2 | 5 个附带 Clotho 样例可做 smoke | 三种 OEA backbone | 结构与参数形状 | `[CODE] python examples/encode_example.py`，但 checkpoint 文件名错误 | 1 个 base model、对应 checkpoint | B（需修正文件名/加载路径） | TODO |
-| FIG-03 | 图 3；§3.3；附录 L | 否定查询指标示意与人工构造单元测试 | 合成排名样例 | 与模型无关 | R@k、HNSR、HNSR@k、TFR、TFR-HN@k、Δ-Rank | `[MISSING]` README 声称存在，源码无实现 | 无 GPU；测试向量 | C（需实现） | TODO |
+| FIG-03 | 图 3；§3.3；附录 L | 否定查询指标示意与人工构造单元测试 | 合成排名样例 | 与模型无关 | R@k、HNSR、HNSR@k、TFR、TFR-HN@k、Δ-Rank | `[CODE]` `AudioRetrieval/evaluation/negative_metrics.py`；`python -m unittest tests.test_negative_metrics -v` | 无 GPU；测试向量 | A（公式实现及合成验证完整） | COMPLETED |
 | EXP-01 | §3.2.2；附录 D；表 8–9 | 生成五类 UIQ | AudioCaps、Clotho、MECAT captions + HN captions | GPT-5.1 | 输出数量、格式、长度约束、语义有效率 | `[CODE] python -m AudioRetrieval generate-uiq ...`，但默认 GPT-4/0.7/100 tokens 且 prompt 不同 | GPT-5.1 API、完整 captions、HN 配对 | D（闭源 API；官方代码不匹配论文 prompt） | TODO |
 | EXP-02 | §3.2.3；附录 C/E；表 1、7 | 人工 UIQ 有效性评测 | 75 样例 × 5 类型；9 人；675 ratings | 人工标注者 | 5 点 Likert 均值/标准差、分数据集结果 | `[MISSING]` 无界面、样例抽样清单或原始 ratings | 75 样例 ID、音频、标注者与协议 | D | BLOCKED |
 | EXP-03 | §3.2.3；附录 E；表 1、10 | LLM UIQ 有效性评测 | 与 EXP-02 相同的 75 样例 | Claude Opus 4.5 | 5 点 Likert、Human–LLM agreement（正文报告 r/p） | `[MISSING]` 无评测脚本或原始响应 | Claude Opus 4.5 API、75 样例清单 | D | BLOCKED |
