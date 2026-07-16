@@ -37,11 +37,18 @@ git status --short > "${RUN_DIR}/git_status_before.txt"
 hostname > "${RUN_DIR}/hostname.txt"
 pgrep -af '[c]onda.*(install|create|update)|[p]ython.*-m pip|[p]ip install' \
   > "${RUN_DIR}/package_manager_processes_before.txt" || true
+pgrep -af '[d]ownload_model_assets.py|[s]moke_oea|[v]alidate_clotho_evaluation.py|[t]orchrun|[a]ccelerate launch' \
+  > "${RUN_DIR}/oea_processes_before.txt" || true
 
 if [[ -s "${RUN_DIR}/package_manager_processes_before.txt" ]]; then
   echo "[ERROR] Another package installation appears to be active in the shared environment." >&2
   cat "${RUN_DIR}/package_manager_processes_before.txt" >&2
   exit 4
+fi
+if [[ -s "${RUN_DIR}/oea_processes_before.txt" ]]; then
+  echo "[ERROR] An OEA model/data job is using the shared environment." >&2
+  cat "${RUN_DIR}/oea_processes_before.txt" >&2
+  exit 5
 fi
 
 CONDA_BASE="$(conda info --base)"
@@ -78,7 +85,7 @@ export CUDA_VISIBLE_DEVICES=""
 
 if ! command -v 7zz >/dev/null 2>&1; then
   echo "[ERROR] 7zip was installed but the expected 7zz executable is unavailable." >&2
-  exit 5
+  exit 6
 fi
 
 7zz i > "${RUN_DIR}/7zz_info.txt" 2>&1
