@@ -40,12 +40,14 @@
 |---|---|---|---:|
 | `nvidia/omni-embed-nemotron-3b` | `865db1bb57e369a85357cf114cbd6b3c5322d19d` | 多个 safetensors | repo 9.42 GB |
 | `Qwen/Qwen2.5-Omni-7B` | `ae9e1690543ffd5c0221dc27f79834d0294cba00` | 多个 safetensors | repo 22.38 GB |
-| `OEA-Nemo3B-AC` | `8ed66aa77bc6f2001b807b5d2bd3e60503d89535` | `step_400_best.pt` | 9.47 GB |
-| `OEA-Nemo3B-Cl` | `9588912298afca0b11f5895b864ae28083f35022` | `step_450_best.pt` | 9.47 GB |
-| `OEA-Qwen7B-AC` | `f44f247020a7192affe6927db91d0778d33b9791` | `step_300.pt` | 17.94 GB |
-| `OEA-Qwen7B-Cl` | `30c6e97cfdf451b1948013d2839befe0c3022c46` | `step_330.pt` | 17.94 GB |
+| `OEA-Nemo3B-AC` | `8ed66aa77bc6f2001b807b5d2bd3e60503d89535` | `[MISSING]` 下载固定 revision 完整快照后审计 | 约 9.47 GB `[INFERRED]` |
+| `OEA-Nemo3B-Cl` | `9588912298afca0b11f5895b864ae28083f35022` | `[MISSING]` 下载固定 revision 完整快照后审计 | 约 9.47 GB `[INFERRED]` |
+| `OEA-Qwen7B-AC` | `f44f247020a7192affe6927db91d0778d33b9791` | `[MISSING]` 固定 model card 与旧资源记录的 step 名称冲突 | 约 17.94 GB `[INFERRED]` |
+| `OEA-Qwen7B-Cl` | `30c6e97cfdf451b1948013d2839befe0c3022c46` | `[MISSING]` 下载固定 revision 完整快照后审计 | 约 17.94 GB `[INFERRED]` |
 
 六个 OEA checkpoint 共 73.75 GB，三个 base 权重共约 43.74 GB，合计 117.49 GB（109.42 GiB），未含缓存临时文件。建议预留 160 GB。
+
+当前并行批次采用完整不可变快照，不依据有冲突的文件名猜测：MODEL-03 约 28.4 GB、MODEL-04 约 58.3 GB，实际远端文件名、字节数与 LFS SHA256 将由下载时的 `download_manifest.json` 固定。
 
 ## P3：数据
 

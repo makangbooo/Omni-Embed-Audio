@@ -16,9 +16,11 @@
 | 1 环境 | 生成环境候选、安装脚本与无模型检查 | COMPLETED | `c61fecb` | fork 已同步 | 完整 transitive lock 必须在 Linux solve 后生成 | 固定首批模型资源 |
 | 1 环境 | CPU-02：创建 `oea-repro` 并生成 resolved lock | COMPLETED | `11f20d2` | `pip check`、必需接口、仓库导入、音频 I/O/重采样均通过；resolved artifacts 已生成 | 无 | 在单卡实例执行 GPU-02 |
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
-| 1 环境 | CPU-03：安装 DATA-02 的 7-Zip 工具 | BLOCKED | `99b88a3` | MODEL-02 正在使用共享 `oea-repro` | 不能在活跃模型下载期间执行 Conda transaction | MODEL-02 结束后安装固定 `7zip=26.02` |
+| 1 环境 | CPU-03：安装 DATA-02 的 7-Zip 工具 | WAITING_USER | `99b88a3` | MODEL-02 已退出，当前可执行安装 | 无；必须先于新一批并行下载执行 | 安装固定 `7zip=26.02` 后再启动并行下载 |
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
-| 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | RUNNING_REMOTE | `30f003a` | 进程 39554；运行目录 `logs/model02_download_20260716_150343` | 正在下载固定 revision 的 `step_350.pt` | 监控 `.incomplete` 增长；完成后核对 manifest 和 LFS SHA256 |
+| 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | FAILED | `30f003a` | `logs/model02_download_20260716_150343` 已保留；镜像 HEAD 连续返回 HTTP 504 | Hugging Face 将底层 504 包装为 `LocalEntryNotFoundError`，外层未重试 | 拉取 HTTP 5xx 分类补丁后断点续传 |
+| 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | WAITING_USER | `5d65345` | 未启动 | 无；固定 revision 完整快照约 28.4 GB `[INFERRED]` | CPU-03 后在独立 CPU 终端启动 |
+| 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | WAITING_USER | `5d65345` | 未启动 | checkpoint 文件名公开说明不一致，完整固定 revision 下载后审计 | CPU-03 后在独立 CPU 终端启动 |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 在 canonical negative evaluator 中接入已验证指标 |
@@ -28,6 +30,7 @@
 | 3 数据 | AudioCaps v2 91,256 manifest | BLOCKED | N/A | 未开始 | 数据版本/下载源未公开 | 请求作者或获得用户已有文件 |
 | 3 数据 | Clotho v2.1 evaluation 下载与 checksum | COMPLETED | `aff03e4` | DATA-01 首次下载及两次幂等复核完成；3 个 MD5 全部匹配 | 无；两次复核均为 `verified_existing`，未重复下载 | DATA-02 安全解压、1,045 条 WAV/CSV/UIQ ID 校验 |
 | 3 数据 | DATA-02：Clotho evaluation 解压与完整性校验 | BLOCKED | `e938cb5` | CPU 预检已完成 | 服务器及共享环境无 `7zz`/`7z`/`7za` | CPU-03 安装固定 extractor 后运行完整校验 |
+| 3 数据 | DATA-03：Clotho development/validation 下载与 checksum | WAITING_USER | `5d65345` | 未启动 | 无；六个 Zenodo 文件约 5.8 GB `[INFERRED]` | CPU-03 后与模型任务并行下载 |
 | 3 数据 | MECAT 847/848 manifest | BLOCKED | N/A | 未开始 | 论文与 UIQ release 数量不一致 | 固定官方评测子集 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | LAION/Robust/MGA/M2D-CLAP | BLOCKED | N/A | 未开始 | checkpoint revision/统一入口不完整 | 官方 OEA 评测完成后逐个固定资源 |
@@ -39,4 +42,4 @@
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：在 A100-SXM4-80GB 上确认 PyTorch CUDA 12.6、BF16、NCCL 2.26.2、必需 Qwen/PEFT 接口、仓库导入和音频 I/O 均通过；固定首批模型的不可变 Hugging Face revision。
 - 当前阻塞：正式论文表格评测仍缺完整 AudioCaps、Clotho 和 MECAT/UIQ 数据；当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
-- 下一步：等待 MODEL-02 下载进程结束并核对 LFS SHA256；随后执行 CPU-03 固定 7-Zip 安装，再运行 DATA-02。
+- 下一步：先执行 CPU-03 固定 7-Zip 安装；随后在独立 CPU 终端断点续传 MODEL-02，并并行启动 MODEL-03、MODEL-04 与 DATA-03。
