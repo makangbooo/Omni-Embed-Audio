@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "status": "metadata_complete_manifest_and_audio_confirmation_pending",
+  "evidence_source": "full local parse of released MECAT question UIQ IDs and pinned WavCaps AudioSet_SL metadata",
+  "mecat_id_source": {
+    "path": "data/UIQ/mecat/mecat_question_queries.jsonl",
+    "size_bytes": 1239789,
+    "sha256": "307599b2b79e7497850c0d7c4b2aa039bc2ddc199af7226eb8c42304f778535a",
+    "source_tag": "[CODE] released OEA MECAT positive UIQ; DATA-05 must still prove exact equality with the archive manifest"
+  },
+  "wavcaps_source": {
+    "repository": "cvssp/WavCaps",
+    "revision": "0930ec11ded28fa0eaa910fde2f6fc3538acbeac",
+    "path": "json_files/AudioSet_SL/as_final.json",
+    "size_bytes": 15341826,
+    "sha256": "c26e4c7f1fd00f346b54b7808c0d90c3465a2d98469023a8ad2735b9c9d8d4f3",
+    "rows": 108317,
+    "source_tag": "[CODE] pinned official WavCaps metadata"
+  },
+  "mecat": {
+    "rows": 848,
+    "unique_sample_ids": 848,
+    "unique_source_videos": 807,
+    "source_videos_with_multiple_segments": 37,
+    "maximum_segments_per_source_video": 3,
+    "duplicate_segment_samples": 41
+  },
+  "source_video_overlap": {
+    "unique_youtube_ids": 4,
+    "mecat_samples": 4,
+    "youtube_ids": [
+      "FQIZHO6l0IY",
+      "Nw2EarZypA0",
+      "qEfTLLEpojc",
+      "vzt3AXNeKIQ"
+    ],
+    "mecat_sample_ids": [
+      "FQIZHO6l0IY_24_8066665_34_8067",
+      "Nw2EarZypA0_290_028_300_028",
+      "qEfTLLEpojc_175_6841665_185_684",
+      "vzt3AXNeKIQ_70_72_80_72"
+    ],
+    "match_protocol": "[CODE][INFERRED] exact 11-character YouTube source-video ID extracted from released MECAT audio_id and normalized from WavCaps AudioSet_SL IDs",
+    "interpretation": "[INFERRED] source-video candidates only; shared video ID does not prove temporal or audio-content overlap",
+    "blocklist_status": "NOT_APPLIED_SOURCE_VIDEO_CANDIDATE_ONLY"
+  },
+  "missing_evidence": {
+    "archive_manifest_confirmation": "[MISSING until DATA-05] exact 848 archive/UIQ ID set equality",
+    "temporal_overlap": "[MISSING] WavCaps metadata does not identify the AudioSet_SL segment timestamp",
+    "audio_or_embedding_protocol": "[MISSING] paper implementation, model, threshold, reviewed candidates, and raw similarities",
+    "paper_847_subset": "[MISSING] excluded MECAT ID and filtering rule"
+  }
+}

@@ -50,6 +50,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_data09_wavcaps_metadata_audit.sh",
             "run_data10_clotho_trainval_validation.sh",
             "run_model03_model04_audit.sh",
+            "run_data11_mecat_wavcaps_provenance.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -101,6 +102,15 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertNotIn("snapshot_download", source)
         self.assertNotIn("rm -rf", source)
         self.assertNotIn("Remove-Item", source)
+
+    def test_mecat_wavcaps_provenance_is_metadata_only(self) -> None:
+        source = (
+            REPOSITORY_ROOT / "scripts/run_data11_mecat_wavcaps_provenance.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("audit_mecat_wavcaps_provenance.py", source)
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
+        self.assertNotIn("snapshot_download", source)
+        self.assertNotIn("rm -rf", source)
 
 
 if __name__ == "__main__":
