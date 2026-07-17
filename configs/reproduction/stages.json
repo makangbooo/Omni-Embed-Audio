@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "source_tags": {
+    "stage_order": "[INFERRED] operational order required by the reproduction protocol; it is not a paper claim",
+    "commands": "[CODE] committed non-overwriting wrappers",
+    "resource_estimates": "[INFERRED] planning estimates; each long real run still requires a fresh pre-run report"
+  },
+  "required_public_stage_ids": [
+    "official_eval",
+    "train_qwen3b",
+    "uiq_eval",
+    "baselines",
+    "all"
+  ],
+  "stages": [
+    {
+      "stage_id": "data04",
+      "kind": "executable",
+      "status": "WAITING_USER",
+      "resource": "CPU",
+      "duration": "5-30 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/download_data04_mecat_00a_test.sh"],
+      "required_arguments": [],
+      "description": "Download and verify the fixed 173 MB MECAT 00A/test shard without extraction."
+    },
+    {
+      "stage_id": "data05",
+      "kind": "executable",
+      "status": "BLOCKED",
+      "resource": "CPU",
+      "duration": "5-20 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/run_data05_mecat_validation.sh"],
+      "required_arguments": [],
+      "blocked_reason": "DATA-04 fixed MECAT archive has not yet been verified on the remote CPU server.",
+      "description": "Safely extract, decode, and validate MECAT IDs after DATA-04 succeeds."
+    },
+    {
+      "stage_id": "data06",
+      "kind": "executable",
+      "status": "TODO",
+      "resource": "CPU",
+      "duration": "2-10 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/download_data06_audiocaps_v2_metadata.sh"],
+      "required_arguments": [],
+      "description": "Download fixed AudioCaps v2 metadata only; no audio is downloaded."
+    },
+    {
+      "stage_id": "data07",
+      "kind": "executable",
+      "status": "BLOCKED",
+      "resource": "CPU",
+      "duration": "2-10 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/run_data07_audiocaps_v2_metadata_validation.sh"],
+      "required_arguments": [],
+      "blocked_reason": "DATA-06 fixed AudioCaps metadata has not yet been downloaded on the remote CPU server.",
+      "description": "Validate fixed AudioCaps v2 metadata and released UIQ IDs after DATA-06."
+    },
+    {
+      "stage_id": "data08",
+      "kind": "executable",
+      "status": "TODO",
+      "resource": "CPU",
+      "duration": "5-20 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/download_data08_wavcaps_metadata.sh"],
+      "required_arguments": [],
+      "description": "Download fixed WavCaps metadata only; no 819 GB audio corpus is downloaded."
+    },
+    {
+      "stage_id": "data09",
+      "kind": "executable",
+      "status": "BLOCKED",
+      "resource": "CPU",
+      "duration": "10-30 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/run_data09_wavcaps_metadata_audit.sh"],
+      "required_arguments": [],
+      "blocked_reason": "DATA-08 fixed WavCaps metadata has not yet been downloaded on the remote CPU server.",
+      "description": "Recompute WavCaps duration and leakage metadata after DATA-08."
+    },
+    {
+      "stage_id": "data10",
+      "kind": "executable",
+      "status": "BLOCKED",
+      "resource": "CPU",
+      "duration": "10-30 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/run_data10_clotho_trainval_validation.sh"],
+      "required_arguments": [],
+      "blocked_reason": "DATA-03 Clotho development/validation archives have not yet been re-audited as complete.",
+      "description": "Safely extract and validate Clotho development/validation after DATA-03."
+    },
+    {
+      "stage_id": "data11",
+      "kind": "executable",
+      "status": "BLOCKED",
+      "resource": "CPU",
+      "duration": "2-10 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/run_data11_mecat_wavcaps_provenance.sh"],
+      "required_arguments": [],
+      "blocked_reason": "DATA-11 requires completed DATA-05 MECAT and DATA-08 WavCaps metadata evidence.",
+      "description": "Audit MECAT-WavCaps source-video candidates after DATA-05 and DATA-08."
+    },
+    {
+      "stage_id": "official_model_lock",
+      "kind": "executable",
+      "status": "TODO",
+      "resource": "CPU",
+      "duration": "30-150 minutes",
+      "long_operation": true,
+      "command": [
+        "bash",
+        "scripts/run_official_oea_model_pipeline.sh",
+        "{variant}"
+      ],
+      "required_arguments": ["variant"],
+      "description": "Audit one exact base/checkpoint pair, verify or extract inference weights, and create a portable model lock."
+    },
+    {
+      "stage_id": "official_eval_embeddings",
+      "kind": "executable",
+      "status": "BLOCKED",
+      "resource": "1xA100-80GB",
+      "duration": "over 30 minutes",
+      "long_operation": true,
+      "command": ["bash", "scripts/run_qwen3b_cl_clotho_embeddings.sh"],
+      "required_arguments": [],
+      "blocked_reason": "A reviewed Qwen3B-Cl model lock must be generated, committed, and pulled before GPU execution.",
+      "description": "Generate the formal Qwen3B-Cl Clotho audio/caption embedding bank from a committed model lock."
+    },
+    {
+      "stage_id": "official_eval_metrics",
+      "kind": "executable",
+      "status": "BLOCKED",
+      "resource": "CPU",
+      "duration": "5-20 minutes",
+      "long_operation": false,
+      "command": [
+        "bash",
+        "scripts/run_qwen3b_clotho_retrieval_suite.sh",
+        "{embedding_dir}"
+      ],
+      "required_arguments": ["embedding_dir"],
+      "blocked_reason": "A complete official_eval_embeddings directory must be supplied from the GPU server.",
+      "description": "Run the four fixed T2A/T2T protocols over a completed embedding directory."
+    },
+    {
+      "stage_id": "uiq_embeddings",
+      "kind": "executable",
+      "status": "BLOCKED",
+      "resource": "1xA100-80GB",
+      "duration": "over 30 minutes",
+      "long_operation": true,
+      "command": [
+        "bash",
+        "scripts/run_qwen3b_cl_clotho_positive_uiq_embeddings.sh"
+      ],
+      "required_arguments": [],
+      "blocked_reason": "A reviewed Qwen3B-Cl model lock must be committed and the Clotho manifest must remain fixed.",
+      "description": "Generate 4,180 released positive-UIQ query embeddings from the committed model lock."
+    },
+    {
+      "stage_id": "uiq_metrics",
+      "kind": "executable",
+      "status": "BLOCKED",
+      "resource": "CPU",
+      "duration": "5-20 minutes",
+      "long_operation": false,
+      "command": [
+        "bash",
+        "scripts/run_qwen3b_clotho_positive_uiq_suite.sh",
+        "{caption_embedding_dir}",
+        "{uiq_embedding_dir}"
+      ],
+      "required_arguments": ["caption_embedding_dir", "uiq_embedding_dir"],
+      "blocked_reason": "Completed caption-candidate and positive-UIQ embedding directories must both be supplied.",
+      "description": "Evaluate Tables 12-15 from completed caption-candidate and UIQ-query directories."
+    },
+    {
+      "stage_id": "official_eval",
+      "kind": "group",
+      "status": "BLOCKED",
+      "resource": "CPU -> 1xA100-80GB -> CPU",
+      "duration": "multi-step",
+      "long_operation": true,
+      "children": [
+        "official_model_lock",
+        "official_eval_embeddings",
+        "official_eval_metrics"
+      ],
+      "blocked_reason": "The model lock, GPU embedding bank, and CPU metric handoff have not yet completed in order.",
+      "description": "Cross-server official Qwen3B-Cl evaluation plan; group stages are intentionally plan-only."
+    },
+    {
+      "stage_id": "uiq_eval",
+      "kind": "group",
+      "status": "BLOCKED",
+      "resource": "1xA100-80GB -> CPU",
+      "duration": "multi-step",
+      "long_operation": true,
+      "children": ["official_eval_embeddings", "uiq_embeddings", "uiq_metrics"],
+      "blocked_reason": "The committed model lock and both GPU embedding inputs required by the CPU UIQ suite are pending.",
+      "description": "Cross-server positive-UIQ evaluation plan; negative UIQ remains separately blocked by missing HN audio IDs."
+    },
+    {
+      "stage_id": "train_qwen3b",
+      "kind": "blocked",
+      "status": "BLOCKED",
+      "resource": "GPU count not yet fixed",
+      "duration": "unknown",
+      "long_operation": true,
+      "blocked_reason": "[MISSING] paper/code do not fix world size, seed, exact AudioCaps 91,256-row manifest, all stage configs, or the Clotho early-stopping split.",
+      "description": "Training is deliberately unavailable until the official-checkpoint evaluation loop and missing configuration decisions are resolved."
+    },
+    {
+      "stage_id": "baselines",
+      "kind": "blocked",
+      "status": "BLOCKED",
+      "resource": "CPU/GPU not yet fixed",
+      "duration": "unknown",
+      "long_operation": true,
+      "blocked_reason": "Baseline checkpoint revisions, model-specific inference dependencies, and the complete common candidate collections are not yet locked.",
+      "description": "Baseline execution is deliberately unavailable rather than silently using latest or mismatched checkpoints."
+    },
+    {
+      "stage_id": "all",
+      "kind": "group",
+      "status": "BLOCKED",
+      "resource": "multiple CPU/GPU server handoffs",
+      "duration": "multi-stage",
+      "long_operation": true,
+      "children": [
+        "data04",
+        "data05",
+        "data06",
+        "data07",
+        "data08",
+        "data09",
+        "data10",
+        "data11",
+        "official_eval",
+        "uiq_eval",
+        "train_qwen3b",
+        "baselines"
+      ],
+      "blocked_reason": "At least training, baselines, official evaluation, UIQ, and multiple data children remain blocked or unexecuted.",
+      "description": "Complete reproduction plan. It remains plan-only while any child is blocked or requires a server handoff."
+    }
+  ]
+}

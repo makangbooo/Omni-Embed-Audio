@@ -56,6 +56,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_qwen3b_cl_clotho_positive_uiq_embeddings.sh",
             "run_qwen3b_clotho_positive_uiq_suite.sh",
             "run_official_checkpoint_preparation.sh",
+            "run_reproduction.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -183,6 +184,24 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             / "scripts/run_qwen3b_cl_clotho_positive_uiq_embeddings.sh"
         ).read_text(encoding="utf-8")
         self.assertIn('--base-embedding-config "${RESOLVED_BASE_CONFIG}"', uiq)
+
+    def test_unified_reproduction_entry_is_plan_first_and_non_destructive(self) -> None:
+        wrapper = (REPOSITORY_ROOT / "scripts/run_reproduction.sh").read_text(
+            encoding="utf-8"
+        )
+        runner = (REPOSITORY_ROOT / "scripts/run_reproduction.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('exec python scripts/run_reproduction.py "$@"', wrapper)
+        self.assertIn("--acknowledge-long-operation", runner)
+        self.assertIn("if not args.execute", runner)
+        for fragment in (
+            "rm -rf",
+            "git reset --hard",
+            "git clean -fd",
+            "git push --force",
+        ):
+            self.assertNotIn(fragment, wrapper)
 
 
 if __name__ == "__main__":
