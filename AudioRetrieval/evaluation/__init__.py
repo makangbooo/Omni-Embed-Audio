@@ -1,5 +1,4 @@
-"""
-Evaluation Module for Audio Retrieval.
+"""Evaluation Module for Audio Retrieval.
 
 This module provides tools for evaluating audio-text retrieval models:
 
@@ -24,6 +23,10 @@ Example usage:
     )
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from AudioRetrieval.evaluation.metrics import (
     compute_recall_at_k,
     compute_mrr,
@@ -40,13 +43,38 @@ from AudioRetrieval.evaluation.negative_metrics import (
     compute_tfr,
     compute_tfr_hn_at_k,
 )
-
-from AudioRetrieval.evaluation.runners import (
-    BaselineRunner,
-    UIQRunner,
-    NegativeQueryRunner,
-    PrecomputedEmbeddingRunner,
+from AudioRetrieval.evaluation.canonical import (
+    CanonicalRetrievalResult,
+    evaluate_caption_to_caption,
+    evaluate_id_retrieval,
+    evaluate_query_to_candidates,
 )
+
+if TYPE_CHECKING:
+    from AudioRetrieval.evaluation.runners import (
+        BaselineRunner,
+        NegativeQueryRunner,
+        PrecomputedEmbeddingRunner,
+        UIQRunner,
+    )
+
+
+_RUNNER_EXPORTS = {
+    "BaselineRunner",
+    "UIQRunner",
+    "NegativeQueryRunner",
+    "PrecomputedEmbeddingRunner",
+}
+
+
+def __getattr__(name: str):
+    """Load optional runner dependencies only when a runner is requested."""
+
+    if name in _RUNNER_EXPORTS:
+        from AudioRetrieval.evaluation import runners
+
+        return getattr(runners, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     # Metrics
@@ -62,6 +90,10 @@ __all__ = [
     "compute_negative_query_metrics",
     "compute_tfr",
     "compute_tfr_hn_at_k",
+    "CanonicalRetrievalResult",
+    "evaluate_caption_to_caption",
+    "evaluate_id_retrieval",
+    "evaluate_query_to_candidates",
     # Runners
     "BaselineRunner",
     "UIQRunner",
