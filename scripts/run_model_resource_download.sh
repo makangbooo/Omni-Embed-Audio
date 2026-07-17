@@ -15,6 +15,10 @@ source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 ENV_NAME="oea-repro"
 MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_DOWNLOAD_MAX_ATTEMPTS="${MODEL_DOWNLOAD_MAX_ATTEMPTS:-20}"
+MODEL_DOWNLOAD_RETRY_BACKOFF_SECONDS="${MODEL_DOWNLOAD_RETRY_BACKOFF_SECONDS:-30}"
+MODEL_DOWNLOAD_MAX_RETRY_DELAY_SECONDS="${MODEL_DOWNLOAD_MAX_RETRY_DELAY_SECONDS:-600}"
+MODEL_DOWNLOAD_MAX_WORKERS="${MODEL_DOWNLOAD_MAX_WORKERS:-1}"
 RUN_ID="${RUN_PREFIX}_download_$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/${RUN_ID}"
 MANIFEST="${ROOT_DIR}/${MANIFEST_RELATIVE}"
@@ -63,12 +67,18 @@ echo "[INFO] Run directory: ${RUN_DIR}"
 echo "[INFO] Model root: ${MODEL_ROOT}"
 echo "[INFO] Resource manifest: ${MANIFEST}"
 echo "[INFO] GPU disabled"
+echo "[INFO] Download attempts: ${MODEL_DOWNLOAD_MAX_ATTEMPTS}"
+echo "[INFO] Download workers: ${MODEL_DOWNLOAD_MAX_WORKERS}"
 
 set +e
 python scripts/download_model_assets.py \
   --manifest "${MANIFEST}" \
   --model-root "${MODEL_ROOT}" \
-  --output "${RUN_DIR}/download_manifest.json"
+  --output "${RUN_DIR}/download_manifest.json" \
+  --max-download-attempts "${MODEL_DOWNLOAD_MAX_ATTEMPTS}" \
+  --retry-backoff-seconds "${MODEL_DOWNLOAD_RETRY_BACKOFF_SECONDS}" \
+  --max-retry-delay-seconds "${MODEL_DOWNLOAD_MAX_RETRY_DELAY_SECONDS}" \
+  --max-workers "${MODEL_DOWNLOAD_MAX_WORKERS}"
 DOWNLOAD_EXIT_CODE=$?
 set -e
 printf '%s\n' "${DOWNLOAD_EXIT_CODE}" > "${RUN_DIR}/download_exit_code.txt"

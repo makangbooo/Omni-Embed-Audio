@@ -28,13 +28,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--max-download-attempts", type=int, default=5)
+    parser.add_argument("--max-download-attempts", type=int, default=20)
     parser.add_argument("--retry-backoff-seconds", type=int, default=30)
+    parser.add_argument("--max-retry-delay-seconds", type=int, default=600)
+    parser.add_argument("--max-workers", type=int, default=1)
     args = parser.parse_args()
     if args.max_download_attempts < 1:
         parser.error("--max-download-attempts must be at least 1")
     if args.retry_backoff_seconds < 0:
         parser.error("--retry-backoff-seconds must be non-negative")
+    if args.max_retry_delay_seconds < 0:
+        parser.error("--max-retry-delay-seconds must be non-negative")
+    if args.max_workers < 1:
+        parser.error("--max-workers must be at least 1")
     return args
 
 
@@ -145,6 +151,7 @@ def download_snapshot_with_retries(
     output: Path,
     max_attempts: int,
     backoff_seconds: int,
+    max_retry_delay_seconds: int,
 ) -> None:
     attempts: list[dict[str, Any]] = asset_report.setdefault(
         "download_attempts", []
@@ -170,7 +177,10 @@ def download_snapshot_with_retries(
                 }
             )
             if retryable and attempt_number < max_attempts:
-                delay = backoff_seconds * 2 ** (attempt_number - 1)
+                delay = min(
+                    backoff_seconds * 2 ** (attempt_number - 1),
+                    max_retry_delay_seconds,
+                )
                 attempt["retry_delay_seconds"] = delay
                 write_json(output, report)
                 time.sleep(delay)
@@ -205,6 +215,8 @@ def main() -> int:
         "huggingface_hub_version": huggingface_hub_version,
         "max_download_attempts": args.max_download_attempts,
         "retry_backoff_seconds": args.retry_backoff_seconds,
+        "max_retry_delay_seconds": args.max_retry_delay_seconds,
+        "max_workers": args.max_workers,
         "assets": [],
     }
     write_json(output, report)
@@ -326,12 +338,17 @@ def main() -> int:
                     "revision": revision,
                     "local_dir": destination,
                     "allow_patterns": patterns,
+                    # A single worker avoids competing multi-GB transfers on
+                    # unstable CAS/Xet links. Hugging Face resumes the existing
+                    # local_dir .incomplete file on the next outer attempt.
+                    "max_workers": args.max_workers,
                 },
                 asset_report=asset_report,
                 report=report,
                 output=output,
                 max_attempts=args.max_download_attempts,
                 backoff_seconds=args.retry_backoff_seconds,
+                max_retry_delay_seconds=args.max_retry_delay_seconds,
             )
 
             missing = [

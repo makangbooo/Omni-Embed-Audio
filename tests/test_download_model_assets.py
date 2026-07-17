@@ -30,6 +30,23 @@ with patch.dict(sys.modules, {"huggingface_hub": fake_huggingface_hub}):
 
 
 class DownloadModelAssetsTest(unittest.TestCase):
+    def test_download_defaults_favor_resilience(self) -> None:
+        argv = [
+            "download_model_assets.py",
+            "--manifest",
+            "m.json",
+            "--model-root",
+            "models",
+            "--output",
+            "out.json",
+        ]
+        with patch.object(sys, "argv", argv):
+            args = download_module.parse_args()
+
+        self.assertEqual(args.max_download_attempts, 20)
+        self.assertEqual(args.max_retry_delay_seconds, 600)
+        self.assertEqual(args.max_workers, 1)
+
     def test_chunked_encoding_error_is_retryable(self) -> None:
         chunked_error_type = type(
             "ChunkedEncodingError", (Exception,), {"__module__": "requests.exceptions"}
@@ -82,6 +99,7 @@ class DownloadModelAssetsTest(unittest.TestCase):
                     output=output,
                     max_attempts=3,
                     backoff_seconds=30,
+                    max_retry_delay_seconds=600,
                 )
 
         self.assertEqual(downloader.call_count, 2)
@@ -90,6 +108,33 @@ class DownloadModelAssetsTest(unittest.TestCase):
             [attempt["status"] for attempt in asset_report["download_attempts"]],
             ["retryable_error", "complete"],
         )
+
+    def test_retry_delay_is_capped(self) -> None:
+        chunked_error_type = type(
+            "ChunkedEncodingError", (Exception,), {"__module__": "requests.exceptions"}
+        )
+        report = {"status": "running", "assets": []}
+        asset_report = {"download_attempts": []}
+        report["assets"].append(asset_report)
+        downloader = Mock(side_effect=[chunked_error_type("broken"), None])
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "manifest.json"
+            with (
+                patch.object(download_module, "snapshot_download", downloader),
+                patch.object(download_module.time, "sleep") as sleep,
+            ):
+                download_snapshot_with_retries(
+                    download_kwargs={"repo_id": "owner/model"},
+                    asset_report=asset_report,
+                    report=report,
+                    output=output,
+                    max_attempts=2,
+                    backoff_seconds=1000,
+                    max_retry_delay_seconds=600,
+                )
+
+        sleep.assert_called_once_with(600)
 
     def test_model_root_inside_repository_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "outside the Git repository"):
