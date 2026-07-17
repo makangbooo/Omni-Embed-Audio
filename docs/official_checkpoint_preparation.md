@@ -117,6 +117,38 @@ logs/official_checkpoint_preparation_<variant>_<timestamp>/
 └── memory/disk snapshots
 ```
 
-Formal model-specific embedding configs may be committed only after this
-report supplies the derived checkpoint SHA256 and confirms the actual LoRA and
-projection structure.
+## Portable model lock
+
+Formal evaluation must not copy model identities manually from download logs.
+After both the selected base/checkpoint assets and the derived checkpoint have
+passed the workflows above, build a small portable lock:
+
+```bash
+python scripts/build_official_oea_model_lock.py \
+  --variant oea_qwen3b_cl \
+  --model-resource-audit logs/model_resource_audit_YYYYMMDD_HHMMSS/model_resource_audit.json \
+  --checkpoint-preparation logs/official_checkpoint_preparation_oea_qwen3b_cl_YYYYMMDD_HHMMSS/preparation_manifest.json \
+  --output results/model_locks/oea_qwen3b_cl.json
+```
+
+The builder accepts an overall `incomplete` resource audit only when the two
+assets selected by the requested variant are individually complete. This
+allows one multi-asset audit to contain an unrelated unfinished download
+without weakening the selected evidence chain. For both selected assets it
+requires the exact immutable repository revision, revision marker, destination,
+file count, byte count, and per-file Git-blob or LFS verification. It also
+rehashes the derived checkpoint and rejects any drift after extraction.
+
+The resulting JSON contains no server-absolute model path. It locks every base
+snapshot file, the official raw checkpoint identity, the derived checkpoint
+identity, measured LoRA structure, both input-report hashes, and both evidence
+Git commits. Generation requires a clean worktree and refuses to overwrite an
+existing output.
+
+This step uses the `oea-repro` environment on a CPU server, disables no files,
+downloads nothing, and does not require a GPU. It reads only the small derived
+checkpoint because the large base and raw checkpoint were already hashed by
+the two cited audit reports. Expected time is under one minute and the output
+is a small JSON file. Formal model-specific embedding configs may be committed
+only after this lock supplies the derived SHA256 and confirms the measured LoRA
+and projection structure.
