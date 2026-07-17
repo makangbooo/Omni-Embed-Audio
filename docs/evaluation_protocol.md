@@ -229,3 +229,52 @@ and `suite_metrics.json`. A changed or failed artifact stops finalization and
 is recorded under `failures/`; completed suite metrics are never overwritten.
 The four protocols require no GPU once embeddings exist and use less than
 approximately 0.6 GB of additional result storage.
+
+## Qwen3B-Cl Clotho positive-UIQ suite
+
+The released Clotho Question, Imperative, Paraphrase, and `tagging` files each
+contain exactly 1,045 unique target IDs. Their fixed byte sizes and SHA256
+values are pinned in
+`configs/eval/qwen3b_cl_clotho_positive_uiq_embeddings.json`. The paper calls
+the fourth type Keyphrase while the release calls it `tagging`; both labels
+are retained in every config, metadata row, summary, and result.
+
+`scripts/run_qwen3b_cl_clotho_positive_uiq_embeddings.sh` generates 4,180
+query embeddings in type-major and canonical-candidate order. It reuses the
+same `query:` prefix, chat template, last-hidden attention-mask mean pooling,
+checkpoint text projection head, and L2 normalization as caption queries.
+There is no UIQ-specific prompt. Before loading the model it requires every
+released `original_captions` list to equal the corresponding canonical
+Clotho manifest captions exactly. Source file drift, missing/extra target IDs,
+schema changes, order changes, or caption changes are hard errors.
+
+The UIQ generator is single-GPU, strict-offline, and resumable by the same
+`RUN_ID`. Each chunk is written atomically and verified by shape, SHA256,
+finite values, and unit norm. The committed batch size is 1 `[INFERRED]`; it
+must be changed only through a new committed config after a measured smoke
+test. Audio candidates are not re-encoded by this step.
+
+After both the caption candidate bank and UIQ query bank are complete, the
+CPU-only suite is launched with:
+
+```bash
+bash scripts/run_qwen3b_clotho_positive_uiq_suite.sh \
+  /absolute/path/to/completed_caption_embedding_directory \
+  /absolute/path/to/completed_uiq_embedding_directory
+```
+
+`scripts/prepare_positive_uiq_evaluation_suite.py` revalidates both generation
+directories, checkpoint/config identities, Git ancestry, every source and
+artifact hash, metadata order, shapes, finite values, and unit norms. It then
+materializes four explicit 1,045-row index lists and runs the canonical ID
+evaluator separately for Tables 12–15. A query target must resolve to exactly
+the fixed 1,045-candidate Clotho collection; no ID normalization, filtering,
+or post-result protocol choice is allowed. Finalization rehashes all inputs,
+rankings, logs, Git records, and exit codes before writing
+`positive_uiq_summary.csv` and `suite_metrics.json`.
+
+This completes the executable Clotho/Qwen3B-Cl path but does not yet constitute
+a reproduced paper result: formal GPU embeddings have not run, the full four
+CLAP plus six OEA model matrix is pending, and AudioCaps/MECAT candidates are
+not ready. MECAT also remains blocked on the unpublished 847-versus-848
+candidate choice.
