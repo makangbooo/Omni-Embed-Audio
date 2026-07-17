@@ -60,9 +60,10 @@ class BaselineReadinessAuditTest(unittest.TestCase):
         self.assertTrue(self.models["mga_clap"]["code_surface_complete"])
         self.assertFalse(self.models["robust_clap"]["code_surface_complete"])
         self.assertFalse(self.models["m2d_clap"]["code_surface_complete"])
-        self.assertFalse(
+        self.assertTrue(
             self.models["vanilla_qwen2_5_omni_3b"]["code_surface_complete"]
         )
+        self.assertEqual(self.report["summary"]["code_surface_complete"], 5)
         self.assertFalse(
             self.models["laion_clap"]["resource_identity_complete"]
         )

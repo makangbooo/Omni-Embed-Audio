@@ -6,7 +6,7 @@ The paper reports three untrained multimodal-LLM backbones as retrieval baseline
 
 | Component | Fixed value | Evidence |
 | --- | --- | --- |
-| Text input | prepend `query:` | `[PAPER][CODE]` |
+| Text input | public runtime renders `query:<caption>` with no inserted separator | `[PAPER]` prefix; `[CODE]` exact concatenation |
 | Audio input | audio-only chat message, with no inserted text prefix | `[CODE]` |
 | Paper/audio conflict | paper states `passage:` for audio | `[PAPER][CODE]` conflict; public-code runs must not be labelled strict paper-protocol reproductions |
 | Pooling | attention-mask-aware mean of last hidden states | `[CODE]` `OmniEmbedAdapter._encode` |
@@ -24,4 +24,53 @@ The exact immutable resources and this protocol are centralized in `configs/chec
 
 The pipeline disables GPU visibility, refuses dirty Git state, refuses to overwrite an existing lock, and retains a failed audit under `logs/`. It does not download files, load a model, generate embeddings, or produce retrieval metrics. Because hashing a 3B/7B snapshot may exceed 30 minutes on shared storage, each real execution must receive a separate resource/time report before it is started.
 
-Formal embedding generation remains pending. It must consume a committed base-only lock, revalidate every base file, use the fixed protocol above, save raw hidden-dimension embeddings and rankings, and first pass a small fixture before a full dataset run.
+## Lock-bound embedding path
+
+The formal generator and wrapper are committed but have not been run on a real
+base lock:
+
+```bash
+bash scripts/run_vanilla_backbone_embeddings.sh vanilla_nemotron_3b --smoke
+bash scripts/run_vanilla_backbone_embeddings.sh vanilla_qwen2_5_omni_3b --smoke
+bash scripts/run_vanilla_backbone_embeddings.sh vanilla_qwen2_5_omni_7b --smoke
+```
+
+Before loading a GPU, the wrapper requires a clean worktree and a committed
+`results/model_locks/<backbone_id>.json`. The resolver binds the protocol file,
+model lock, complete base inventory, and current Git commit into a non-overwriting
+resolved config. The generator then:
+
+1. runs with all Hugging Face offline flags enabled and exactly one visible GPU;
+2. rejects missing, extra, changed, or symlinked base files;
+3. derives the output dimension from the verified base `config.json`;
+4. loads only `OmniEmbedAdapter`, with every base parameter frozen;
+5. records that no OEA checkpoint, LoRA, or projection head was loaded;
+6. writes resumable L2-normalized chunks plus candidate/query metadata, full
+   configuration, hashes, Git identity, environment, GPU information, and
+   failure evidence.
+
+The wrapper requires an explicit `--smoke` or `--full` mode. `--smoke` uses the
+five audio files bundled with the repository (5 candidates and 25 caption
+queries) and is only a model-load/forward/integrity fixture. It does not replace
+the separate 32--128-row dataset-pipeline smoke tests. A full pass cannot start
+unless `SMOKE_METRICS` points to a completed run from the same backbone, current
+Git commit, and current committed model lock. The gate rehashes all four output
+artifacts, checks their shapes and metadata counts, verifies L2 normalization,
+and rejects any record that loaded an OEA checkpoint, LoRA, or projection head:
+
+```bash
+export SMOKE_METRICS=/path/to/smoke-run/generation_metrics.json
+bash scripts/run_vanilla_backbone_embeddings.sh vanilla_nemotron_3b --full
+```
+
+The three pinned configurations expose hidden dimensions through two verified
+structures: Nemotron uses `text_config.hidden_size` (2048), while Qwen3B and
+Qwen7B use `thinker_config.text_config.hidden_size` (2048 and 3584). These are
+read from the locked local file rather than hard-coded as a claimed paper
+parameter. The smoke gate is implemented but has not yet passed on a real GPU.
+
+The current protocol fixes Clotho evaluation at 1,045 candidates and all 5,225
+captions. Batch size 1 and seed 42 are explicitly `[INFERRED]`; the paper does
+not publish vanilla evaluation values for them. A real model lock, a small GPU
+fixture, the full embedding pass, and canonical retrieval evaluation are still
+pending. No reproduced vanilla metric exists yet.

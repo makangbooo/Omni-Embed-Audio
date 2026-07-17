@@ -15,7 +15,10 @@
   "protocol": {
     "text_prompt": {
       "value": "query:",
-      "source": "[PAPER][CODE]"
+      "source": "[PAPER][CODE]",
+      "runtime_join": "direct concatenation without an inserted separator",
+      "runtime_form": "query:<caption>",
+      "runtime_source": "[CODE] _build_text_messages strips the added trailing space before concatenation"
     },
     "audio_prompt": {
       "runtime_value": "audio-only chat message; passage_prefix parameter is not inserted",

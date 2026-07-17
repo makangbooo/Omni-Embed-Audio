@@ -37,16 +37,17 @@ it imports no model library, downloads nothing, and uses no GPU.
 | Robust-CLAP | Adapter and UIQ text precomputer only | `[MISSING]`; local checkpoint/source trees are named but not identified | `BLOCKED` |
 | MGA-CLAP | Adapter, runner, Hydra config/loader, CLI choice | `[MISSING]`; source tree/checkpoint are untracked | `BLOCKED` |
 | M2D-CLAP | Adapter and vendored portable model only | `[MISSING]`; no checkpoint revision/SHA256 | `BLOCKED` |
-| Nemotron-3B | Shared mean-pooling/L2 adapter plus non-overwriting base-lock pipeline | Base snapshot is pinned by MODEL-03; real lock not yet generated | `BLOCKED` pending a committed lock and embedding wrapper |
-| Qwen2.5-Omni-3B | Shared mean-pooling/L2 adapter plus non-overwriting base-lock pipeline | Base snapshot is pinned by MODEL-01; real lock not yet generated | `BLOCKED` pending explicit config, committed lock, and embedding wrapper |
-| Qwen2.5-Omni-7B | Shared mean-pooling/L2 adapter plus non-overwriting base-lock pipeline | Base snapshot is pinned by MODEL-04; real lock not yet generated | `BLOCKED` pending a committed lock and embedding wrapper |
+| Nemotron-3B | Base-lock pipeline, fixed Clotho protocol, lock resolver, resumable base-only generator/wrapper | Base snapshot is pinned by MODEL-03; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
+| Qwen2.5-Omni-3B | Base-lock pipeline, fixed Clotho protocol, lock resolver, resumable base-only generator/wrapper | Base snapshot is pinned by MODEL-01; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
+| Qwen2.5-Omni-7B | Base-lock pipeline, fixed Clotho protocol, lock resolver, resumable base-only generator/wrapper | Base snapshot is pinned by MODEL-04; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
 
 No row is currently formal-ready. This is not solely a checkpoint-download
 problem: Robust-CLAP and M2D-CLAP lack normal baseline entrypoints; MGA-CLAP's
 argparse route does not pass the required repository/checkpoint paths; and all
-three vanilla rows still lack a real committed base lock and its lock-bound
-embedding wrapper. The committed CPU pipeline can now produce those locks, but
-implementing a tool is not evidence that the remote resource audit has run.
+three vanilla rows still lack a real committed base lock and successful GPU
+fixture. The committed CPU pipeline can produce those locks and the formal
+wrapper consumes them, but implementing a tool is not evidence that either
+remote stage has run.
 
 ## Code conflicts preserved for later fixes
 
@@ -61,8 +62,9 @@ implementing a tool is not evidence that the remote resource audit has run.
    so this cannot yet be presented as a verified minimal bug fix.
 4. `[CODE]` the common `OmniEmbedAdapter` implements attention-mask-aware mean
    pooling and L2 normalization, but the exact audio-prefix behavior conflicts
-   with the paper statement. A formal vanilla wrapper must select and label the
-   same protocol used for OEA instead of choosing silently.
+   with the paper statement. The formal vanilla wrapper now fixes and labels
+   the public-code audio-only/no-prefix protocol; it does not claim strict
+   paper-protocol equivalence.
 
 ## Unblocking order
 
@@ -73,9 +75,8 @@ implementing a tool is not evidence that the remote resource audit has run.
 3. For Robust-CLAP, first preserve the original load error, then assess the
    existing compatibility changes as an independent minimal patch.
 4. Run the non-overwriting vanilla base-lock pipeline for each complete base
-   snapshot and commit only the small locks. Then add one model-lock-bound
-   embedding wrapper per baseline/backbone and run a small fixture before full
-   Clotho.
+   snapshot and commit only the small locks. Then run a lock-bound GPU fixture
+   before full Clotho embedding generation.
 5. Reuse the canonical embedding evaluators and identical candidate/query IDs;
    do not use the legacy runner's metric output as proof until its protocol is
    reconciled with the fixed evaluation contract.
