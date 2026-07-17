@@ -41,6 +41,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "resume_environment.sh",
             "run_data02_clotho_validation.sh",
             "run_embedding_evaluation.sh",
+            "run_qwen3b_cl_clotho_embeddings.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -67,6 +68,10 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn('> >(tee "${OUTPUT_DIR}/stdout.log")', source)
         self.assertIn('2> >(tee "${OUTPUT_DIR}/stderr.log" >&2)', source)
         self.assertNotIn("rm -rf", source)
+
+    def test_large_raw_result_tree_is_ignored(self) -> None:
+        source = (REPOSITORY_ROOT / ".gitignore").read_text(encoding="utf-8")
+        self.assertIn("/results/raw/", source)
 
 
 if __name__ == "__main__":

@@ -34,6 +34,7 @@ huggingface_cache/
 /checkpoints/
 /models/
 /outputs/
+/results/raw/
 /wandb/
 /.cache/
 

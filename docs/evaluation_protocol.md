@@ -135,3 +135,34 @@ For T2T, candidate paths may be omitted because the query caption bank is also
 the candidate bank. Because the paper does not publish caption-selection
 details, a chosen protocol must not be marked `PAPER` unless new evidence is
 found.
+
+## Resumable official-checkpoint embedding generation
+
+`scripts/generate_oea_embeddings.py` and
+`scripts/run_qwen3b_cl_clotho_embeddings.sh` implement the first formal
+OEA-Qwen3B (+Cl) embedding pass over the canonical Clotho evaluation manifest.
+The fixed configuration is
+`configs/eval/qwen3b_cl_clotho_embeddings.json`.
+
+The generator preserves manifest order and creates exactly 1,045 audio
+candidates and 5,225 caption queries. Each projected 512-dimensional chunk is
+written atomically, checked for finite values and unit L2 norm, and accompanied
+by its range and SHA256. A resumed invocation verifies every completed chunk
+before skipping it. The full arrays are consolidated only after all chunks are
+present. Immutable config and metadata files are verified instead of
+overwritten, and a changed Git/config/manifest identity cannot reuse an old run
+directory. Every invocation has a separate `attempts/attempt_*` directory with
+command, Git state, environment, GPU inventory, stdout, stderr, exit code, and
+failure evidence.
+
+The committed audio/text batch sizes are both 1 `[INFERRED]`, selected as the
+conservative first formal setting after the five-sample A100 smoke test. They
+affect throughput, not the candidate or query set. Any later batch-size change
+requires a new committed configuration and experiment identity.
+
+There is a material prompt conflict: `[PAPER]` states that audio uses the
+`passage:` prefix, while `[CODE]` `_build_audio_messages()` explicitly omits a
+text prefix from audio-only messages. The first checkpoint evaluation follows
+the public-code audio-only/no-prefix path and is labelled accordingly. A
+prefix-including A/B run must be reported separately; neither result may be
+silently substituted for the other.
