@@ -53,6 +53,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_data11_mecat_wavcaps_provenance.sh",
             "run_negative_embedding_evaluation.sh",
             "run_qwen3b_clotho_retrieval_suite.sh",
+            "run_qwen3b_cl_clotho_positive_uiq_embeddings.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "experiment_prefix": "oea_qwen3b_clotho_positive_uiq_embeddings_seed42",
+  "model": "OEA-Qwen3B (+Cl)",
+  "dataset": "Clotho v2.1 evaluation UIQ",
+  "seed": 42,
+  "expected_examples": 1045,
+  "expected_total_queries": 4180,
+  "expected_embedding_dim": 512,
+  "text_batch_size": 1,
+  "batch_size_source": "INFERRED: conservative formal-evaluation batch size; change only through a new committed config after a measured smoke test",
+  "base_embedding_config": {
+    "path": "configs/eval/qwen3b_cl_clotho_embeddings.json",
+    "size_bytes": 2567,
+    "sha256": "595d39b9f361d542ee8fed88f61b0978eda32d1263db5f4620589f718b21570b"
+  },
+  "query_sources": [
+    {
+      "released_query_type": "question",
+      "paper_query_type": "Question",
+      "path": "data/UIQ/clotho/clotho_evaluation_question_queries.jsonl",
+      "expected_rows": 1045,
+      "size_bytes": 716306,
+      "sha256": "f24d174b0e89fe96ca1b670b7b1b12177b352d95b28fb5906c0ac1fc41badfa2"
+    },
+    {
+      "released_query_type": "imperative",
+      "paper_query_type": "Imperative",
+      "path": "data/UIQ/clotho/clotho_evaluation_imperative_queries.jsonl",
+      "expected_rows": 1045,
+      "size_bytes": 722593,
+      "sha256": "d3e5b45dad0fa152c35640ede6592639fba6fd4ef7926e82b9f2ff4b76fa7eb4"
+    },
+    {
+      "released_query_type": "paraphrase",
+      "paper_query_type": "Paraphrase",
+      "path": "data/UIQ/clotho/clotho_evaluation_paraphrase_queries.jsonl",
+      "expected_rows": 1045,
+      "size_bytes": 723567,
+      "sha256": "416444575c6a47ccf56ad25ab221e3fa72c2809b306b4521efc0eed6d0587913"
+    },
+    {
+      "released_query_type": "tagging",
+      "paper_query_type": "Keyphrase",
+      "path": "data/UIQ/clotho/clotho_evaluation_tagging_queries.jsonl",
+      "expected_rows": 1045,
+      "size_bytes": 707417,
+      "sha256": "41a78773ff958002dec294fe19ed78bb209af3fe700401ce5b7ff4d233c06bfb"
+    }
+  ],
+  "text_protocol": {
+    "prefix": "query:",
+    "pooling": "attention-mask mean pooling of last hidden states",
+    "projection": "checkpoint text projection head followed by L2 normalization",
+    "source": "PAPER+CODE",
+    "reuse_note": "UIQ strings use the identical public-code text path as caption queries; no UIQ-specific prompt is inserted"
+  }
+}
