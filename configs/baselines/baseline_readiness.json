@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "expected_model_ids": [
+    "laion_clap",
+    "robust_clap",
+    "mga_clap",
+    "m2d_clap",
+    "vanilla_nemotron_3b",
+    "vanilla_qwen2_5_omni_3b",
+    "vanilla_qwen2_5_omni_7b"
+  ],
+  "source_tags": {
+    "model_scope": "[PAPER] Tables 2-5 and 11-17 compare four CLAP baselines and three unadapted multimodal-LLM backbones",
+    "code_surfaces": "[CODE] static observations from the committed official repository; expected absence is recorded rather than silently repaired",
+    "resource_identity": "[CODE] or [MISSING] according to whether an immutable repository revision and checkpoint identity are committed",
+    "readiness": "[INFERRED] formal evaluation requires a complete code entry, immutable resources, locally verified files, and the common fixed candidate collection"
+  },
+  "common_data_gate": {
+    "status": "BLOCKED",
+    "reason": "AudioCaps evaluation audio is absent; MECAT DATA-04/05 is pending and the paper's exact 847-row MECAT manifest/caption field is [MISSING]."
+  },
+  "models": [
+    {
+      "model_id": "laion_clap",
+      "paper_model": "LAION-CLAP",
+      "category": "clap_baseline",
+      "status": "BLOCKED",
+      "surfaces": [
+        {"surface_id": "adapter", "path": "AudioRetrieval/models/laion_clap_adapter.py", "needle": "class LaionClapAdapter", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "baseline_runner", "path": "AudioRetrieval/evaluation/runners/baseline.py", "needle": "self.model_name == \"laion_clap\"", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/laion_clap.yaml", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"laion_clap\"", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "argparse_cli", "path": "AudioRetrieval/cli/main.py", "needle": "choices=[\"laion_clap\", \"mga_clap\", \"oea\", \"wavcaps\"]", "expected_present": true, "required_for_formal": true}
+      ],
+      "required_local_resources": [],
+      "resource_identity": {
+        "status": "MISSING",
+        "code_reference": "AudioRetrieval/conf/model/laion_clap.yaml sets ckpt_path: null and delegates to the installed laion_clap default",
+        "immutable_revision": null,
+        "checkpoint_sha256": null
+      },
+      "blockers": [
+        "[MISSING] The paper and repository do not pin the LAION-CLAP package revision or downloaded default checkpoint SHA256.",
+        "The laion-clap dependency is optional/commented in requirements.txt and absent from the resolved reproduction lock."
+      ],
+      "next_action": "Identify and pin the exact package/source commit and default checkpoint before installing or evaluating it."
+    },
+    {
+      "model_id": "robust_clap",
+      "paper_model": "Robust-CLAP",
+      "category": "clap_baseline",
+      "status": "BLOCKED",
+      "surfaces": [
+        {"surface_id": "adapter", "path": "AudioRetrieval/models/robust_clap_adapter.py", "needle": "class RobustClapAdapter", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "baseline_runner", "path": "AudioRetrieval/evaluation/runners/baseline.py", "needle": "self.model_name == \"robust_clap\"", "expected_present": false, "required_for_formal": true},
+        {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/robust_clap.yaml", "expected_present": false, "required_for_formal": true},
+        {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"robust_clap\"", "expected_present": false, "required_for_formal": true},
+        {"surface_id": "argparse_cli", "path": "AudioRetrieval/cli/main.py", "needle": "\"robust_clap\"", "expected_present": false, "required_for_formal": true},
+        {"surface_id": "uiq_text_precomputer", "path": "AudioRetrieval/preprocessing/embeddings/uiq_text.py", "needle": "self.model_name == \"robust_clap\"", "expected_present": true, "required_for_formal": false}
+      ],
+      "required_local_resources": [
+        {"resource_id": "upstream_source_tree", "root": "repository", "path": "_linguistic_robust_clap-master", "kind": "directory"},
+        {"resource_id": "legacy_torchlibrosa_tree", "root": "repository", "path": "torchlibrosa", "kind": "directory"},
+        {"resource_id": "checkpoint", "root": "repository", "path": "ModelCheckpoint/robust-clap/630k-audioset-best.pt", "kind": "file"}
+      ],
+      "resource_identity": {
+        "status": "MISSING",
+        "code_reference": "AudioRetrieval/conf/preprocessing/embeddings.yaml names a local checkpoint but no source revision, bytes, or SHA256",
+        "immutable_revision": null,
+        "checkpoint_sha256": null
+      },
+      "blockers": [
+        "No baseline runner, Hydra model config/loader, or argparse choice is committed for Robust-CLAP.",
+        "The adapter assumes two untracked source trees and applies tokenizer/STFT compatibility changes that have not been tied to an upstream commit.",
+        "[MISSING] Exact checkpoint source, revision, bytes, and SHA256."
+      ],
+      "next_action": "Pin the upstream source/checkpoint, preserve an original-load failure, then review any compatibility patch independently."
+    },
+    {
+      "model_id": "mga_clap",
+      "paper_model": "MGA-CLAP",
+      "category": "clap_baseline",
+      "status": "BLOCKED",
+      "surfaces": [
+        {"surface_id": "adapter", "path": "AudioRetrieval/models/mga_clap_adapter.py", "needle": "class MGAClapAdapter", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "baseline_runner", "path": "AudioRetrieval/evaluation/runners/baseline.py", "needle": "self.model_name == \"mga_clap\"", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/mga_clap.yaml", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"mga_clap\"", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "argparse_cli", "path": "AudioRetrieval/cli/main.py", "needle": "choices=[\"laion_clap\", \"mga_clap\", \"oea\", \"wavcaps\"]", "expected_present": true, "required_for_formal": true}
+      ],
+      "required_local_resources": [
+        {"resource_id": "upstream_source_tree", "root": "repository", "path": "AudioRetrieval/models/mga_clap", "kind": "directory"},
+        {"resource_id": "checkpoint", "root": "repository", "path": "ModelCheckpoint/mga_clap/mga-clap.pt", "kind": "file"}
+      ],
+      "resource_identity": {
+        "status": "MISSING",
+        "code_reference": "AudioRetrieval/conf/model/mga_clap.yaml names repository-relative source/checkpoint paths",
+        "immutable_revision": null,
+        "checkpoint_sha256": null
+      },
+      "blockers": [
+        "The source subtree and checkpoint referenced by the committed config are not tracked.",
+        "The argparse CLI exposes MGA-CLAP but does not accept/pass repo_path or ckpt_path, so that public route instantiates the adapter with None paths.",
+        "[MISSING] Exact upstream commit and checkpoint identity."
+      ],
+      "next_action": "Pin the upstream source and checkpoint, then add a model-locked entry that passes explicit paths."
+    },
+    {
+      "model_id": "m2d_clap",
+      "paper_model": "M2D-CLAP",
+      "category": "clap_baseline",
+      "status": "BLOCKED",
+      "surfaces": [
+        {"surface_id": "adapter", "path": "AudioRetrieval/models/m2d_clap_adapter.py", "needle": "class M2DClapAdapter", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "portable_model", "path": "AudioRetrieval/models/portable_m2d.py", "needle": "class PortableM2D", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "baseline_runner", "path": "AudioRetrieval/evaluation/runners/baseline.py", "needle": "self.model_name == \"m2d_clap\"", "expected_present": false, "required_for_formal": true},
+        {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/m2d_clap.yaml", "expected_present": false, "required_for_formal": true},
+        {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"m2d_clap\"", "expected_present": false, "required_for_formal": true},
+        {"surface_id": "argparse_cli", "path": "AudioRetrieval/cli/main.py", "needle": "\"m2d_clap\"", "expected_present": false, "required_for_formal": true}
+      ],
+      "required_local_resources": [
+        {"resource_id": "checkpoint", "root": "repository", "path": "ModelCheckpoint/M2D2/m2d_clap/checkpoint-30.pth", "kind": "file"}
+      ],
+      "resource_identity": {
+        "status": "MISSING",
+        "code_reference": "AudioRetrieval/models/m2d_clap_adapter.py documents a repository-relative checkpoint path",
+        "immutable_revision": null,
+        "checkpoint_sha256": null
+      },
+      "blockers": [
+        "No baseline runner, Hydra config/loader, argparse choice, or formal wrapper is committed for M2D-CLAP.",
+        "[MISSING] Exact upstream source commit and checkpoint identity."
+      ],
+      "next_action": "Pin source/checkpoint identities before adding the missing entrypoint and smoke test."
+    },
+    {
+      "model_id": "vanilla_nemotron_3b",
+      "paper_model": "Nemotron-3B",
+      "category": "vanilla_backbone",
+      "status": "BLOCKED",
+      "surfaces": [
+        {"surface_id": "adapter", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "class OmniEmbedAdapter", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "mean_pooling", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = summed / denom", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "l2_normalization", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = F.normalize(pooled, p=2, dim=-1)", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/omni_embed.yaml", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"omni_embed\"", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "formal_base_only_wrapper", "path": "scripts/run_vanilla_backbone_embeddings.sh", "expected_present": false, "required_for_formal": true}
+      ],
+      "required_local_resources": [],
+      "resource_identity": {
+        "status": "PINNED",
+        "registry_reference": "configs/resources/model03_nemo3b.json#omni_embed_nemotron_3b"
+      },
+      "blockers": [
+        "No model-lock-bound base-only embedding wrapper exists.",
+        "The public argparse CLI does not route its 'oea' choice to BaselineRunner, and the README command mixes Hydra syntax with argparse.",
+        "The exact text/audio prefix policy remains conflicted between paper text and public backbone code."
+      ],
+      "next_action": "Add a base-only lock and formal embedding wrapper after the shared prefix protocol is fixed explicitly."
+    },
+    {
+      "model_id": "vanilla_qwen2_5_omni_3b",
+      "paper_model": "Qwen2.5-Omni-3B",
+      "category": "vanilla_backbone",
+      "status": "BLOCKED",
+      "surfaces": [
+        {"surface_id": "adapter", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "class OmniEmbedAdapter", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "mean_pooling", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = summed / denom", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "l2_normalization", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = F.normalize(pooled, p=2, dim=-1)", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/qwen2_5_omni_3b.yaml", "expected_present": false, "required_for_formal": true},
+        {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"omni_embed\"", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "formal_base_only_wrapper", "path": "scripts/run_vanilla_backbone_embeddings.sh", "expected_present": false, "required_for_formal": true}
+      ],
+      "required_local_resources": [],
+      "resource_identity": {
+        "status": "PINNED",
+        "registry_reference": "configs/resources/model01_qwen3b_cl.json#qwen2_5_omni_3b"
+      },
+      "blockers": [
+        "No Qwen3B Hydra config or model-lock-bound base-only embedding wrapper exists.",
+        "The exact text/audio prefix policy remains conflicted between paper text and public backbone code."
+      ],
+      "next_action": "Add an explicit Qwen3B base-only config/lock/wrapper without loading LoRA or projection heads."
+    },
+    {
+      "model_id": "vanilla_qwen2_5_omni_7b",
+      "paper_model": "Qwen2.5-Omni-7B",
+      "category": "vanilla_backbone",
+      "status": "BLOCKED",
+      "surfaces": [
+        {"surface_id": "adapter", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "class OmniEmbedAdapter", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "mean_pooling", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = summed / denom", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "l2_normalization", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = F.normalize(pooled, p=2, dim=-1)", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/omni_embed_7b.yaml", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"omni_embed\"", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "formal_base_only_wrapper", "path": "scripts/run_vanilla_backbone_embeddings.sh", "expected_present": false, "required_for_formal": true}
+      ],
+      "required_local_resources": [],
+      "resource_identity": {
+        "status": "PINNED",
+        "registry_reference": "configs/resources/model04_qwen7b.json#qwen2_5_omni_7b"
+      },
+      "blockers": [
+        "The Hydra config uses an unfixed repository-relative path instead of the immutable base resource registry.",
+        "No model-lock-bound base-only embedding wrapper exists.",
+        "The exact text/audio prefix policy remains conflicted between paper text and public backbone code."
+      ],
+      "next_action": "Bind the existing Qwen7B config to an immutable base-only lock before formal evaluation."
+    }
+  ]
+}

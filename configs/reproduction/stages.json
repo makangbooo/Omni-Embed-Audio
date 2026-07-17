@@ -224,8 +224,8 @@
       "resource": "CPU/GPU not yet fixed",
       "duration": "unknown",
       "long_operation": true,
-      "blocked_reason": "Baseline checkpoint revisions, model-specific inference dependencies, and the complete common candidate collections are not yet locked.",
-      "description": "Baseline execution is deliberately unavailable rather than silently using latest or mismatched checkpoints."
+      "blocked_reason": "The committed readiness audit finds 2/7 complete static code surfaces, 3/7 pinned resource identities, and 0/7 formal-ready models; the complete common candidate collections are also pending.",
+      "description": "Baseline execution is deliberately unavailable rather than silently repairing missing entries or using latest/mismatched checkpoints."
     },
     {
       "stage_id": "all",

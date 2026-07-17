@@ -93,7 +93,10 @@ bash scripts/run_reproduction.sh \
 | Caption/UIQ embedding | 1×A100-80GB | 严格离线、单卡、可恢复；必须使用已提交模型锁 |
 | T2A/T2T/UIQ 指标 | CPU | 从固定 embedding 运行完整排名和指标 |
 | Qwen3B 训练 | BLOCKED | 缺 world size、seed、精确 AudioCaps manifest、完整 stage 配置和 Clotho early-stop split |
-| 基线 | BLOCKED | checkpoint revision、依赖和共同候选集尚未全部锁定 |
+| 基线 | BLOCKED | 7 个非 OEA 模型中仅 2 个具备完整静态代码入口、3 个具备固定资源身份、0 个可正式评测 |
+
+基线逐模型代码入口、外部目录假设和资源身份审计见
+[`docs/baseline_readiness.md`](docs/baseline_readiness.md)。该审计只读取源文件和本地文件元数据，不会安装依赖或下载权重。
 
 ## 证据链
 
