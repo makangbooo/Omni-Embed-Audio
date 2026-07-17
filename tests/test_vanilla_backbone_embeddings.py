@@ -415,6 +415,17 @@ class VanillaBackboneEmbeddingsTest(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, generator)
 
+    def test_retrieval_wrapper_is_cpu_only_and_non_overwriting(self) -> None:
+        wrapper = (
+            REPOSITORY_ROOT / "scripts/run_vanilla_clotho_retrieval_suite.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("CUDA_VISIBLE_DEVICES=disabled", wrapper)
+        self.assertIn("prepare_embedding_evaluation_suite.py prepare", wrapper)
+        self.assertIn("prepare_embedding_evaluation_suite.py finalize", wrapper)
+        self.assertIn("Base-only evidence path", wrapper)
+        self.assertIn("refusing to overwrite", wrapper)
+        self.assertNotIn("nvidia-smi", wrapper)
+
 
 if __name__ == "__main__":
     unittest.main()

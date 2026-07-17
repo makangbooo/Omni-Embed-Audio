@@ -71,8 +71,34 @@ Qwen7B use `thinker_config.text_config.hidden_size` (2048 and 3584). These are
 read from the locked local file rather than hard-coded as a claimed paper
 parameter. The smoke gate is implemented but has not yet passed on a real GPU.
 
+## CPU retrieval finalizer
+
+After a full embedding run completes, the base-only evidence finalizer runs on
+CPU:
+
+```bash
+bash scripts/run_vanilla_clotho_retrieval_suite.sh \
+  vanilla_nemotron_3b \
+  /path/to/completed-full-embedding-directory
+```
+
+The finalizer accepts only the matching committed vanilla model lock and exact
+generation-protocol SHA. It rehashes all embeddings and metadata, checks the
+base revision and hidden dimension, and requires the generator to record
+`projection_head_loaded=false`, `lora_loaded=false`, and
+`oea_checkpoint_loaded=false`. Its evaluator identity is explicitly
+`base-only:<repo>@<revision>#model-lock-sha256=...`; the compatibility field
+named `checkpoint` therefore cannot be mistaken for an OEA checkpoint claim.
+
+For each backbone it emits four separate protocols: T2A with all captions,
+T2A with the public-code seed-0 one-caption selection, T2T with the public-code
+seed-0 selection, and an explicitly `[INFERRED]` all-caption T2T sensitivity
+run. Each protocol retains embeddings, rankings, metrics, configuration, Git
+identity, and file hashes. The wrapper disables GPU visibility and never
+overwrites a non-complete protocol directory.
+
 The current protocol fixes Clotho evaluation at 1,045 candidates and all 5,225
 captions. Batch size 1 and seed 42 are explicitly `[INFERRED]`; the paper does
 not publish vanilla evaluation values for them. A real model lock, a small GPU
-fixture, the full embedding pass, and canonical retrieval evaluation are still
-pending. No reproduced vanilla metric exists yet.
+fixture, the full embedding pass, and execution of the committed CPU retrieval
+suite are still pending. No reproduced vanilla metric exists yet.

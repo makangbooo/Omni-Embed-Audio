@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "binding_type": "vanilla_backbone",
+  "suite_prefix": "vanilla_qwen2_5_omni_7b_clotho_retrieval_suite_seed42",
+  "backbone_id": "vanilla_qwen2_5_omni_7b",
+  "model": "Qwen2.5-Omni-7B",
+  "dataset": "Clotho v2.1 evaluation",
+  "embedding_seed": 42,
+  "expected_candidate_count": 1045,
+  "expected_query_count": 5225,
+  "expected_embedding_dim": 3584,
+  "expected_captions_per_clip": 5,
+  "expected_generation_protocol_sha256": "81b9ac8f59bc54d4350e9fb227ce7b813a083abde741d4131381e89a7b5d1bdf",
+  "vanilla_model_lock_path": "results/model_locks/vanilla_qwen2_5_omni_7b.json",
+  "minimum_generator_commit": "2583e2ba7c3774d644aca737e6468cc07a7eab07",
+  "base_model": {
+    "repo_id": "Qwen/Qwen2.5-Omni-7B",
+    "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+    "local_subdir": "Qwen2.5-Omni-7B"
+  },
+  "embedding_protocol": {
+    "audio": "public-code audio-only chat message without passage: insertion",
+    "text": "direct query:<caption> concatenation",
+    "pooling": "attention-mask-aware mean of last hidden states",
+    "normalization": "L2",
+    "projection": "none; retain 3584-dimensional backbone hidden state",
+    "source": "CODE",
+    "paper_conflict": "PAPER states passage: for audio; this suite does not hide that conflict"
+  },
+  "expected_protocol": {
+    "text_prompt": {"value": "query:", "source": "[PAPER][CODE]", "runtime_join": "direct concatenation without an inserted separator", "runtime_form": "query:<caption>", "runtime_source": "[CODE] _build_text_messages strips the added trailing space before concatenation"},
+    "audio_prompt": {"runtime_value": "audio-only chat message; passage_prefix parameter is not inserted", "runtime_source": "[CODE]", "paper_value": "passage:", "paper_source": "[PAPER]", "status": "CONFLICT", "claim_boundary": "Public-code protocol only; do not label as a strict paper-protocol reproduction."},
+    "pooling": {"value": "attention-mask-aware mean of last hidden states", "source": "[CODE]"},
+    "normalization": {"value": "L2", "source": "[CODE]"},
+    "projection": {"value": "none; retain the backbone hidden dimension", "source": "[CODE] public base adapter returns pooled hidden states directly"}
+  },
+  "protocols": [
+    {"protocol_id": "t2a_public_code_default_joint_all_captions", "task": "t2a", "paper_table": "Table 2", "query_selection": "all", "protocol_label": "public-code-default-joint-all-captions", "protocol_source": "CODE", "expected_evaluated_queries": 5225, "note": "eval_core default joint task set includes A2T, so T2A evaluates all five captions per clip"},
+    {"protocol_id": "t2a_public_code_t2a_only_seed0", "task": "t2a", "paper_table": "Table 2", "query_selection": "public_code_seed0_one_per_clip", "query_selection_seed": 0, "protocol_label": "public-code-t2a-only-seed0-one-caption", "protocol_source": "CODE", "expected_evaluated_queries": 1045, "note": "eval_core samples one caption per clip when text_to_audio is requested without audio_to_text"},
+    {"protocol_id": "t2t_public_code_default_seed0", "task": "t2t", "paper_table": "Table 3", "query_selection": "public_code_seed0_one_per_clip", "query_selection_seed": 0, "protocol_label": "public-code-default-seed0-one-caption", "protocol_source": "CODE", "expected_evaluated_queries": 1045, "note": "eval_core defaults t2t_queries_per_clip to one and uses random.Random(0) when no caption seed is supplied"},
+    {"protocol_id": "t2t_all_captions_sensitivity", "task": "t2t", "paper_table": "Table 3 sensitivity", "query_selection": "all", "protocol_label": "canonical-all-captions-sensitivity", "protocol_source": "INFERRED", "expected_evaluated_queries": 5225, "note": "all-caption sensitivity run because PAPER does not publish the T2T caption-query selection"}
+  ]
+}

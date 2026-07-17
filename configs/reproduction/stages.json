@@ -158,13 +158,20 @@
     },
     {
       "stage_id": "vanilla_metrics",
-      "kind": "blocked",
+      "kind": "executable",
       "status": "BLOCKED",
       "resource": "CPU",
-      "duration": "unknown",
+      "duration": "5-20 minutes",
       "long_operation": false,
-      "blocked_reason": "The existing formal CPU suite is bound to an OEA checkpoint/model lock; a vanilla-model-lock-specific finalizer is not yet committed.",
-      "description": "Compute the fixed T2A/T2T protocols from a completed vanilla embedding bank after the vanilla evidence finalizer exists."
+      "command": [
+        "bash",
+        "scripts/run_vanilla_clotho_retrieval_suite.sh",
+        "{backbone}",
+        "{embedding_dir}"
+      ],
+      "required_arguments": ["backbone", "embedding_dir"],
+      "blocked_reason": "A complete full Clotho embedding directory from the same committed vanilla model lock and fixed protocol is required.",
+      "description": "Audit a base-only embedding bank and compute four fixed T2A/T2T protocols without loading a GPU."
     },
     {
       "stage_id": "vanilla_baselines",
@@ -179,7 +186,7 @@
         "vanilla_full_embeddings",
         "vanilla_metrics"
       ],
-      "blocked_reason": "Real base locks, GPU smoke/full artifacts, and the CPU vanilla finalizer have not completed in order.",
+      "blocked_reason": "Real base locks and GPU smoke/full artifacts have not completed in order; the CPU finalizer is committed but requires those artifacts.",
       "description": "Cross-server plan for the three unadapted multimodal-LLM baselines; group stages are plan-only."
     },
     {
@@ -312,7 +319,7 @@
       "long_operation": true,
       "children": ["vanilla_baselines", "clap_baselines"],
       "blocked_reason": "The committed readiness audit finds 5/7 complete static code surfaces, 3/7 pinned resource identities, and 0/7 formal-ready models; complete common candidate collections are also pending.",
-      "description": "Baseline plan now exposes the implemented vanilla CPU/GPU leaves while retaining explicit CLAP and metric blockers."
+      "description": "Baseline plan exposes the complete vanilla CPU/GPU/CPU code path while retaining explicit CLAP and real-resource blockers."
     },
     {
       "stage_id": "all",

@@ -30,6 +30,15 @@ from scripts.evaluate_embedding_artifacts import (  # noqa: E402
 from scripts.build_official_oea_eval_config import (  # noqa: E402
     verify_official_model_lock_binding,
 )
+from scripts.build_vanilla_backbone_eval_config import (  # noqa: E402
+    validate_protocol as validate_vanilla_protocol,
+    verify_vanilla_model_lock_binding,
+)
+
+
+OFFICIAL_BINDING_TYPE = "official_oea"
+VANILLA_BINDING_TYPE = "vanilla_backbone"
+SUPPORTED_BINDING_TYPES = {OFFICIAL_BINDING_TYPE, VANILLA_BINDING_TYPE}
 
 
 def parse_args() -> argparse.Namespace:
@@ -94,12 +103,20 @@ def immutable_json_text(value: Any) -> str:
     return json.dumps(value, indent=2, ensure_ascii=False) + "\n"
 
 
+def suite_binding_type(config: Mapping[str, Any]) -> str:
+    binding_type = config.get("binding_type", OFFICIAL_BINDING_TYPE)
+    if binding_type not in SUPPORTED_BINDING_TYPES:
+        raise ValueError(f"unsupported retrieval suite binding_type: {binding_type}")
+    return str(binding_type)
+
+
 def load_suite_config(path: Path) -> dict[str, Any]:
     config = json.loads(path.read_text(encoding="utf-8"))
     if config.get("schema_version") != 1:
         raise ValueError("unsupported retrieval suite config schema_version")
+    binding_type = suite_binding_type(config)
+    config["binding_type"] = binding_type
     required = {
-        "checkpoint",
         "dataset",
         "embedding_protocol",
         "embedding_seed",
@@ -110,11 +127,26 @@ def load_suite_config(path: Path) -> dict[str, Any]:
         "expected_query_count",
         "minimum_generator_commit",
         "model",
-        "official_model_lock_path",
-        "official_variant_id",
         "protocols",
         "suite_prefix",
     }
+    if binding_type == OFFICIAL_BINDING_TYPE:
+        required.update(
+            {
+                "checkpoint",
+                "official_model_lock_path",
+                "official_variant_id",
+            }
+        )
+    else:
+        required.update(
+            {
+                "backbone_id",
+                "base_model",
+                "expected_protocol",
+                "vanilla_model_lock_path",
+            }
+        )
     missing = sorted(required - set(config))
     if missing:
         raise ValueError(f"retrieval suite config missing fields: {missing}")
@@ -134,12 +166,38 @@ def load_suite_config(path: Path) -> dict[str, Any]:
     for field in (
         "dataset",
         "model",
-        "official_model_lock_path",
-        "official_variant_id",
         "suite_prefix",
     ):
         if not isinstance(config[field], str) or not config[field].strip():
             raise ValueError(f"{field} must be a non-empty string")
+    binding_strings = (
+        ("official_model_lock_path", "official_variant_id")
+        if binding_type == OFFICIAL_BINDING_TYPE
+        else ("backbone_id", "vanilla_model_lock_path")
+    )
+    for field in binding_strings:
+        if not isinstance(config[field], str) or not config[field].strip():
+            raise ValueError(f"{field} must be a non-empty string")
+    if not isinstance(config["embedding_protocol"], dict):
+        raise ValueError("embedding_protocol must be an object")
+    if binding_type == VANILLA_BINDING_TYPE:
+        forbidden = {"checkpoint", "official_model_lock_path", "official_variant_id"}
+        present = sorted(forbidden & set(config))
+        if present:
+            raise ValueError(
+                f"vanilla retrieval suite contains OEA-only fields: {present}"
+            )
+        base_model = config["base_model"]
+        if not isinstance(base_model, dict):
+            raise ValueError("base_model must be an object")
+        for field in ("repo_id", "revision", "local_subdir"):
+            if not isinstance(base_model.get(field), str) or not base_model[
+                field
+            ].strip():
+                raise ValueError(f"base_model.{field} must be a non-empty string")
+        config["expected_protocol"] = validate_vanilla_protocol(
+            config["expected_protocol"], "expected_protocol"
+        )
     digest = config["expected_generation_protocol_sha256"]
     if (
         not isinstance(digest, str)
@@ -185,6 +243,23 @@ def load_suite_config(path: Path) -> dict[str, Any]:
     if len(set(protocol_ids)) != len(protocol_ids):
         raise ValueError("protocol_id values must be unique")
     return config
+
+
+def evaluation_resource_identity(
+    config: Mapping[str, Any], audit: Mapping[str, Any]
+) -> str:
+    if suite_binding_type(config) == OFFICIAL_BINDING_TYPE:
+        checkpoint = config["checkpoint"]
+        return (
+            f"{checkpoint['repo_id']}@{checkpoint['revision']}:"
+            f"{checkpoint['local_subpath']}#sha256={checkpoint['sha256']}"
+        )
+    base_model = config["base_model"]
+    lock_sha256 = audit["model_lock_binding"]["model_lock"]["sha256"]
+    return (
+        f"base-only:{base_model['repo_id']}@{base_model['revision']}:"
+        f"{base_model['local_subdir']}#model-lock-sha256={lock_sha256}"
+    )
 
 
 def verify_file_identity(
@@ -319,6 +394,7 @@ def validate_embeddings(
 def audit_embedding_directory(
     config: Mapping[str, Any], embedding_dir: Path
 ) -> dict[str, Any]:
+    binding_type = suite_binding_type(config)
     required_paths = {
         "generation_metrics": embedding_dir / "generation_metrics.json",
         "run_identity": embedding_dir / "run_identity.json",
@@ -359,8 +435,6 @@ def audit_embedding_directory(
         raise RuntimeError("run identity candidate_count mismatch")
     if identity.get("query_count") != config["expected_query_count"]:
         raise RuntimeError("run identity query_count mismatch")
-    if identity.get("checkpoint_revision") != config["checkpoint"]["revision"]:
-        raise RuntimeError("checkpoint revision mismatch")
     verify_file_identity(
         required_paths["resolved_embedding_config"],
         identity.get("config", {}),
@@ -370,15 +444,88 @@ def audit_embedding_directory(
     saved_without_paths.pop("resolved_paths", None)
     if saved_without_paths != resolved_embedding_config:
         raise RuntimeError("saved generation config differs from resolved source")
-    model_lock_binding = verify_official_model_lock_binding(
-        resolved_embedding_config
-    )
-    if model_lock_binding.get("variant_id") != config["official_variant_id"]:
-        raise RuntimeError("official model-lock variant mismatch")
-    if model_lock_binding.get("model_lock", {}).get(
-        "repository_path"
-    ) != config["official_model_lock_path"]:
-        raise RuntimeError("official model-lock path mismatch")
+    if binding_type == OFFICIAL_BINDING_TYPE:
+        if identity.get("checkpoint_revision") != config["checkpoint"]["revision"]:
+            raise RuntimeError("checkpoint revision mismatch")
+        model_lock_binding = verify_official_model_lock_binding(
+            resolved_embedding_config
+        )
+        if model_lock_binding.get("variant_id") != config["official_variant_id"]:
+            raise RuntimeError("official model-lock variant mismatch")
+        if model_lock_binding.get("model_lock", {}).get(
+            "repository_path"
+        ) != config["official_model_lock_path"]:
+            raise RuntimeError("official model-lock path mismatch")
+        if metrics.get("official_model_lock") != model_lock_binding:
+            raise RuntimeError("generation metrics model-lock binding mismatch")
+        if identity.get("official_model_lock") != model_lock_binding:
+            raise RuntimeError("run identity model-lock binding mismatch")
+        if resolved_generation_config.get("checkpoint") != config["checkpoint"]:
+            raise RuntimeError(
+                "resolved generation checkpoint specification mismatch"
+            )
+        if resolved_generation_config.get("audio_prompt_protocol") != {
+            "runtime": {
+                "value": (
+                    "audio-only chat message; passage_prefix parameter is not inserted"
+                ),
+                "source": "CODE",
+                "note": (
+                    "The paper states passage:, but public _build_audio_messages() "
+                    "explicitly ignores it. This run is a public-code protocol, not "
+                    "a strict paper-protocol claim."
+                ),
+            }
+        }:
+            raise RuntimeError("resolved audio prompt protocol mismatch")
+    else:
+        if identity.get("base_revision") != config["base_model"]["revision"]:
+            raise RuntimeError("base revision mismatch")
+        if identity.get("backbone_id") != config["backbone_id"]:
+            raise RuntimeError("run identity backbone mismatch")
+        if metrics.get("backbone_id") != config["backbone_id"]:
+            raise RuntimeError("generation metrics backbone mismatch")
+        model_lock_binding = verify_vanilla_model_lock_binding(
+            resolved_embedding_config
+        )
+        if model_lock_binding.get("backbone_id") != config["backbone_id"]:
+            raise RuntimeError("vanilla model-lock backbone mismatch")
+        if model_lock_binding.get("model_lock", {}).get(
+            "repository_path"
+        ) != config["vanilla_model_lock_path"]:
+            raise RuntimeError("vanilla model-lock path mismatch")
+        if metrics.get("vanilla_model_lock") != model_lock_binding:
+            raise RuntimeError("generation metrics vanilla lock binding mismatch")
+        if identity.get("vanilla_model_lock") != model_lock_binding:
+            raise RuntimeError("run identity vanilla lock binding mismatch")
+        for field in ("repo_id", "revision", "local_subdir"):
+            if resolved_embedding_config.get("base_model", {}).get(field) != (
+                config["base_model"][field]
+            ):
+                raise RuntimeError(f"resolved base_model.{field} mismatch")
+        if resolved_embedding_config.get("protocol") != config["expected_protocol"]:
+            raise RuntimeError("resolved vanilla embedding protocol mismatch")
+        forbidden = {
+            "checkpoint",
+            "official_model_lock",
+            "official_variant_id",
+        }
+        present = sorted(forbidden & set(resolved_embedding_config))
+        if present:
+            raise RuntimeError(
+                f"resolved vanilla config contains OEA-only fields: {present}"
+            )
+        for field in (
+            "projection_head_loaded",
+            "lora_loaded",
+            "oea_checkpoint_loaded",
+        ):
+            if metrics.get(field) is not False:
+                raise RuntimeError(f"vanilla generation must record {field}=false")
+        if identity.get("embedding_dimension") != config["expected_embedding_dim"]:
+            raise RuntimeError("run identity embedding dimension mismatch")
+        if metrics.get("embedding_dimension") != config["expected_embedding_dim"]:
+            raise RuntimeError("generation metrics embedding dimension mismatch")
     observed_protocol_sha256 = str(
         model_lock_binding.get("protocol_config", {}).get("sha256", "")
     ).lower()
@@ -386,28 +533,10 @@ def audit_embedding_directory(
         config["expected_generation_protocol_sha256"]
     ).lower():
         raise RuntimeError("generation protocol SHA256 mismatch")
-    if metrics.get("official_model_lock") != model_lock_binding:
-        raise RuntimeError("generation metrics model-lock binding mismatch")
-    if identity.get("official_model_lock") != model_lock_binding:
-        raise RuntimeError("run identity model-lock binding mismatch")
     if resolved_embedding_config.get("resolution_git_commit") != identity.get(
         "git_commit"
     ):
         raise RuntimeError("resolved config/generator Git commit mismatch")
-    if resolved_generation_config.get("checkpoint") != config["checkpoint"]:
-        raise RuntimeError("resolved generation checkpoint specification mismatch")
-    if resolved_generation_config.get("audio_prompt_protocol") != {
-        "runtime": {
-            "value": "audio-only chat message; passage_prefix parameter is not inserted",
-            "source": "CODE",
-            "note": (
-                "The paper states passage:, but public _build_audio_messages() "
-                "explicitly ignores it. This run is a public-code protocol, not "
-                "a strict paper-protocol claim."
-            ),
-        }
-    }:
-        raise RuntimeError("resolved audio prompt protocol mismatch")
 
     recorded_artifacts = metrics.get("artifacts")
     if not isinstance(recorded_artifacts, dict):
@@ -449,18 +578,26 @@ def audit_embedding_directory(
         captions_per_clip=int(config["expected_captions_per_clip"]),
         seed=0,
     )
-    return {
+    report = {
         "paths": {name: str(path) for name, path in required_paths.items()},
         "source_files": {
             name: file_identity(path) for name, path in required_paths.items()
         },
         "verified_generation_artifacts": verified_artifacts,
-        "official_model_lock": model_lock_binding,
+        "binding_type": binding_type,
+        "model_lock_binding": model_lock_binding,
         "generation_metrics": metrics,
         "run_identity": identity,
         "selected_indices": selected_indices,
         "selection_rows": selection_rows,
     }
+    legacy_lock_key = (
+        "official_model_lock"
+        if binding_type == OFFICIAL_BINDING_TYPE
+        else "vanilla_model_lock"
+    )
+    report[legacy_lock_key] = model_lock_binding
+    return report
 
 
 def build_evaluation_config(
@@ -472,15 +609,11 @@ def build_evaluation_config(
     selection_indices_path: Path,
 ) -> dict[str, Any]:
     paths = audit["paths"]
-    checkpoint = suite_config["checkpoint"]
     evaluation_config: dict[str, Any] = {
         "schema_version": 1,
         "experiment_id": f"{suite_id}__{protocol['protocol_id']}",
         "model": suite_config["model"],
-        "checkpoint": (
-            f"{checkpoint['repo_id']}@{checkpoint['revision']}:"
-            f"{checkpoint['local_subpath']}#sha256={checkpoint['sha256']}"
-        ),
+        "checkpoint": evaluation_resource_identity(suite_config, audit),
         "dataset": suite_config["dataset"],
         "task": protocol["task"],
         "paper_table": protocol["paper_table"],
@@ -615,6 +748,8 @@ def prepare_suite(config_path: Path, embedding_dir: Path, suite_dir: Path) -> in
         suite_identity = {
             "schema_version": 1,
             "suite_id": suite_id,
+            "binding_type": config["binding_type"],
+            "model_lock_binding": audit["model_lock_binding"],
             "git_commit": git_commit,
             "suite_config": file_identity(config_path),
             "embedding_dir": str(embedding_dir),
@@ -643,6 +778,7 @@ def prepare_suite(config_path: Path, embedding_dir: Path, suite_dir: Path) -> in
             "git_commit": git_commit,
             "git_status_short": git_status,
             "embedding_dir": str(embedding_dir),
+            "binding_type": config["binding_type"],
             "embedding_generation_status": audit["generation_metrics"]["status"],
             "candidate_count": config["expected_candidate_count"],
             "query_count": config["expected_query_count"],
@@ -722,11 +858,7 @@ def validate_protocol_run(
     if run_metrics.get("status") != "complete":
         raise RuntimeError(f"protocol {protocol['protocol_id']} is not complete")
 
-    checkpoint = config["checkpoint"]
-    expected_checkpoint = (
-        f"{checkpoint['repo_id']}@{checkpoint['revision']}:"
-        f"{checkpoint['local_subpath']}#sha256={checkpoint['sha256']}"
-    )
+    expected_checkpoint = evaluation_resource_identity(config, audit)
     expected_values = {
         "experiment_id": protocol["experiment_id"],
         "model": config["model"],
@@ -903,6 +1035,10 @@ def finalize_suite(config_path: Path, embedding_dir: Path, suite_dir: Path) -> i
         identity = json.loads(identity_path.read_text(encoding="utf-8"))
         if identity.get("git_commit") != git_commit:
             raise RuntimeError("suite preparation and finalization commits differ")
+        if identity.get("binding_type") != config["binding_type"]:
+            raise RuntimeError("suite binding type mismatch")
+        if identity.get("model_lock_binding") != audit["model_lock_binding"]:
+            raise RuntimeError("suite model-lock binding mismatch")
         identity_checks = {
             "suite_config": file_identity(config_path),
             "suite_plan": file_identity(plan_path),
@@ -1000,6 +1136,8 @@ def finalize_suite(config_path: Path, embedding_dir: Path, suite_dir: Path) -> i
             "git_commit": git_commit,
             "git_status_short": git_status,
             "embedding_dir": str(embedding_dir),
+            "binding_type": config["binding_type"],
+            "model_lock_binding": audit["model_lock_binding"],
             "protocol_count": len(results),
             "results": results,
             "summary": file_identity(summary_path),
@@ -1011,6 +1149,9 @@ def finalize_suite(config_path: Path, embedding_dir: Path, suite_dir: Path) -> i
                 if (
                     existing.get("suite_id") != report["suite_id"]
                     or existing.get("git_commit") != report["git_commit"]
+                    or existing.get("binding_type") != report["binding_type"]
+                    or existing.get("model_lock_binding")
+                    != report["model_lock_binding"]
                     or existing.get("results") != report["results"]
                     or existing.get("summary") != report["summary"]
                 ):

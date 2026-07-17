@@ -81,8 +81,10 @@ bash scripts/run_reproduction.sh \
 ```
 
 计划顺序固定为：CPU base-only 模型锁 → 1×A100 smoke → 1×A100 全量
-Clotho embedding → CPU 指标。全量阶段必须显式传入前一步的
-`--smoke-metrics`，不能只靠环境变量或跳过 smoke 闸门。
+Clotho embedding → CPU 四协议 T2A/T2T 汇总。全量阶段必须显式传入
+前一步的 `--smoke-metrics`，不能只靠环境变量或跳过 smoke 闸门；CPU
+汇总继续绑定相同 vanilla model lock 和协议 SHA，并拒绝加载 OEA
+checkpoint、LoRA 或 projection head 的证据记录。
 
 CPU 指标阶段需要显式提供上一台 GPU 服务器生成的目录：
 

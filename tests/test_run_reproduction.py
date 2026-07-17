@@ -142,6 +142,15 @@ class RunReproductionTest(unittest.TestCase):
             payload["steps"][2]["command"][-2:],
             ["--full", "<smoke_metrics>"],
         )
+        self.assertEqual(
+            payload["steps"][3]["command"],
+            [
+                "bash",
+                "scripts/run_vanilla_clotho_retrieval_suite.sh",
+                "vanilla_qwen2_5_omni_3b",
+                "<embedding_dir>",
+            ],
+        )
 
     def test_vanilla_full_requires_explicit_smoke_metrics_on_execute(self) -> None:
         stage = self.registry["vanilla_full_embeddings"]

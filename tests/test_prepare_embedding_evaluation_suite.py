@@ -42,6 +42,48 @@ MODEL_LOCK_BINDING = {
         "sha256": "b" * 64,
     },
 }
+VANILLA_MODEL_LOCK_BINDING = {
+    "backbone_id": "synthetic-vanilla",
+    "model": "synthetic-model",
+    "model_lock": {
+        "repository_path": "results/model_locks/synthetic-vanilla.json",
+        "size_bytes": 10,
+        "sha256": "d" * 64,
+    },
+    "protocol_config": {
+        "repository_path": "configs/eval/synthetic-vanilla.json",
+        "size_bytes": 10,
+        "sha256": "b" * 64,
+    },
+}
+VANILLA_PROTOCOL = {
+    "text_prompt": {
+        "value": "query:",
+        "source": "[PAPER][CODE]",
+        "runtime_join": "direct concatenation without an inserted separator",
+        "runtime_form": "query:<caption>",
+        "runtime_source": "[CODE] synthetic",
+    },
+    "audio_prompt": {
+        "runtime_value": (
+            "audio-only chat message; passage_prefix parameter is not inserted"
+        ),
+        "runtime_source": "[CODE]",
+        "paper_value": "passage:",
+        "paper_source": "[PAPER]",
+        "status": "CONFLICT",
+        "claim_boundary": "synthetic public-code protocol",
+    },
+    "pooling": {
+        "value": "attention-mask-aware mean of last hidden states",
+        "source": "[CODE]",
+    },
+    "normalization": {"value": "L2", "source": "[CODE]"},
+    "projection": {
+        "value": "none; retain the backbone hidden dimension",
+        "source": "[CODE]",
+    },
+}
 
 
 def write_json(path: Path, value: object) -> None:
@@ -247,6 +289,80 @@ def synthetic_embedding_directory(root: Path) -> Path:
     return embedding_dir
 
 
+def synthetic_vanilla_suite_config(root: Path) -> Path:
+    path = synthetic_suite_config(root)
+    config = json.loads(path.read_text(encoding="utf-8"))
+    for field in ("checkpoint", "official_model_lock_path", "official_variant_id"):
+        config.pop(field)
+    config.update(
+        {
+            "binding_type": "vanilla_backbone",
+            "backbone_id": "synthetic-vanilla",
+            "vanilla_model_lock_path": (
+                "results/model_locks/synthetic-vanilla.json"
+            ),
+            "base_model": {
+                "repo_id": "synthetic/base",
+                "revision": "base-revision",
+                "local_subdir": "synthetic-base",
+            },
+            "expected_protocol": VANILLA_PROTOCOL,
+        }
+    )
+    write_json(path, config)
+    return path
+
+
+def synthetic_vanilla_embedding_directory(root: Path) -> Path:
+    embedding_dir = synthetic_embedding_directory(root)
+    resolved = {
+        "backbone_id": "synthetic-vanilla",
+        "model": "synthetic-model",
+        "base_model": {
+            "repo_id": "synthetic/base",
+            "revision": "base-revision",
+            "local_subdir": "synthetic-base",
+        },
+        "protocol": VANILLA_PROTOCOL,
+        "resolution_git_commit": "generation-commit",
+    }
+    write_json(embedding_dir / "resolved_embedding_config.json", resolved)
+    write_json(
+        embedding_dir / "config.yaml",
+        {**resolved, "resolved_paths": {"output_dir": str(embedding_dir)}},
+    )
+    write_json(
+        embedding_dir / "run_identity.json",
+        {
+            "git_commit": "generation-commit",
+            "config": file_identity(
+                embedding_dir / "resolved_embedding_config.json"
+            ),
+            "vanilla_model_lock": VANILLA_MODEL_LOCK_BINDING,
+            "backbone_id": "synthetic-vanilla",
+            "base_revision": "base-revision",
+            "embedding_dimension": 2,
+            "candidate_count": 2,
+            "query_count": 4,
+        },
+    )
+    metrics_path = embedding_dir / "generation_metrics.json"
+    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    metrics.update(
+        {
+            "backbone_id": "synthetic-vanilla",
+            "vanilla_model_lock": VANILLA_MODEL_LOCK_BINDING,
+            "embedding_dimension": 2,
+            "projection_head_loaded": False,
+            "lora_loaded": False,
+            "oea_checkpoint_loaded": False,
+        }
+    )
+    metrics.pop("official_model_lock", None)
+    write_json(metrics_path, metrics)
+    return embedding_dir
+
+
 class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
     def test_fixed_config_separates_all_public_code_protocols(self) -> None:
         repository_root = Path(__file__).resolve().parents[1]
@@ -281,6 +397,51 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             )["sha256"],
             config["expected_generation_protocol_sha256"],
         )
+
+    def test_vanilla_fixed_configs_bind_exact_base_only_protocols(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        expected = {
+            "vanilla_nemotron_3b": (
+                "vanilla_nemotron_3b_clotho_embeddings.json",
+                2048,
+            ),
+            "vanilla_qwen2_5_omni_3b": (
+                "vanilla_qwen2_5_omni_3b_clotho_embeddings.json",
+                2048,
+            ),
+            "vanilla_qwen2_5_omni_7b": (
+                "vanilla_qwen2_5_omni_7b_clotho_embeddings.json",
+                3584,
+            ),
+        }
+        for backbone_id, (embedding_name, dimension) in expected.items():
+            with self.subTest(backbone=backbone_id):
+                suite_name = embedding_name.replace(
+                    "_clotho_embeddings.json", "_clotho_retrieval_suite.json"
+                )
+                config = load_suite_config(
+                    repository_root / "configs/eval" / suite_name
+                )
+                self.assertEqual(config["binding_type"], "vanilla_backbone")
+                self.assertEqual(config["backbone_id"], backbone_id)
+                self.assertEqual(config["expected_embedding_dim"], dimension)
+                self.assertNotIn("checkpoint", config)
+                generation_config = json.loads(
+                    (repository_root / "configs/eval" / embedding_name).read_text(
+                        encoding="utf-8"
+                    )
+                )
+                self.assertEqual(config["base_model"], generation_config["base_model"])
+                self.assertEqual(
+                    config["expected_protocol"], generation_config["protocol"]
+                )
+                self.assertEqual(
+                    file_identity(
+                        repository_root / "configs/eval" / embedding_name
+                    )["sha256"],
+                    config["expected_generation_protocol_sha256"],
+                )
+                self.assertEqual(len(config["protocols"]), 4)
 
     def test_seed0_selection_reproduces_one_choice_per_clip(self) -> None:
         candidates = [
@@ -425,6 +586,112 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             self.assertEqual(
                 len(list((suite_dir / "failures").glob("failure_*.json"))), 1
             )
+
+    def test_prepare_and_finalize_complete_synthetic_vanilla_suite(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config_path = synthetic_vanilla_suite_config(root)
+            embedding_dir = synthetic_vanilla_embedding_directory(root)
+            suite_dir = root / "synthetic_suite_run"
+            with (
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.git_output",
+                    side_effect=["suite-commit", ""],
+                ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_vanilla_model_lock_binding",
+                    return_value=VANILLA_MODEL_LOCK_BINDING,
+                ),
+                patch("scripts.prepare_embedding_evaluation_suite.subprocess.run"),
+                patch("builtins.print"),
+            ):
+                self.assertEqual(
+                    prepare_suite(config_path, embedding_dir, suite_dir), 0
+                )
+
+            plan = json.loads(
+                (suite_dir / "suite_plan.json").read_text(encoding="utf-8")
+            )
+            for protocol in plan["protocols"]:
+                protocol_config = json.loads(
+                    Path(protocol["config"]).read_text(encoding="utf-8")
+                )
+                self.assertTrue(
+                    protocol_config["checkpoint"].startswith(
+                        "base-only:synthetic/base@base-revision:synthetic-base"
+                    )
+                )
+                output_dir = Path(protocol["output_dir"])
+                output_dir.mkdir(parents=True)
+                for name, content in (
+                    ("command.sh", "synthetic wrapper\n"),
+                    ("environment.txt", "synthetic environment\n"),
+                    ("git_commit.txt", "suite-commit\n"),
+                    ("git_status.txt", ""),
+                    ("gpu_info.txt", "GPU disabled\n"),
+                    ("stdout.log", ""),
+                    ("stderr.log", ""),
+                ):
+                    (output_dir / name).write_text(content, encoding="utf-8")
+                with patch(
+                    "scripts.evaluate_embedding_artifacts.git_output",
+                    side_effect=["suite-commit", ""],
+                ):
+                    run_evaluation(
+                        config_path=Path(protocol["config"]),
+                        output_dir=output_dir,
+                        argv=["python", "synthetic-vanilla-evaluation"],
+                    )
+                (output_dir / "exit_code.txt").write_text("0\n", encoding="utf-8")
+
+            with (
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.git_output",
+                    side_effect=["suite-commit", ""],
+                ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_vanilla_model_lock_binding",
+                    return_value=VANILLA_MODEL_LOCK_BINDING,
+                ),
+                patch("builtins.print"),
+            ):
+                self.assertEqual(
+                    finalize_suite(config_path, embedding_dir, suite_dir), 0
+                )
+            report = json.loads(
+                (suite_dir / "suite_metrics.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(report["status"], "complete")
+            self.assertEqual(report["binding_type"], "vanilla_backbone")
+            self.assertEqual(
+                report["model_lock_binding"], VANILLA_MODEL_LOCK_BINDING
+            )
+
+    def test_vanilla_suite_rejects_loaded_oea_components(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config_path = synthetic_vanilla_suite_config(root)
+            embedding_dir = synthetic_vanilla_embedding_directory(root)
+            metrics_path = embedding_dir / "generation_metrics.json"
+            metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+            metrics["lora_loaded"] = True
+            write_json(metrics_path, metrics)
+            with (
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.git_output",
+                    side_effect=["suite-commit", ""],
+                ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_vanilla_model_lock_binding",
+                    return_value=VANILLA_MODEL_LOCK_BINDING,
+                ),
+                self.assertRaisesRegex(RuntimeError, "lora_loaded=false"),
+            ):
+                prepare_suite(
+                    config_path,
+                    embedding_dir,
+                    root / "synthetic_suite_run",
+                )
 
     def test_generation_artifact_drift_is_rejected_and_recorded(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
