@@ -3,6 +3,8 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -120,6 +122,38 @@ class BaselineReadinessAuditTest(unittest.TestCase):
         ):
             self.assertNotIn(fragment, source)
         self.assertIn("refusing to overwrite existing report", source)
+
+    def test_cli_writes_lf_only_json_without_overwriting(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "audit.json"
+            command = [
+                sys.executable,
+                str(REPOSITORY_ROOT / "scripts/audit_baseline_readiness.py"),
+                "--output",
+                str(output),
+            ]
+            completed = subprocess.run(
+                command,
+                cwd=REPOSITORY_ROOT,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            content = output.read_bytes()
+            self.assertNotIn(b"\r\n", content)
+            self.assertTrue(content.endswith(b"\n"))
+            repeated = subprocess.run(
+                command,
+                cwd=REPOSITORY_ROOT,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertNotEqual(repeated.returncode, 0)
+            self.assertIn("refusing to overwrite", repeated.stderr)
 
 
 if __name__ == "__main__":

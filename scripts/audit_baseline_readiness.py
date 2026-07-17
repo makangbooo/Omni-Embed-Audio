@@ -409,7 +409,8 @@ def main() -> int:
         output.parent.mkdir(parents=True, exist_ok=True)
         if output.exists():
             raise FileExistsError(f"refusing to overwrite existing report: {output}")
-        output.write_text(rendered, encoding="utf-8")
+        with output.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(rendered)
     else:
         print(rendered, end="")
     return 0 if report["report_status"] == "complete" else 1
