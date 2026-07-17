@@ -1,0 +1,47 @@
+{
+  "delta_contract": {
+    "absolute_delta": "abs(reproduced_value - paper_value), percentage points",
+    "relative_delta": "(reproduced_value - paper_value) / paper_value * 100, signed percent",
+    "rounding": "ROUND_HALF_UP to 6 decimal places"
+  },
+  "inputs": {
+    "observations": {
+      "path": "results/observations/reproduction_observations.jsonl",
+      "sha256": "ea300770b222dc5e4fee0a9f9cfa6f0f97874056d5ef0b7d56aa913b37a1fad5",
+      "size_bytes": 3628
+    },
+    "paper_registry": {
+      "path": "configs/results/paper_reported_metrics.jsonl",
+      "sha256": "70474246c8d16243c790316310e4fede937960eed11b92dcb30c9f200a1423b8",
+      "size_bytes": 7110
+    }
+  },
+  "observation_count": 6,
+  "output": {
+    "path": "results/tables/reproduction_summary.csv",
+    "sha256": "a6f1a20ade4c128ca6e4fa830a107f8385e00003acafac8622e83f0c7351ced4",
+    "size_bytes": 2857
+  },
+  "paper_metric_count": 18,
+  "schema_version": 1,
+  "status": "complete",
+  "status_counts": {
+    "blocked": 6
+  },
+  "summary_row_count": 6,
+  "unobserved_paper_metric_count": 12,
+  "unobserved_paper_metric_ids": [
+    "table12_oea_qwen3b_cl_clotho_question_r1",
+    "table12_oea_qwen3b_cl_clotho_question_r10",
+    "table12_oea_qwen3b_cl_clotho_question_r5",
+    "table13_oea_qwen3b_cl_clotho_imperative_r1",
+    "table13_oea_qwen3b_cl_clotho_imperative_r10",
+    "table13_oea_qwen3b_cl_clotho_imperative_r5",
+    "table14_oea_qwen3b_cl_clotho_paraphrase_r1",
+    "table14_oea_qwen3b_cl_clotho_paraphrase_r10",
+    "table14_oea_qwen3b_cl_clotho_paraphrase_r5",
+    "table15_oea_qwen3b_cl_clotho_keyphrase_r1",
+    "table15_oea_qwen3b_cl_clotho_keyphrase_r10",
+    "table15_oea_qwen3b_cl_clotho_keyphrase_r5"
+  ]
+}
