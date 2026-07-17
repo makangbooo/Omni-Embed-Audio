@@ -11,6 +11,7 @@
 | 0 项目审计 | 31 条实验/图/派生分析 inventory | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认复现边界 |
 | 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `48d7a50` | 本地与 fork 分支均存在 | 无 | 后续提交仅推送该分支 |
 | 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
+| 0 编排 | 统一复现入口与 CPU/GPU 阶段门禁 | COMPLETED | `2a47e10` | 公共入口、精确阶段注册表、默认只规划/显式执行、长任务确认和干净 worktree 门禁已实现；完整 193 项测试通过；尚未在远程执行 | 无；入口完成不代表任何 blocked 实验已解锁或产生复现值 | 仅在固定资源与证据满足后更新叶子阶段状态；当前仍只等待 DATA-04 |
 | 1 环境 | CPU-01：CPU/内存/存储/编译器/网络审计 | COMPLETED | `20770d0` | 远程完成；原始日志未进 Git | Zenodo 返回 503；容器 `nproc=2` | 在共享目录挂载到 A100 后执行 GPU-01 |
 | 1 环境 | GPU-01：A100/Driver/CUDA/NCCL 基础审计 | COMPLETED | `905e84d` | 1×A100-SXM4-80GB 远程完成；原始日志未进 Git | 多卡 GPU–GPU 拓扑留待 DDP smoke | 固定环境候选并执行 GPU-02 |
 | 1 环境 | 生成环境候选、安装脚本与无模型检查 | COMPLETED | `c61fecb` | fork 已同步 | 完整 transitive lock 必须在 Linux solve 后生成 | 固定首批模型资源 |
@@ -60,6 +61,6 @@
 
 - 当前阶段：环境、首批官方权重、checkpoint 结构审计、inference-only 权重提取及单卡 GPU smoke 已完成。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：Clotho DATA-02 远程全量解码/manifest/UIQ 校验通过；WavCaps DATA-09 精确复现论文的 173 个 AudioCaps 和 638 个 Clotho 重叠计数；DATA-10 完成 development/validation 四个 CSV 全量审计与远程全量校验实现；MODEL-03/04 只读完整性审计器及六变体按变体精确资源审计入口完成；六个 OEA 原始 checkpoint 的真实文件名、revision、字节数与 LFS SHA256 已固定，并完成清单驱动的 FakeTensor 结构审计/非覆盖推理权重提取器；六变体可移植模型资源锁生成器已把基础模型全文件、原始/派生 checkpoint、实测 LoRA 结构及证据报告纳入同一校验契约；进一步完成固定顺序的三阶段 CPU 流水线、已有派生权重逐张量只读复核，以及正式 Caption/UIQ GPU 生成和 CPU 汇总对已提交模型锁/完整 base 文件清单的双端强绑定；DATA-11 在固定元数据上发现 4 个 MECAT 同源视频候选；显式 target/HN negative artifact evaluator、Qwen3B-Cl/Clotho 四协议 caption retrieval 套件，以及 Tables 12–15 正向 UIQ 的 4,180-query 可恢复生成器/CPU 套件完成；Tables 1–17 全部分类，13 张数值结果表的 910 个论文指标已登记并通过固定 PDF 的 910/910 单元转录审计；完整 183 项测试通过。
+- 最近完成：Clotho DATA-02 远程全量解码/manifest/UIQ 校验通过；WavCaps DATA-09 精确复现论文的 173 个 AudioCaps 和 638 个 Clotho 重叠计数；DATA-10 完成 development/validation 四个 CSV 全量审计与远程全量校验实现；MODEL-03/04 只读完整性审计器及六变体按变体精确资源审计入口完成；六个 OEA 原始 checkpoint 的真实文件名、revision、字节数与 LFS SHA256 已固定，并完成清单驱动的 FakeTensor 结构审计/非覆盖推理权重提取器；六变体可移植模型资源锁生成器已把基础模型全文件、原始/派生 checkpoint、实测 LoRA 结构及证据报告纳入同一校验契约；进一步完成固定顺序的三阶段 CPU 流水线、已有派生权重逐张量只读复核，以及正式 Caption/UIQ GPU 生成和 CPU 汇总对已提交模型锁/完整 base 文件清单的双端强绑定；DATA-11 在固定元数据上发现 4 个 MECAT 同源视频候选；显式 target/HN negative artifact evaluator、Qwen3B-Cl/Clotho 四协议 caption retrieval 套件，以及 Tables 12–15 正向 UIQ 的 4,180-query 可恢复生成器/CPU 套件完成；Tables 1–17 全部分类，13 张数值结果表的 910 个论文指标已登记并通过固定 PDF 的 910/910 单元转录审计；统一入口已将数据、模型锁、官方评测、UIQ、训练、基线和全流程注册为默认只规划、按 CPU/GPU 交接的受控阶段；完整 193 项测试通过。
 - 当前阻塞：正式论文全三数据集表仍缺 AudioCaps 与 MECAT 音频；AudioCaps 还缺论文有效 91,256-row train manifest，MECAT 还缺论文 847 条中的排除 ID 和检索 caption 字段。WavCaps 的 `<=31s` 文字条件与 275,618 计数不一致，论文精确 filtered manifest/blocklist 未发布。`+Cl` 的论文 early-stopping split 也未命名，而公开 launcher 使用 evaluation 早停。当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
 - 下一步：保持 DATA-04 为用户唯一待执行步骤；成功后在同一 CPU 服务器执行 DATA-05，再依次完成 DATA-06/07、DATA-08/09 与 DATA-11 canonical 复算。CPU 数据步骤完成后再申请 1×A100-80GB 做 Qwen3B-Cl 正式 embedding 小批校验。
