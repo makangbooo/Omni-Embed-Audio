@@ -43,6 +43,7 @@
 | 3 数据 | DATA-04：固定并下载 MECAT `00A/test` | WAITING_USER | `87dbe32` | 独立工作副本 `/home/jg525/Omni-Embed-Audio-data04` 已创建且干净；下载命令尚未运行 | 需要远程 CPU 执行约 173 MB 下载 | 拉取最新分支后运行下载并核对 manifest/size/SHA256 |
 | 3 数据 | DATA-05：MECAT 848 条安全解压/解码/UIQ ID 校验 | BLOCKED | `87dbe32` | 尚未运行；安全解压、FLAC 完整解码、六字段保留、UIQ 集合校验已通过合成测试 | 等待 DATA-04 | DATA-04 完成后在同一 CPU 服务器执行 |
 | 3 数据 | MECAT 论文 847 条子集与检索 caption 口径 | BLOCKED | `87dbe32` | 官方 `00A/test` 与发布正向 UIQ 均为 848；审计文档已完成 | `[MISSING]` 被排除 ID、过滤规则、caption 字段/组合均未公开 | 不擅自删样本；先报告 848 条公开口径，继续请求作者证据 |
+| 3 数据 | DATA-11：MECAT–WavCaps 来源视频候选审计 | IN_PROGRESS | `e5bf4db` | 本地发布 UIQ 848 IDs × 固定 AudioSet_SL 108,317 rows 已完成：807 唯一来源视频、4 个同源视频候选；109 项测试通过 | DATA-05 archive manifest 与 DATA-08 远程 metadata 尚未复算；论文音频/embedding 阈值 `[MISSING]` | DATA-05/08 后在 CPU 侧运行 canonical join；不把来源视频候选写成音频重复或 blocklist |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | LAION/Robust/MGA/M2D-CLAP | BLOCKED | N/A | 未开始 | checkpoint revision/统一入口不完整 | 官方 OEA 评测完成后逐个固定资源 |
 | 6 扩展 | 人工/闭源 API、效率、token-length、派生图表 | TODO | N/A | 未开始 | 按阶段后置 | 核心训练评测完成后执行 |
@@ -51,6 +52,6 @@
 
 - 当前阶段：环境、首批官方权重、checkpoint 结构审计、inference-only 权重提取及单卡 GPU smoke 已完成。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：Clotho DATA-02 远程全量解码/manifest/UIQ 校验通过；WavCaps DATA-09 精确复现论文的 173 个 AudioCaps 和 638 个 Clotho 重叠计数；DATA-10 完成 development/validation 四个 CSV 全量审计与远程全量校验实现；MODEL-03/04 只读完整性审计器完成；完整 105 项测试通过。
+- 最近完成：Clotho DATA-02 远程全量解码/manifest/UIQ 校验通过；WavCaps DATA-09 精确复现论文的 173 个 AudioCaps 和 638 个 Clotho 重叠计数；DATA-10 完成 development/validation 四个 CSV 全量审计与远程全量校验实现；MODEL-03/04 只读完整性审计器完成；DATA-11 在固定元数据上发现 4 个 MECAT 同源视频候选；完整 109 项测试通过。
 - 当前阻塞：正式论文全三数据集表仍缺 AudioCaps 与 MECAT 音频；AudioCaps 还缺论文有效 91,256-row train manifest，MECAT 还缺论文 847 条中的排除 ID 和检索 caption 字段。WavCaps 的 `<=31s` 文字条件与 275,618 计数不一致，论文精确 filtered manifest/blocklist 未发布。`+Cl` 的论文 early-stopping split 也未命名，而公开 launcher 使用 evaluation 早停。当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
-- 下一步：保持 DATA-04 为用户唯一待执行步骤；成功后在同一 CPU 服务器执行 DATA-05，再依次完成 DATA-06/07 与 DATA-08/09。CPU 数据步骤完成后再申请 1×A100-80GB 做 Qwen3B-Cl 正式 embedding 小批校验。
+- 下一步：保持 DATA-04 为用户唯一待执行步骤；成功后在同一 CPU 服务器执行 DATA-05，再依次完成 DATA-06/07、DATA-08/09 与 DATA-11 canonical 复算。CPU 数据步骤完成后再申请 1×A100-80GB 做 Qwen3B-Cl 正式 embedding 小批校验。

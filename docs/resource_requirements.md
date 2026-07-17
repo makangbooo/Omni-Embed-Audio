@@ -87,6 +87,7 @@
 - 官方数据仓库：`mispeech/MECAT-Caption` revision `be4a24c3f7309d74208e08a7cce49e72cb7a5834`；官方实现仓库：`xiaomi-research/mecat` commit `a004949d58e86e2ee56baa879607ec2109cfcc46`。
 - 当前只需下载 `00A/test_0000-0000000.tar.gz`：173,168,424 bytes，LFS SHA256 `644cf75e2509c633452a18e36c41b285a317c6cbc06198d7dfe406c5aa5122c4`；无需下载约 16 GB 的其他域。
 - `[CODE]` 官方 `00A/test` 和四个 OEA 正向 UIQ 文件均为 848 IDs；`[PAPER]` 评测写 847 auto-captioned pairs。
+- DATA-11 在固定 WavCaps AudioSet_SL metadata 中找到 4 个 MECAT 同源 YouTube video candidates；该结果仅为 `[CODE][INFERRED]` provenance，不证明时间片/音频重复。远程 canonical manifest 复算等待 DATA-05/08。
 - `[MISSING]` 论文使用的精确 847-row manifest、排除的 1 条样本、T2A/T2T caption 字段/组合。
 - DATA-04/05 可以完成公开 848 条数据的下载、解压、解码、六字段保存和 UIQ ID 精确对齐；严格 847 条主表在作者提供缺失信息前保持 BLOCKED。详见 `docs/mecat_data_audit.md`。
 

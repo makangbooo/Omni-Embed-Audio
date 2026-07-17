@@ -56,6 +56,13 @@ There are 6 non-positive-duration records and 67 records with duration exactly 3
 
 The paper does not publish the exact Clotho-to-WavCaps blocklist or its duplicate-resolution rule. Consequently, 638 is an exact reproduced overlap count, while the 1,017-row conservative blocklist is `[INFERRED]` and must not be described as the paper's original blocklist.
 
+### MECAT 00A/test against WavCaps AudioSet_SL
+
+- Released MECAT positive UIQ contains 848 unique sample IDs representing 807 unique 11-character YouTube source-video IDs.
+- Exact source-video ID matching against the pinned 108,317 WavCaps AudioSet_SL rows finds 4 shared videos and 4 MECAT samples.
+- This is `[CODE][INFERRED]` provenance evidence pending DATA-05 archive-manifest confirmation. A shared source video does not prove temporal or audio-content overlap because the WavCaps metadata does not publish the AudioSet_SL segment timestamp.
+- `[MISSING]` the paper's audio/embedding model, threshold, candidate list, and manual review. DATA-11 reports the four candidates without applying a blocklist.
+
 ## Count after the metadata-only conservative blocklist
 
 Applying the inferred `0 < duration < 31` filter and removing all 173 AudioCaps matches plus all 383 duration-eligible conservative Clotho candidates yields 275,062 rows. This is an `[INFERRED]` conservative reconstruction. The paper's exact post-blocklist training count is `[MISSING]`.
@@ -72,4 +79,4 @@ The small summary is committed as `results/data_audits/data09_wavcaps_local_vali
 | Clotho conservative candidates | 1,017 | 261,815 | `11c2a1d1f6e97f98f117dfb7c453419f554dd4bff4bdc724ee1c30ab88adb805` |
 | filename + `sound_id` confirmations | 611 | 148,171 | `d6c51f269e8a81ef7b470d5f266595c6949573c6819928f930abc34fb6e7afb1` |
 
-The full local validation was run twice; the second pass reused the outputs only after verifying deterministic hashes. Remote DATA-08/09 will recreate the same audit on the shared CPU storage before WavCaps audio preparation begins.
+The full local validation was run twice; the second pass reused the outputs only after verifying deterministic hashes. Remote DATA-08/09 will recreate the same audit on the shared CPU storage before WavCaps audio preparation begins. DATA-11 then joins the canonical MECAT manifest to the pinned AudioSet_SL metadata and preserves the source-video candidate artifact separately from training blocklists.

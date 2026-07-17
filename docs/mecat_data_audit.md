@@ -1,6 +1,6 @@
 # MECAT 数据审计
 
-最后更新：2026-07-17（Asia/Shanghai）
+最后更新：2026-07-18（Asia/Shanghai）
 
 ## 结论
 
@@ -59,6 +59,30 @@ DATA-04 不解压、不使用 GPU，也不覆盖已有无 revision marker 的非
 8. 对 409 条 negative UIQ 检查 audio ID 均属于候选集，但不伪造缺失的 hard-negative audio ID；
 9. 生成 848-row JSONL manifest、统计 JSON、逐文件 SHA256 和完整运行日志。
 
+## DATA-11：MECAT–WavCaps 来源视频审计
+
+入口：`bash scripts/run_data11_mecat_wavcaps_provenance.sh`
+
+论文附录 B.4 的音频/embedding 重叠实现、模型、阈值、人工复核候选均未公开。DATA-11 先完成无需猜测的来源级子问题：
+
+1. 严格从 MECAT `sample_id` 的前 11 个字符解析公开的 YouTube source-video ID，但不猜测后续时间编码；
+2. 将 WavCaps AudioSet_SL 的 `Y<11-char>.wav` 规范化为同一 ID；
+3. 只做精确 ID 交集，不使用 caption 相似度或模糊字符串匹配；
+4. 报告同一来源视频的全部 MECAT segments，但不据此删除样本或修改训练/评测集合；
+5. canonical JSONL 若已存在且内容不同则拒绝覆盖。
+
+在 DATA-05 远程 archive 校验前，先用发布的 848 条 MECAT question UIQ ID 和固定 WavCaps metadata 完成本地全量审计：
+
+| 项目 | 结果 | 证据等级 |
+|---|---:|---|
+| MECAT UIQ sample IDs | 848 | `[CODE]` |
+| MECAT 唯一 source videos | 807 | `[CODE][INFERRED]` ID 结构解析 |
+| 具有多个 MECAT segments 的 source videos | 37 | `[CODE][INFERRED]` |
+| 与 WavCaps AudioSet_SL 同源的 YouTube IDs | 4 | `[CODE][INFERRED]` |
+| 涉及 MECAT samples | 4 | `[CODE][INFERRED]` |
+
+4 个候选 source-video IDs 为 `FQIZHO6l0IY`、`Nw2EarZypA0`、`qEfTLLEpojc`、`vzt3AXNeKIQ`。它们只证明同一来源视频，不能证明 MECAT 与 WavCaps 使用了相同时间段或相同音频字节，也不能替代论文的 embedding 检查。小型证据保存在 `results/data_audits/data11_mecat_wavcaps_provenance_local.json`；DATA-05/08 完成后由 DATA-11 远程复算并确认 archive manifest。
+
 ## 尚未解决的问题
 
 | 问题 | 标记 | 对实验的影响 | 解决条件 |
@@ -66,3 +90,4 @@ DATA-04 不解压、不使用 GPU，也不覆盖已有无 revision marker 的非
 | 论文 847 与公开 848 的差异 | `[MISSING]` | 不能宣称精确复现 MECAT 表 2/3/12–15 | 作者提供 847-row manifest、排除 ID 或可审计过滤规则 |
 | T2A/T2T 的 caption 字段/组合 | `[MISSING]` | 不能生成论文同口径的 MECAT caption query/candidate | 作者提供字段选择或原始评测 manifest |
 | negative 的 hard-negative audio ID | `[MISSING]` | 不能精确计算 MECAT HNSR/TFR/Δ-Rank | 作者提供 target/HN pairing，或另做明确标为 `[INFERRED]` 的重建实验 |
+| 附录 B.4 的音频/embedding 重叠协议 | `[MISSING]` | 4 个同源视频候选不能判定为音频重复 | 作者提供模型、阈值、时间片/候选清单与人工复核结果；或在完整音频上做明确标为替代协议的实验 |
