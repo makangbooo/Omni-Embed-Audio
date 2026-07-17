@@ -74,10 +74,11 @@
 
 ### MECAT
 
-- 官方仓库：`xiaomi-research/mecat`。
-- `[PAPER]` 评测 847 auto-captioned pairs；`[CODE]` UIQ 正向文件有 848 IDs。
-- `[MISSING]` 论文使用的精确 847-row manifest、音频映射、caption 字段与排除的 1 条样本。
-- 在得到 manifest 前，MECAT 相关主表保持 BLOCKED。
+- 官方数据仓库：`mispeech/MECAT-Caption` revision `be4a24c3f7309d74208e08a7cce49e72cb7a5834`；官方实现仓库：`xiaomi-research/mecat` commit `a004949d58e86e2ee56baa879607ec2109cfcc46`。
+- 当前只需下载 `00A/test_0000-0000000.tar.gz`：173,168,424 bytes，LFS SHA256 `644cf75e2509c633452a18e36c41b285a317c6cbc06198d7dfe406c5aa5122c4`；无需下载约 16 GB 的其他域。
+- `[CODE]` 官方 `00A/test` 和四个 OEA 正向 UIQ 文件均为 848 IDs；`[PAPER]` 评测写 847 auto-captioned pairs。
+- `[MISSING]` 论文使用的精确 847-row manifest、排除的 1 条样本、T2A/T2T caption 字段/组合。
+- DATA-04/05 可以完成公开 848 条数据的下载、解压、解码、六字段保存和 UIQ ID 精确对齐；严格 847 条主表在作者提供缺失信息前保持 BLOCKED。详见 `docs/mecat_data_audit.md`。
 
 ### UIQ 与 hard negatives
 

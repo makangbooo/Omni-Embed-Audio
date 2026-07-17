@@ -34,7 +34,9 @@
 | 3 数据 | Clotho v2.1 evaluation 下载与 checksum | COMPLETED | `aff03e4` | DATA-01 首次下载及两次幂等复核完成；3 个 MD5 全部匹配 | 无；两次复核均为 `verified_existing`，未重复下载 | DATA-02 安全解压、1,045 条 WAV/CSV/UIQ ID 校验 |
 | 3 数据 | DATA-02：Clotho evaluation 解压与完整性校验 | WAITING_USER | `e938cb5` | CPU 预检完成且 `7zz 26.02` 已可用 | 无 | 并行下载启动后安排完整校验 |
 | 3 数据 | DATA-03：Clotho development/validation 下载与 checksum | RUNNING_REMOTE | `ae2c3fb` | PID 49545；`logs/data03_clotho_trainval_download_20260716_170930`；development archive `.part` 约 227 MB 且持续更新 | 无；六个 Zenodo 文件约 5.8 GB `[INFERRED]` | 保持运行，完成后逐文件核对官方 MD5 |
-| 3 数据 | MECAT 847/848 manifest | BLOCKED | N/A | 未开始 | 论文与 UIQ release 数量不一致 | 固定官方评测子集 |
+| 3 数据 | DATA-04：固定并下载 MECAT `00A/test` | WAITING_USER | `87dbe32` | 尚未在 CPU 服务器运行；下载脚本、固定 revision/size/LFS SHA256 已提交 | 需要远程 CPU 执行约 173 MB 下载 | 下载完成后核对 `download_manifest.json` 与本地 SHA256 |
+| 3 数据 | DATA-05：MECAT 848 条安全解压/解码/UIQ ID 校验 | BLOCKED | `87dbe32` | 尚未运行；安全解压、FLAC 完整解码、六字段保留、UIQ 集合校验已通过合成测试 | 等待 DATA-04 | DATA-04 完成后在同一 CPU 服务器执行 |
+| 3 数据 | MECAT 论文 847 条子集与检索 caption 口径 | BLOCKED | `87dbe32` | 官方 `00A/test` 与发布正向 UIQ 均为 848；审计文档已完成 | `[MISSING]` 被排除 ID、过滤规则、caption 字段/组合均未公开 | 不擅自删样本；先报告 848 条公开口径，继续请求作者证据 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | LAION/Robust/MGA/M2D-CLAP | BLOCKED | N/A | 未开始 | checkpoint revision/统一入口不完整 | 官方 OEA 评测完成后逐个固定资源 |
 | 6 扩展 | 人工/闭源 API、效率、token-length、派生图表 | TODO | N/A | 未开始 | 按阶段后置 | 核心训练评测完成后执行 |
@@ -43,6 +45,6 @@
 
 - 当前阶段：环境、首批官方权重、checkpoint 结构审计、inference-only 权重提取及单卡 GPU smoke 已完成。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：canonical T2A/T2T/UIQ 指标、全部 15 个发布 UIQ 文件的 schema 适配、可审计指标 runner，以及 Qwen3B-Cl 的可恢复全量 embedding 生成器；完整 67 项测试通过。
-- 当前阻塞：正式论文表格评测仍缺完整 AudioCaps、Clotho 和 MECAT/UIQ 数据；当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
-- 下一步：在 CPU 服务器执行 DATA-02 Clotho evaluation 解压/解码/manifest 校验；MODEL-02/03/04 与 DATA-03 继续远程断点续传。DATA-02 通过后申请 1×A100-80GB 做正式 embedding 小批校验。
+- 最近完成：canonical T2A/T2T/UIQ 指标、15 个发布 UIQ 文件的 schema 适配、可审计指标/embedding runner，以及 MECAT 官方 `00A/test` 的固定资源、安全解压和 848-ID 校验实现；完整 76 项测试通过。
+- 当前阻塞：正式论文表格评测仍缺完整 AudioCaps、Clotho 和 MECAT 数据；MECAT 还缺论文 847 条中的排除 ID和检索 caption 字段。当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
+- 下一步：CPU 侧完成 DATA-02、DATA-04/05，并让 MODEL-02/03/04 与 DATA-03 继续远程断点续传；Clotho DATA-02 通过后申请 1×A100-80GB 做正式 embedding 小批校验。
