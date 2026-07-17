@@ -64,6 +64,30 @@ class DownloadHttpAssetsTest(unittest.TestCase):
                 "clotho_metadata_validation.csv": "2e010427c56b1ce6008b0f03f41048ce",
             },
         )
+        self.assertEqual(
+            {asset["name"]: asset["size_bytes"] for asset in specification["files"]},
+            {
+                "clotho_audio_development.7z": 4541582263,
+                "clotho_audio_validation.7z": 1260701425,
+                "clotho_captions_development.csv": 1336762,
+                "clotho_captions_validation.csv": 367649,
+                "clotho_metadata_development.csv": 830797,
+                "clotho_metadata_validation.csv": 224803,
+            },
+        )
+        self.assertEqual(
+            {
+                asset["name"]: asset.get("sha256")
+                for asset in specification["files"]
+                if asset["kind"] != "audio_archive"
+            },
+            {
+                "clotho_captions_development.csv": "df2e5b92060b4bb23311f8b3a7f82241d900b9c4f62b0cc467ac2ce5e9c52886",
+                "clotho_captions_validation.csv": "fb0365506fe2dfcba9b7299daf7623a795abbd6ab9997a88ab0308e2fdfdbb88",
+                "clotho_metadata_development.csv": "b054a8d9d0f88436e7cf6341c82a70e9e975c3b3ddd560d9b04f2cd5fdc75949",
+                "clotho_metadata_validation.csv": "066026ae1bc20277614ae9d4fffea085d959f0b5e40120751b8d3e717f5faa97",
+            },
+        )
 
     def test_manifest_rejects_path_traversal(self) -> None:
         specification = {

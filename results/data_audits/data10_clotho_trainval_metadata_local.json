@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "status": "metadata_complete_audio_pending",
+  "evidence_source": "full local parse of four fixed Zenodo v2.1 CSV files with exact MD5/SHA256/byte validation",
+  "source_record": "https://zenodo.org/records/4783391",
+  "dataset": "Clotho",
+  "version": "2.1",
+  "sources": {
+    "clotho_captions_development.csv": {
+      "size_bytes": 1336762,
+      "md5": "d4090b39ce9f2491908eebf4d5b09bae",
+      "sha256": "df2e5b92060b4bb23311f8b3a7f82241d900b9c4f62b0cc467ac2ce5e9c52886"
+    },
+    "clotho_captions_validation.csv": {
+      "size_bytes": 367649,
+      "md5": "5879e023032b22a2c930aaa0528bead4",
+      "sha256": "fb0365506fe2dfcba9b7299daf7623a795abbd6ab9997a88ab0308e2fdfdbb88"
+    },
+    "clotho_metadata_development.csv": {
+      "size_bytes": 830797,
+      "md5": "170d20935ecfdf161ce1bb154118cda5",
+      "sha256": "b054a8d9d0f88436e7cf6341c82a70e9e975c3b3ddd560d9b04f2cd5fdc75949"
+    },
+    "clotho_metadata_validation.csv": {
+      "size_bytes": 224803,
+      "md5": "2e010427c56b1ce6008b0f03f41048ce",
+      "sha256": "066026ae1bc20277614ae9d4fffea085d959f0b5e40120751b8d3e717f5faa97"
+    }
+  },
+  "development": {
+    "caption_rows": 3839,
+    "metadata_rows": 3839,
+    "unique_file_names": 3839,
+    "caption_metadata_exact_file_set_match": true,
+    "captions_per_audio": 5,
+    "caption_audio_pairs_if_public_loader_is_used": 19195,
+    "empty_captions": 0,
+    "audio_with_duplicate_caption_text": 0,
+    "valid_sound_ids": 3830,
+    "file_names_with_leading_or_trailing_whitespace": [
+      " Ambience Birds.wav",
+      " typical neighborhood in Porto.wav"
+    ],
+    "file_name_policy": "preserve exact official CSV value; do not strip or rename",
+    "metadata_encoding": {
+      "encoding_used": "iso-8859-1",
+      "utf8_decodable": false,
+      "first_utf8_error_byte_offset": 705706,
+      "invalid_utf8_byte_hex": "c1",
+      "non_ascii_codepoint_counts": {
+        "U+00C1": 2
+      }
+    }
+  },
+  "validation": {
+    "caption_rows": 1045,
+    "metadata_rows": 1045,
+    "unique_file_names": 1045,
+    "caption_metadata_exact_file_set_match": true,
+    "captions_per_audio": 5,
+    "caption_audio_pairs_if_public_loader_is_used": 5225,
+    "empty_captions": 0,
+    "audio_with_duplicate_caption_text": 0,
+    "valid_sound_ids": 1039,
+    "file_names_with_leading_or_trailing_whitespace": [
+      " e ieio ieai.wav"
+    ],
+    "file_name_policy": "preserve exact official CSV value; do not strip or rename",
+    "metadata_encoding": {
+      "encoding_used": "iso-8859-1",
+      "utf8_decodable": false,
+      "first_utf8_error_byte_offset": 89021,
+      "invalid_utf8_byte_hex": "c1",
+      "non_ascii_codepoint_counts": {
+        "U+00C1": 4
+      }
+    }
+  },
+  "cross_split_metadata_audit": {
+    "file_name_overlap_count": 1,
+    "file_name_overlaps": [
+      "City Ambience w_ Car Passing_1-2.wav"
+    ],
+    "valid_sound_id_overlap_count": 2,
+    "valid_sound_id_overlaps": {
+      "130603": {
+        "development": [
+          "Greek Chat2 - (Apollonia&#39;s sPA) 18_44 05.10.wav"
+        ],
+        "validation": [
+          "Greek Chat2 - (Apollonia__39_s sPA) 18_44 05.10.wav"
+        ]
+      },
+      "86163": {
+        "development": [
+          "City Ambience w_ Car Passing_1-2.wav"
+        ],
+        "validation": [
+          "City Ambience w_ Car Passing_1-2.wav"
+        ]
+      }
+    },
+    "policy": "report official-release overlap without deleting samples; exact audio-byte comparison remains pending remote extraction"
+  },
+  "split_role_sources": {
+    "development": "[PAPER][CODE] paper reports 3,839 additional Clotho clips; public launcher trains on development",
+    "paper_early_stopping_split": "[MISSING] paper reports validation R@10 early stopping without identifying the Clotho split",
+    "public_launcher_early_stopping_split": "[CODE] public launcher passes Clotho evaluation, not official validation, as --val-csv/--val-audio-dir",
+    "official_validation": "[CODE] downloaded for audit but not selected by the public launcher"
+  }
+}

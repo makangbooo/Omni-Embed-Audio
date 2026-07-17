@@ -48,6 +48,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_data07_audiocaps_v2_metadata_validation.sh",
             "download_data08_wavcaps_metadata.sh",
             "run_data09_wavcaps_metadata_audit.sh",
+            "run_data10_clotho_trainval_validation.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -78,6 +79,17 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
     def test_large_raw_result_tree_is_ignored(self) -> None:
         source = (REPOSITORY_ROOT / ".gitignore").read_text(encoding="utf-8")
         self.assertIn("/results/raw/", source)
+
+    def test_clotho_trainval_wrapper_audits_before_isolated_extraction(self) -> None:
+        source = (
+            REPOSITORY_ROOT / "scripts/run_data10_clotho_trainval_validation.sh"
+        ).read_text(encoding="utf-8")
+        listing_audit = source.index("python scripts/audit_7z_listing.py")
+        extraction = source.index('"${EXTRACTOR}" x "${archive}"')
+        self.assertLess(listing_audit, extraction)
+        self.assertIn('EXTRACT_ROOT="${DATASET_ROOT}/extracted_trainval"', source)
+        self.assertIn("refusing to overwrite", source)
+        self.assertNotIn("rm -rf", source)
 
 
 if __name__ == "__main__":

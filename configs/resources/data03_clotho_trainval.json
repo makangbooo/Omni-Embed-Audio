@@ -9,7 +9,9 @@
   "source_tags": {
     "version": "[INFERRED] paper says Clotho v2; use repaired official v2.1 release from Zenodo record 4783391",
     "development_examples": "[PAPER] 3839 development clips used for the +Cl stage",
-    "checksums": "[MISSING] absent from paper/code; pinned from official Zenodo record 4783391 file metadata"
+    "checksums": "[MISSING] absent from paper/code; MD5 and byte counts pinned from official Zenodo record 4783391 file metadata",
+    "metadata_encoding": "[CODE] fixed development/validation metadata is strict ISO-8859-1, with raw 0xC1 bytes that are not UTF-8",
+    "early_stopping_split": "[MISSING] paper says validation R@10 without naming the Clotho split; public launcher passes evaluation instead of official validation"
   },
   "expected_examples": 4884,
   "files": [
@@ -17,36 +19,46 @@
       "name": "clotho_audio_development.7z",
       "url": "https://zenodo.org/records/4783391/files/clotho_audio_development.7z?download=1",
       "md5": "c8b05bc7acdb13895bb3c6a29608667e",
+      "size_bytes": 4541582263,
       "kind": "audio_archive"
     },
     {
       "name": "clotho_audio_validation.7z",
       "url": "https://zenodo.org/records/4783391/files/clotho_audio_validation.7z?download=1",
       "md5": "7dba730be08bada48bd15dc4e668df59",
+      "size_bytes": 1260701425,
       "kind": "audio_archive"
     },
     {
       "name": "clotho_captions_development.csv",
       "url": "https://zenodo.org/records/4783391/files/clotho_captions_development.csv?download=1",
       "md5": "d4090b39ce9f2491908eebf4d5b09bae",
+      "sha256": "df2e5b92060b4bb23311f8b3a7f82241d900b9c4f62b0cc467ac2ce5e9c52886",
+      "size_bytes": 1336762,
       "kind": "captions"
     },
     {
       "name": "clotho_captions_validation.csv",
       "url": "https://zenodo.org/records/4783391/files/clotho_captions_validation.csv?download=1",
       "md5": "5879e023032b22a2c930aaa0528bead4",
+      "sha256": "fb0365506fe2dfcba9b7299daf7623a795abbd6ab9997a88ab0308e2fdfdbb88",
+      "size_bytes": 367649,
       "kind": "captions"
     },
     {
       "name": "clotho_metadata_development.csv",
       "url": "https://zenodo.org/records/4783391/files/clotho_metadata_development.csv?download=1",
       "md5": "170d20935ecfdf161ce1bb154118cda5",
+      "sha256": "b054a8d9d0f88436e7cf6341c82a70e9e975c3b3ddd560d9b04f2cd5fdc75949",
+      "size_bytes": 830797,
       "kind": "metadata"
     },
     {
       "name": "clotho_metadata_validation.csv",
       "url": "https://zenodo.org/records/4783391/files/clotho_metadata_validation.csv?download=1",
       "md5": "2e010427c56b1ce6008b0f03f41048ce",
+      "sha256": "066026ae1bc20277614ae9d4fffea085d959f0b5e40120751b8d3e717f5faa97",
+      "size_bytes": 224803,
       "kind": "metadata"
     }
   ]
