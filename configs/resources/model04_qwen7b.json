@@ -5,7 +5,7 @@
   "source_tags": {
     "repositories": "[CODE] author-linked official Hugging Face repositories",
     "revisions": "[CODE] immutable Hugging Face revisions audited from repository metadata",
-    "file_inventory": "[MISSING] pinned Qwen7B-AC model card names step_40.pt while earlier resource notes named a different step; download and audit the entire pinned snapshot"
+    "file_inventory": "[CODE] exact checkpoint filename, size, and LFS SHA256 fixed from each immutable Hugging Face revision; this resolves the model-card filename conflict without guessing"
   },
   "assets": [
     {
@@ -24,7 +24,12 @@
       "revision": "f44f247020a7192affe6927db91d0778d33b9791",
       "local_subdir": "OEA-Qwen7B-AC",
       "allow_patterns": null,
-      "required_files": ["README.md"]
+      "required_files": ["README.md", "step_300.pt"],
+      "expected_primary_file": {
+        "path": "step_300.pt",
+        "size_bytes": 17940602533,
+        "lfs_sha256": "cd751e3a71f0b47b9ecbbc0f5a11e4673097f0ebdbd80f610387f5778dd70a46"
+      }
     },
     {
       "name": "oea_qwen7b_cl",
@@ -33,7 +38,12 @@
       "revision": "30c6e97cfdf451b1948013d2839befe0c3022c46",
       "local_subdir": "OEA-Qwen7B-Cl",
       "allow_patterns": null,
-      "required_files": ["README.md"]
+      "required_files": ["README.md", "step_330.pt"],
+      "expected_primary_file": {
+        "path": "step_330.pt",
+        "size_bytes": 17940602661,
+        "lfs_sha256": "09ce41af7e7ac23106fa74d25e45b7229a046d687774cbd4ab2c00c05097d92e"
+      }
     }
   ]
 }

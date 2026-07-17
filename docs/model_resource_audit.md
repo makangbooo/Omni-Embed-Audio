@@ -14,13 +14,14 @@ bash scripts/run_model03_model04_audit.sh
 
 ## 固定审计范围
 
-- `[CODE]` MODEL-03：Nemotron-3B base、OEA-Nemo3B-AC、OEA-Nemo3B-Cl 的三个不可变 revisions。
-- `[CODE]` MODEL-04：Qwen2.5-Omni-7B base、OEA-Qwen7B-AC、OEA-Qwen7B-Cl 的三个不可变 revisions。
+- `[CODE]` MODEL-03：Nemotron-3B base、OEA-Nemo3B-AC、OEA-Nemo3B-Cl 的三个不可变 revisions；两个 checkpoint 的实际文件分别为 `step_400_best.pt` 与 `step_450_best.pt`。
+- `[CODE]` MODEL-04：Qwen2.5-Omni-7B base、OEA-Qwen7B-AC、OEA-Qwen7B-Cl 的三个不可变 revisions；两个 checkpoint 的实际文件分别为 `step_300.pt` 与 `step_330.pt`。
 - 每个 asset 的目标目录和 revision marker 必须与资源 manifest 完全一致。
 - 本地选定文件集合必须与固定 revision 的远程选定文件集合完全一致；缺失和额外文件均单独报告。
 - 每个文件验证字节数；LFS 文件验证远程 LFS SHA256，非 LFS 文件验证 Git blob SHA-1，并额外记录本地 SHA256。
 - `.cache/` 不作为模型快照文件；其中持久存在的 `.lock` 不判失败，真实 `*.incomplete` 会被列出并使 asset 状态为 `incomplete`。
 - symlink、revision marker 缺失/不一致、额外文件、尺寸错误或内容 hash 错误判为 `failed`，不会自动修复。
+- checkpoint 的精确文件名、字节数与 LFS SHA256 已写入资源 manifest；README 中“一律 `step_40.pt`”的说法不作为文件选择依据。
 
 ## 状态与退出码
 
@@ -31,6 +32,11 @@ bash scripts/run_model03_model04_audit.sh
 | `failed` | 1 | 网络 metadata 审计失败，或 marker/文件集合/内容不一致 | 保留报告，先分析根因；不得直接删除或重下 |
 
 单个 asset 同样使用 `complete`、`incomplete`、`failed`。整体状态不能用目录总大小或某一个 checkpoint 的完整性替代。
+
+完整性审计通过后，使用 `scripts/run_official_checkpoint_preparation.sh`
+执行逐 checkpoint 的 weights-only 结构检查与非覆盖推理权重提取；详见
+`docs/official_checkpoint_preparation.md`。完整快照通过不自动证明内部
+LoRA/projection 结构正确，两层审计证据必须分别保留。
 
 ## 审计工件
 

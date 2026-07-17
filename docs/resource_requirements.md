@@ -40,16 +40,18 @@
 |---|---|---|---:|
 | `nvidia/omni-embed-nemotron-3b` | `865db1bb57e369a85357cf114cbd6b3c5322d19d` | 多个 safetensors | repo 9.42 GB |
 | `Qwen/Qwen2.5-Omni-7B` | `ae9e1690543ffd5c0221dc27f79834d0294cba00` | 多个 safetensors | repo 22.38 GB |
-| `OEA-Nemo3B-AC` | `8ed66aa77bc6f2001b807b5d2bd3e60503d89535` | `[MISSING]` 下载固定 revision 完整快照后审计 | 约 9.47 GB `[INFERRED]` |
-| `OEA-Nemo3B-Cl` | `9588912298afca0b11f5895b864ae28083f35022` | `[MISSING]` 下载固定 revision 完整快照后审计 | 约 9.47 GB `[INFERRED]` |
-| `OEA-Qwen7B-AC` | `f44f247020a7192affe6927db91d0778d33b9791` | `[MISSING]` 固定 model card 与旧资源记录的 step 名称冲突 | 约 17.94 GB `[INFERRED]` |
-| `OEA-Qwen7B-Cl` | `30c6e97cfdf451b1948013d2839befe0c3022c46` | `[MISSING]` 下载固定 revision 完整快照后审计 | 约 17.94 GB `[INFERRED]` |
+| `OEA-Nemo3B-AC` | `8ed66aa77bc6f2001b807b5d2bd3e60503d89535` | `[CODE] step_400_best.pt`；9,466,826,153 bytes；LFS SHA256 已固定 | 9.47 GB |
+| `OEA-Nemo3B-Cl` | `9588912298afca0b11f5895b864ae28083f35022` | `[CODE] step_450_best.pt`；9,466,826,217 bytes；LFS SHA256 已固定 | 9.47 GB |
+| `OEA-Qwen7B-AC` | `f44f247020a7192affe6927db91d0778d33b9791` | `[CODE] step_300.pt`；17,940,602,533 bytes；LFS SHA256 已固定 | 17.94 GB |
+| `OEA-Qwen7B-Cl` | `30c6e97cfdf451b1948013d2839befe0c3022c46` | `[CODE] step_330.pt`；17,940,602,661 bytes；LFS SHA256 已固定 | 17.94 GB |
 
 六个 OEA checkpoint 共 73.75 GB，三个 base 权重共约 43.74 GB，合计 117.49 GB（109.42 GiB），未含缓存临时文件。建议预留 160 GB。
 
-当前并行批次采用完整不可变快照，不依据有冲突的文件名猜测：MODEL-03 约 28.4 GB、MODEL-04 约 58.3 GB，实际远端文件名、字节数与 LFS SHA256 将由下载时的 `download_manifest.json` 固定。
+当前并行批次采用完整不可变快照，不依据 README 中有冲突的 `step_40.pt` 说法猜测：MODEL-03 约 28.4 GB、MODEL-04 约 58.3 GB。六个 OEA 原始 checkpoint 的实际远端文件名、字节数与 LFS SHA256 已固定在资源 manifest 和 `configs/checkpoints/official_oea_checkpoints.json`。
 
 `[CODE]` 已提供 `scripts/run_model03_model04_audit.sh` 做只读完成性判定：完整比对固定 revision 文件集合、字节数、LFS SHA256、非 LFS Git blob ID、revision marker 与残留 `.incomplete`。它不会下载或修改模型；详见 `docs/model_resource_audit.md`。
+
+完整性审计通过后，`scripts/run_official_checkpoint_preparation.sh` 对任一变体执行 weights-only/FakeTensorMode 结构审计，并以实测 LoRA 结构生成非覆盖的 inference-only 权重。其余五个评测配置必须等待各自派生权重 SHA256，不提前猜测；详见 `docs/official_checkpoint_preparation.md`。
 
 ## P3：数据
 

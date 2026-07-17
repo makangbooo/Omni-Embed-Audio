@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "expected_variant_ids": [
+    "oea_nemo3b",
+    "oea_nemo3b_cl",
+    "oea_qwen3b",
+    "oea_qwen3b_cl",
+    "oea_qwen7b",
+    "oea_qwen7b_cl"
+  ],
+  "source_tags": {
+    "variant_mapping": "[PAPER+CODE] six released OEA model variants and their named backbones",
+    "checkpoint_identity": "[CODE] immutable official Hugging Face revision metadata, exact LFS filename, byte size, and SHA256",
+    "derived_checkpoint_name": "[INFERRED] append _inference_only before .pt; the derived artifact is byte-verified and never represented as an official author checkpoint",
+    "structure_expectations": "[CODE] measured from each fixed source checkpoint by weights-only FakeTensorMode inspection before extraction; no architecture-derived count is assumed"
+  },
+  "variants": [
+    {
+      "variant_id": "oea_nemo3b",
+      "paper_model": "OEA-Nemo3B",
+      "training_variant": "AudioCaps",
+      "base_asset": {
+        "manifest": "configs/resources/model03_nemo3b.json",
+        "asset_name": "omni_embed_nemotron_3b"
+      },
+      "checkpoint_asset": {
+        "manifest": "configs/resources/model03_nemo3b.json",
+        "asset_name": "oea_nemo3b_ac"
+      }
+    },
+    {
+      "variant_id": "oea_nemo3b_cl",
+      "paper_model": "OEA-Nemo3B (+Cl)",
+      "training_variant": "AudioCaps + Clotho",
+      "base_asset": {
+        "manifest": "configs/resources/model03_nemo3b.json",
+        "asset_name": "omni_embed_nemotron_3b"
+      },
+      "checkpoint_asset": {
+        "manifest": "configs/resources/model03_nemo3b.json",
+        "asset_name": "oea_nemo3b_cl"
+      }
+    },
+    {
+      "variant_id": "oea_qwen3b",
+      "paper_model": "OEA-Qwen3B",
+      "training_variant": "AudioCaps",
+      "base_asset": {
+        "manifest": "configs/resources/model01_qwen3b_cl.json",
+        "asset_name": "qwen2_5_omni_3b"
+      },
+      "checkpoint_asset": {
+        "manifest": "configs/resources/model02_qwen3b_ac.json",
+        "asset_name": "oea_qwen3b_ac"
+      }
+    },
+    {
+      "variant_id": "oea_qwen3b_cl",
+      "paper_model": "OEA-Qwen3B (+Cl)",
+      "training_variant": "AudioCaps + Clotho",
+      "base_asset": {
+        "manifest": "configs/resources/model01_qwen3b_cl.json",
+        "asset_name": "qwen2_5_omni_3b"
+      },
+      "checkpoint_asset": {
+        "manifest": "configs/resources/model01_qwen3b_cl.json",
+        "asset_name": "oea_qwen3b_cl"
+      }
+    },
+    {
+      "variant_id": "oea_qwen7b",
+      "paper_model": "OEA-Qwen7B",
+      "training_variant": "AudioCaps",
+      "base_asset": {
+        "manifest": "configs/resources/model04_qwen7b.json",
+        "asset_name": "qwen2_5_omni_7b"
+      },
+      "checkpoint_asset": {
+        "manifest": "configs/resources/model04_qwen7b.json",
+        "asset_name": "oea_qwen7b_ac"
+      }
+    },
+    {
+      "variant_id": "oea_qwen7b_cl",
+      "paper_model": "OEA-Qwen7B (+Cl)",
+      "training_variant": "AudioCaps + Clotho",
+      "base_asset": {
+        "manifest": "configs/resources/model04_qwen7b.json",
+        "asset_name": "qwen2_5_omni_7b"
+      },
+      "checkpoint_asset": {
+        "manifest": "configs/resources/model04_qwen7b.json",
+        "asset_name": "oea_qwen7b_cl"
+      }
+    }
+  ]
+}

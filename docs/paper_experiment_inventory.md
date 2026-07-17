@@ -49,7 +49,7 @@
 
 ### 已提供
 
-- `[CODE]` 六个 Hugging Face 模型仓库和 base-model 映射；但根 README 所称“每个仓库包含 `step_40.pt`”不符合实际文件名。
+- `[CODE]` 六个 Hugging Face 模型仓库和 base-model 映射；根 README 所称“每个仓库包含 `step_40.pt`”不符合实际文件名。复现分支已按不可变 revision/LFS metadata 固定实际的 `step_400_best.pt`、`step_450_best.pt`、`step_350.pt`、`step_40.pt`、`step_300.pt`、`step_330.pt`，并由 `configs/checkpoints/official_oea_checkpoints.json` 统一解析。
 - `[CODE]` 13,053 条 UIQ JSONL：Question、Imperative、Paraphrase、`tagging`、Negative，覆盖三个数据集。
 - `[CODE]` OEA adapter、LoRA attachment、双投影头、mean pooling、L2 normalization、InfoNCE trainer、WavCaps manifest builder。
 - `[CODE]` LAION-CLAP、Robust-CLAP、MGA-CLAP、M2D-CLAP adapter 文件；但统一 CLI/Hydra 未暴露全部 adapter，权重获取与 revision 未固定。

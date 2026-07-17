@@ -31,7 +31,12 @@
       ],
       "required_files": [
         "step_40.pt"
-      ]
+      ],
+      "expected_primary_file": {
+        "path": "step_40.pt",
+        "size_bytes": 9466833858,
+        "lfs_sha256": "d5f2648c19b07fe5b33c22873098f9b9d749dfe2fb48e5d3dedfcea827c39b5c"
+      }
     }
   ]
 }

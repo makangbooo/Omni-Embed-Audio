@@ -55,6 +55,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_qwen3b_clotho_retrieval_suite.sh",
             "run_qwen3b_cl_clotho_positive_uiq_embeddings.sh",
             "run_qwen3b_clotho_positive_uiq_suite.sh",
+            "run_official_checkpoint_preparation.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -112,6 +113,20 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertNotIn("snapshot_download", source)
         self.assertNotIn("rm -rf", source)
         self.assertNotIn("Remove-Item", source)
+
+    def test_official_checkpoint_preparation_is_cpu_only_and_non_overwriting(self) -> None:
+        wrapper = (
+            REPOSITORY_ROOT / "scripts/run_official_checkpoint_preparation.sh"
+        ).read_text(encoding="utf-8")
+        implementation = (
+            REPOSITORY_ROOT / "scripts/prepare_official_oea_checkpoint.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
+        self.assertIn("prepare_official_oea_checkpoint.py", wrapper)
+        self.assertIn("--inspect-only", wrapper)
+        self.assertIn("refusing to overwrite", implementation)
+        self.assertNotIn("rm -rf", wrapper)
+        self.assertNotIn("rm -rf", implementation)
 
     def test_mecat_wavcaps_provenance_is_metadata_only(self) -> None:
         source = (

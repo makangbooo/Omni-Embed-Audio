@@ -5,7 +5,7 @@
   "source_tags": {
     "repositories": "[CODE] author-linked official Hugging Face repositories",
     "revisions": "[CODE] immutable Hugging Face revisions audited from repository metadata",
-    "file_inventory": "[MISSING] checkpoint filename documentation is not consistent enough to preselect a file; download and audit the entire pinned snapshot"
+    "file_inventory": "[CODE] exact checkpoint filename, size, and LFS SHA256 fixed from each immutable Hugging Face revision; full-snapshot audit remains enabled"
   },
   "assets": [
     {
@@ -24,7 +24,12 @@
       "revision": "8ed66aa77bc6f2001b807b5d2bd3e60503d89535",
       "local_subdir": "OEA-Nemo3B-AC",
       "allow_patterns": null,
-      "required_files": ["README.md"]
+      "required_files": ["README.md", "step_400_best.pt"],
+      "expected_primary_file": {
+        "path": "step_400_best.pt",
+        "size_bytes": 9466826153,
+        "lfs_sha256": "55579dfbd4f6621b5d842c5e731d6a1d37dbfd04b26b1c55bf8cdea980e67d25"
+      }
     },
     {
       "name": "oea_nemo3b_cl",
@@ -33,7 +38,12 @@
       "revision": "9588912298afca0b11f5895b864ae28083f35022",
       "local_subdir": "OEA-Nemo3B-Cl",
       "allow_patterns": null,
-      "required_files": ["README.md"]
+      "required_files": ["README.md", "step_450_best.pt"],
+      "expected_primary_file": {
+        "path": "step_450_best.pt",
+        "size_bytes": 9466826217,
+        "lfs_sha256": "c9013285894109487a840a843fe789e8c3ed1c67fc3fbbe9ee7391e57b2ea96d"
+      }
     }
   ]
 }

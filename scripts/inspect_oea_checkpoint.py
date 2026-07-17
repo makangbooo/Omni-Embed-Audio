@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import resource
 import subprocess
 import time
 import traceback
@@ -16,6 +15,14 @@ from typing import Any
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+
+
+def peak_rss_kib() -> int | None:
+    try:
+        import resource
+    except ImportError:
+        return None
+    return int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
 
 def parse_args() -> argparse.Namespace:
@@ -68,8 +75,12 @@ def tensor_mapping_summary(mapping: dict[str, Any], torch: Any) -> dict[str, Any
     non_lora_keys = [key for key in tensor_keys if key not in lora_key_set]
     dtype_counts: dict[str, int] = {}
     dtype_bytes: dict[str, int] = {}
+    lora_dtype_counts: dict[str, int] = {}
+    lora_dtype_bytes: dict[str, int] = {}
     total_numel = 0
     total_bytes = 0
+    lora_total_numel = 0
+    lora_total_bytes = 0
     shapes: dict[str, list[int]] = {}
     for key, tensor in tensor_items:
         dtype = str(tensor.dtype)
@@ -79,6 +90,11 @@ def tensor_mapping_summary(mapping: dict[str, Any], torch: Any) -> dict[str, Any
         dtype_bytes[dtype] = dtype_bytes.get(dtype, 0) + size_bytes
         total_numel += numel
         total_bytes += size_bytes
+        if key in lora_key_set:
+            lora_dtype_counts[dtype] = lora_dtype_counts.get(dtype, 0) + 1
+            lora_dtype_bytes[dtype] = lora_dtype_bytes.get(dtype, 0) + size_bytes
+            lora_total_numel += numel
+            lora_total_bytes += size_bytes
         shapes[key] = list(tensor.shape)
 
     return {
@@ -90,6 +106,10 @@ def tensor_mapping_summary(mapping: dict[str, Any], torch: Any) -> dict[str, Any
         "dtype_tensor_counts": dtype_counts,
         "dtype_estimated_bytes": dtype_bytes,
         "lora_tensor_count": len(lora_keys),
+        "lora_total_numel": lora_total_numel,
+        "lora_estimated_tensor_bytes": lora_total_bytes,
+        "lora_dtype_tensor_counts": lora_dtype_counts,
+        "lora_dtype_estimated_bytes": lora_dtype_bytes,
         "non_lora_tensor_count": len(non_lora_keys),
         "lora_tensor_keys": lora_keys,
         "non_lora_tensor_keys": non_lora_keys,
@@ -215,7 +235,7 @@ def main() -> int:
                 f"checkpoint sections missing: {report['missing_required_sections']}"
             )
 
-        report["peak_rss_kib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        report["peak_rss_kib"] = peak_rss_kib()
         report["status"] = "complete"
         report["finished_at"] = utc_now()
         write_json(output, report)
@@ -225,7 +245,7 @@ def main() -> int:
         report["finished_at"] = utc_now()
         report["error"] = repr(exc)
         report["traceback"] = traceback.format_exc()
-        report["peak_rss_kib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        report["peak_rss_kib"] = peak_rss_kib()
         write_json(output, report)
         raise
 
