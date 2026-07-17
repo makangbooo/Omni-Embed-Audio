@@ -49,6 +49,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "download_data08_wavcaps_metadata.sh",
             "run_data09_wavcaps_metadata_audit.sh",
             "run_data10_clotho_trainval_validation.sh",
+            "run_model03_model04_audit.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -90,6 +91,16 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn('EXTRACT_ROOT="${DATASET_ROOT}/extracted_trainval"', source)
         self.assertIn("refusing to overwrite", source)
         self.assertNotIn("rm -rf", source)
+
+    def test_model_resource_audit_is_read_only(self) -> None:
+        source = (
+            REPOSITORY_ROOT / "scripts/run_model03_model04_audit.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("scripts/audit_model_resources.py", source)
+        self.assertNotIn("download_model_assets.py", source)
+        self.assertNotIn("snapshot_download", source)
+        self.assertNotIn("rm -rf", source)
+        self.assertNotIn("Remove-Item", source)
 
 
 if __name__ == "__main__":
