@@ -6,8 +6,9 @@ cd "${ROOT_DIR}"
 # shellcheck source=scripts/lib/conda.sh
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
-if [[ $# -ne 2 ]]; then
-  echo "Usage: $0 <vanilla_backbone_id> <--smoke|--full>" >&2
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+  echo "Usage: $0 <vanilla_backbone_id> --smoke" >&2
+  echo "       $0 <vanilla_backbone_id> --full <smoke_metrics.json>" >&2
   exit 2
 fi
 
@@ -34,18 +35,23 @@ DATA_ROOT="${DATA_ROOT:-/home/jg525/datasets/oea}"
 MODEL_LOCK="${MODEL_LOCK:-${ROOT_DIR}/results/model_locks/${BACKBONE_ID}.json}"
 case "${RUN_MODE}" in
   --smoke)
+    if [[ $# -ne 2 ]]; then
+      echo "[ERROR] --smoke does not accept a smoke-metrics argument." >&2
+      exit 2
+    fi
     PROTOCOL_CONFIG="${ROOT_DIR}/configs/eval/${CONFIG_STEM}_clotho_smoke_embeddings.json"
     MANIFEST="${ROOT_DIR}/configs/eval/fixtures/vanilla_clotho_5_manifest.jsonl"
     DEFAULT_RUN_PREFIX="${BACKBONE_ID}_clotho_smoke_seed42"
     ;;
   --full)
+    if [[ $# -ne 3 ]]; then
+      echo "[ERROR] --full requires an explicit completed smoke metrics path." >&2
+      exit 2
+    fi
+    SMOKE_METRICS=$3
     PROTOCOL_CONFIG="${ROOT_DIR}/configs/eval/${CONFIG_STEM}_clotho_embeddings.json"
     MANIFEST="${DATA_ROOT}/clotho_v2.1/manifests/clotho_evaluation_manifest.jsonl"
     DEFAULT_RUN_PREFIX="${BACKBONE_ID}_clotho_embeddings_seed42"
-    if [[ -z "${SMOKE_METRICS:-}" ]]; then
-      echo "[ERROR] --full requires SMOKE_METRICS from a completed five-sample run." >&2
-      exit 2
-    fi
     ;;
   *)
     echo "[ERROR] Run mode must be exactly --smoke or --full." >&2
@@ -73,8 +79,8 @@ exec > >(tee "${ATTEMPT_DIR}/stdout.log") \
   2> >(tee "${ATTEMPT_DIR}/stderr.log" >&2)
 
 {
-  printf 'MODEL_ROOT=%q DATA_ROOT=%q MODEL_LOCK=%q RUN_ID=%q SMOKE_METRICS=%q ' \
-    "${MODEL_ROOT}" "${DATA_ROOT}" "${MODEL_LOCK}" "${RUN_ID}" "${SMOKE_METRICS:-}"
+  printf 'MODEL_ROOT=%q DATA_ROOT=%q MODEL_LOCK=%q RUN_ID=%q ' \
+    "${MODEL_ROOT}" "${DATA_ROOT}" "${MODEL_LOCK}" "${RUN_ID}"
   printf '%q ' "$0" "$@"
   printf '\n'
 } > "${ATTEMPT_DIR}/command.sh"

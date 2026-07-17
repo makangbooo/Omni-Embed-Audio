@@ -53,14 +53,16 @@ The wrapper requires an explicit `--smoke` or `--full` mode. `--smoke` uses the
 five audio files bundled with the repository (5 candidates and 25 caption
 queries) and is only a model-load/forward/integrity fixture. It does not replace
 the separate 32--128-row dataset-pipeline smoke tests. A full pass cannot start
-unless `SMOKE_METRICS` points to a completed run from the same backbone, current
-Git commit, and current committed model lock. The gate rehashes all four output
-artifacts, checks their shapes and metadata counts, verifies L2 normalization,
+unless its third argument points to a completed run from the same backbone,
+current Git commit, and current committed model lock. The gate rehashes all four
+output artifacts, checks their shapes and metadata counts, verifies L2 normalization,
 and rejects any record that loaded an OEA checkpoint, LoRA, or projection head:
 
 ```bash
-export SMOKE_METRICS=/path/to/smoke-run/generation_metrics.json
-bash scripts/run_vanilla_backbone_embeddings.sh vanilla_nemotron_3b --full
+bash scripts/run_vanilla_backbone_embeddings.sh \
+  vanilla_nemotron_3b \
+  --full \
+  /path/to/smoke-run/generation_metrics.json
 ```
 
 The three pinned configurations expose hidden dimensions through two verified

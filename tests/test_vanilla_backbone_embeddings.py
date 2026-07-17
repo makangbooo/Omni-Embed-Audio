@@ -403,7 +403,8 @@ class VanillaBackboneEmbeddingsTest(unittest.TestCase):
         self.assertIn("MODEL_LOCK", wrapper)
         self.assertIn("HF_HUB_OFFLINE=1", wrapper)
         self.assertIn("requires a clean Git worktree", wrapper)
-        self.assertIn("<--smoke|--full>", wrapper)
+        self.assertIn("--smoke", wrapper)
+        self.assertIn("--full <smoke_metrics.json>", wrapper)
         self.assertIn("SMOKE_METRICS", wrapper)
         self.assertIn("verify_vanilla_smoke_gate.py", wrapper)
         for forbidden in (

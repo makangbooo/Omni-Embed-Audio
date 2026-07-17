@@ -71,6 +71,19 @@ bash scripts/run_reproduction.sh \
   --execute
 ```
 
+Vanilla backbone 也按独立服务器叶子阶段展开；以下命令目前只打印计划，真实
+GPU 阶段在模型锁提交前保持 `BLOCKED`：
+
+```bash
+bash scripts/run_reproduction.sh \
+  --stage vanilla_baselines \
+  --backbone vanilla_nemotron_3b
+```
+
+计划顺序固定为：CPU base-only 模型锁 → 1×A100 smoke → 1×A100 全量
+Clotho embedding → CPU 指标。全量阶段必须显式传入前一步的
+`--smoke-metrics`，不能只靠环境变量或跳过 smoke 闸门。
+
 CPU 指标阶段需要显式提供上一台 GPU 服务器生成的目录：
 
 ```bash

@@ -24,9 +24,11 @@ from scripts.run_reproduction import (
 def arguments(**overrides: object) -> argparse.Namespace:
     values: dict[str, object] = {
         "variant": "oea_qwen3b_cl",
+        "backbone": "vanilla_nemotron_3b",
         "embedding_dir": None,
         "caption_embedding_dir": None,
         "uiq_embedding_dir": None,
+        "smoke_metrics": None,
         "verify_existing_derived": False,
         "acknowledge_long_operation": False,
     }
@@ -64,7 +66,11 @@ class RunReproductionTest(unittest.TestCase):
         self.assertEqual(stage_ids[:4], ["data04", "data05", "data06", "data07"])
         self.assertEqual(stage_ids.count("official_eval_embeddings"), 1)
         self.assertIn("train_qwen3b", stage_ids)
-        self.assertIn("baselines", stage_ids)
+        self.assertIn("vanilla_model_lock", stage_ids)
+        self.assertIn("vanilla_smoke_embeddings", stage_ids)
+        self.assertIn("vanilla_full_embeddings", stage_ids)
+        self.assertIn("vanilla_metrics", stage_ids)
+        self.assertIn("clap_baselines", stage_ids)
 
     def test_official_eval_plan_preserves_cpu_gpu_cpu_handoff(self) -> None:
         payload = plan_payload(
@@ -72,9 +78,11 @@ class RunReproductionTest(unittest.TestCase):
             self.registry,
             {
                 "variant": "oea_qwen3b_cl",
+                "backbone": "vanilla_nemotron_3b",
                 "embedding_dir": None,
                 "caption_embedding_dir": None,
                 "uiq_embedding_dir": None,
+                "smoke_metrics": None,
             },
             verify_existing_derived=True,
         )
@@ -91,9 +99,11 @@ class RunReproductionTest(unittest.TestCase):
         stage = self.registry["official_eval_metrics"]
         values = {
             "variant": "oea_qwen3b_cl",
+            "backbone": "vanilla_nemotron_3b",
             "embedding_dir": None,
             "caption_embedding_dir": None,
             "uiq_embedding_dir": None,
+            "smoke_metrics": None,
         }
         self.assertIn(
             "<embedding_dir>", render_command(stage, values, allow_missing=True)
@@ -101,8 +111,56 @@ class RunReproductionTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "requires --embedding-dir"):
             render_command(stage, values, allow_missing=False)
 
+    def test_vanilla_plan_preserves_cpu_gpu_gpu_cpu_handoff(self) -> None:
+        payload = plan_payload(
+            "vanilla_baselines",
+            self.registry,
+            {
+                "variant": "oea_qwen3b_cl",
+                "backbone": "vanilla_qwen2_5_omni_3b",
+                "embedding_dir": None,
+                "caption_embedding_dir": None,
+                "uiq_embedding_dir": None,
+                "smoke_metrics": None,
+            },
+            verify_existing_derived=False,
+        )
+        self.assertEqual(
+            [step["resource"] for step in payload["steps"]],
+            ["CPU", "1xA100-80GB", "1xA100-80GB", "CPU"],
+        )
+        self.assertEqual(
+            payload["steps"][0]["command"],
+            [
+                "bash",
+                "scripts/run_vanilla_backbone_model_pipeline.sh",
+                "vanilla_qwen2_5_omni_3b",
+            ],
+        )
+        self.assertEqual(payload["steps"][1]["command"][-1], "--smoke")
+        self.assertEqual(
+            payload["steps"][2]["command"][-2:],
+            ["--full", "<smoke_metrics>"],
+        )
+
+    def test_vanilla_full_requires_explicit_smoke_metrics_on_execute(self) -> None:
+        stage = self.registry["vanilla_full_embeddings"]
+        values = {
+            "variant": "oea_qwen3b_cl",
+            "backbone": "vanilla_nemotron_3b",
+            "embedding_dir": None,
+            "caption_embedding_dir": None,
+            "uiq_embedding_dir": None,
+            "smoke_metrics": None,
+        }
+        self.assertIn(
+            "<smoke_metrics>", render_command(stage, values, allow_missing=True)
+        )
+        with self.assertRaisesRegex(ValueError, "requires --smoke-metrics"):
+            render_command(stage, values, allow_missing=False)
+
     def test_group_and_blocked_stages_never_execute(self) -> None:
-        for stage_id in ("official_eval", "train_qwen3b"):
+        for stage_id in ("official_eval", "train_qwen3b", "baselines"):
             with self.subTest(stage=stage_id), self.assertRaisesRegex(
                 RuntimeError, "plan-only"
             ):

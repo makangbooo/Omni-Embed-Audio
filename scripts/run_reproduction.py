@@ -40,6 +40,11 @@ OFFICIAL_VARIANTS = (
     "oea_qwen7b",
     "oea_qwen7b_cl",
 )
+VANILLA_BACKBONES = (
+    "vanilla_nemotron_3b",
+    "vanilla_qwen2_5_omni_3b",
+    "vanilla_qwen2_5_omni_7b",
+)
 FORBIDDEN_COMMAND_FRAGMENTS = (
     "rm -rf",
     "git reset --hard",
@@ -66,9 +71,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--variant", choices=OFFICIAL_VARIANTS, default="oea_qwen3b_cl"
     )
+    parser.add_argument(
+        "--backbone", choices=VANILLA_BACKBONES, default="vanilla_nemotron_3b"
+    )
     parser.add_argument("--embedding-dir", type=Path)
     parser.add_argument("--caption-embedding-dir", type=Path)
     parser.add_argument("--uiq-embedding-dir", type=Path)
+    parser.add_argument("--smoke-metrics", type=Path)
     parser.add_argument("--verify-existing-derived", action="store_true")
     args = parser.parse_args()
     if not args.list and not args.stage:
@@ -154,9 +163,11 @@ def load_stage_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, dict[str, An
             if not isinstance(required, list) or any(
                 argument not in {
                     "variant",
+                    "backbone",
                     "embedding_dir",
                     "caption_embedding_dir",
                     "uiq_embedding_dir",
+                    "smoke_metrics",
                 }
                 for argument in required
             ):
@@ -225,6 +236,7 @@ def validate_group_cycles(registry: Mapping[str, Mapping[str, Any]]) -> None:
 def argument_values(args: argparse.Namespace) -> dict[str, str | None]:
     return {
         "variant": args.variant,
+        "backbone": args.backbone,
         "embedding_dir": (
             str(args.embedding_dir.resolve()) if args.embedding_dir else None
         ),
@@ -235,6 +247,9 @@ def argument_values(args: argparse.Namespace) -> dict[str, str | None]:
         ),
         "uiq_embedding_dir": (
             str(args.uiq_embedding_dir.resolve()) if args.uiq_embedding_dir else None
+        ),
+        "smoke_metrics": (
+            str(args.smoke_metrics.resolve()) if args.smoke_metrics else None
         ),
     }
 
