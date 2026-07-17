@@ -45,10 +45,13 @@ For one variant, the runner performs these steps in order:
    top-level sections, unsafe globals, tensor keys, shapes, dtypes, and sizes;
 6. take the LoRA tensor count and byte count from that exact inspection rather
    than inferring them from an architecture name;
-7. reload with `weights_only=True`, select only keys containing `lora_`, and
-   write a new `_inference_only.pt` file without overwriting an existing file;
-8. reload the derived file and compare every LoRA and projection tensor for
-   exact equality;
+7. either reload with `weights_only=True`, select only keys containing `lora_`,
+   and write a new `_inference_only.pt` file without overwriting an existing
+   file, or explicitly select read-only verification of an existing derived
+   artifact;
+8. load the derived file and compare its exact top-level schema, source SHA256,
+   metadata, every LoRA tensor, and every projection tensor with the fixed raw
+   checkpoint;
 9. record source/destination hashes, commands, Git state, environment logs,
    memory, exit codes, and failures.
 
@@ -74,6 +77,10 @@ bash scripts/run_official_checkpoint_preparation.sh oea_nemo3b --inspect-only
 
 # Audit followed by non-overwriting inference-only extraction:
 bash scripts/run_official_checkpoint_preparation.sh oea_nemo3b
+
+# For an artifact previously produced by the audited extraction script:
+bash scripts/run_official_checkpoint_preparation.sh \
+  oea_qwen3b_cl --verify-existing-derived
 ```
 
 Valid IDs are:
@@ -101,7 +108,8 @@ oea_qwen7b_cl
 - Disk: the source is not copied; only a small derived LoRA/projection artifact
   and logs are added. The exact size is recorded rather than predicted.
 - Overwrite/deletion risk: existing derived outputs are rejected; no recursive
-  deletion is used.
+  deletion is used. `--verify-existing-derived` requires the destination to
+  exist and never writes it.
 
 Each run creates a timestamped ignored directory:
 
@@ -155,3 +163,34 @@ the two cited audit reports. Expected time is under one minute and the output
 is a small JSON file. Formal model-specific embedding configs may be committed
 only after this lock supplies the derived SHA256 and confirms the measured LoRA
 and projection structure.
+
+## One-command per-variant CPU pipeline
+
+After a variant's raw resources are present, the three formal gates can run in
+one failure-stopping command:
+
+```bash
+# New derived artifact:
+bash scripts/run_official_oea_model_pipeline.sh oea_nemo3b
+
+# Existing Qwen3B-Cl artifact from the earlier audited extraction:
+bash scripts/run_official_oea_model_pipeline.sh \
+  oea_qwen3b_cl --verify-existing-derived
+```
+
+The stages are fixed as: exact variant-scoped resource audit, raw checkpoint
+inspection plus extract/verify, then model-lock generation. A nonzero stage
+prevents every later stage and remains in `pipeline_manifest.json`. All large
+intermediate reports stay in the ignored timestamped `logs/` directory. The
+only repository-visible output is
+`results/model_locks/<variant_id>.json`; an existing lock is never overwritten.
+
+This is a CPU task with `CUDA_VISIBLE_DEVICES` empty and no model download. It
+does use Hugging Face metadata access and reads every selected base-model file
+once plus the raw checkpoint multiple times. Estimated total reads are roughly
+40 GB for a 3B variant and 76 GB for a 7B variant `[CODE][INFERRED]`; expected
+time is 30–150 minutes `[INFERRED]`, dominated by shared-storage throughput.
+Therefore each real execution must receive the required long-operation resource
+report before it starts. A successful run intentionally creates a small
+uncommitted lock for review; the model, raw checkpoint, derived weights, and
+large logs remain outside Git.

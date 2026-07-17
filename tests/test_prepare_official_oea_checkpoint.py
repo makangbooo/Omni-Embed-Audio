@@ -119,6 +119,17 @@ class PrepareOfficialOEACheckpointTest(unittest.TestCase):
         self.assertIn("544", extract_args)
         self.assertIn("50462720", extract_args)
         self.assertIn(str(destination), extract_args)
+        verify_args = extraction_command(
+            "python",
+            source,
+            destination,
+            extraction,
+            variant,
+            {"expected_lora_tensors": 544, "expected_lora_bytes": 50462720},
+            verify_existing=True,
+        )
+        self.assertIn("--verify-existing", verify_args)
+        self.assertNotIn("--verify-existing", extract_args)
 
     def test_registry_rejects_path_traversal_and_duplicate_variant(self) -> None:
         for unsafe_path in ("../escape.json", "C:/escape.json", "/escape.json"):

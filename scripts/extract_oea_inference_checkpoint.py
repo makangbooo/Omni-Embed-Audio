@@ -19,7 +19,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--destination", type=Path, required=True)
     parser.add_argument("--audit-output", type=Path, required=True)
@@ -27,6 +27,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--expected-source-sha256", required=True)
     parser.add_argument("--expected-lora-tensors", type=int, required=True)
     parser.add_argument("--expected-lora-bytes", type=int, required=True)
+    parser.add_argument(
+        "--verify-existing",
+        action="store_true",
+        help=(
+            "Do not write a checkpoint. Require the destination to exist and "
+            "compare it exactly with the selected source tensors and metadata."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -104,6 +112,30 @@ def assert_tensor_mappings_equal(
             raise RuntimeError(f"{section}/{key} differs after extraction")
 
 
+def assert_derived_state_equal(
+    expected: dict[str, Any], actual: Any, torch: Any
+) -> None:
+    if not isinstance(actual, dict):
+        raise TypeError("derived checkpoint top level is not a dict")
+    if set(actual) != set(expected):
+        raise RuntimeError("derived checkpoint top-level keys differ")
+    for section in ("lora_state_dict", "audio_head", "text_head"):
+        if not isinstance(actual.get(section), dict):
+            raise TypeError(f"derived {section} is not a dict")
+        assert_tensor_mappings_equal(
+            expected[section], actual[section], torch, section
+        )
+    for field in (
+        "schema_version",
+        "source_checkpoint_sha256",
+        "config",
+        "metrics",
+        "global_step",
+    ):
+        if actual.get(field) != expected[field]:
+            raise RuntimeError(f"derived checkpoint {field} differs from source")
+
+
 def main() -> int:
     args = parse_args()
     source = args.source.resolve()
@@ -111,14 +143,20 @@ def main() -> int:
     audit_output = args.audit_output.resolve()
     if not source.is_file():
         raise FileNotFoundError(source)
-    if destination.exists():
+    if args.verify_existing and not destination.is_file():
+        raise FileNotFoundError(
+            f"existing derived checkpoint is missing: {destination}"
+        )
+    if not args.verify_existing and destination.exists():
         raise FileExistsError(
             f"refusing to overwrite existing derived checkpoint: {destination}"
         )
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary_destination = destination.with_name(
-        f".{destination.name}.tmp.{os.getpid()}"
-    )
+    temporary_destination: Path | None = None
+    if not args.verify_existing:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary_destination = destination.with_name(
+            f".{destination.name}.tmp.{os.getpid()}"
+        )
 
     report: dict[str, Any] = {
         "schema_version": 1,
@@ -129,6 +167,9 @@ def main() -> int:
         "git_status_short": git_output("status", "--short"),
         "source": str(source),
         "destination": str(destination),
+        "operation": (
+            "verify_existing_derived" if args.verify_existing else "extract"
+        ),
         "source_size_bytes": source.stat().st_size,
         "expected_source_size_bytes": args.expected_source_size,
         "expected_source_sha256": args.expected_source_sha256,
@@ -217,13 +258,19 @@ def main() -> int:
             "metrics": json_safe(state.get("metrics", {})),
             "global_step": json_safe(state.get("global_step")),
         }
-        save_started = time.monotonic()
-        torch.save(derived_state, temporary_destination)
-        report["save_elapsed_seconds"] = time.monotonic() - save_started
+        if args.verify_existing:
+            derived_path = destination
+        else:
+            if temporary_destination is None:
+                raise AssertionError("temporary extraction path was not initialized")
+            save_started = time.monotonic()
+            torch.save(derived_state, temporary_destination)
+            report["save_elapsed_seconds"] = time.monotonic() - save_started
+            derived_path = temporary_destination
 
         derived_unsafe_globals = sorted(
             torch.serialization.get_unsafe_globals_in_checkpoint(
-                temporary_destination
+                derived_path
             )
         )
         report["derived_unsafe_globals"] = derived_unsafe_globals
@@ -232,24 +279,14 @@ def main() -> int:
                 f"derived checkpoint contains unsafe globals: {derived_unsafe_globals}"
             )
         loaded_derived = torch.load(
-            temporary_destination,
+            derived_path,
             mmap=True,
             weights_only=True,
         )
-        assert_tensor_mappings_equal(
-            lora_state,
-            loaded_derived["lora_state_dict"],
-            torch,
-            "lora_state_dict",
-        )
-        assert_tensor_mappings_equal(
-            state["audio_head"], loaded_derived["audio_head"], torch, "audio_head"
-        )
-        assert_tensor_mappings_equal(
-            state["text_head"], loaded_derived["text_head"], torch, "text_head"
-        )
+        assert_derived_state_equal(derived_state, loaded_derived, torch)
 
-        temporary_destination.replace(destination)
+        if temporary_destination is not None:
+            temporary_destination.replace(destination)
         report["destination_size_bytes"] = destination.stat().st_size
         report["destination_sha256"] = sha256_file(destination)
         report["peak_rss_kib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -263,7 +300,7 @@ def main() -> int:
         report["error"] = repr(exc)
         report["traceback"] = traceback.format_exc()
         write_json(audit_output, report)
-        if temporary_destination.exists():
+        if temporary_destination is not None and temporary_destination.exists():
             temporary_destination.unlink()
         raise
 

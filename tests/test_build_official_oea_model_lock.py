@@ -259,6 +259,19 @@ class BuildOfficialOEAModelLockTest(unittest.TestCase):
             lock = self.build(audit_path, preparation_path)
         self.assertEqual(lock["status"], "locked")
 
+    def test_read_only_verified_existing_derived_artifact_is_lockable(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_directory:
+            directory = Path(raw_directory)
+            fixture = self.write_fixture(directory)
+            audit_path, preparation_path, _, _, preparation = fixture
+            preparation["operation"] = "inspect_and_verify_existing"
+            preparation_path.write_text(json.dumps(preparation), encoding="utf-8")
+            lock = self.build(audit_path, preparation_path)
+        self.assertEqual(
+            lock["evidence"]["checkpoint_preparation_operation"],
+            "inspect_and_verify_existing",
+        )
+
     def test_existing_qwen3b_cl_config_matches_fixed_registry_identity(self) -> None:
         config = json.loads(
             (

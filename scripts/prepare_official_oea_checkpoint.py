@@ -39,7 +39,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--variant", required=True)
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--inspect-only", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--inspect-only", action="store_true")
+    mode.add_argument(
+        "--verify-existing-derived",
+        action="store_true",
+        help="Verify an existing derived artifact without writing or replacing it.",
+    )
     return parser.parse_args()
 
 
@@ -334,9 +340,10 @@ def extraction_command(
     output: Path,
     variant: Mapping[str, Any],
     expectations: Mapping[str, int],
+    verify_existing: bool = False,
 ) -> list[str]:
     asset = variant["checkpoint_asset"]
-    return [
+    command = [
         python,
         str(REPOSITORY_ROOT / "scripts/extract_oea_inference_checkpoint.py"),
         "--source",
@@ -354,6 +361,9 @@ def extraction_command(
         "--expected-lora-bytes",
         str(expectations["expected_lora_bytes"]),
     ]
+    if verify_existing:
+        command.append("--verify-existing")
+    return command
 
 
 def run_command(arguments: Sequence[str]) -> int:
@@ -386,7 +396,15 @@ def main() -> int:
     report: dict[str, Any] = {
         "schema_version": 1,
         "status": "running",
-        "operation": "inspect_only" if args.inspect_only else "inspect_and_extract",
+        "operation": (
+            "inspect_only"
+            if args.inspect_only
+            else (
+                "inspect_and_verify_existing"
+                if args.verify_existing_derived
+                else "inspect_and_extract"
+            )
+        ),
         "started_at": utc_now(),
         "finished_at": None,
         "git_commit": git_output("rev-parse", "HEAD"),
@@ -419,7 +437,15 @@ def main() -> int:
             raise FileNotFoundError(source)
         if source.stat().st_size != variant["checkpoint_asset"]["source_size_bytes"]:
             raise RuntimeError("source checkpoint size differs from fixed registry")
-        if not args.inspect_only and destination.exists():
+        if args.verify_existing_derived and not destination.is_file():
+            raise FileNotFoundError(
+                f"existing derived checkpoint is missing: {destination}"
+            )
+        if (
+            not args.inspect_only
+            and not args.verify_existing_derived
+            and destination.exists()
+        ):
             raise FileExistsError(
                 f"refusing to overwrite existing derived checkpoint: {destination}"
             )
@@ -452,6 +478,7 @@ def main() -> int:
             extraction_path,
             variant,
             expectations,
+            verify_existing=args.verify_existing_derived,
         )
         report["extraction_command"] = extract_arguments
         atomic_write_json(report_path, report)

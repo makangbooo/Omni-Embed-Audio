@@ -64,6 +64,11 @@ SHA256、完整解析结果、两个 manifest 和两个 asset 名称。这样生
 `docs/official_checkpoint_preparation.md`。完整快照通过不自动证明内部
 LoRA/projection 结构正确，两层审计证据必须分别保留。
 
+正式执行时也可以使用
+`scripts/run_official_oea_model_pipeline.sh <variant_id>` 将资源审计、
+checkpoint 提取/只读复核和模型锁生成按固定顺序串联；任一步失败都不会
+继续下一步。
+
 ## 审计工件
 
 每次运行写入：

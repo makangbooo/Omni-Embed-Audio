@@ -265,8 +265,13 @@ def validate_preparation(
     model_root: Path,
 ) -> tuple[str, dict[str, Any], dict[str, int]]:
     validate_evidence_header(report, "checkpoint preparation", {"complete"})
-    if report.get("operation") != "inspect_and_extract":
-        raise ValueError("checkpoint preparation did not extract a derived artifact")
+    if report.get("operation") not in {
+        "inspect_and_extract",
+        "inspect_and_verify_existing",
+    }:
+        raise ValueError(
+            "checkpoint preparation did not extract or verify a derived artifact"
+        )
     if report.get("variant_id") != variant["variant_id"]:
         raise ValueError("checkpoint preparation variant_id differs from request")
     if report.get("variant") != variant:
@@ -447,6 +452,7 @@ def build_model_lock(
             "checkpoint_preparation": portable_file_identity(preparation_path),
             "resource_audit_git_commit": resource_audit["git_commit"],
             "checkpoint_preparation_git_commit": preparation["git_commit"],
+            "checkpoint_preparation_operation": preparation["operation"],
         },
     }
 
