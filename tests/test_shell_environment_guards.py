@@ -52,6 +52,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_model03_model04_audit.sh",
             "run_data11_mecat_wavcaps_provenance.sh",
             "run_negative_embedding_evaluation.sh",
+            "run_qwen3b_clotho_retrieval_suite.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -117,6 +118,17 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn("audit_mecat_wavcaps_provenance.py", source)
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
         self.assertNotIn("snapshot_download", source)
+        self.assertNotIn("rm -rf", source)
+
+    def test_qwen3b_retrieval_suite_is_cpu_only_and_non_overwriting(self) -> None:
+        source = (
+            REPOSITORY_ROOT / "scripts/run_qwen3b_clotho_retrieval_suite.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
+        self.assertIn("prepare_embedding_evaluation_suite.py prepare", source)
+        self.assertIn("run_embedding_evaluation.sh", source)
+        self.assertIn("prepare_embedding_evaluation_suite.py finalize", source)
+        self.assertIn("Use a new SUITE_ID", source)
         self.assertNotIn("rm -rf", source)
 
 
