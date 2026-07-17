@@ -19,8 +19,8 @@
 | 1 环境 | CPU-03：安装 DATA-02 的 7-Zip 工具 | COMPLETED | `a54cf5e` | `7zip=26.02` 已在共享 `oea-repro` 可用；install/wrapper exit 均为 0 | 无；Conda 报告目标包已安装，未发生依赖 transaction | 启动并行资源下载 |
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
 | 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | RUNNING_REMOTE | `ae2c3fb` | PID 52680；`logs/model02_download_20260716_171806`；3.42 GB 分片在更新 | CAS 间歇返回 504，但断点续传有实际增长 | 保持 tmux，完成后核对 9,466,835,918 bytes 与 LFS SHA256 |
-| 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | WAITING_USER | `ae2c3fb` | base 与 AC 完整；Cl 分片 6,658,457,600/9,466,834,755 bytes；失败日志已保留 | CAS 多次 `IncompleteRead`，原 5 次外层重试耗尽 | 拉取长重试补丁，先以单 worker 续传剩余约 2.81 GB |
-| 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | WAITING_USER | `ae2c3fb` | base 完整；AC 分片 10,674,503,680/17,940,610,993 bytes；Cl 尚未开始 | CAS 多次 `IncompleteRead`，原 5 次外层重试耗尽 | MODEL-03 完成后以单 worker 续传剩余约 7.27 GB，再下载 Cl |
+| 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | RUNNING_REMOTE | `48c9b3c` | `logs/model03_download_20260717_142429`；base/AC 完整，Cl 分片 7,224,688,640/9,466,834,755 bytes 且在增长 | CAS 链路不稳定；单 worker、20 次重试正在缓解 | 保持 tmux；结束后核对 exit code、manifest、残留 partial 与 LFS SHA256 |
+| 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | RUNNING_REMOTE | `48c9b3c` | `logs/model04_download_20260717_143427`；base 完整，AC 分片 11,146,362,880/17,940,610,993 bytes；Cl 尚未开始 | CAS 链路不稳定；AC 已进入第 2 次外层尝试 | 保持 tmux；AC 完成后自动下载 Cl，最后核对全部 SHA256 |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 先补 canonical evaluator 与 manifest |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 在 canonical negative evaluator 中接入已验证指标 |
@@ -42,4 +42,4 @@
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：在 A100-SXM4-80GB 上确认 PyTorch CUDA 12.6、BF16、NCCL 2.26.2、必需 Qwen/PEFT 接口、仓库导入和音频 I/O 均通过；固定首批模型的不可变 Hugging Face revision。
 - 当前阻塞：正式论文表格评测仍缺完整 AudioCaps、Clotho 和 MECAT/UIQ 数据；当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
-- 下一步：拉取下载器长重试补丁；先串行续传 MODEL-03，完成并校验后再恢复 MODEL-04，避免超大 CAS 分片争抢带宽。
+- 下一步：MODEL-03 与 MODEL-04 正在远程并行断点续传；保持单 worker，不启动重复任务，任一结束后立即审计 manifest、exit code、残留 partial 与 LFS SHA256。
