@@ -44,6 +44,8 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_qwen3b_cl_clotho_embeddings.sh",
             "download_data04_mecat_00a_test.sh",
             "run_data05_mecat_validation.sh",
+            "download_data06_audiocaps_v2_metadata.sh",
+            "run_data07_audiocaps_v2_metadata_validation.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):

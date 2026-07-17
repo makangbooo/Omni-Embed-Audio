@@ -26,6 +26,7 @@ class DownloadHttpAssetsTest(unittest.TestCase):
             self.assertEqual(
                 hash_file(path), hashlib.md5(b"clotho", usedforsecurity=False).hexdigest()
             )
+            self.assertEqual(hash_file(path, "sha256"), hashlib.sha256(b"clotho").hexdigest())
 
     def test_manifest_has_exact_official_evaluation_assets(self) -> None:
         manifest = REPOSITORY_ROOT / "configs/resources/data01_clotho_evaluation.json"
@@ -77,6 +78,25 @@ class DownloadHttpAssetsTest(unittest.TestCase):
             ],
         }
         with self.assertRaisesRegex(ValueError, "unsafe"):
+            validate_specification(specification)
+
+    def test_optional_sha256_and_size_are_validated(self) -> None:
+        specification = {
+            "schema_version": 1,
+            "local_subdir": "audiocaps_v2/source",
+            "files": [
+                {
+                    "name": "train.csv",
+                    "url": "https://example.invalid/train.csv",
+                    "md5": "0" * 32,
+                    "sha256": "a" * 64,
+                    "size_bytes": 123,
+                }
+            ],
+        }
+        validate_specification(specification)
+        specification["files"][0]["sha256"] = "short"
+        with self.assertRaisesRegex(ValueError, "invalid SHA256"):
             validate_specification(specification)
 
 

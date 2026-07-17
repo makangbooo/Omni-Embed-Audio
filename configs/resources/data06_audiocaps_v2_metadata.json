@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "resource_id": "DATA-06",
+  "dataset": "AudioCaps",
+  "version": "2.0",
+  "split": "train+validation+test metadata",
+  "local_subdir": "audiocaps_v2_d004db3/metadata",
+  "source_record": "https://github.com/cdjkim/audiocaps/tree/d004db3ea1b01cf4fd0347dd8d27db90cadc8809/dataset2.0",
+  "source_tags": {
+    "release": "[CODE] official AudioCaps repository announced AudioCaps2.0 on 2025-02-24",
+    "paper_count": "[PAPER][CODE] paper and official README report 91,256 train rows",
+    "parsed_count": "[CODE] public OEA csv.DictReader path yields 91,254 valid train records because the pinned CSV contains three unquoted bare-CR fragments and two quoted multiline captions"
+  },
+  "expected_examples": 98606,
+  "files": [
+    {
+      "name": "README.md",
+      "url": "https://raw.githubusercontent.com/cdjkim/audiocaps/d004db3ea1b01cf4fd0347dd8d27db90cadc8809/dataset2.0/README.md",
+      "md5": "83370ac917f97e11b548daaf36da9197",
+      "sha256": "ae2fcbcf7e4f93964dfaf02c094998b2cfc199a16f4eb0350f65f170ad01a906",
+      "size_bytes": 753,
+      "kind": "official_readme"
+    },
+    {
+      "name": "train.csv",
+      "url": "https://raw.githubusercontent.com/cdjkim/audiocaps/d004db3ea1b01cf4fd0347dd8d27db90cadc8809/dataset2.0/train.csv",
+      "md5": "1fc9b9360bbc2c1ea4470c1c1573b3d4",
+      "sha256": "25659eee0ff887972b6a8a74008dfffe582343930e89db71519d66e9dd014f6e",
+      "size_bytes": 6311901,
+      "kind": "captions"
+    },
+    {
+      "name": "val.csv",
+      "url": "https://raw.githubusercontent.com/cdjkim/audiocaps/d004db3ea1b01cf4fd0347dd8d27db90cadc8809/dataset2.0/val.csv",
+      "md5": "b319beea34769896c80399b14befdf8a",
+      "sha256": "dfdd0f83c70fb818fbb86dcba42754abfb97f7774d811fff91a1c89d84d868c5",
+      "size_bytes": 169508,
+      "kind": "captions"
+    },
+    {
+      "name": "test.csv",
+      "url": "https://raw.githubusercontent.com/cdjkim/audiocaps/d004db3ea1b01cf4fd0347dd8d27db90cadc8809/dataset2.0/test.csv",
+      "md5": "11f06bd97a512e62d7907d724c76e7c3",
+      "sha256": "365c8a8a71c9070a8d5dba5dd44f3a781f906632a49cb82b38bebaaa8f3c5ccb",
+      "size_bytes": 397498,
+      "kind": "captions"
+    }
+  ]
+}
