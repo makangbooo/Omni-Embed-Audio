@@ -297,7 +297,7 @@ class PreparePositiveUIQEvaluationSuiteTest(unittest.TestCase):
         self.assertEqual(config["protocols"][-1]["paper_query_type"], "Keyphrase")
         self.assertEqual(
             config["minimum_uiq_generator_commit"],
-            "ff41047ca749e2c849e2c2f3944fcc84c342d92e",
+            "d2b54ba5b61bf8166e070f2a47fc9b7bcd95c337",
         )
         uiq_config = file_identity(
             REPOSITORY_ROOT

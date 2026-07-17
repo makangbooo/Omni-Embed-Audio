@@ -15,8 +15,8 @@
   "expected_uiq_generation_config_sha256": "49aacfebee0542532692598e71d8f15822021f7bea7ef27a9ca011d0cf0e779b",
   "official_variant_id": "oea_qwen3b_cl",
   "official_model_lock_path": "results/model_locks/oea_qwen3b_cl.json",
-  "minimum_caption_generator_commit": "03850ff056ac53a1177bec786526a368955ada06",
-  "minimum_uiq_generator_commit": "ff41047ca749e2c849e2c2f3944fcc84c342d92e",
+  "minimum_caption_generator_commit": "d2b54ba5b61bf8166e070f2a47fc9b7bcd95c337",
+  "minimum_uiq_generator_commit": "d2b54ba5b61bf8166e070f2a47fc9b7bcd95c337",
   "checkpoint": {
     "repo_id": "JudeJiwoo/OEA-Qwen3B-Cl",
     "revision": "54ccd008d4a1340d2a1f8edcd5dd0e82c61367a4",

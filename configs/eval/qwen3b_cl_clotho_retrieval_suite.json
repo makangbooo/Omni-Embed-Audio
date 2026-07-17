@@ -11,7 +11,7 @@
   "expected_generation_protocol_sha256": "d7bc40d10c278dfddc9046818e9529a0ce7e7962ce8c06ae1c76d4e07a14bf19",
   "official_variant_id": "oea_qwen3b_cl",
   "official_model_lock_path": "results/model_locks/oea_qwen3b_cl.json",
-  "minimum_generator_commit": "03850ff056ac53a1177bec786526a368955ada06",
+  "minimum_generator_commit": "d2b54ba5b61bf8166e070f2a47fc9b7bcd95c337",
   "checkpoint": {
     "repo_id": "JudeJiwoo/OEA-Qwen3B-Cl",
     "revision": "54ccd008d4a1340d2a1f8edcd5dd0e82c61367a4",
