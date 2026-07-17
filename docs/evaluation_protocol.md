@@ -136,6 +136,27 @@ the candidate bank. Because the paper does not publish caption-selection
 details, a chosen protocol must not be marked `PAPER` unless new evidence is
 found.
 
+## Negative-query artifact contract
+
+The general evaluator does not guess a hard-negative audio ID.
+`scripts/evaluate_negative_embedding_artifacts.py` is a separate strict path
+for Figure 3 and Table 17. It requires an explicit JSONL mapping from every
+query ID to one target candidate ID and one distinct hard-negative candidate
+ID. The mapping must cover the complete query metadata exactly, and every
+audio ID must resolve in the fixed candidate collection. Missing or duplicate
+IDs are errors; `negative_captions` are never treated as audio identifiers.
+
+The runner saves full similarities/rankings, optimistic one-based target/HN
+ranks, per-query evidence, R@k, Delta-Rank, HNSR/HNSR@k, TFR/TFR-HN@k, all
+source/artifact hashes, and the same Git/environment/command provenance as the
+general evaluator. The full contract and JSON example are in
+`docs/negative_query_metrics.md`.
+
+`[MISSING]` The released 1,581 negative UIQ rows still lack hard-negative
+audio IDs. Therefore this executable path does not make Tables 4/17
+reproducible by itself; a formal run remains blocked until an author pairing
+or a separately labelled, auditable reconstruction is available.
+
 ## Resumable official-checkpoint embedding generation
 
 `scripts/generate_oea_embeddings.py` and
