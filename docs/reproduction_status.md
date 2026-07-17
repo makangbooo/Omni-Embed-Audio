@@ -22,7 +22,8 @@
 | 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | RUNNING_REMOTE | `48c9b3c` | `logs/model03_download_20260717_142429`；base/AC 完整，Cl 分片 7,224,688,640/9,466,834,755 bytes 且在增长 | CAS 链路不稳定；单 worker、20 次重试正在缓解 | 保持 tmux；结束后核对 exit code、manifest、残留 partial 与 LFS SHA256 |
 | 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | RUNNING_REMOTE | `48c9b3c` | `logs/model04_download_20260717_143427`；base 完整，AC 分片 11,146,362,880/17,940,610,993 bytes；Cl 尚未开始 | CAS 链路不稳定；AC 已进入第 2 次外层尝试 | 保持 tmux；AC 完成后自动下载 Cl，最后核对全部 SHA256 |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
-| 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | 数据未准备；官方 OEA eval 命令不加载 checkpoint | 完成 Clotho manifest 后接入 checkpoint embedding 生成器 |
+| 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | BLOCKED | N/A | 未开始 | Clotho manifest 尚未完成；GPU 正式 embedding 尚未生成 | DATA-02 通过后做小批 GPU 校验与全量 embedding |
+| 2 官方权重 | Qwen3B-Cl 全量 checkpoint embedding 生成器 | COMPLETED | `03850ff` | 固定 1,045 audio/5,225 caption、单批原子工件、SHA256、严格离线/单 GPU、精确 resume identity 和失败 attempt 已实现；完整 67 项测试通过 | GPU 正式运行尚未开始；论文 `passage:` 与公开代码 no-prefix 冲突已显式标记 | DATA-02 完成后先做少量 chunk GPU 校验，再启动可恢复全量生成 |
 | 2 指标 | Canonical T2A/T2T/UIQ embedding evaluator | COMPLETED | `43158ae` | 确定性 ID 检索、caption 多正例/排除 self、显式 query 子集、完整排名和严格输入校验已实现；相关 15 项测试通过 | 论文未公开 T2T caption 选择与 tie 口径；已在协议文档标为 `[MISSING]` | 接入 checkpoint embedding 生成器 |
 | 2 指标 | 可审计 embedding 实验输出 runner | COMPLETED | `5ed57a7` | CPU-only runner 已保存固定 embedding、metadata、完整排名、输入/工件 SHA256、seed、Git/环境/命令和失败证据；相关测试总计 27 项通过 | 无；正式运行要求干净 worktree 和显式协议来源 | 用 Qwen3B-Cl + Clotho evaluation 完成首个正式 T2A/T2T 闭环 |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 在 canonical negative evaluator 中接入已验证指标 |
@@ -42,6 +43,6 @@
 
 - 当前阶段：环境、首批官方权重、checkpoint 结构审计、inference-only 权重提取及单卡 GPU smoke 已完成。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：canonical T2A/T2T/UIQ 指标、全部 15 个发布 UIQ 文件的 schema 适配，以及不覆盖旧结果的可审计 embedding 输出 runner；相关测试总计 27 项通过。
+- 最近完成：canonical T2A/T2T/UIQ 指标、全部 15 个发布 UIQ 文件的 schema 适配、可审计指标 runner，以及 Qwen3B-Cl 的可恢复全量 embedding 生成器；完整 67 项测试通过。
 - 当前阻塞：正式论文表格评测仍缺完整 AudioCaps、Clotho 和 MECAT/UIQ 数据；当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
-- 下一步：MODEL-02/03/04 与 DATA-03 继续远程断点续传；本地并行实现 Clotho manifest 与 checkpoint embedding 生成器。任一远程任务结束后审计 manifest、exit code、残留 partial 与 LFS SHA256。
+- 下一步：在 CPU 服务器执行 DATA-02 Clotho evaluation 解压/解码/manifest 校验；MODEL-02/03/04 与 DATA-03 继续远程断点续传。DATA-02 通过后申请 1×A100-80GB 做正式 embedding 小批校验。
