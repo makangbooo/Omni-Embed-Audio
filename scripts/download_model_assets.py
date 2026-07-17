@@ -123,6 +123,67 @@ def local_files(directory: Path) -> list[Path]:
     )
 
 
+def pinned_file_specs(asset: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return legacy and multi-file content pins without duplicating paths."""
+    specifications: list[dict[str, Any]] = []
+    primary = asset.get("expected_primary_file")
+    if primary is not None:
+        specifications.append(primary)
+    specifications.extend(asset.get("expected_files", []))
+    paths = [item["path"] for item in specifications]
+    if len(paths) != len(set(paths)):
+        raise ValueError(f"duplicate expected file paths for {asset['name']}: {paths}")
+    return specifications
+
+
+def validate_remote_file_pins(
+    *,
+    asset_name: str,
+    remote_files: list[dict[str, Any]],
+    specifications: list[dict[str, Any]],
+) -> None:
+    by_path = {item["path"]: item for item in remote_files}
+    for expected in specifications:
+        path = expected["path"]
+        remote = by_path.get(path)
+        if remote is None:
+            raise RuntimeError(
+                f"expected pinned file is absent for {asset_name}: {path}"
+            )
+        for field in ("size_bytes", "lfs_sha256"):
+            if field in expected and remote[field] != expected[field]:
+                raise RuntimeError(
+                    f"pinned metadata mismatch for {asset_name}/{path} "
+                    f"field {field}: {remote[field]} != {expected[field]}"
+                )
+
+
+def validate_local_file_pins(
+    *,
+    asset_name: str,
+    destination: Path,
+    specifications: list[dict[str, Any]],
+) -> None:
+    for expected in specifications:
+        path = destination / expected["path"]
+        if not path.is_file():
+            raise RuntimeError(
+                f"expected pinned file is missing locally for {asset_name}: {path}"
+            )
+        if "size_bytes" in expected and path.stat().st_size != expected["size_bytes"]:
+            raise RuntimeError(
+                f"local size mismatch for {asset_name}/{expected['path']}: "
+                f"{path.stat().st_size} != {expected['size_bytes']}"
+            )
+        if "sha256" in expected:
+            digest = sha256_file(path)
+            if digest != expected["sha256"]:
+                raise RuntimeError(
+                    f"local SHA256 mismatch for {asset_name}/{expected['path']}: "
+                    f"{digest} != {expected['sha256']}"
+                )
+
+
 def ensure_external_model_root(model_root: Path) -> None:
     resolved = model_root.resolve()
     if resolved == REPOSITORY_ROOT or REPOSITORY_ROOT in resolved.parents:
@@ -318,28 +379,12 @@ def main() -> int:
                 if lfs_sha256:
                     remote_sha256[sibling.rfilename] = lfs_sha256
 
-            expected_primary = asset.get("expected_primary_file")
-            if expected_primary is not None:
-                matching_remote = next(
-                    (
-                        item
-                        for item in remote_files
-                        if item["path"] == expected_primary["path"]
-                    ),
-                    None,
-                )
-                if matching_remote is None:
-                    raise RuntimeError(
-                        f"expected primary file is absent for {name}: "
-                        f"{expected_primary['path']}"
-                    )
-                for field in ("size_bytes", "lfs_sha256"):
-                    if matching_remote[field] != expected_primary[field]:
-                        raise RuntimeError(
-                            f"pinned metadata mismatch for {name}/"
-                            f"{expected_primary['path']} field {field}: "
-                            f"{matching_remote[field]} != {expected_primary[field]}"
-                        )
+            expected_files = pinned_file_specs(asset)
+            validate_remote_file_pins(
+                asset_name=name,
+                remote_files=remote_files,
+                specifications=expected_files,
+            )
 
             free_bytes = shutil.disk_usage(model_root).free
             required_free = int(expected_bytes * 1.2) + 5 * 1024**3
@@ -393,6 +438,12 @@ def main() -> int:
             ]
             if missing:
                 raise RuntimeError(f"required files missing for {name}: {missing}")
+
+            validate_local_file_pins(
+                asset_name=name,
+                destination=destination,
+                specifications=expected_files,
+            )
 
             for path in local_files(destination):
                 relative = path.relative_to(destination).as_posix()

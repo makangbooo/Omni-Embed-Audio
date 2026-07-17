@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "resource_id": "DATA-08",
+  "dataset": "WavCaps",
+  "split": "all public metadata and official blacklists",
+  "source": "https://huggingface.co/datasets/cvssp/WavCaps",
+  "source_tags": {
+    "dataset_identity": "[CODE] official WavCaps Hugging Face dataset repository",
+    "paper_count": "[PAPER] 275,618 samples after the paper-described <=31-second filter",
+    "reconstructed_count": "[INFERRED] public metadata produces exactly 275,618 only under 0 < duration < 31, not the written <=31 predicate",
+    "audio_scope": "[CODE] DATA-08 intentionally excludes every Zip_files/** audio archive"
+  },
+  "expected_examples": 403050,
+  "expected_download_bytes": 176863095,
+  "assets": [
+    {
+      "name": "wavcaps_metadata",
+      "repo_id": "cvssp/WavCaps",
+      "repo_type": "dataset",
+      "revision": "0930ec11ded28fa0eaa910fde2f6fc3538acbeac",
+      "local_subdir": "wavcaps_0930ec11/source",
+      "allow_patterns": [
+        "README.md",
+        "json_files/AudioSet_SL/as_final.json",
+        "json_files/BBC_Sound_Effects/bbc_final.json",
+        "json_files/FreeSound/fsd_final.json",
+        "json_files/SoundBible/sb_final.json",
+        "json_files/blacklist/blacklist_exclude_all_ac.json",
+        "json_files/blacklist/blacklist_exclude_test_ac.json",
+        "json_files/blacklist/blacklist_exclude_ub8k_esc50_vggsound.json"
+      ],
+      "required_files": [
+        "README.md",
+        "json_files/AudioSet_SL/as_final.json",
+        "json_files/BBC_Sound_Effects/bbc_final.json",
+        "json_files/FreeSound/fsd_final.json",
+        "json_files/SoundBible/sb_final.json",
+        "json_files/blacklist/blacklist_exclude_all_ac.json",
+        "json_files/blacklist/blacklist_exclude_test_ac.json",
+        "json_files/blacklist/blacklist_exclude_ub8k_esc50_vggsound.json"
+      ],
+      "expected_files": [
+        {
+          "path": "README.md",
+          "size_bytes": 3615,
+          "sha256": "176d5ddabc6598bea6e2a14f3fdc296828e3ae89ecc00cccb853b7518f3368c8"
+        },
+        {
+          "path": "json_files/AudioSet_SL/as_final.json",
+          "size_bytes": 15341826,
+          "sha256": "c26e4c7f1fd00f346b54b7808c0d90c3465a2d98469023a8ad2735b9c9d8d4f3",
+          "lfs_sha256": "c26e4c7f1fd00f346b54b7808c0d90c3465a2d98469023a8ad2735b9c9d8d4f3"
+        },
+        {
+          "path": "json_files/BBC_Sound_Effects/bbc_final.json",
+          "size_bytes": 11670806,
+          "sha256": "151c37b00aa0823a697fbc8b24b124bef2c2654a5165ed4245addf7a0388f657",
+          "lfs_sha256": "151c37b00aa0823a697fbc8b24b124bef2c2654a5165ed4245addf7a0388f657"
+        },
+        {
+          "path": "json_files/FreeSound/fsd_final.json",
+          "size_bytes": 147300685,
+          "sha256": "4499ada1a7a76666695d880feb298f557efb3aa8af3b57fd9b713c75319ff53f",
+          "lfs_sha256": "4499ada1a7a76666695d880feb298f557efb3aa8af3b57fd9b713c75319ff53f"
+        },
+        {
+          "path": "json_files/SoundBible/sb_final.json",
+          "size_bytes": 469675,
+          "sha256": "c64329d13c58322d932a7e802c3f4b95d1fcd2ba0e52083cecb35a41b00f6a1c"
+        },
+        {
+          "path": "json_files/blacklist/blacklist_exclude_all_ac.json",
+          "size_bytes": 1525390,
+          "sha256": "ab53786c5d0a0fe174013395cae46dfcec8676ba71c8539605691290b63b4803"
+        },
+        {
+          "path": "json_files/blacklist/blacklist_exclude_test_ac.json",
+          "size_bytes": 77724,
+          "sha256": "54a84d4e24f5c7eda582ce75d0e34eae51a22df9f1a946db9e43501a6fb386a8"
+        },
+        {
+          "path": "json_files/blacklist/blacklist_exclude_ub8k_esc50_vggsound.json",
+          "size_bytes": 473374,
+          "sha256": "64e278412489767ce8578e651985c310d8409ed78855bfcc78f9e398ca838c50"
+        }
+      ]
+    }
+  ]
+}

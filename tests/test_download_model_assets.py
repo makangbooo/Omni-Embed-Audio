@@ -24,9 +24,12 @@ with patch.dict(sys.modules, {"huggingface_hub": fake_huggingface_hub}):
         ensure_external_model_root,
         is_retryable_network_error,
         local_files,
+        pinned_file_specs,
         repository_info,
         selected,
         sha256_file,
+        validate_local_file_pins,
+        validate_remote_file_pins,
     )
 
 
@@ -188,6 +191,69 @@ class DownloadModelAssetsTest(unittest.TestCase):
             self.assertEqual(
                 sha256_file(payload), hashlib.sha256(b"checkpoint").hexdigest()
             )
+
+    def test_multi_file_pins_validate_remote_and_local_content(self) -> None:
+        payload = b"metadata"
+        digest = hashlib.sha256(payload).hexdigest()
+        asset = {
+            "name": "metadata",
+            "expected_files": [
+                {
+                    "path": "source.json",
+                    "size_bytes": len(payload),
+                    "sha256": digest,
+                    "lfs_sha256": digest,
+                }
+            ],
+        }
+        specifications = pinned_file_specs(asset)
+        validate_remote_file_pins(
+            asset_name=asset["name"],
+            remote_files=[
+                {
+                    "path": "source.json",
+                    "size_bytes": len(payload),
+                    "lfs_sha256": digest,
+                }
+            ],
+            specifications=specifications,
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory)
+            (destination / "source.json").write_bytes(payload)
+            validate_local_file_pins(
+                asset_name=asset["name"],
+                destination=destination,
+                specifications=specifications,
+            )
+
+    def test_file_pins_reject_duplicate_paths_and_content_mismatch(self) -> None:
+        duplicate = {
+            "name": "duplicate",
+            "expected_primary_file": {"path": "same"},
+            "expected_files": [{"path": "same"}],
+        }
+        with self.assertRaisesRegex(ValueError, "duplicate expected file paths"):
+            pinned_file_specs(duplicate)
+
+        expected = [{"path": "source.json", "size_bytes": 8, "sha256": "0" * 64}]
+        with self.assertRaisesRegex(RuntimeError, "pinned metadata mismatch"):
+            validate_remote_file_pins(
+                asset_name="metadata",
+                remote_files=[
+                    {"path": "source.json", "size_bytes": 7, "lfs_sha256": None}
+                ],
+                specifications=expected,
+            )
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory)
+            (destination / "source.json").write_bytes(b"metadata")
+            with self.assertRaisesRegex(RuntimeError, "local SHA256 mismatch"):
+                validate_local_file_pins(
+                    asset_name="metadata",
+                    destination=destination,
+                    specifications=expected,
+                )
 
     def test_first_download_manifest_uses_immutable_revisions(self) -> None:
         manifest = REPOSITORY_ROOT / "configs/resources/model01_qwen3b_cl.json"
