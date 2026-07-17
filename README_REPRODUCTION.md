@@ -89,7 +89,7 @@ bash scripts/run_reproduction.sh \
 | 阶段 | 资源 | 当前说明 |
 |---|---|---|
 | DATA-04/05/06/07/08/09/10/11 | CPU | 下载固定小型资源、安全解压、manifest/泄漏/UIQ 校验 |
-| 单变体资源审计、checkpoint 复核、模型锁 | CPU | 读取量较大，真实运行前仍需长任务报告 |
+| 单变体资源审计、checkpoint 复核、OEA/vanilla 模型锁 | CPU | 读取量较大，真实运行前仍需长任务报告；vanilla 锁不加载 LoRA 或 projection |
 | Caption/UIQ embedding | 1×A100-80GB | 严格离线、单卡、可恢复；必须使用已提交模型锁 |
 | T2A/T2T/UIQ 指标 | CPU | 从固定 embedding 运行完整排名和指标 |
 | Qwen3B 训练 | BLOCKED | 缺 world size、seed、精确 AudioCaps manifest、完整 stage 配置和 Clotho early-stop split |

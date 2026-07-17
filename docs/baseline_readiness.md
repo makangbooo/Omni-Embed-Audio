@@ -37,14 +37,16 @@ it imports no model library, downloads nothing, and uses no GPU.
 | Robust-CLAP | Adapter and UIQ text precomputer only | `[MISSING]`; local checkpoint/source trees are named but not identified | `BLOCKED` |
 | MGA-CLAP | Adapter, runner, Hydra config/loader, CLI choice | `[MISSING]`; source tree/checkpoint are untracked | `BLOCKED` |
 | M2D-CLAP | Adapter and vendored portable model only | `[MISSING]`; no checkpoint revision/SHA256 | `BLOCKED` |
-| Nemotron-3B | Shared mean-pooling/L2 adapter and Hydra loader/config | Base snapshot is pinned by MODEL-03 | `BLOCKED` pending a base-only model lock/wrapper |
-| Qwen2.5-Omni-3B | Shared mean-pooling/L2 adapter and generic Hydra loader | Base snapshot is pinned by MODEL-01 | `BLOCKED` pending explicit config/lock/wrapper |
-| Qwen2.5-Omni-7B | Shared mean-pooling/L2 adapter and Hydra loader/config | Base snapshot is pinned by MODEL-04 | `BLOCKED` pending a base-only model lock/wrapper |
+| Nemotron-3B | Shared mean-pooling/L2 adapter plus non-overwriting base-lock pipeline | Base snapshot is pinned by MODEL-03; real lock not yet generated | `BLOCKED` pending a committed lock and embedding wrapper |
+| Qwen2.5-Omni-3B | Shared mean-pooling/L2 adapter plus non-overwriting base-lock pipeline | Base snapshot is pinned by MODEL-01; real lock not yet generated | `BLOCKED` pending explicit config, committed lock, and embedding wrapper |
+| Qwen2.5-Omni-7B | Shared mean-pooling/L2 adapter plus non-overwriting base-lock pipeline | Base snapshot is pinned by MODEL-04; real lock not yet generated | `BLOCKED` pending a committed lock and embedding wrapper |
 
 No row is currently formal-ready. This is not solely a checkpoint-download
 problem: Robust-CLAP and M2D-CLAP lack normal baseline entrypoints; MGA-CLAP's
 argparse route does not pass the required repository/checkpoint paths; and all
-three vanilla rows lack a model-lock-bound base-only embedding wrapper.
+three vanilla rows still lack a real committed base lock and its lock-bound
+embedding wrapper. The committed CPU pipeline can now produce those locks, but
+implementing a tool is not evidence that the remote resource audit has run.
 
 ## Code conflicts preserved for later fixes
 
@@ -70,8 +72,10 @@ three vanilla rows lack a model-lock-bound base-only embedding wrapper.
    byte size, and SHA256. Record access/license requirements separately.
 3. For Robust-CLAP, first preserve the original load error, then assess the
    existing compatibility changes as an independent minimal patch.
-4. Add one non-overwriting, model-locked embedding wrapper per baseline and
-   base-only backbone; run a small fixture before full Clotho.
+4. Run the non-overwriting vanilla base-lock pipeline for each complete base
+   snapshot and commit only the small locks. Then add one model-lock-bound
+   embedding wrapper per baseline/backbone and run a small fixture before full
+   Clotho.
 5. Reuse the canonical embedding evaluators and identical candidate/query IDs;
    do not use the legacy runner's metric output as proof until its protocol is
    reconciled with the fixed evaluation contract.

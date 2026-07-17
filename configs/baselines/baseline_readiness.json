@@ -142,6 +142,7 @@
         {"surface_id": "adapter", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "class OmniEmbedAdapter", "expected_present": true, "required_for_formal": true},
         {"surface_id": "mean_pooling", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = summed / denom", "expected_present": true, "required_for_formal": true},
         {"surface_id": "l2_normalization", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = F.normalize(pooled, p=2, dim=-1)", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "base_lock_pipeline", "path": "scripts/run_vanilla_backbone_model_pipeline.sh", "needle": "exact base resource audit -> vanilla base-only model lock", "expected_present": true, "required_for_formal": true},
         {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/omni_embed.yaml", "expected_present": true, "required_for_formal": true},
         {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"omni_embed\"", "expected_present": true, "required_for_formal": true},
         {"surface_id": "formal_base_only_wrapper", "path": "scripts/run_vanilla_backbone_embeddings.sh", "expected_present": false, "required_for_formal": true}
@@ -156,7 +157,7 @@
         "The public argparse CLI does not route its 'oea' choice to BaselineRunner, and the README command mixes Hydra syntax with argparse.",
         "The exact text/audio prefix policy remains conflicted between paper text and public backbone code."
       ],
-      "next_action": "Add a base-only lock and formal embedding wrapper after the shared prefix protocol is fixed explicitly."
+      "next_action": "Run the committed base-lock pipeline and commit its small lock, then add a lock-bound formal embedding wrapper using the explicit public-code prefix protocol."
     },
     {
       "model_id": "vanilla_qwen2_5_omni_3b",
@@ -167,6 +168,7 @@
         {"surface_id": "adapter", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "class OmniEmbedAdapter", "expected_present": true, "required_for_formal": true},
         {"surface_id": "mean_pooling", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = summed / denom", "expected_present": true, "required_for_formal": true},
         {"surface_id": "l2_normalization", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = F.normalize(pooled, p=2, dim=-1)", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "base_lock_pipeline", "path": "scripts/run_vanilla_backbone_model_pipeline.sh", "needle": "exact base resource audit -> vanilla base-only model lock", "expected_present": true, "required_for_formal": true},
         {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/qwen2_5_omni_3b.yaml", "expected_present": false, "required_for_formal": true},
         {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"omni_embed\"", "expected_present": true, "required_for_formal": true},
         {"surface_id": "formal_base_only_wrapper", "path": "scripts/run_vanilla_backbone_embeddings.sh", "expected_present": false, "required_for_formal": true}
@@ -180,7 +182,7 @@
         "No Qwen3B Hydra config or model-lock-bound base-only embedding wrapper exists.",
         "The exact text/audio prefix policy remains conflicted between paper text and public backbone code."
       ],
-      "next_action": "Add an explicit Qwen3B base-only config/lock/wrapper without loading LoRA or projection heads."
+      "next_action": "Run and commit the base-only lock, then add an explicit Qwen3B config and lock-bound wrapper without loading LoRA or projection heads."
     },
     {
       "model_id": "vanilla_qwen2_5_omni_7b",
@@ -191,6 +193,7 @@
         {"surface_id": "adapter", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "class OmniEmbedAdapter", "expected_present": true, "required_for_formal": true},
         {"surface_id": "mean_pooling", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = summed / denom", "expected_present": true, "required_for_formal": true},
         {"surface_id": "l2_normalization", "path": "AudioRetrieval/models/omni_embed_adapter.py", "needle": "pooled = F.normalize(pooled, p=2, dim=-1)", "expected_present": true, "required_for_formal": true},
+        {"surface_id": "base_lock_pipeline", "path": "scripts/run_vanilla_backbone_model_pipeline.sh", "needle": "exact base resource audit -> vanilla base-only model lock", "expected_present": true, "required_for_formal": true},
         {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/omni_embed_7b.yaml", "expected_present": true, "required_for_formal": true},
         {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"omni_embed\"", "expected_present": true, "required_for_formal": true},
         {"surface_id": "formal_base_only_wrapper", "path": "scripts/run_vanilla_backbone_embeddings.sh", "expected_present": false, "required_for_formal": true}
@@ -205,7 +208,7 @@
         "No model-lock-bound base-only embedding wrapper exists.",
         "The exact text/audio prefix policy remains conflicted between paper text and public backbone code."
       ],
-      "next_action": "Bind the existing Qwen7B config to an immutable base-only lock before formal evaluation."
+      "next_action": "Run and commit the immutable base-only lock, then bind the Qwen7B formal embedding wrapper to it."
     }
   ]
 }

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "expected_backbone_ids": [
+    "vanilla_nemotron_3b",
+    "vanilla_qwen2_5_omni_3b",
+    "vanilla_qwen2_5_omni_7b"
+  ],
+  "source_tags": {
+    "models": "[PAPER] vanilla multimodal-LLM backbones reported in Tables 2 and 3",
+    "resources": "[CODE] immutable Hugging Face revisions fixed by the reproduction resource manifests",
+    "pooling": "[CODE] public OmniEmbedAdapter attention-mask-aware mean pooling over last hidden states",
+    "normalization": "[CODE] public OmniEmbedAdapter L2-normalizes pooled hidden states",
+    "audio_prompt_conflict": "[PAPER][CODE] paper states passage:, while public _build_audio_messages() explicitly omits text from audio-only messages"
+  },
+  "protocol": {
+    "text_prompt": {
+      "value": "query:",
+      "source": "[PAPER][CODE]"
+    },
+    "audio_prompt": {
+      "runtime_value": "audio-only chat message; passage_prefix parameter is not inserted",
+      "runtime_source": "[CODE]",
+      "paper_value": "passage:",
+      "paper_source": "[PAPER]",
+      "status": "CONFLICT",
+      "claim_boundary": "Public-code protocol only; do not label as a strict paper-protocol reproduction."
+    },
+    "pooling": {
+      "value": "attention-mask-aware mean of last hidden states",
+      "source": "[CODE]"
+    },
+    "normalization": {
+      "value": "L2",
+      "source": "[CODE]"
+    },
+    "projection": {
+      "value": "none; retain the backbone hidden dimension",
+      "source": "[CODE] public base adapter returns pooled hidden states directly"
+    }
+  },
+  "backbones": [
+    {
+      "backbone_id": "vanilla_nemotron_3b",
+      "paper_model": "Nemotron-3B",
+      "family": "nemotron",
+      "base_asset": {
+        "manifest": "configs/resources/model03_nemo3b.json",
+        "asset_name": "omni_embed_nemotron_3b"
+      }
+    },
+    {
+      "backbone_id": "vanilla_qwen2_5_omni_3b",
+      "paper_model": "Qwen2.5-Omni-3B",
+      "family": "qwen2_5_omni",
+      "base_asset": {
+        "manifest": "configs/resources/model01_qwen3b_cl.json",
+        "asset_name": "qwen2_5_omni_3b"
+      }
+    },
+    {
+      "backbone_id": "vanilla_qwen2_5_omni_7b",
+      "paper_model": "Qwen2.5-Omni-7B",
+      "family": "qwen2_5_omni",
+      "base_asset": {
+        "manifest": "configs/resources/model04_qwen7b.json",
+        "asset_name": "qwen2_5_omni_7b"
+      }
+    }
+  ]
+}
