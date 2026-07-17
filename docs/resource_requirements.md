@@ -61,10 +61,12 @@
 
 ### AudioCaps v2
 
-- `[PAPER]` 91,256 training samples；test 为 975 clips × 5 captions。
-- `[CODE]` 路径假设 `AudioCaps/v2_meta_data/{train,val,test}.csv` 与 `AudioCaps/audiocaps_raw_audio/`。
-- `[MISSING]` “v2”来源、revision、91,256 样本究竟是 clip 还是 caption rows、公开下载说明与 checksum。
-- 在获得论文同版 metadata 前，不用普通 AudioCaps 替代并声称严格复现。
+- `[CODE]` 已固定官方 AudioCaps 2.0 commit `d004db3ea1b01cf4fd0347dd8d27db90cadc8809` 的 `dataset2.0/{train,val,test}.csv`，DATA-06/07 校验 MD5、SHA256、bytes、schema、计数及 UIQ 对齐。
+- `[PAPER][CODE]` 论文与官方 README 均报告 91,256 train；`[CODE]` 公共 OEA loader 实际只能得到 91,254 个有效记录，原因是 3 个 bare-CR 孤立 caption 片段和 2 个 quoted 多行 caption。
+- `[INFERRED]` 仅修复 3 个 caption 尾部仍为 91,254 条；`[MISSING]` 论文的有效 91,256-row manifest 或另外 2 条记录。
+- test 已固定为 975 clips × 5 captions；四类正 UIQ 的 ID 和去重 captions、630 条 negative 的原 captions 均与官方 CSV 精确对齐。
+- 当前真正需要用户提供的是官方音频下载权限/文件。官方 README 指向 `https://forms.gle/2wF54Y1Ft2LtPdhW8`；若只能从 YouTube 重建，必须逐条报告下架缺失，不能缩小候选集冒充论文口径。
+- 详见 `docs/audiocaps_v2_data_audit.md`。
 
 ### Clotho v2.1
 

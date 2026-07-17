@@ -91,4 +91,4 @@ OEA 使用同一个具备原生音频理解能力的多模态 LLM 处理文本�
 
 核心结论可以尝试复现，但公开发布不足以直接重跑论文全部表格。第一优先级不是训练，而是：固定环境；修复官方 checkpoint 加载/文件名；建立三个数据集的 canonical manifest；补 UIQ schema adapter 和 metric unit tests；在一个 3B checkpoint 上完成端到端官方权重评测。只有该闭环通过后，才进入单个 3B 训练链。
 
-训练数字目前只能计划为“近似复现”，直到获得 AudioCaps v2 91,256-sample manifest、实际 DDP/global-batch 配置、stage-specific LR、精确 blocklists、HN pairing 和随机种子。
+训练数字目前只能计划为“近似复现”。AudioCaps 2.0 官方 metadata 已固定，但公开 OEA loader 只有 91,254 个有效 train records，与论文/README 的 91,256 冲突；仍需获得论文有效 manifest、实际 DDP/global-batch 配置、stage-specific LR、精确 blocklists、HN pairing 和随机种子。

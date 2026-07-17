@@ -30,7 +30,9 @@
 | 2 UIQ | Tables 12–15 正向 UIQ | BLOCKED | `6160cd3` | 发布 schema adapter 已完成；15 个 JSONL、13,053 行和正/负 query 约束通过测试 | AudioCaps/Clotho/MECAT 音频候选集未全部准备；MECAT 847/848 口径未决 | 数据就绪后接入 canonical ID evaluator，禁止静默丢弃未映射 ID |
 | 2 Negative | Tables 4/17 否定查询 | BLOCKED | N/A | 未开始 | 发布文件无 HN audio ID | 请求作者 pairing 或审计式重建 |
 | 3 数据 | WavCaps ≤31s + leakage blocklists | BLOCKED | N/A | 未开始 | 精确 manifest/blocklists 未发布 | 先做 metadata-only overlap audit |
-| 3 数据 | AudioCaps v2 91,256 manifest | BLOCKED | N/A | 未开始 | 数据版本/下载源未公开 | 请求作者或获得用户已有文件 |
+| 3 数据 | DATA-06：AudioCaps 2.0 官方 metadata 下载 | TODO | `4ef4f29` | 固定 commit、MD5/SHA256/bytes 与 CPU 下载脚本已提交；本地真实下载闭环通过 | 当前优先等待 DATA-04，尚未安排远程运行 | DATA-04 后在 CPU 服务器下载约 6.9 MB metadata |
+| 3 数据 | DATA-07：AudioCaps 2.0 metadata/UIQ 全量校验 | TODO | `4ef4f29` | 本地真实全量验证通过：91,254 train、495 val、975 test、正/负 UIQ 精确对齐；82 项测试通过 | 远程尚未运行 | DATA-06 后生成远程 manifests 和统计证据 |
+| 3 数据 | AudioCaps v2 论文 91,256 train 口径 | BLOCKED | `4ef4f29` | 官方固定 CSV 与公共 loader 已审计；另有 `[CODE]` 91,254 和 `[INFERRED]` 修复 91,254 两套 manifest | `[MISSING]` 能产生 91,256 个有效样本的论文 manifest/loader；实际音频尚未提供 | 请求官方音频；训练前显式选择公开 loader 或修复口径，不冒充 exact |
 | 3 数据 | Clotho v2.1 evaluation 下载与 checksum | COMPLETED | `aff03e4` | DATA-01 首次下载及两次幂等复核完成；3 个 MD5 全部匹配 | 无；两次复核均为 `verified_existing`，未重复下载 | DATA-02 安全解压、1,045 条 WAV/CSV/UIQ ID 校验 |
 | 3 数据 | DATA-02：Clotho evaluation 解压与完整性校验 | WAITING_USER | `e938cb5` | CPU 预检完成且 `7zz 26.02` 已可用 | 无 | 并行下载启动后安排完整校验 |
 | 3 数据 | DATA-03：Clotho development/validation 下载与 checksum | RUNNING_REMOTE | `ae2c3fb` | PID 49545；`logs/data03_clotho_trainval_download_20260716_170930`；development archive `.part` 约 227 MB 且持续更新 | 无；六个 Zenodo 文件约 5.8 GB `[INFERRED]` | 保持运行，完成后逐文件核对官方 MD5 |
@@ -45,6 +47,6 @@
 
 - 当前阶段：环境、首批官方权重、checkpoint 结构审计、inference-only 权重提取及单卡 GPU smoke 已完成。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：canonical T2A/T2T/UIQ 指标、15 个发布 UIQ 文件的 schema 适配、可审计指标/embedding runner，以及 MECAT 官方 `00A/test` 的固定资源、安全解压和 848-ID 校验实现；完整 76 项测试通过。
-- 当前阻塞：正式论文表格评测仍缺完整 AudioCaps、Clotho 和 MECAT 数据；MECAT 还缺论文 847 条中的排除 ID和检索 caption 字段。当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
-- 下一步：CPU 侧完成 DATA-02、DATA-04/05，并让 MODEL-02/03/04 与 DATA-03 继续远程断点续传；Clotho DATA-02 通过后申请 1×A100-80GB 做正式 embedding 小批校验。
+- 最近完成：MECAT `00A/test` 固定资源/安全校验，以及 AudioCaps 2.0 固定 commit、CSV 异常双口径 manifest、975-test/UIQ 全量对齐；本地真实 metadata 闭环和完整 82 项测试通过。
+- 当前阻塞：正式论文表格评测仍缺完整 AudioCaps、Clotho 和 MECAT 音频；AudioCaps 还缺论文有效 91,256-row train manifest，MECAT 还缺论文 847 条中的排除 ID和检索 caption 字段。当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
+- 下一步：保持当前 DATA-04 为用户唯一待执行步骤；其后在 CPU 侧依次完成 DATA-05、DATA-06/07。MODEL-02/03/04 与 DATA-03 继续远程断点续传；Clotho DATA-02 通过后申请 1×A100-80GB 做正式 embedding 小批校验。

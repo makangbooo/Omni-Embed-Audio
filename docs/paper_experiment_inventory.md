@@ -22,7 +22,7 @@
 | EXP-04 | §3.2.3；附录 I | UIQ 与真实 Freesound 查询 token-length 分析 | UIQ 13,053 条；Freesound 查询统计 | 分词器 `[MISSING]` | token 数分布、均值；对照文献 1.8 tokens | `[MISSING]` 无脚本、无真实查询日志/分词定义 | Freesound 查询数据或文献可复算统计 | C | BLOCKED |
 | EXP-05 | §3.3；附录 K | 四阶段 hard-negative mining + 人工复核 | 三个评测集 | MGA-CLAP + BGE-large-en-v1.5 | Top-20、声学相似度、语义相似度、保留率、最终配对数 | `[CODE] preprocess hard-negatives` 默认 Top-50；另有 LAION-CLAP 替代脚本 Top-20 | MGA-CLAP 权重、BGE、完整音频/captions、人工复核记录 | C（动态阈值与最终配对未发布） | BLOCKED |
 | EXP-06 | 附录 B.1；表 6 | 数据来源与潜在污染关系审计 | WavCaps 子集与 7 个评测集 | 文件/来源匹配 | 来源对应关系 | `[MISSING]` 无 provenance 脚本 | 各数据集 metadata | B | TODO |
-| EXP-07 | §4.1；附录 B.2 | AudioCaps test–WavCaps AudioSet_SL 重叠 | 975 AudioCaps test clips；108,317 WavCaps AudioSet_SL | 规范化 YouTube ID 精确匹配 | 173/975=17.7%；865 caption rows；占 WavCaps 0.16% | `[MISSING]` 无重叠或 blocklist 脚本 | 两侧 metadata；明确版本 | B | TODO |
+| EXP-07 | §4.1；附录 B.2 | AudioCaps test–WavCaps AudioSet_SL 重叠 | 975 AudioCaps test clips；108,317 WavCaps AudioSet_SL | 规范化 YouTube ID 精确匹配 | 173/975=17.7%；865 caption rows；占 WavCaps 0.16% | `[CODE]` DATA-06/07 已固定 AudioCaps 2.0 test 975 clips；WavCaps overlap/blocklist 实现仍缺 | 固定 WavCaps AudioSet_SL metadata | B | IN_PROGRESS |
 | EXP-08 | §4.1；附录 B.3 | Clotho evaluation–WavCaps Freesound 重叠 | 1,045 Clotho evaluation clips | filename case-insensitive 精确匹配；可扩展 fingerprint | 638/1,045=61.0% | `[MISSING]` 无重叠或 blocklist 脚本 | Clotho v2.1 metadata、WavCaps Freesound metadata | B | TODO |
 | EXP-09 | §4.1；附录 B.4 | MECAT–WavCaps 无显著重叠核验 | MECAT 与 WavCaps | filename + embedding 检查，具体阈值 `[MISSING]` | 重叠数/率 | `[CODE]` DATA-04/05 已固定官方 `00A/test` 848 条并实现完整性检查；重叠实现仍缺 | MECAT 848 条公开 manifest、论文 847 条排除 ID `[MISSING]`、WavCaps metadata、嵌入模型/阈值 | C | IN_PROGRESS |
 | EXP-10 | §5.1；表 2 | caption Text-to-Audio 完整基线 | AudioCaps 975、Clotho 1,045、MECAT 847（发布 UIQ 为 848，需澄清） | 4 CLAP + 3 vanilla LALM + 6 OEA | R@1/5/10 | README 把 Hydra `key=value` 语法传给 argparse CLI，命令会报参数错误；即使改调 `eval_hydra.py` 也只加载裸 backbone；主 evaluator 不支持 MECAT | 13 模型/权重、3 数据集、统一候选集 | C（需评测入口补全） | TODO |
@@ -67,7 +67,7 @@
 8. `[PAPER]` 音频输入使用 `passage:`；`[CODE]` `_build_audio_messages` 明确忽略 `passage_prefix`。这是论文方法与公开实现的实质差异，需用官方 checkpoint smoke test 判定实际训练口径。
 9. `[PAPER]` WavCaps 过滤到 ≤31 秒并应用泄漏 blocklist；`[CODE]` manifest 默认 `--max-duration=None`，没有生成或应用论文 blocklist 的实现。
 10. `[PAPER]` hard-negative Stage 2 使用动态声学阈值保留约 3×最终数量；`[CODE]` 替代脚本直接保留 Top-3，通用 pipeline 默认 Top-50，均不能证明等同论文。
-11. `[PAPER]` AudioCaps v2 训练为 91,256 samples；`[CODE]` 没有下载来源、revision 或 manifest，公开 AudioCaps 版本与论文口径无法对应。
+11. `[PAPER][CODE]` AudioCaps v2 官方 README 与论文均写 91,256 train；DATA-06/07 已固定官方 commit，但公共 OEA `csv.DictReader` 只能产生 91,254 个有效记录。3 个 bare-CR caption 尾部可修复但计数仍为 91,254；论文有效 91,256-row manifest `[MISSING]`。
 12. `[PAPER]/[CODE]` 正文 MECAT 为 847 对，UIQ 发布为 848 个正查询 ID；需作者 manifest 解释 1 条差异。
 
 ## 第一轮结论
