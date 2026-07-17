@@ -54,6 +54,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_negative_embedding_evaluation.sh",
             "run_qwen3b_clotho_retrieval_suite.sh",
             "run_qwen3b_cl_clotho_positive_uiq_embeddings.sh",
+            "run_qwen3b_clotho_positive_uiq_suite.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -129,6 +130,17 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn("prepare_embedding_evaluation_suite.py prepare", source)
         self.assertIn("run_embedding_evaluation.sh", source)
         self.assertIn("prepare_embedding_evaluation_suite.py finalize", source)
+        self.assertIn("Use a new SUITE_ID", source)
+        self.assertNotIn("rm -rf", source)
+
+    def test_positive_uiq_suite_is_cpu_only_and_non_overwriting(self) -> None:
+        source = (
+            REPOSITORY_ROOT / "scripts/run_qwen3b_clotho_positive_uiq_suite.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
+        self.assertIn("prepare_positive_uiq_evaluation_suite.py prepare", source)
+        self.assertIn("run_embedding_evaluation.sh", source)
+        self.assertIn("prepare_positive_uiq_evaluation_suite.py finalize", source)
         self.assertIn("Use a new SUITE_ID", source)
         self.assertNotIn("rm -rf", source)
 
