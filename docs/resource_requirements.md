@@ -73,10 +73,12 @@
 
 ### Clotho v2.1
 
-- 官方 Zenodo record `4783391`：development 4.5 GB、validation 1.3 GB、evaluation 1.2 GB，metadata/captions 约 3.3 MB，总下载 7.1 GB。
+- 官方 Zenodo record `4783391`：development archive 4,541,582,263 bytes、validation archive 1,260,701,425 bytes、evaluation archive 1.2 GB，metadata/captions 约 3.3 MB，总下载约 7.1 GB。
 - `[PAPER]` 追加训练为 3,839 clips；evaluation 为 1,045 clips。
 - DATA-02 已在远程完整验证 v2.1 evaluation：1,045/1,045 音频成功解码、每条 5 captions、四类正 UIQ ID 全部精确对齐；manifest MD5 `253c1b275e3618fa94750150d7962da5`。
-- `[INFERRED]` 论文只写 v2；当前使用修复后的 v2.1 并在报告标记版本差异。development/validation 仍需完成 DATA-03 下载和 checksum。
+- DATA-10 已在本地完整审计 development/validation 的四个 CSV：3,839/1,045 条、各 5 captions，caption/metadata 文件名集合精确一致；严格 metadata 编码为 ISO-8859-1。两个音频归档及 4,884 WAV 的远程校验待 DATA-03 下载完成。
+- `[CODE]` 公开 `+Cl` launcher 用 development 训练、evaluation 早停；`[PAPER]` 只写 validation R@10，未命名 split。论文真实早停 split 为 `[MISSING]`，训练时必须把公开代码路线与 official-validation 敏感性路线分开报告。
+- `[INFERRED]` 论文只写 v2；当前使用修复后的 v2.1 并在报告标记版本差异。详见 `docs/clotho_trainval_data_audit.md`。
 
 ### MECAT
 

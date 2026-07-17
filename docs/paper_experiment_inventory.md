@@ -36,11 +36,11 @@
 | EXP-18 | §5.4；附录 H；表 5、16 | 推理效率 | Clotho 1,045 clips | LAION/MGA/M2D + 3 OEA | audio ms/clip、text ms/query、peak GPU GB | `[MISSING]` 无 benchmark 脚本 | A100-SXM4-80GB、固定 batch/warmup/repetitions（均 `[MISSING]`） | C | TODO |
 | EXP-19 | §3.1/§5.4；表 5、16 | 训练参数量/占比 | 不依赖数据 | 3 OEA + 3 CLAP | trainable params、占总参数百分比 | `[CODE]` PEFT 可统计；无论文表生成脚本 | 所有模型结构/权重 | B | TODO |
 | EXP-20 | §4.1/4.2；附录 A | OEA-Nemo3B：WavCaps → AudioCaps | WavCaps 275,618（≤31s、去泄漏）→ AudioCaps v2 91,256 | Omni-Embed-Nemotron-3B | train loss、val R@10、表 2/3/12–17 | `[MISSING]` 无 Nemo 完整 stage config；通用 trainer 可近似 | 数据、base 权重、blocklists、完整超参 | C | BLOCKED |
-| EXP-21 | §4.1/4.2；附录 A | OEA-Nemo3B (+Cl)：追加 Clotho v2 | EXP-20 + 3,839 Clotho clips | 同上 | 同上 | `[MISSING]` 无 stage-3 命令 | EXP-20 checkpoint、Clotho dev/train/val 选择 | C | BLOCKED |
+| EXP-21 | §4.1/4.2；附录 A | OEA-Nemo3B (+Cl)：追加 Clotho v2 | EXP-20 + 3,839 Clotho clips | 同上 | 同上 | `[CODE]` `python -m AudioRetrieval.training.oea.train_omniembed_lora --dataset clotho --train-csv ...development... --val-csv ...evaluation...`；论文未命名 early-stopping split | EXP-20 checkpoint、DATA-10 manifests、论文 split 证据 `[MISSING]` | C | BLOCKED |
 | EXP-22 | §4.1/4.2；附录 A | OEA-Qwen3B：WavCaps → AudioCaps | 同 EXP-20 | Qwen2.5-Omni-3B | 同 EXP-20 | `[CODE] wavcaps_3b.sh` 仅覆盖 WavCaps，未给 AudioCaps stage | 数据、权重、完整超参、DDP 修复 | C | BLOCKED |
-| EXP-23 | §4.1/4.2；附录 A | OEA-Qwen3B (+Cl)：追加 Clotho v2 | 同 EXP-21 | Qwen2.5-Omni-3B | 同上 | `[MISSING]` 无 stage-3 命令 | EXP-22 checkpoint、Clotho 配置 | C | BLOCKED |
+| EXP-23 | §4.1/4.2；附录 A | OEA-Qwen3B (+Cl)：追加 Clotho v2 | 同 EXP-21 | Qwen2.5-Omni-3B | 同上 | `[CODE]` 同 EXP-21 的通用 Clotho launcher；backbone/stage 超参未固定 | EXP-22 checkpoint、DATA-10 manifests、完整 Qwen stage config `[MISSING]` | C | BLOCKED |
 | EXP-24 | §4.1/4.2；附录 A | OEA-Qwen7B：WavCaps → AudioCaps | 同 EXP-20 | Qwen2.5-Omni-7B | 同 EXP-20 | `[MISSING]` 无 7B stage config | 数据、权重、完整超参、8 卡训练 | C | BLOCKED |
-| EXP-25 | §4.1/4.2；附录 A | OEA-Qwen7B (+Cl)：追加 Clotho v2 | 同 EXP-21 | Qwen2.5-Omni-7B | 同上 | `[MISSING]` 无 stage-3 命令 | EXP-24 checkpoint、Clotho 配置 | C | BLOCKED |
+| EXP-25 | §4.1/4.2；附录 A | OEA-Qwen7B (+Cl)：追加 Clotho v2 | 同 EXP-21 | Qwen2.5-Omni-7B | 同上 | `[CODE]` 同 EXP-21 的通用 Clotho launcher；7B stage 超参未固定 | EXP-24 checkpoint、DATA-10 manifests、完整 7B stage config `[MISSING]` | C | BLOCKED |
 | DER-01 | 附录 F；表 11 | 三数据集 T2A/T2T 均值汇总 | EXP-10、EXP-11 | 所有基线/OEA | mean R@1/5/10 | `[MISSING]` 无汇总脚本 | EXP-10/11 raw metrics | B（派生） | TODO |
 | DER-02 | §5.3；表 4 | 三数据集 UIQ 均值与 Avg UIQ | EXP-12–17 | 4 CLAP + 6 OEA | 四类 R@5、negative HNSR@10、Avg UIQ | `[MISSING]` 无表生成脚本 | UIQ 分数据集 raw metrics | B（派生） | TODO |
 | DER-03 | §5.4；附录 J | backbone 泛化与 retrieval-specific scaling | 表 2/3/11、EXP-18/19 | Nemo3B、Qwen3B、Qwen7B | 跨数据集趋势、3B/7B 差值、效率 | `[MISSING]` 无分析脚本 | 已复现主表及效率结果 | B（派生） | TODO |
@@ -69,6 +69,7 @@
 10. `[PAPER]` hard-negative Stage 2 使用动态声学阈值保留约 3×最终数量；`[CODE]` 替代脚本直接保留 Top-3，通用 pipeline 默认 Top-50，均不能证明等同论文。
 11. `[PAPER][CODE]` AudioCaps v2 官方 README 与论文均写 91,256 train；DATA-06/07 已固定官方 commit，但公共 OEA `csv.DictReader` 只能产生 91,254 个有效记录。3 个 bare-CR caption 尾部可修复但计数仍为 91,254；论文有效 91,256-row manifest `[MISSING]`。
 12. `[PAPER]/[CODE]` 正文 MECAT 为 847 对，UIQ 发布为 848 个正查询 ID；需作者 manifest 解释 1 条差异。
+13. `[PAPER]` `+Cl` 使用 3,839 clips 并按 validation R@10 早停，但没有命名 Clotho split；`[CODE]` 唯一 launcher 明确用 development 训练、evaluation 早停，而不是 official validation。DATA-10 会完整保留两个官方训练侧 split；公开代码路线与无污染 official-validation 敏感性路线必须分开报告。
 
 ## 第一轮结论
 
