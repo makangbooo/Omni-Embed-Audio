@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "resource_id": "DATA-04",
+  "dataset": "MECAT-Caption",
+  "configuration": "00A",
+  "split": "test",
+  "source": "https://huggingface.co/datasets/mispeech/MECAT-Caption",
+  "source_tags": {
+    "dataset_identity": "[PAPER][INFERRED] paper names MECAT; official data card identifies 00A as general sound excluding speech/music",
+    "expected_examples": "[CODE] official 00A test and released OEA MECAT positive UIQ contain 848 IDs; [PAPER] reports 847 without publishing the excluded ID",
+    "retrieval_caption_field": "[MISSING] paper and public OEA code do not identify which MECAT JSON caption field was used for T2A/T2T"
+  },
+  "assets": [
+    {
+      "name": "mecat_caption_00a_test",
+      "repo_id": "mispeech/MECAT-Caption",
+      "repo_type": "dataset",
+      "revision": "be4a24c3f7309d74208e08a7cce49e72cb7a5834",
+      "local_subdir": "mecat_caption_be4a24c3/source",
+      "allow_patterns": [
+        "README.md",
+        "00A/test_0000-0000000.tar.gz"
+      ],
+      "required_files": [
+        "README.md",
+        "00A/test_0000-0000000.tar.gz"
+      ],
+      "expected_primary_file": {
+        "path": "00A/test_0000-0000000.tar.gz",
+        "size_bytes": 173168424,
+        "lfs_sha256": "644cf75e2509c633452a18e36c41b285a317c6cbc06198d7dfe406c5aa5122c4"
+      }
+    }
+  ]
+}

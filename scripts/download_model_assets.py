@@ -26,7 +26,17 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", type=Path, required=True)
-    parser.add_argument("--model-root", type=Path, required=True)
+    parser.add_argument(
+        "--model-root",
+        "--resource-root",
+        dest="model_root",
+        type=Path,
+        required=True,
+        help=(
+            "External destination root. --model-root is retained for backward "
+            "compatibility; --resource-root is the generic spelling."
+        ),
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--max-download-attempts", type=int, default=20)
     parser.add_argument("--retry-backoff-seconds", type=int, default=30)
@@ -73,6 +83,28 @@ def selected(filename: str, patterns: list[str] | None) -> bool:
     if patterns is None:
         return True
     return any(fnmatch.fnmatch(filename, pattern) for pattern in patterns)
+
+
+def repository_info(
+    api: HfApi,
+    *,
+    repo_id: str,
+    repo_type: str,
+    revision: str,
+) -> Any:
+    """Resolve immutable metadata through the matching Hugging Face API."""
+    kwargs = {
+        "repo_id": repo_id,
+        "revision": revision,
+        "files_metadata": True,
+    }
+    if repo_type == "model":
+        return api.model_info(**kwargs)
+    if repo_type == "dataset":
+        return api.dataset_info(**kwargs)
+    if repo_type == "space":
+        return api.space_info(**kwargs)
+    raise ValueError(f"unsupported Hugging Face repo_type: {repo_type!r}")
 
 
 def sha256_file(path: Path) -> str:
@@ -231,6 +263,7 @@ def main() -> int:
         for asset in specification["assets"]:
             name = asset["name"]
             repo_id = asset["repo_id"]
+            repo_type = asset.get("repo_type", "model")
             revision = asset["revision"]
             patterns = asset.get("allow_patterns")
             destination = model_root / asset["local_subdir"]
@@ -250,10 +283,11 @@ def main() -> int:
             else:
                 write_json(marker, identity)
 
-            info = api.model_info(
+            info = repository_info(
+                api,
                 repo_id=repo_id,
+                repo_type=repo_type,
                 revision=revision,
-                files_metadata=True,
             )
             if info.sha != revision:
                 raise RuntimeError(
@@ -318,6 +352,7 @@ def main() -> int:
             asset_report: dict[str, Any] = {
                 "name": name,
                 "repo_id": repo_id,
+                "repo_type": repo_type,
                 "requested_revision": revision,
                 "resolved_revision": info.sha,
                 "destination": str(destination),
@@ -334,7 +369,7 @@ def main() -> int:
             download_snapshot_with_retries(
                 download_kwargs={
                     "repo_id": repo_id,
-                    "repo_type": asset.get("repo_type", "model"),
+                    "repo_type": repo_type,
                     "revision": revision,
                     "local_dir": destination,
                     "allow_patterns": patterns,

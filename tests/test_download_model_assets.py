@@ -24,6 +24,7 @@ with patch.dict(sys.modules, {"huggingface_hub": fake_huggingface_hub}):
         ensure_external_model_root,
         is_retryable_network_error,
         local_files,
+        repository_info,
         selected,
         sha256_file,
     )
@@ -145,6 +146,35 @@ class DownloadModelAssetsTest(unittest.TestCase):
         self.assertFalse(selected("config.json", ["*.pt"]))
         self.assertTrue(selected("any/file", None))
 
+    def test_repository_info_routes_dataset_metadata(self) -> None:
+        api = Mock()
+        expected = object()
+        api.dataset_info.return_value = expected
+
+        actual = repository_info(
+            api,
+            repo_id="mispeech/MECAT-Caption",
+            repo_type="dataset",
+            revision="a" * 40,
+        )
+
+        self.assertIs(actual, expected)
+        api.dataset_info.assert_called_once_with(
+            repo_id="mispeech/MECAT-Caption",
+            revision="a" * 40,
+            files_metadata=True,
+        )
+        api.model_info.assert_not_called()
+
+    def test_repository_info_rejects_unknown_type(self) -> None:
+        with self.assertRaisesRegex(ValueError, "unsupported Hugging Face repo_type"):
+            repository_info(
+                Mock(),
+                repo_id="owner/repository",
+                repo_type="unknown",
+                revision="a" * 40,
+            )
+
     def test_hash_and_local_file_inventory_skip_hf_cache(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -211,6 +241,28 @@ class DownloadModelAssetsTest(unittest.TestCase):
                     self.assertIsNone(asset["allow_patterns"])
                     self.assertEqual(len(asset["revision"]), 40)
                     int(asset["revision"], 16)
+
+    def test_mecat_manifest_pins_official_dataset_shard(self) -> None:
+        manifest = REPOSITORY_ROOT / "configs/resources/data04_mecat_00a_test.json"
+        specification = json.loads(manifest.read_text(encoding="utf-8"))
+        self.assertEqual(specification["resource_id"], "DATA-04")
+        self.assertEqual(len(specification["assets"]), 1)
+        asset = specification["assets"][0]
+        self.assertEqual(asset["repo_type"], "dataset")
+        self.assertEqual(
+            asset["revision"], "be4a24c3f7309d74208e08a7cce49e72cb7a5834"
+        )
+        self.assertEqual(
+            asset["expected_primary_file"],
+            {
+                "path": "00A/test_0000-0000000.tar.gz",
+                "size_bytes": 173168424,
+                "lfs_sha256": (
+                    "644cf75e2509c633452a18e36c41b285"
+                    "a317c6cbc06198d7dfe406c5aa5122c4"
+                ),
+            },
+        )
 
 
 if __name__ == "__main__":
