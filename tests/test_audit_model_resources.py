@@ -16,11 +16,14 @@ fake_huggingface_hub.__version__ = "test"
 fake_huggingface_hub.snapshot_download = lambda **_: None
 
 with patch.dict(sys.modules, {"huggingface_hub": fake_huggingface_hub}):
+    import scripts.audit_model_resources as audit_module
     from scripts.audit_model_resources import (
         audit_local_asset,
+        audit_resources,
         combined_status,
         destination_for,
         git_blob_sha1,
+        normalize_asset_selection,
         validate_manifest,
     )
 
@@ -35,6 +38,123 @@ class AuditModelResourcesTest(unittest.TestCase):
         "allow_patterns": None,
         "required_files": ["config.json", "weights.bin"],
     }
+
+    def test_exact_asset_selection_rejects_duplicates_and_unsafe_names(self) -> None:
+        self.assertEqual(normalize_asset_selection(None), ())
+        self.assertEqual(
+            normalize_asset_selection(["base_model", "checkpoint-1"]),
+            ("base_model", "checkpoint-1"),
+        )
+        with self.assertRaisesRegex(ValueError, "duplicate"):
+            normalize_asset_selection(["base_model", "base_model"])
+        for unsafe in ("../base", "base/model", "", "base model"):
+            with self.subTest(value=unsafe), self.assertRaisesRegex(
+                ValueError, "unsafe"
+            ):
+                normalize_asset_selection([unsafe])
+
+    def test_audit_resources_reads_only_exact_requested_assets(self) -> None:
+        def asset(name: str) -> dict:
+            return {
+                "name": name,
+                "repo_id": f"owner/{name}",
+                "revision": "a" * 40,
+                "local_subdir": name,
+                "required_files": ["weights.bin"],
+            }
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = root / "resources.json"
+            output = root / "audit.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "assets": [asset("selected"), asset("unrelated")],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            audited_names: list[str] = []
+
+            def fake_remote_inventory(api: object, row: dict) -> list[dict]:
+                audited_names.append(row["name"])
+                return [
+                    {
+                        "path": "weights.bin",
+                        "size_bytes": 1,
+                        "lfs_sha256": "b" * 64,
+                        "blob_id": None,
+                    }
+                ]
+
+            def fake_local_audit(**kwargs: object) -> dict:
+                row = kwargs["asset"]
+                return {"name": row["name"], "status": "complete"}
+
+            with (
+                patch.object(audit_module, "HfApi", return_value=object()),
+                patch.object(
+                    audit_module,
+                    "remote_inventory",
+                    side_effect=fake_remote_inventory,
+                ),
+                patch.object(
+                    audit_module,
+                    "audit_local_asset",
+                    side_effect=fake_local_audit,
+                ),
+            ):
+                exit_code = audit_resources(
+                    manifest_paths=[manifest],
+                    model_root=root / "models",
+                    output=output,
+                    asset_names=("selected",),
+                )
+
+            report = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(audited_names, ["selected"])
+        self.assertEqual(report["requested_assets"], ["selected"])
+        self.assertEqual([row["name"] for row in report["assets"]], ["selected"])
+
+    def test_audit_resources_rejects_requested_asset_absent_from_manifests(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = root / "resources.json"
+            output = root / "audit.json"
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "assets": [
+                            {
+                                "name": "present",
+                                "repo_id": "owner/present",
+                                "revision": "a" * 40,
+                                "local_subdir": "present",
+                                "required_files": ["weights.bin"],
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch.object(audit_module, "HfApi", return_value=object()):
+                exit_code = audit_resources(
+                    manifest_paths=[manifest],
+                    model_root=root / "models",
+                    output=output,
+                    asset_names=("absent",),
+                )
+            report = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(report["status"], "failed")
+        self.assertIn("absent", report["fatal_error"])
 
     @staticmethod
     def remote_files(config: bytes, weights: bytes) -> list[dict[str, object]]:

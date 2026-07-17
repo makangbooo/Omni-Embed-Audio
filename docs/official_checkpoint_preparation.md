@@ -66,6 +66,9 @@ cd /home/jg525/Omni-Embed-Audio
 conda activate oea-repro
 export MODEL_ROOT=/home/jg525/model_cache/oea
 
+# Read-only base/checkpoint snapshot audit for this exact variant:
+bash scripts/run_official_oea_model_resource_audit.sh oea_nemo3b
+
 # Structure and identity audit only:
 bash scripts/run_official_checkpoint_preparation.sh oea_nemo3b --inspect-only
 

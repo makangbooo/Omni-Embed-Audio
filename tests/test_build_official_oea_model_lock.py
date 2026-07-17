@@ -7,6 +7,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
+from scripts.audit_official_oea_variant_resources import (
+    resolve_variant_audit_plan,
+)
 from scripts.build_official_oea_model_lock import (
     build_model_lock,
     portable_file_identity,
@@ -102,6 +105,11 @@ class BuildOfficialOEAModelLockTest(unittest.TestCase):
             "git_status_short": "",
             "model_root": str(model_root.resolve()),
             "fatal_error": None,
+            "scope": resolve_variant_audit_plan(variant_id),
+            "requested_assets": [
+                variant["base_asset"]["name"],
+                checkpoint_asset["name"],
+            ],
             "assets": [
                 asset_report(variant["base_asset"], base_files),
                 asset_report(checkpoint_asset, checkpoint_files),
@@ -211,6 +219,20 @@ class BuildOfficialOEAModelLockTest(unittest.TestCase):
                 ),
                 "Git blob",
             ),
+            (
+                "wrong official variant scope",
+                lambda audit, prep: audit["scope"].update(
+                    variant_id="oea_qwen3b"
+                ),
+                "scope variant_id",
+            ),
+            (
+                "scope and requested assets disagree",
+                lambda audit, prep: audit.update(
+                    requested_assets=["qwen2_5_omni_3b"]
+                ),
+                "requested assets",
+            ),
         )
         for label, mutate, error in mutations:
             with (
@@ -227,6 +249,15 @@ class BuildOfficialOEAModelLockTest(unittest.TestCase):
                 preparation_path.write_text(json.dumps(preparation), encoding="utf-8")
                 with self.assertRaisesRegex(ValueError, error):
                     self.build(audit_path, preparation_path)
+
+    def test_generic_multi_asset_audit_without_scope_remains_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_directory:
+            directory = Path(raw_directory)
+            audit_path, preparation_path, _, audit, _ = self.write_fixture(directory)
+            audit.pop("scope")
+            audit_path.write_text(json.dumps(audit), encoding="utf-8")
+            lock = self.build(audit_path, preparation_path)
+        self.assertEqual(lock["status"], "locked")
 
     def test_existing_qwen3b_cl_config_matches_fixed_registry_identity(self) -> None:
         config = json.loads(

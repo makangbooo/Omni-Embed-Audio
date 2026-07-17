@@ -89,6 +89,42 @@ def validate_evidence_header(
         raise ValueError(f"{label} was produced from a dirty Git worktree")
 
 
+def validate_optional_official_scope(
+    scope: Any, registry_path: Path, variant: Mapping[str, Any]
+) -> None:
+    if scope is None:
+        return
+    if not isinstance(scope, dict):
+        raise ValueError("model resource audit scope is not an object")
+    if scope.get("schema_version") != 1:
+        raise ValueError("model resource audit scope has unsupported schema_version")
+    if scope.get("type") != "official_oea_variant":
+        raise ValueError("model resource audit has an unexpected scope type")
+    if scope.get("variant_id") != variant["variant_id"]:
+        raise ValueError("model resource audit scope variant_id differs from request")
+    if scope.get("variant") != variant:
+        raise ValueError("model resource audit scope variant differs from registry")
+    expected_manifests: list[str] = []
+    for field in ("base_manifest", "checkpoint_manifest"):
+        if variant[field] not in expected_manifests:
+            expected_manifests.append(variant[field])
+    if scope.get("manifests") != expected_manifests:
+        raise ValueError("model resource audit scope manifests differ from registry")
+    expected_assets = [
+        variant["base_asset"]["name"],
+        variant["checkpoint_asset"]["name"],
+    ]
+    if scope.get("asset_names") != expected_assets:
+        raise ValueError("model resource audit scope assets differ from registry")
+    registry_identity = scope.get("checkpoint_registry")
+    actual_registry_identity = portable_file_identity(registry_path)
+    if not isinstance(registry_identity, dict) or any(
+        registry_identity.get(field) != actual_registry_identity[field]
+        for field in ("size_bytes", "sha256")
+    ):
+        raise ValueError("model resource audit scope used a different registry")
+
+
 def matching_asset_report(
     resource_audit: Mapping[str, Any],
     expected: Mapping[str, Any],
@@ -321,6 +357,15 @@ def build_model_lock(
     )
     if resource_audit.get("fatal_error") is not None:
         raise ValueError("model resource audit has a fatal_error")
+    audit_scope = resource_audit.get("scope")
+    validate_optional_official_scope(audit_scope, registry_path, variant)
+    if audit_scope is not None and resource_audit.get("requested_assets") != [
+        variant["base_asset"]["name"],
+        variant["checkpoint_asset"]["name"],
+    ]:
+        raise ValueError(
+            "model resource audit requested assets differ from official scope"
+        )
     model_root_text = resource_audit.get("model_root")
     if not isinstance(model_root_text, str) or not model_root_text:
         raise ValueError("model resource audit has no model_root")

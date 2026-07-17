@@ -41,7 +41,7 @@ WINDOWS_DRIVE = re.compile(r"^[A-Za-z]:")
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--manifest",
         type=Path,
@@ -49,9 +49,23 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Resource manifest; repeat for multiple manifests.",
     )
+    parser.add_argument(
+        "--asset",
+        action="append",
+        default=None,
+        help=(
+            "Audit only this exact asset name; repeat for multiple assets. "
+            "Every requested name must occur exactly once across the manifests."
+        ),
+    )
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    return parser.parse_args()
+    args = parser.parse_args()
+    try:
+        args.asset = normalize_asset_selection(args.asset)
+    except ValueError as error:
+        parser.error(str(error))
+    return args
 
 
 def utc_now() -> str:
@@ -104,6 +118,19 @@ def safe_relative_path(value: str, label: str) -> PurePosixPath:
     ):
         raise ValueError(f"unsafe {label}: {value!r}")
     return path
+
+
+def normalize_asset_selection(values: list[str] | None) -> tuple[str, ...]:
+    if values is None:
+        return ()
+    output: list[str] = []
+    for value in values:
+        if not isinstance(value, str) or SAFE_ASSET_NAME.fullmatch(value) is None:
+            raise ValueError(f"unsafe requested asset name: {value!r}")
+        if value in output:
+            raise ValueError(f"duplicate requested asset name: {value}")
+        output.append(value)
+    return tuple(output)
 
 
 def destination_for(model_root: Path, asset: dict[str, Any]) -> Path:
@@ -363,11 +390,23 @@ def combined_status(assets: list[dict[str, Any]]) -> tuple[str, int]:
     return "incomplete", 2
 
 
-def main() -> int:
-    args = parse_args()
-    model_root = args.model_root.resolve()
-    output = args.output.resolve()
+def audit_resources(
+    *,
+    manifest_paths: list[Path],
+    model_root: Path,
+    output: Path,
+    asset_names: tuple[str, ...] = (),
+    scope: dict[str, Any] | None = None,
+) -> int:
+    model_root = model_root.resolve()
+    output = output.resolve()
     ensure_external_model_root(model_root)
+    requested_assets = normalize_asset_selection(list(asset_names))
+    requested_set = set(requested_assets)
+    if not manifest_paths:
+        raise ValueError("at least one model resource manifest is required")
+    if scope is not None and not isinstance(scope, dict):
+        raise ValueError("audit scope must be a JSON object")
 
     report: dict[str, Any] = {
         "schema_version": 1,
@@ -381,21 +420,26 @@ def main() -> int:
         "hf_endpoint": os.environ.get("HF_ENDPOINT", "https://huggingface.co"),
         "huggingface_hub_version": huggingface_hub_version,
         "operation": "read-only metadata and local-content audit; no downloads",
+        "requested_assets": list(requested_assets),
         "assets": [],
     }
+    if scope is not None:
+        report["scope"] = scope
     write_json(output, report)
 
     try:
         api = HfApi(endpoint=report["hf_endpoint"])
         seen_names: set[str] = set()
         seen_destinations: set[str] = set()
-        for manifest_argument in args.manifest:
+        for manifest_argument in manifest_paths:
             manifest = manifest_argument.resolve()
             specification = json.loads(manifest.read_text(encoding="utf-8"))
             validate_manifest(specification, manifest)
             report["manifests"].append(str(manifest))
             for asset in specification["assets"]:
                 name = asset["name"]
+                if requested_set and name not in requested_set:
+                    continue
                 destination = str(destination_for(model_root, asset))
                 if name in seen_names:
                     raise ValueError(f"duplicate asset name across manifests: {name}")
@@ -424,6 +468,14 @@ def main() -> int:
                 report["assets"].append(asset_report)
                 write_json(output, report)
 
+        missing_requests = sorted(requested_set - seen_names)
+        if missing_requests:
+            raise ValueError(
+                f"requested assets absent from supplied manifests: {missing_requests}"
+            )
+        if not report["assets"]:
+            raise ValueError("model resource audit selected no assets")
+
         report["status"], exit_code = combined_status(report["assets"])
         report["summary"] = {
             status: sum(asset["status"] == status for asset in report["assets"])
@@ -436,6 +488,16 @@ def main() -> int:
     report["finished_at"] = utc_now()
     write_json(output, report)
     return exit_code
+
+
+def main() -> int:
+    args = parse_args()
+    return audit_resources(
+        manifest_paths=args.manifest,
+        model_root=args.model_root,
+        output=args.output,
+        asset_names=args.asset,
+    )
 
 
 if __name__ == "__main__":
