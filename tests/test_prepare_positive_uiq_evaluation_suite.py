@@ -30,6 +30,20 @@ AUDIO_PROMPT_PROTOCOL = {
         ),
     }
 }
+MODEL_LOCK_BINDING = {
+    "variant_id": "synthetic-variant",
+    "model": "synthetic-model",
+    "model_lock": {
+        "repository_path": "results/model_locks/synthetic.json",
+        "size_bytes": 10,
+        "sha256": "d" * 64,
+    },
+    "protocol_config": {
+        "repository_path": "configs/eval/synthetic.json",
+        "size_bytes": 10,
+        "sha256": "b" * 64,
+    },
+}
 
 
 def write_json(path: Path, value: object) -> None:
@@ -63,8 +77,9 @@ def synthetic_config(root: Path) -> Path:
         "repo_id": "synthetic/checkpoint",
         "revision": "checkpoint-revision",
         "local_subpath": "checkpoint.pt",
+        "size_bytes": 20,
         "sha256": "a" * 64,
-        "source": "CODE",
+        "source": "DERIVED_FROM_CODE_CHECKPOINT",
     }
     config = {
         "schema_version": 1,
@@ -79,8 +94,10 @@ def synthetic_config(root: Path) -> Path:
         "expected_queries_per_type": 2,
         "expected_embedding_dim": 2,
         "expected_captions_per_clip": 2,
-        "expected_caption_generation_config_sha256": "b" * 64,
+        "expected_caption_generation_protocol_sha256": "b" * 64,
         "expected_uiq_generation_config_sha256": "c" * 64,
+        "official_variant_id": "synthetic-variant",
+        "official_model_lock_path": "results/model_locks/synthetic.json",
         "minimum_caption_generator_commit": "caption-minimum",
         "minimum_uiq_generator_commit": "uiq-minimum",
         "checkpoint": checkpoint,
@@ -127,18 +144,26 @@ def synthetic_caption_embeddings(root: Path) -> Path:
         "repo_id": "synthetic/checkpoint",
         "revision": "checkpoint-revision",
         "local_subpath": "checkpoint.pt",
+        "size_bytes": 20,
         "sha256": "a" * 64,
-        "source": "CODE",
+        "source": "DERIVED_FROM_CODE_CHECKPOINT",
     }
+    resolved = {
+        "checkpoint": checkpoint,
+        "audio_prompt_protocol": AUDIO_PROMPT_PROTOCOL,
+        "resolution_git_commit": "caption-generation-commit",
+    }
+    write_json(directory / "resolved_embedding_config.json", resolved)
     write_json(
         directory / "config.yaml",
-        {"checkpoint": checkpoint, "audio_prompt_protocol": AUDIO_PROMPT_PROTOCOL},
+        {**resolved, "resolved_paths": {"output_dir": str(directory)}},
     )
     write_json(
         directory / "run_identity.json",
         {
             "git_commit": "caption-generation-commit",
-            "config": {"sha256": "b" * 64},
+            "config": file_identity(directory / "resolved_embedding_config.json"),
+            "official_model_lock": MODEL_LOCK_BINDING,
             "candidate_count": 2,
             "query_count": 4,
             "checkpoint_revision": "checkpoint-revision",
@@ -161,6 +186,7 @@ def synthetic_caption_embeddings(root: Path) -> Path:
             "model": "synthetic-model",
             "dataset": "synthetic-caption-dataset",
             "seed": 42,
+            "official_model_lock": MODEL_LOCK_BINDING,
             "artifacts": artifacts,
         },
     )
@@ -202,6 +228,10 @@ def synthetic_uiq_embeddings(root: Path) -> Path:
         {"released_query_type": query_type, "rows": 2}
         for query_type in QUERY_TYPES
     ]
+    resolved_base = {
+        "resolution_git_commit": "uiq-generation-commit",
+    }
+    write_json(directory / "resolved_base_embedding_config.json", resolved_base)
     write_json(
         directory / "config.yaml",
         {
@@ -217,6 +247,10 @@ def synthetic_uiq_embeddings(root: Path) -> Path:
         {
             "git_commit": "uiq-generation-commit",
             "config": {"sha256": "c" * 64},
+            "base_embedding_config": file_identity(
+                directory / "resolved_base_embedding_config.json"
+            ),
+            "official_model_lock": MODEL_LOCK_BINDING,
             "query_count": 8,
             "checkpoint_revision": "checkpoint-revision",
             "query_sources": query_sources,
@@ -234,6 +268,10 @@ def synthetic_uiq_embeddings(root: Path) -> Path:
             "model": "synthetic-model",
             "dataset": "synthetic-uiq-dataset",
             "seed": 42,
+            "base_embedding_config": file_identity(
+                directory / "resolved_base_embedding_config.json"
+            ),
+            "official_model_lock": MODEL_LOCK_BINDING,
             "query_count": 8,
             "query_type_counts": {query_type: 2 for query_type in QUERY_TYPES},
             "query_sources": query_sources,
@@ -305,6 +343,14 @@ class PreparePositiveUIQEvaluationSuiteTest(unittest.TestCase):
                     "scripts.prepare_positive_uiq_evaluation_suite.git_output",
                     side_effect=["suite-commit", ""],
                 ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
+                ),
+                patch(
+                    "scripts.prepare_positive_uiq_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
+                ),
                 patch("scripts.prepare_positive_uiq_evaluation_suite.subprocess.run"),
                 patch("builtins.print"),
             ):
@@ -351,6 +397,14 @@ class PreparePositiveUIQEvaluationSuiteTest(unittest.TestCase):
                     "scripts.prepare_positive_uiq_evaluation_suite.git_output",
                     side_effect=["suite-commit", ""],
                 ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
+                ),
+                patch(
+                    "scripts.prepare_positive_uiq_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
+                ),
                 patch("builtins.print"),
             ):
                 self.assertEqual(
@@ -385,6 +439,14 @@ class PreparePositiveUIQEvaluationSuiteTest(unittest.TestCase):
                 patch(
                     "scripts.prepare_positive_uiq_evaluation_suite.git_output",
                     side_effect=["suite-commit", ""],
+                ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
+                ),
+                patch(
+                    "scripts.prepare_positive_uiq_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
                 ),
                 patch("scripts.prepare_positive_uiq_evaluation_suite.subprocess.run"),
                 self.assertRaisesRegex(RuntimeError, "SHA256 mismatch"),

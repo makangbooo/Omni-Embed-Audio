@@ -11,8 +11,8 @@
   "batch_size_source": "INFERRED: conservative formal-evaluation batch size; change only through a new committed config after a measured smoke test",
   "base_embedding_config": {
     "path": "configs/eval/qwen3b_cl_clotho_embeddings.json",
-    "size_bytes": 2567,
-    "sha256": "595d39b9f361d542ee8fed88f61b0978eda32d1263db5f4620589f718b21570b"
+    "size_bytes": 2609,
+    "sha256": "d7bc40d10c278dfddc9046818e9529a0ce7e7962ce8c06ae1c76d4e07a14bf19"
   },
   "query_sources": [
     {

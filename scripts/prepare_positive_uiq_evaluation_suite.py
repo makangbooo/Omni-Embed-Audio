@@ -20,6 +20,9 @@ from scripts.evaluate_embedding_artifacts import (
     load_jsonl_objects,
     write_json,
 )
+from scripts.build_official_oea_eval_config import (
+    verify_official_model_lock_binding,
+)
 from scripts.prepare_embedding_evaluation_suite import (
     assert_identity_matches,
     atomic_write_text,
@@ -76,7 +79,7 @@ def load_suite_config(path: Path) -> dict[str, Any]:
         "embedding_protocol",
         "embedding_seed",
         "expected_candidate_count",
-        "expected_caption_generation_config_sha256",
+        "expected_caption_generation_protocol_sha256",
         "expected_caption_query_count",
         "expected_captions_per_clip",
         "expected_embedding_dim",
@@ -86,6 +89,8 @@ def load_suite_config(path: Path) -> dict[str, Any]:
         "minimum_caption_generator_commit",
         "minimum_uiq_generator_commit",
         "model",
+        "official_model_lock_path",
+        "official_variant_id",
         "protocols",
         "suite_prefix",
     }
@@ -108,11 +113,25 @@ def load_suite_config(path: Path) -> dict[str, Any]:
     ):
         raise ValueError("embedding_seed must be an integer")
     for field in (
-        "expected_caption_generation_config_sha256",
+        "caption_dataset",
+        "dataset",
+        "model",
+        "official_model_lock_path",
+        "official_variant_id",
+        "suite_prefix",
+    ):
+        if not isinstance(config[field], str) or not config[field].strip():
+            raise ValueError(f"{field} must be a non-empty string")
+    for field in (
+        "expected_caption_generation_protocol_sha256",
         "expected_uiq_generation_config_sha256",
     ):
         value = config[field]
-        if not isinstance(value, str) or len(value) != 64:
+        if (
+            not isinstance(value, str)
+            or len(value) != 64
+            or any(character not in "0123456789abcdef" for character in value)
+        ):
             raise ValueError(f"{field} must be SHA256")
     protocols = config["protocols"]
     if not isinstance(protocols, list) or len(protocols) != 4:
@@ -161,8 +180,8 @@ def caption_audit_config(config: Mapping[str, Any]) -> dict[str, Any]:
         {
             "dataset": config["caption_dataset"],
             "expected_query_count": config["expected_caption_query_count"],
-            "expected_generation_config_sha256": config[
-                "expected_caption_generation_config_sha256"
+            "expected_generation_protocol_sha256": config[
+                "expected_caption_generation_protocol_sha256"
             ],
             "minimum_generator_commit": config[
                 "minimum_caption_generator_commit"
@@ -247,6 +266,9 @@ def audit_uiq_embedding_directory(
     required_paths = {
         "generation_metrics": uiq_embedding_dir / "generation_metrics.json",
         "run_identity": uiq_embedding_dir / "run_identity.json",
+        "resolved_base_embedding_config": (
+            uiq_embedding_dir / "resolved_base_embedding_config.json"
+        ),
         "resolved_generation_config": uiq_embedding_dir / "config.yaml",
         "query_embeddings": uiq_embedding_dir / "query_embeddings.npy",
         "query_metadata": uiq_embedding_dir / "query_metadata.jsonl",
@@ -259,6 +281,11 @@ def audit_uiq_embedding_directory(
     )
     identity = json.loads(
         required_paths["run_identity"].read_text(encoding="utf-8")
+    )
+    resolved_base_config = json.loads(
+        required_paths["resolved_base_embedding_config"].read_text(
+            encoding="utf-8"
+        )
     )
     resolved_config = json.loads(
         required_paths["resolved_generation_config"].read_text(encoding="utf-8")
@@ -277,6 +304,37 @@ def audit_uiq_embedding_directory(
         raise RuntimeError("UIQ run identity query_count mismatch")
     if identity.get("checkpoint_revision") != config["checkpoint"]["revision"]:
         raise RuntimeError("UIQ checkpoint revision mismatch")
+    verify_file_identity(
+        required_paths["resolved_base_embedding_config"],
+        identity.get("base_embedding_config", {}),
+        "resolved UIQ base embedding config",
+    )
+    model_lock_binding = verify_official_model_lock_binding(resolved_base_config)
+    if model_lock_binding.get("variant_id") != config["official_variant_id"]:
+        raise RuntimeError("UIQ official model-lock variant mismatch")
+    if model_lock_binding.get("model_lock", {}).get(
+        "repository_path"
+    ) != config["official_model_lock_path"]:
+        raise RuntimeError("UIQ official model-lock path mismatch")
+    observed_protocol_sha256 = str(
+        model_lock_binding.get("protocol_config", {}).get("sha256", "")
+    ).lower()
+    if observed_protocol_sha256 != str(
+        config["expected_caption_generation_protocol_sha256"]
+    ).lower():
+        raise RuntimeError("UIQ base generation protocol SHA256 mismatch")
+    if metrics.get("official_model_lock") != model_lock_binding:
+        raise RuntimeError("UIQ metrics model-lock binding mismatch")
+    if identity.get("official_model_lock") != model_lock_binding:
+        raise RuntimeError("UIQ run identity model-lock binding mismatch")
+    if metrics.get("base_embedding_config") != identity.get(
+        "base_embedding_config"
+    ):
+        raise RuntimeError("UIQ resolved base-config identities differ")
+    if resolved_base_config.get("resolution_git_commit") != identity.get(
+        "git_commit"
+    ):
+        raise RuntimeError("UIQ resolved base-config/Git commit mismatch")
     if str(identity.get("config", {}).get("sha256", "")).lower() != str(
         config["expected_uiq_generation_config_sha256"]
     ).lower():
@@ -327,6 +385,7 @@ def audit_uiq_embedding_directory(
             name: file_identity(path) for name, path in required_paths.items()
         },
         "verified_generation_artifacts": verified_artifacts,
+        "official_model_lock": model_lock_binding,
         "generation_metrics": metrics,
         "run_identity": identity,
         "indices_by_type": indices,

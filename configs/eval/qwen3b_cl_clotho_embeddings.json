@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "official_variant_id": "oea_qwen3b_cl",
   "experiment_prefix": "oea_qwen3b_clotho_embeddings_seed42",
   "model": "OEA-Qwen3B (+Cl)",
   "dataset": "Clotho v2.1 evaluation",

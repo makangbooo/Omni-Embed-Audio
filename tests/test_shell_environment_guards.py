@@ -159,6 +159,31 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn("Use a new SUITE_ID", source)
         self.assertNotIn("rm -rf", source)
 
+    def test_formal_embedding_wrappers_resolve_the_committed_model_lock(self) -> None:
+        wrappers = (
+            "run_qwen3b_cl_clotho_embeddings.sh",
+            "run_qwen3b_cl_clotho_positive_uiq_embeddings.sh",
+        )
+        for filename in wrappers:
+            with self.subTest(script=filename):
+                source = (REPOSITORY_ROOT / "scripts" / filename).read_text(
+                    encoding="utf-8"
+                )
+                self.assertIn("results/model_locks/oea_qwen3b_cl.json", source)
+                self.assertIn("build_official_oea_eval_config.py", source)
+                self.assertIn("config_resolution.json", source)
+                self.assertNotIn("rm -rf", source)
+
+        caption = (
+            REPOSITORY_ROOT / "scripts/run_qwen3b_cl_clotho_embeddings.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn('--config "${RESOLVED_CONFIG}"', caption)
+        uiq = (
+            REPOSITORY_ROOT
+            / "scripts/run_qwen3b_cl_clotho_positive_uiq_embeddings.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn('--base-embedding-config "${RESOLVED_BASE_CONFIG}"', uiq)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -194,3 +194,12 @@ Therefore each real execution must receive the required long-operation resource
 report before it starts. A successful run intentionally creates a small
 uncommitted lock for review; the model, raw checkpoint, derived weights, and
 large logs remain outside Git.
+
+The reviewed lock must then be committed and pushed as its own small evidence
+artifact before formal GPU work. Caption and positive-UIQ wrappers resolve the
+committed protocol against that committed lock with
+`scripts/build_official_oea_eval_config.py`. The resolver expands the runtime
+configuration to the complete locked base-file inventory, records both input
+hashes and the current Git commit, creates or exactly verifies a stable result,
+and rejects an untracked lock. The GPU generator independently reopens both
+tracked inputs and rejects any identity, variant, resource, or commit drift.

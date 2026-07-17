@@ -9,9 +9,11 @@ source "${ROOT_DIR}/scripts/lib/conda.sh"
 MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
 DATA_ROOT="${DATA_ROOT:-/home/jg525/datasets/oea}"
 MANIFEST="${DATA_ROOT}/clotho_v2.1/manifests/clotho_evaluation_manifest.jsonl"
-CONFIG="${ROOT_DIR}/configs/eval/qwen3b_cl_clotho_embeddings.json"
+PROTOCOL_CONFIG="${ROOT_DIR}/configs/eval/qwen3b_cl_clotho_embeddings.json"
+MODEL_LOCK="${MODEL_LOCK:-${ROOT_DIR}/results/model_locks/oea_qwen3b_cl.json}"
 RUN_ID="${RUN_ID:-oea_qwen3b_clotho_embeddings_seed42_$(date +%Y%m%d_%H%M%S)}"
 OUTPUT_DIR="${RESULT_ROOT:-${ROOT_DIR}/results/raw}/${RUN_ID}"
+RESOLVED_CONFIG="${OUTPUT_DIR}/resolved_embedding_config.json"
 ATTEMPT_ID="attempt_$(date +%Y%m%d_%H%M%S)"
 ATTEMPT_DIR="${OUTPUT_DIR}/attempts/${ATTEMPT_ID}"
 
@@ -29,8 +31,8 @@ exec > >(tee "${ATTEMPT_DIR}/stdout.log") \
   2> >(tee "${ATTEMPT_DIR}/stderr.log" >&2)
 
 {
-  printf 'MODEL_ROOT=%q DATA_ROOT=%q RUN_ID=%q ' \
-    "${MODEL_ROOT}" "${DATA_ROOT}" "${RUN_ID}"
+  printf 'MODEL_ROOT=%q DATA_ROOT=%q MODEL_LOCK=%q RUN_ID=%q ' \
+    "${MODEL_ROOT}" "${DATA_ROOT}" "${MODEL_LOCK}" "${RUN_ID}"
   printf '%q ' "$0" "$@"
   printf '\n'
 } > "${ATTEMPT_DIR}/command.sh"
@@ -67,8 +69,14 @@ echo "[INFO] Output directory: ${OUTPUT_DIR}"
 echo "[INFO] Attempt directory: ${ATTEMPT_DIR}"
 echo "[INFO] Resume by exporting the same RUN_ID and running this wrapper again."
 
+python scripts/build_official_oea_eval_config.py \
+  --protocol-config "${PROTOCOL_CONFIG}" \
+  --model-lock "${MODEL_LOCK}" \
+  --output "${RESOLVED_CONFIG}" \
+  > "${ATTEMPT_DIR}/config_resolution.json"
+
 python scripts/generate_oea_embeddings.py \
-  --config "${CONFIG}" \
+  --config "${RESOLVED_CONFIG}" \
   --model-root "${MODEL_ROOT}" \
   --manifest "${MANIFEST}" \
   --output-dir "${OUTPUT_DIR}" \

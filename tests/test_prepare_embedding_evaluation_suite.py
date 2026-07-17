@@ -28,6 +28,20 @@ AUDIO_PROMPT_PROTOCOL = {
         ),
     }
 }
+MODEL_LOCK_BINDING = {
+    "variant_id": "synthetic-variant",
+    "model": "synthetic-model",
+    "model_lock": {
+        "repository_path": "results/model_locks/synthetic.json",
+        "size_bytes": 10,
+        "sha256": "c" * 64,
+    },
+    "protocol_config": {
+        "repository_path": "configs/eval/synthetic.json",
+        "size_bytes": 10,
+        "sha256": "b" * 64,
+    },
+}
 
 
 def write_json(path: Path, value: object) -> None:
@@ -45,8 +59,9 @@ def synthetic_suite_config(root: Path) -> Path:
         "repo_id": "synthetic/checkpoint",
         "revision": "checkpoint-revision",
         "local_subpath": "checkpoint.pt",
+        "size_bytes": 20,
         "sha256": "a" * 64,
-        "source": "CODE",
+        "source": "DERIVED_FROM_CODE_CHECKPOINT",
     }
     protocols = [
         {
@@ -102,7 +117,9 @@ def synthetic_suite_config(root: Path) -> Path:
         "expected_query_count": 4,
         "expected_embedding_dim": 2,
         "expected_captions_per_clip": 2,
-        "expected_generation_config_sha256": "b" * 64,
+        "expected_generation_protocol_sha256": "b" * 64,
+        "official_variant_id": "synthetic-variant",
+        "official_model_lock_path": "results/model_locks/synthetic.json",
         "minimum_generator_commit": "minimum-commit",
         "checkpoint": checkpoint,
         "embedding_protocol": {"source": "CODE"},
@@ -171,21 +188,29 @@ def synthetic_embedding_directory(root: Path) -> Path:
         "repo_id": "synthetic/checkpoint",
         "revision": "checkpoint-revision",
         "local_subpath": "checkpoint.pt",
+        "size_bytes": 20,
         "sha256": "a" * 64,
-        "source": "CODE",
+        "source": "DERIVED_FROM_CODE_CHECKPOINT",
     }
+    resolved = {
+        "checkpoint": checkpoint,
+        "audio_prompt_protocol": AUDIO_PROMPT_PROTOCOL,
+        "resolution_git_commit": "generation-commit",
+    }
+    write_json(embedding_dir / "resolved_embedding_config.json", resolved)
     write_json(
         embedding_dir / "config.yaml",
         {
-            "checkpoint": checkpoint,
-            "audio_prompt_protocol": AUDIO_PROMPT_PROTOCOL,
+            **resolved,
+            "resolved_paths": {"output_dir": str(embedding_dir)},
         },
     )
     write_json(
         embedding_dir / "run_identity.json",
         {
             "git_commit": "generation-commit",
-            "config": {"size_bytes": 1, "sha256": "b" * 64},
+            "config": file_identity(embedding_dir / "resolved_embedding_config.json"),
+            "official_model_lock": MODEL_LOCK_BINDING,
             "candidate_count": 2,
             "query_count": 4,
             "checkpoint_revision": "checkpoint-revision",
@@ -215,6 +240,7 @@ def synthetic_embedding_directory(root: Path) -> Path:
             "model": "synthetic-model",
             "dataset": "synthetic-dataset",
             "seed": 42,
+            "official_model_lock": MODEL_LOCK_BINDING,
             "artifacts": artifacts,
         },
     )
@@ -253,7 +279,7 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
                 repository_root
                 / "configs/eval/qwen3b_cl_clotho_embeddings.json"
             )["sha256"],
-            config["expected_generation_config_sha256"],
+            config["expected_generation_protocol_sha256"],
         )
 
     def test_seed0_selection_reproduces_one_choice_per_clip(self) -> None:
@@ -294,6 +320,10 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
                 patch(
                     "scripts.prepare_embedding_evaluation_suite.git_output",
                     side_effect=["suite-commit", ""],
+                ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
                 ),
                 patch("scripts.prepare_embedding_evaluation_suite.subprocess.run"),
                 patch("builtins.print"),
@@ -345,6 +375,9 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             with patch(
                 "scripts.prepare_embedding_evaluation_suite.git_output",
                 side_effect=["suite-commit", ""],
+            ), patch(
+                "scripts.prepare_embedding_evaluation_suite.verify_official_model_lock_binding",
+                return_value=MODEL_LOCK_BINDING,
             ), patch("builtins.print"):
                 self.assertEqual(
                     finalize_suite(config_path, embedding_dir, suite_dir), 0
@@ -362,6 +395,9 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             with patch(
                 "scripts.prepare_embedding_evaluation_suite.git_output",
                 side_effect=["suite-commit", ""],
+            ), patch(
+                "scripts.prepare_embedding_evaluation_suite.verify_official_model_lock_binding",
+                return_value=MODEL_LOCK_BINDING,
             ), patch("builtins.print"):
                 self.assertEqual(
                     finalize_suite(config_path, embedding_dir, suite_dir), 0
@@ -376,6 +412,10 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
                 patch(
                     "scripts.prepare_embedding_evaluation_suite.git_output",
                     side_effect=["suite-commit", ""],
+                ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
                 ),
                 patch("builtins.print"),
                 self.assertRaisesRegex(RuntimeError, "recorded SHA256 mismatch"),
@@ -400,6 +440,10 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
                 patch(
                     "scripts.prepare_embedding_evaluation_suite.git_output",
                     side_effect=["suite-commit", ""],
+                ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
                 ),
                 patch("scripts.prepare_embedding_evaluation_suite.subprocess.run"),
                 self.assertRaisesRegex(RuntimeError, "SHA256 mismatch"),
@@ -428,6 +472,10 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
                 patch(
                     "scripts.prepare_embedding_evaluation_suite.git_output",
                     side_effect=["suite-commit", ""],
+                ),
+                patch(
+                    "scripts.prepare_embedding_evaluation_suite.verify_official_model_lock_binding",
+                    return_value=MODEL_LOCK_BINDING,
                 ),
                 patch("scripts.prepare_embedding_evaluation_suite.subprocess.run"),
                 self.assertRaisesRegex(RuntimeError, "SHA256 mismatch"),

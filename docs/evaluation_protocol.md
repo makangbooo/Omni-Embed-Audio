@@ -162,8 +162,26 @@ or a separately labelled, auditable reconstruction is available.
 `scripts/generate_oea_embeddings.py` and
 `scripts/run_qwen3b_cl_clotho_embeddings.sh` implement the first formal
 OEA-Qwen3B (+Cl) embedding pass over the canonical Clotho evaluation manifest.
-The fixed configuration is
-`configs/eval/qwen3b_cl_clotho_embeddings.json`.
+The fixed protocol configuration is
+`configs/eval/qwen3b_cl_clotho_embeddings.json`. It is not accepted directly
+by a formal GPU run. The wrapper first requires the committed portable lock
+`results/model_locks/oea_qwen3b_cl.json`, then invokes
+`scripts/build_official_oea_eval_config.py` to create
+`resolved_embedding_config.json` inside the stable experiment directory.
+The resolver requires a clean worktree and both inputs to be tracked by Git;
+it refuses to overwrite a different existing result and exactly verifies an
+identical result on resume.
+
+The resolved configuration replaces the protocol's resource subset with the
+lock's complete base-model inventory and derived-checkpoint identity. At GPU
+runtime, every locked base file (including tokenizer, processor, and model
+configuration files), every weight shard, the derived checkpoint, the model
+lock itself, and the source protocol are checked by byte size and SHA256. The
+variant/model/revision/path mappings must agree at every layer. A lock or
+protocol change, a resource drift, a different Git commit, or a manually
+edited resolved configuration is a hard error. The model lock is therefore
+generated on CPU, reviewed and committed as a small JSON artifact before any
+formal GPU embedding run; an untracked lock is intentionally rejected.
 
 The generator preserves manifest order and creates exactly 1,045 audio
 candidates and 5,225 caption queries. Each projected 512-dimensional chunk is
@@ -201,6 +219,7 @@ bash scripts/run_qwen3b_clotho_retrieval_suite.sh \
 Its source config is
 `configs/eval/qwen3b_cl_clotho_retrieval_suite.json`. Before evaluating, the
 suite rechecks the generation config SHA256, checkpoint revision and SHA256,
+the committed protocol and model-lock identities, the resolved config source,
 generator Git ancestry, generation status, every recorded artifact hash,
 metadata order/counts, array shapes and finiteness, and unit L2 norms. The
 prepare/finalize implementation is
@@ -240,7 +259,10 @@ the fourth type Keyphrase while the release calls it `tagging`; both labels
 are retained in every config, metadata row, summary, and result.
 
 `scripts/run_qwen3b_cl_clotho_positive_uiq_embeddings.sh` generates 4,180
-query embeddings in type-major and canonical-candidate order. It reuses the
+query embeddings in type-major and canonical-candidate order. Before loading
+the model, it resolves the same committed caption protocol against the same
+committed Qwen3B-Cl model lock and passes that stable resolved base config to
+the UIQ generator. It reuses the
 same `query:` prefix, chat template, last-hidden attention-mask mean pooling,
 checkpoint text projection head, and L2 normalization as caption queries.
 There is no UIQ-specific prompt. Before loading the model it requires every
@@ -264,7 +286,7 @@ bash scripts/run_qwen3b_clotho_positive_uiq_suite.sh \
 ```
 
 `scripts/prepare_positive_uiq_evaluation_suite.py` revalidates both generation
-directories, checkpoint/config identities, Git ancestry, every source and
+directories, the shared committed model lock, protocol/config identities, Git ancestry, every source and
 artifact hash, metadata order, shapes, finite values, and unit norms. It then
 materializes four explicit 1,045-row index lists and runs the canonical ID
 evaluator separately for Tables 12–15. A query target must resolve to exactly

@@ -25,6 +25,10 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
+from scripts.build_official_oea_eval_config import (
+    verify_official_model_lock_binding,
+)
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -108,6 +112,7 @@ def load_config(path: Path) -> dict[str, Any]:
         "experiment_prefix",
         "model",
         "model_config",
+        "official_variant_id",
         "seed",
         "text_batch_size",
     }
@@ -125,7 +130,12 @@ def load_config(path: Path) -> dict[str, Any]:
             raise ValueError(f"{field} must be a positive integer")
     if not isinstance(config["seed"], int) or isinstance(config["seed"], bool):
         raise ValueError("seed must be an integer")
-    for field in ("dataset", "experiment_prefix", "model"):
+    for field in (
+        "dataset",
+        "experiment_prefix",
+        "model",
+        "official_variant_id",
+    ):
         if not isinstance(config[field], str) or not config[field].strip():
             raise ValueError(f"{field} must be a non-empty string")
     tagged_value(config, "audio_prompt_protocol", "runtime")
@@ -565,6 +575,11 @@ def main() -> int:
         git_status = git_output("status", "--short")
         if git_status:
             raise RuntimeError(f"formal generation requires a clean worktree: {git_status!r}")
+        model_lock_binding = verify_official_model_lock_binding(config)
+        if config.get("resolution_git_commit") != git_commit:
+            raise RuntimeError(
+                "resolved embedding config was not generated at the current Git commit"
+            )
         if not output_dir.name.startswith(config["experiment_prefix"] + "_"):
             raise ValueError("output directory name must start with experiment_prefix")
         strict_offline = {
@@ -592,6 +607,7 @@ def main() -> int:
             "manifest": file_identity(manifest_path),
             "model_root": str(model_root),
             "model": config["model"],
+            "official_model_lock": model_lock_binding,
             "dataset": config["dataset"],
             "checkpoint_revision": config["checkpoint"]["revision"],
             "seed": config["seed"],
@@ -625,6 +641,7 @@ def main() -> int:
                 "git_commit": git_commit,
                 "git_status_short": git_status,
                 "model": config["model"],
+                "official_model_lock": model_lock_binding,
                 "dataset": config["dataset"],
                 "seed": config["seed"],
                 "audio_prompt_protocol": config["audio_prompt_protocol"],

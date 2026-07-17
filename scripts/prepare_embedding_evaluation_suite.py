@@ -27,6 +27,9 @@ from scripts.evaluate_embedding_artifacts import (  # noqa: E402
     load_jsonl_objects,
     write_json,
 )
+from scripts.build_official_oea_eval_config import (  # noqa: E402
+    verify_official_model_lock_binding,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -103,10 +106,12 @@ def load_suite_config(path: Path) -> dict[str, Any]:
         "expected_candidate_count",
         "expected_captions_per_clip",
         "expected_embedding_dim",
-        "expected_generation_config_sha256",
+        "expected_generation_protocol_sha256",
         "expected_query_count",
         "minimum_generator_commit",
         "model",
+        "official_model_lock_path",
+        "official_variant_id",
         "protocols",
         "suite_prefix",
     }
@@ -126,12 +131,22 @@ def load_suite_config(path: Path) -> dict[str, Any]:
         config["embedding_seed"], bool
     ):
         raise ValueError("embedding_seed must be an integer")
-    for field in ("dataset", "model", "suite_prefix"):
+    for field in (
+        "dataset",
+        "model",
+        "official_model_lock_path",
+        "official_variant_id",
+        "suite_prefix",
+    ):
         if not isinstance(config[field], str) or not config[field].strip():
             raise ValueError(f"{field} must be a non-empty string")
-    digest = config["expected_generation_config_sha256"]
-    if not isinstance(digest, str) or len(digest) != 64:
-        raise ValueError("expected_generation_config_sha256 must be SHA256")
+    digest = config["expected_generation_protocol_sha256"]
+    if (
+        not isinstance(digest, str)
+        or len(digest) != 64
+        or any(character not in "0123456789abcdef" for character in digest)
+    ):
+        raise ValueError("expected_generation_protocol_sha256 must be SHA256")
     protocols = config["protocols"]
     if not isinstance(protocols, list) or not protocols:
         raise ValueError("protocols must be a non-empty list")
@@ -307,6 +322,9 @@ def audit_embedding_directory(
     required_paths = {
         "generation_metrics": embedding_dir / "generation_metrics.json",
         "run_identity": embedding_dir / "run_identity.json",
+        "resolved_embedding_config": (
+            embedding_dir / "resolved_embedding_config.json"
+        ),
         "resolved_generation_config": embedding_dir / "config.yaml",
         "candidate_embeddings": embedding_dir / "candidate_embeddings.npy",
         "query_embeddings": embedding_dir / "query_embeddings.npy",
@@ -322,6 +340,9 @@ def audit_embedding_directory(
     )
     identity = json.loads(
         required_paths["run_identity"].read_text(encoding="utf-8")
+    )
+    resolved_embedding_config = json.loads(
+        required_paths["resolved_embedding_config"].read_text(encoding="utf-8")
     )
     resolved_generation_config = json.loads(
         required_paths["resolved_generation_config"].read_text(encoding="utf-8")
@@ -340,10 +361,39 @@ def audit_embedding_directory(
         raise RuntimeError("run identity query_count mismatch")
     if identity.get("checkpoint_revision") != config["checkpoint"]["revision"]:
         raise RuntimeError("checkpoint revision mismatch")
-    if str(identity.get("config", {}).get("sha256", "")).lower() != str(
-        config["expected_generation_config_sha256"]
+    verify_file_identity(
+        required_paths["resolved_embedding_config"],
+        identity.get("config", {}),
+        "resolved embedding config",
+    )
+    saved_without_paths = dict(resolved_generation_config)
+    saved_without_paths.pop("resolved_paths", None)
+    if saved_without_paths != resolved_embedding_config:
+        raise RuntimeError("saved generation config differs from resolved source")
+    model_lock_binding = verify_official_model_lock_binding(
+        resolved_embedding_config
+    )
+    if model_lock_binding.get("variant_id") != config["official_variant_id"]:
+        raise RuntimeError("official model-lock variant mismatch")
+    if model_lock_binding.get("model_lock", {}).get(
+        "repository_path"
+    ) != config["official_model_lock_path"]:
+        raise RuntimeError("official model-lock path mismatch")
+    observed_protocol_sha256 = str(
+        model_lock_binding.get("protocol_config", {}).get("sha256", "")
+    ).lower()
+    if observed_protocol_sha256 != str(
+        config["expected_generation_protocol_sha256"]
     ).lower():
-        raise RuntimeError("generation config SHA256 mismatch")
+        raise RuntimeError("generation protocol SHA256 mismatch")
+    if metrics.get("official_model_lock") != model_lock_binding:
+        raise RuntimeError("generation metrics model-lock binding mismatch")
+    if identity.get("official_model_lock") != model_lock_binding:
+        raise RuntimeError("run identity model-lock binding mismatch")
+    if resolved_embedding_config.get("resolution_git_commit") != identity.get(
+        "git_commit"
+    ):
+        raise RuntimeError("resolved config/generator Git commit mismatch")
     if resolved_generation_config.get("checkpoint") != config["checkpoint"]:
         raise RuntimeError("resolved generation checkpoint specification mismatch")
     if resolved_generation_config.get("audio_prompt_protocol") != {
@@ -405,6 +455,7 @@ def audit_embedding_directory(
             name: file_identity(path) for name, path in required_paths.items()
         },
         "verified_generation_artifacts": verified_artifacts,
+        "official_model_lock": model_lock_binding,
         "generation_metrics": metrics,
         "run_identity": identity,
         "selected_indices": selected_indices,

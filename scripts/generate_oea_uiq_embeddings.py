@@ -17,6 +17,9 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 
 from AudioRetrieval.evaluation.uiq_schema import load_released_uiq
+from scripts.build_official_oea_eval_config import (
+    verify_official_model_lock_binding,
+)
 from scripts.generate_oea_embeddings import (
     atomic_write_json,
     consolidate_chunks,
@@ -44,6 +47,7 @@ RELEASED_QUERY_TYPES = ("question", "imperative", "paraphrase", "tagging")
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--base-embedding-config", type=Path, required=True)
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -276,8 +280,27 @@ def main() -> int:
             report.pop("traceback", None)
 
         config = load_uiq_config(config_path)
-        base_identity = verify_repository_resource(config["base_embedding_config"])
-        base_config = load_base_embedding_config(Path(base_identity["path"]))
+        base_protocol_identity = verify_repository_resource(
+            config["base_embedding_config"]
+        )
+        base_config_path = args.base_embedding_config.resolve()
+        if not base_config_path.is_file():
+            raise FileNotFoundError(base_config_path)
+        base_identity = file_identity(base_config_path)
+        base_config = load_base_embedding_config(base_config_path)
+        model_lock_binding = verify_official_model_lock_binding(base_config)
+        resolved_protocol = base_config.get("protocol_config")
+        if not isinstance(resolved_protocol, dict) or any(
+            resolved_protocol.get(resolved_field) != expected_value
+            for resolved_field, expected_value in (
+                ("repository_path", config["base_embedding_config"]["path"]),
+                ("size_bytes", config["base_embedding_config"]["size_bytes"]),
+                ("sha256", config["base_embedding_config"]["sha256"]),
+            )
+        ):
+            raise ValueError(
+                "resolved base config does not derive from the fixed UIQ protocol"
+            )
         if base_config["model"] != config["model"]:
             raise ValueError("UIQ/base config model mismatch")
         if int(tagged_value(base_config, "model_config", "projection_dim")) != int(
@@ -294,6 +317,10 @@ def main() -> int:
         if git_status:
             raise RuntimeError(
                 f"formal UIQ generation requires a clean worktree: {git_status!r}"
+            )
+        if base_config.get("resolution_git_commit") != git_commit:
+            raise RuntimeError(
+                "resolved base embedding config was not generated at the current Git commit"
             )
         if not output_dir.name.startswith(config["experiment_prefix"] + "_"):
             raise ValueError("output directory name must start with experiment_prefix")
@@ -315,7 +342,9 @@ def main() -> int:
             "experiment_id": output_dir.name,
             "git_commit": git_commit,
             "config": file_identity(config_path),
+            "base_embedding_protocol": base_protocol_identity,
             "base_embedding_config": base_identity,
+            "official_model_lock": model_lock_binding,
             "manifest": file_identity(manifest_path),
             "query_sources": source_identities,
             "model": config["model"],
@@ -329,7 +358,8 @@ def main() -> int:
         resolved_config = json.loads(json.dumps(config))
         resolved_config["resolved_paths"] = {
             "source_config": str(config_path),
-            "base_embedding_config": str(base_identity["path"]),
+            "base_embedding_protocol": str(base_protocol_identity["path"]),
+            "base_embedding_config": str(base_config_path),
             "model_root": str(model_root),
             "manifest": str(manifest_path),
             "output_dir": str(output_dir),
@@ -346,6 +376,8 @@ def main() -> int:
                 "git_commit": git_commit,
                 "git_status_short": git_status,
                 "model": config["model"],
+                "official_model_lock": model_lock_binding,
+                "base_embedding_config": base_identity,
                 "dataset": config["dataset"],
                 "seed": config["seed"],
                 "strict_offline": strict_offline,

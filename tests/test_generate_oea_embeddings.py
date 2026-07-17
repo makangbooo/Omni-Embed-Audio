@@ -30,6 +30,7 @@ class GenerateOEAEmbeddingsTest(unittest.TestCase):
         self.assertEqual(config["caption_count_per_audio"], 5)
         self.assertEqual(config["audio_batch_size"], 1)
         self.assertEqual(config["text_batch_size"], 1)
+        self.assertEqual(config["official_variant_id"], "oea_qwen3b_cl")
         self.assertEqual(
             config["checkpoint"]["revision"],
             "54ccd008d4a1340d2a1f8edcd5dd0e82c61367a4",

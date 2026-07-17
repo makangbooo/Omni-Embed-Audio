@@ -8,14 +8,17 @@
   "expected_query_count": 5225,
   "expected_embedding_dim": 512,
   "expected_captions_per_clip": 5,
-  "expected_generation_config_sha256": "595d39b9f361d542ee8fed88f61b0978eda32d1263db5f4620589f718b21570b",
+  "expected_generation_protocol_sha256": "d7bc40d10c278dfddc9046818e9529a0ce7e7962ce8c06ae1c76d4e07a14bf19",
+  "official_variant_id": "oea_qwen3b_cl",
+  "official_model_lock_path": "results/model_locks/oea_qwen3b_cl.json",
   "minimum_generator_commit": "03850ff056ac53a1177bec786526a368955ada06",
   "checkpoint": {
     "repo_id": "JudeJiwoo/OEA-Qwen3B-Cl",
     "revision": "54ccd008d4a1340d2a1f8edcd5dd0e82c61367a4",
     "local_subpath": "OEA-Qwen3B-Cl/step_40_inference_only.pt",
+    "size_bytes": 59068647,
     "sha256": "f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a",
-    "source": "CODE"
+    "source": "DERIVED_FROM_CODE_CHECKPOINT"
   },
   "embedding_protocol": {
     "audio": "public-code audio-only chat message without passage: insertion",
