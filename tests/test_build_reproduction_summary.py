@@ -49,6 +49,7 @@ def paper_row(**overrides: object) -> dict:
         "metric": "R@1",
         "paper_value": "20.00",
         "unit": "percent",
+        "sort_order": 1,
         "source": "[PAPER]",
         "paper_pdf_sha256": PAPER_PDF_SHA256,
         "pdf_page": 6,
@@ -122,7 +123,7 @@ class BuildReproductionSummaryTests(unittest.TestCase):
     def test_fixed_registry_values_and_pdf_pages(self) -> None:
         rows = read_jsonl(DEFAULT_PAPER_REGISTRY, "paper registry")
         registry = validate_paper_registry(rows)
-        self.assertEqual(len(registry), 18)
+        self.assertEqual(len(registry), 910)
         expected = {
             "table2_oea_qwen3b_cl_clotho_t2a_r1": ("22.87", 6),
             "table2_oea_qwen3b_cl_clotho_t2a_r5": ("49.78", 6),
@@ -143,13 +144,14 @@ class BuildReproductionSummaryTests(unittest.TestCase):
             "table15_oea_qwen3b_cl_clotho_keyphrase_r5": ("57.99", 17),
             "table15_oea_qwen3b_cl_clotho_keyphrase_r10": ("71.87", 17),
         }
-        self.assertEqual(
-            {
-                metric_id: (row["paper_value"], row["pdf_page"])
-                for metric_id, row in registry.items()
-            },
-            expected,
-        )
+        observed = {
+            metric_id: (
+                registry[metric_id]["paper_value"],
+                registry[metric_id]["pdf_page"],
+            )
+            for metric_id in expected
+        }
+        self.assertEqual(observed, expected)
         self.assertEqual(
             {row["paper_pdf_sha256"] for row in registry.values()},
             {PAPER_PDF_SHA256},
@@ -209,6 +211,39 @@ class BuildReproductionSummaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "escapes repository"):
             validate_observations(rows, registry)
 
+    def test_unit_ranges_and_count_integrality_are_enforced(self) -> None:
+        invalid_score = paper_row(unit="score_1_to_5", paper_value="0.99")
+        with self.assertRaisesRegex(ValueError, "score range"):
+            validate_paper_registry([invalid_score])
+        invalid_count = paper_row(unit="count", paper_value="1.5")
+        with self.assertRaisesRegex(ValueError, "integer count"):
+            validate_paper_registry([invalid_count])
+        invalid_standard_deviation = paper_row(
+            unit="score_standard_deviation", paper_value="-0.01"
+        )
+        with self.assertRaisesRegex(ValueError, "must be non-negative"):
+            validate_paper_registry([invalid_standard_deviation])
+
+    def test_exact_status_rejects_qualified_paper_value(self) -> None:
+        paper, observations, _, _, evidence = self.make_inputs(
+            paper_rows=[
+                paper_row(
+                    paper_value="25.0",
+                    unit="gigabytes",
+                    metric="Peak GPU memory (GB)",
+                    paper_value_qualifier="approximately",
+                )
+            ]
+        )
+        rows = read_jsonl(observations, "observations")
+        rows[0].update(status="exact", reproduced_value="25.0")
+        rows[0]["evidence"] = evidence_identity(
+            evidence, ["metrics", "R@1"]
+        )
+        registry = validate_paper_registry(read_jsonl(paper, "paper"))
+        with self.assertRaisesRegex(ValueError, "qualified paper value"):
+            validate_observations(rows, registry)
+
     def test_blocked_status_requires_null_and_needs_no_evidence(self) -> None:
         paper, observations, _, _, _ = self.make_inputs()
         registry = validate_paper_registry(read_jsonl(paper, "paper"))
@@ -243,8 +278,8 @@ class BuildReproductionSummaryTests(unittest.TestCase):
         self.assertEqual(len(rows), 6)
         self.assertEqual({row["status"] for row in rows}, {"blocked"})
         self.assertTrue(all(row["reproduced_value"] == "" for row in rows))
-        self.assertEqual(result["paper_metric_count"], 18)
-        self.assertEqual(result["unobserved_paper_metric_count"], 12)
+        self.assertEqual(result["paper_metric_count"], 910)
+        self.assertEqual(result["unobserved_paper_metric_count"], 904)
         self.assertEqual(result["status_counts"], {"blocked": 6})
 
 

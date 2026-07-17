@@ -53,9 +53,20 @@ ALLOWED_STATUSES = {
 VALUE_STATUSES = {"exact", "close", "trend_reproduced"}
 MISSING_VALUE_STATUSES = {"blocked", "not_reproducible"}
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-PAPER_VALUE_PATTERN = re.compile(r"^(?:0|[1-9][0-9]*)\.[0-9]{2}$")
+PAPER_VALUE_PATTERN = re.compile(
+    r"^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$"
+)
 TABLE_PATTERN = re.compile(r"^Table ([1-9][0-9]*)$")
-METRIC_ORDER = {"R@1": 1, "R@5": 5, "R@10": 10}
+ALLOWED_UNITS = {
+    "count",
+    "gigabytes",
+    "million_parameters",
+    "milliseconds",
+    "percent",
+    "rank_gap",
+    "score_1_to_5",
+    "score_standard_deviation",
+}
 SIX_PLACES = Decimal("0.000001")
 
 
@@ -157,6 +168,23 @@ def rounded_delta_text(value: Decimal) -> str:
     return decimal_text(value.quantize(SIX_PLACES, rounding=ROUND_HALF_UP))
 
 
+def validate_unit_value(value: Decimal, unit: str, label: str) -> None:
+    if unit == "percent" and not Decimal("0") <= value <= Decimal("100"):
+        raise ValueError(f"{label} is outside [0, 100] percent")
+    if unit == "score_1_to_5" and not Decimal("1") <= value <= Decimal("5"):
+        raise ValueError(f"{label} is outside [1, 5] score range")
+    if unit == "count":
+        if value < 0 or value != value.to_integral_value():
+            raise ValueError(f"{label} must be a non-negative integer count")
+    if unit in {
+        "gigabytes",
+        "million_parameters",
+        "milliseconds",
+        "score_standard_deviation",
+    } and value < 0:
+        raise ValueError(f"{label} must be non-negative for unit {unit}")
+
+
 def validate_paper_registry(
     rows: Sequence[Mapping[str, Any]],
 ) -> dict[str, dict[str, Any]]:
@@ -170,6 +198,7 @@ def validate_paper_registry(
         "paper_table",
         "paper_value",
         "pdf_page",
+        "sort_order",
         "source",
         "task",
         "unit",
@@ -189,23 +218,35 @@ def validate_paper_registry(
             raise ValueError(f"{label}: invalid paper_table: {table}")
         for field in ("model", "dataset", "task", "note"):
             required_nonempty_string(row, field, label)
-        metric = required_nonempty_string(row, "metric", label)
-        if metric not in METRIC_ORDER:
-            raise ValueError(f"{label}: unsupported metric: {metric}")
+        required_nonempty_string(row, "metric", label)
         paper_value = row.get("paper_value")
         if not isinstance(paper_value, str) or PAPER_VALUE_PATTERN.fullmatch(
             paper_value
         ) is None:
             raise ValueError(
-                f"{label}: paper_value must be a string with two decimals"
+                f"{label}: paper_value must preserve its displayed numeric string"
             )
         numeric_paper_value = decimal_value(paper_value, f"{label}: paper_value")
-        if not Decimal("0") <= numeric_paper_value <= Decimal("100"):
-            raise ValueError(f"{label}: paper_value is outside [0, 100]")
-        if row.get("unit") != "percent":
-            raise ValueError(f"{label}: unit must be percent")
+        unit = row.get("unit")
+        if unit not in ALLOWED_UNITS:
+            raise ValueError(f"{label}: unsupported unit: {unit}")
+        validate_unit_value(numeric_paper_value, str(unit), f"{label}: paper_value")
+        sort_order = row.get("sort_order")
+        if (
+            not isinstance(sort_order, int)
+            or isinstance(sort_order, bool)
+            or sort_order <= 0
+        ):
+            raise ValueError(f"{label}: sort_order must be a positive integer")
         if row.get("source") != "[PAPER]":
             raise ValueError(f"{label}: source must be [PAPER]")
+        qualifier = row.get("paper_value_qualifier")
+        if qualifier is not None and (
+            not isinstance(qualifier, str) or not qualifier.strip()
+        ):
+            raise ValueError(
+                f"{label}: paper_value_qualifier must be non-empty when present"
+            )
         pdf_hash = row.get("paper_pdf_sha256")
         if not isinstance(pdf_hash, str) or SHA256_PATTERN.fullmatch(pdf_hash) is None:
             raise ValueError(f"{label}: invalid paper_pdf_sha256")
@@ -345,14 +386,15 @@ def validate_observations(
 
         reproduced_raw = row.get("reproduced_value")
         reproduced: Decimal | None = None
+        paper_row = registry[metric_id]
+        paper_unit = str(paper_row["unit"])
         if status in VALUE_STATUSES:
             reproduced = decimal_value(
                 reproduced_raw, f"{label}: reproduced_value"
             )
-            if not Decimal("0") <= reproduced <= Decimal("100"):
-                raise ValueError(
-                    f"{label}: reproduced_value is outside [0, 100]"
-                )
+            validate_unit_value(
+                reproduced, paper_unit, f"{label}: reproduced_value"
+            )
             evidence_value = verify_evidence(
                 row.get("evidence"), label, require_json_value=True
             )
@@ -364,6 +406,9 @@ def validate_observations(
             if reproduced_raw is not None:
                 reproduced = decimal_value(
                     reproduced_raw, f"{label}: reproduced_value"
+                )
+                validate_unit_value(
+                    reproduced, paper_unit, f"{label}: reproduced_value"
                 )
                 evidence_value = verify_evidence(
                     row.get("evidence"), label, require_json_value=True
@@ -387,10 +432,15 @@ def validate_observations(
         paper_value = decimal_value(
             registry[metric_id]["paper_value"], f"{label}: paper_value"
         )
-        if status == "exact" and reproduced != paper_value:
-            raise ValueError(
-                f"{label}: exact status requires reproduced_value == paper_value"
-            )
+        if status == "exact":
+            if paper_row.get("paper_value_qualifier") is not None:
+                raise ValueError(
+                    f"{label}: exact status is invalid for a qualified paper value"
+                )
+            if reproduced != paper_value:
+                raise ValueError(
+                    f"{label}: exact status requires reproduced_value == paper_value"
+                )
         row["_reproduced_decimal"] = reproduced
         observations.append(row)
     return observations
@@ -407,7 +457,7 @@ def summary_rows(
     observations: Sequence[Mapping[str, Any]],
     registry: Mapping[str, Mapping[str, Any]],
 ) -> list[dict[str, str]]:
-    output_rows: list[dict[str, str]] = []
+    sortable_rows: list[dict[str, Any]] = []
     for observation in observations:
         paper = registry[str(observation["paper_metric_id"])]
         paper_value = decimal_value(paper["paper_value"], "paper_value")
@@ -427,7 +477,12 @@ def summary_rows(
                 )
             )
         seed = observation.get("seed")
-        output_rows.append(
+        qualifier = paper.get("paper_value_qualifier")
+        result_note = f"[unit={paper['unit']}]"
+        if qualifier is not None:
+            result_note += f" [paper_value_qualifier={qualifier}]"
+        result_note += f" {observation['notes']}"
+        sortable_rows.append(
             {
                 "paper_table": str(paper["paper_table"]),
                 "experiment": str(observation["experiment"]),
@@ -444,17 +499,22 @@ def summary_rows(
                 if observation.get("checkpoint") is None
                 else str(observation["checkpoint"]),
                 "status": str(observation["status"]),
-                "notes": str(observation["notes"]),
+                "notes": result_note,
+                "_sort_order": int(paper["sort_order"]),
             }
         )
-    output_rows.sort(
+    sortable_rows.sort(
         key=lambda row: (
             table_number(row["paper_table"]),
             row["experiment"],
             row["task"],
-            METRIC_ORDER[row["metric"]],
+            row["_sort_order"],
         )
     )
+    output_rows: list[dict[str, str]] = []
+    for row in sortable_rows:
+        row.pop("_sort_order")
+        output_rows.append({key: str(value) for key, value in row.items()})
     return output_rows
 
 
@@ -515,8 +575,11 @@ def build_summary(
         "status_counts": dict(
             sorted(Counter(str(row["status"]) for row in observations).items())
         ),
+        "unit_counts": dict(
+            sorted(Counter(str(row["unit"]) for row in registry.values()).items())
+        ),
         "delta_contract": {
-            "absolute_delta": "abs(reproduced_value - paper_value), percentage points",
+            "absolute_delta": "abs(reproduced_value - paper_value), in the registry unit",
             "relative_delta": "(reproduced_value - paper_value) / paper_value * 100, signed percent",
             "rounding": "ROUND_HALF_UP to 6 decimal places",
         },

@@ -1,0 +1,1262 @@
+{
+  "matched_metric_cell_count": 910,
+  "method": "Each configured numeric row label and its complete displayed value sequence must occur on one pdfplumber layout-extracted line from the pinned PDF page; extracted copyrighted table text is not retained.",
+  "metric_count": 910,
+  "numeric_table_count": 13,
+  "paper_page_count": 17,
+  "paper_pdf": {
+    "path": "Omni-Embed-Audio.pdf",
+    "sha256": "e76bbd96c82ac78568ed75eaedcbc62e389358c4bb226457ac45b55ab63cfe38",
+    "size_bytes": 1035066
+  },
+  "registry": {
+    "path": "configs/results/paper_reported_metrics.jsonl",
+    "sha256": "5c2cab8c2c7d71f0a7a1677416304f0088ec0ccae2fe7c6cd3249635c8ba1524",
+    "size_bytes": 386143
+  },
+  "schema_version": 1,
+  "source": {
+    "path": "configs/results/paper_reported_tables.json",
+    "sha256": "3664f1f3c13cb40b8648120df5b54caf1df6c313ca122b2a7e94084db604ca62",
+    "size_bytes": 58165
+  },
+  "status": "complete",
+  "tables": [
+    {
+      "matched_row_count": 6,
+      "metric_cell_count": 24,
+      "paper_table": "Table 1",
+      "pdf_page": 4,
+      "row_count": 6,
+      "rows": [
+        {
+          "displayed_label": "Question",
+          "matching_line_numbers": [
+            11
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "Imperative",
+          "matching_line_numbers": [
+            12
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "Keyphrase",
+          "matching_line_numbers": [
+            13
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "Paraphrase",
+          "matching_line_numbers": [
+            14
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "Negative",
+          "matching_line_numbers": [
+            16
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "Overall",
+          "matching_line_numbers": [
+            18
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 4
+        }
+      ]
+    },
+    {
+      "matched_row_count": 13,
+      "metric_cell_count": 117,
+      "paper_table": "Table 2",
+      "pdf_page": 6,
+      "row_count": 13,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            11
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Robust-CLAP",
+          "matching_line_numbers": [
+            12
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            13
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            14
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Nemotron-3B",
+          "matching_line_numbers": [
+            16
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Qwen2.5-Omni-3B",
+          "matching_line_numbers": [
+            17
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Qwen2.5-Omni-7B",
+          "matching_line_numbers": [
+            18
+          ],
+          "row_index": 6,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            20
+          ],
+          "row_index": 7,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B (+Cl)",
+          "matching_line_numbers": [
+            21
+          ],
+          "row_index": 8,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            22
+          ],
+          "row_index": 9,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B (+Cl)",
+          "matching_line_numbers": [
+            23
+          ],
+          "row_index": 10,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            24
+          ],
+          "row_index": 11,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B (+Cl)",
+          "matching_line_numbers": [
+            25
+          ],
+          "row_index": 12,
+          "status": "matched",
+          "value_count": 9
+        }
+      ]
+    },
+    {
+      "matched_row_count": 13,
+      "metric_cell_count": 117,
+      "paper_table": "Table 3",
+      "pdf_page": 7,
+      "row_count": 13,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            11
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Robust-CLAP",
+          "matching_line_numbers": [
+            12
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            13
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            14
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Nemotron-3B",
+          "matching_line_numbers": [
+            16
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Qwen2.5-Omni-3B",
+          "matching_line_numbers": [
+            17
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Qwen2.5-Omni-7B",
+          "matching_line_numbers": [
+            18
+          ],
+          "row_index": 6,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            20
+          ],
+          "row_index": 7,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B (+Cl)",
+          "matching_line_numbers": [
+            21
+          ],
+          "row_index": 8,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            22
+          ],
+          "row_index": 9,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B (+Cl)",
+          "matching_line_numbers": [
+            23
+          ],
+          "row_index": 10,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            24
+          ],
+          "row_index": 11,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B (+Cl)",
+          "matching_line_numbers": [
+            25
+          ],
+          "row_index": 12,
+          "status": "matched",
+          "value_count": 9
+        }
+      ]
+    },
+    {
+      "matched_row_count": 10,
+      "metric_cell_count": 60,
+      "paper_table": "Table 4",
+      "pdf_page": 8,
+      "row_count": 10,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            10
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Robust-CLAP",
+          "matching_line_numbers": [
+            11
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            12
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            13
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            14
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Nemo3B (+Cl)",
+          "matching_line_numbers": [
+            15
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            16
+          ],
+          "row_index": 6,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Qwen3B (+Cl)",
+          "matching_line_numbers": [
+            17
+          ],
+          "row_index": 7,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            18
+          ],
+          "row_index": 8,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Qwen7B (+Cl)",
+          "matching_line_numbers": [
+            19
+          ],
+          "row_index": 9,
+          "status": "matched",
+          "value_count": 6
+        }
+      ]
+    },
+    {
+      "matched_row_count": 6,
+      "metric_cell_count": 24,
+      "paper_table": "Table 5",
+      "pdf_page": 9,
+      "row_count": 6,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            9
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            11
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            13
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            14
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            15
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            16
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 4
+        }
+      ]
+    },
+    {
+      "matched_row_count": 6,
+      "metric_cell_count": 36,
+      "paper_table": "Table 7",
+      "pdf_page": 12,
+      "row_count": 6,
+      "rows": [
+        {
+          "displayed_label": "Question",
+          "matching_line_numbers": [
+            31
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Imperative",
+          "matching_line_numbers": [
+            32
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Keyphrase",
+          "matching_line_numbers": [
+            33
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Paraphrase",
+          "matching_line_numbers": [
+            35
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Negative",
+          "matching_line_numbers": [
+            36
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Mean",
+          "matching_line_numbers": [
+            38
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 6
+        }
+      ]
+    },
+    {
+      "matched_row_count": 13,
+      "metric_cell_count": 78,
+      "paper_table": "Table 11",
+      "pdf_page": 15,
+      "row_count": 13,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            11
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Robust-CLAP",
+          "matching_line_numbers": [
+            12
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            13
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            14
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Nemotron-3B",
+          "matching_line_numbers": [
+            16
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Qwen2.5-Omni-3B",
+          "matching_line_numbers": [
+            17
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "Qwen2.5-Omni-7B",
+          "matching_line_numbers": [
+            18
+          ],
+          "row_index": 6,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            20
+          ],
+          "row_index": 7,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Nemo3B (+Cl)",
+          "matching_line_numbers": [
+            21
+          ],
+          "row_index": 8,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            22
+          ],
+          "row_index": 9,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Qwen3B (+Cl)",
+          "matching_line_numbers": [
+            23
+          ],
+          "row_index": 10,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            24
+          ],
+          "row_index": 11,
+          "status": "matched",
+          "value_count": 6
+        },
+        {
+          "displayed_label": "OEA-Qwen7B (+Cl)",
+          "matching_line_numbers": [
+            25
+          ],
+          "row_index": 12,
+          "status": "matched",
+          "value_count": 6
+        }
+      ]
+    },
+    {
+      "matched_row_count": 10,
+      "metric_cell_count": 90,
+      "paper_table": "Table 12",
+      "pdf_page": 15,
+      "row_count": 10,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            32
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Robust-CLAP",
+          "matching_line_numbers": [
+            33
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            34
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            35
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            36
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B (+Cl)",
+          "matching_line_numbers": [
+            37
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            38
+          ],
+          "row_index": 6,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B (+Cl)",
+          "matching_line_numbers": [
+            39
+          ],
+          "row_index": 7,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            40
+          ],
+          "row_index": 8,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B (+Cl)",
+          "matching_line_numbers": [
+            41
+          ],
+          "row_index": 9,
+          "status": "matched",
+          "value_count": 9
+        }
+      ]
+    },
+    {
+      "matched_row_count": 10,
+      "metric_cell_count": 90,
+      "paper_table": "Table 13",
+      "pdf_page": 16,
+      "row_count": 10,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            10
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Robust-CLAP",
+          "matching_line_numbers": [
+            11
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            12
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            13
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            14
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B (+Cl)",
+          "matching_line_numbers": [
+            15
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            16
+          ],
+          "row_index": 6,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B (+Cl)",
+          "matching_line_numbers": [
+            17
+          ],
+          "row_index": 7,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            18
+          ],
+          "row_index": 8,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B (+Cl)",
+          "matching_line_numbers": [
+            19
+          ],
+          "row_index": 9,
+          "status": "matched",
+          "value_count": 9
+        }
+      ]
+    },
+    {
+      "matched_row_count": 10,
+      "metric_cell_count": 90,
+      "paper_table": "Table 14",
+      "pdf_page": 16,
+      "row_count": 10,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            24
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Robust-CLAP",
+          "matching_line_numbers": [
+            25
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            26
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            27
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            28
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B (+Cl)",
+          "matching_line_numbers": [
+            29
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            30
+          ],
+          "row_index": 6,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B (+Cl)",
+          "matching_line_numbers": [
+            31
+          ],
+          "row_index": 7,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            32
+          ],
+          "row_index": 8,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B (+Cl)",
+          "matching_line_numbers": [
+            33
+          ],
+          "row_index": 9,
+          "status": "matched",
+          "value_count": 9
+        }
+      ]
+    },
+    {
+      "matched_row_count": 10,
+      "metric_cell_count": 90,
+      "paper_table": "Table 15",
+      "pdf_page": 17,
+      "row_count": 10,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            12
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "Robust-CLAP",
+          "matching_line_numbers": [
+            13
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            14
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            15
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            16
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Nemo3B (+Cl)",
+          "matching_line_numbers": [
+            17
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            18
+          ],
+          "row_index": 6,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen3B (+Cl)",
+          "matching_line_numbers": [
+            19
+          ],
+          "row_index": 7,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            20
+          ],
+          "row_index": 8,
+          "status": "matched",
+          "value_count": 9
+        },
+        {
+          "displayed_label": "OEA-Qwen7B (+Cl)",
+          "matching_line_numbers": [
+            21
+          ],
+          "row_index": 9,
+          "status": "matched",
+          "value_count": 9
+        }
+      ]
+    },
+    {
+      "matched_row_count": 6,
+      "metric_cell_count": 24,
+      "paper_table": "Table 16",
+      "pdf_page": 17,
+      "row_count": 6,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            30
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            32
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            34
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            35
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            36
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 4
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            37
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 4
+        }
+      ]
+    },
+    {
+      "matched_row_count": 10,
+      "metric_cell_count": 70,
+      "paper_table": "Table 17",
+      "pdf_page": 17,
+      "row_count": 10,
+      "rows": [
+        {
+          "displayed_label": "LAION-CLAP",
+          "matching_line_numbers": [
+            46
+          ],
+          "row_index": 0,
+          "status": "matched",
+          "value_count": 7
+        },
+        {
+          "displayed_label": "Robust-CLAP",
+          "matching_line_numbers": [
+            47
+          ],
+          "row_index": 1,
+          "status": "matched",
+          "value_count": 7
+        },
+        {
+          "displayed_label": "MGA-CLAP",
+          "matching_line_numbers": [
+            48
+          ],
+          "row_index": 2,
+          "status": "matched",
+          "value_count": 7
+        },
+        {
+          "displayed_label": "M2D-CLAP",
+          "matching_line_numbers": [
+            49
+          ],
+          "row_index": 3,
+          "status": "matched",
+          "value_count": 7
+        },
+        {
+          "displayed_label": "OEA-Nemo3B",
+          "matching_line_numbers": [
+            50
+          ],
+          "row_index": 4,
+          "status": "matched",
+          "value_count": 7
+        },
+        {
+          "displayed_label": "OEA-Nemo3B (+Cl)",
+          "matching_line_numbers": [
+            51
+          ],
+          "row_index": 5,
+          "status": "matched",
+          "value_count": 7
+        },
+        {
+          "displayed_label": "OEA-Qwen3B",
+          "matching_line_numbers": [
+            52
+          ],
+          "row_index": 6,
+          "status": "matched",
+          "value_count": 7
+        },
+        {
+          "displayed_label": "OEA-Qwen3B (+Cl)",
+          "matching_line_numbers": [
+            53
+          ],
+          "row_index": 7,
+          "status": "matched",
+          "value_count": 7
+        },
+        {
+          "displayed_label": "OEA-Qwen7B",
+          "matching_line_numbers": [
+            54
+          ],
+          "row_index": 8,
+          "status": "matched",
+          "value_count": 7
+        },
+        {
+          "displayed_label": "OEA-Qwen7B (+Cl)",
+          "matching_line_numbers": [
+            55
+          ],
+          "row_index": 9,
+          "status": "matched",
+          "value_count": 7
+        }
+      ]
+    }
+  ],
+  "unit_counts": {
+    "count": 6,
+    "gigabytes": 12,
+    "million_parameters": 12,
+    "milliseconds": 24,
+    "percent": 792,
+    "rank_gap": 10,
+    "score_1_to_5": 36,
+    "score_standard_deviation": 18
+  },
+  "unmatched_metric_cell_count": 0,
+  "unmatched_rows": []
+}
