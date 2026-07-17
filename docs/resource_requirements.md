@@ -49,6 +49,8 @@
 
 当前并行批次采用完整不可变快照，不依据有冲突的文件名猜测：MODEL-03 约 28.4 GB、MODEL-04 约 58.3 GB，实际远端文件名、字节数与 LFS SHA256 将由下载时的 `download_manifest.json` 固定。
 
+`[CODE]` 已提供 `scripts/run_model03_model04_audit.sh` 做只读完成性判定：完整比对固定 revision 文件集合、字节数、LFS SHA256、非 LFS Git blob ID、revision marker 与残留 `.incomplete`。它不会下载或修改模型；详见 `docs/model_resource_audit.md`。
+
 ## P3：数据
 
 ### WavCaps

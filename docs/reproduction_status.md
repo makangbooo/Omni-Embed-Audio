@@ -21,6 +21,7 @@
 | 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | IN_PROGRESS | `ae2c3fb` | 最近检查的主容器未发现活动下载进程；已有 partial/完成状态需重新核对 | 进程可能曾在另一实例运行，不能仅凭当前容器 `pgrep` 判定完成 | 后续单独运行只读完整性检查，再决定是否断点续传 |
 | 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | IN_PROGRESS | `48c9b3c` | 已知 base/AC 完整，Cl 曾保留 partial；最近检查的主容器无活动下载进程 | CAS 链路不稳定；最终 Cl 文件尚无完成证据 | 后续单独核对 manifest、partial 与 LFS SHA256，再断点续传 |
 | 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | IN_PROGRESS | `48c9b3c` | 已知 base 完整、AC 曾保留 partial、Cl 未有开始证据；最近检查的主容器无活动下载进程 | CAS 链路不稳定；跨实例状态未确认 | 后续单独核对全部目录与 manifest，再断点续传 |
+| 2 官方权重 | MODEL-03/04 只读完整性审计器 | COMPLETED | `f4309a7` | 远程尚未运行；本地实现及 105 项完整测试通过 | 无；工具完成不代表六个 asset 已完成 | DATA-04 保持为唯一用户步骤；随后在 CPU 侧运行审计并按 asset 决定续传 |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | TODO | `7a8fb50` | Clotho 1,045 条 evaluation manifest 已完整验证；GPU 正式 embedding 尚未安排 | 完整 AudioCaps/MECAT 候选集尚未准备；全三数据集表仍不能运行 | CPU 数据步骤完成后申请 1×A100-80GB，先做 Qwen3B-Cl 小批校验再生成全量 embedding |
 | 2 官方权重 | Qwen3B-Cl 全量 checkpoint embedding 生成器 | COMPLETED | `03850ff` | 固定 1,045 audio/5,225 caption、单批原子工件、SHA256、严格离线/单 GPU、精确 resume identity 和失败 attempt 已实现；完整 67 项测试通过 | GPU 正式运行尚未开始；论文 `passage:` 与公开代码 no-prefix 冲突已显式标记 | CPU 数据步骤完成后先做少量 chunk GPU 校验，再启动可恢复全量生成 |
@@ -50,6 +51,6 @@
 
 - 当前阶段：环境、首批官方权重、checkpoint 结构审计、inference-only 权重提取及单卡 GPU smoke 已完成。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：Clotho DATA-02 远程全量解码/manifest/UIQ 校验通过；WavCaps DATA-09 精确复现论文的 173 个 AudioCaps 和 638 个 Clotho 重叠计数；DATA-10 完成 development/validation 四个 CSV 全量审计、安全解压/全量音频校验实现；完整 97 项测试通过。
+- 最近完成：Clotho DATA-02 远程全量解码/manifest/UIQ 校验通过；WavCaps DATA-09 精确复现论文的 173 个 AudioCaps 和 638 个 Clotho 重叠计数；DATA-10 完成 development/validation 四个 CSV 全量审计与远程全量校验实现；MODEL-03/04 只读完整性审计器完成；完整 105 项测试通过。
 - 当前阻塞：正式论文全三数据集表仍缺 AudioCaps 与 MECAT 音频；AudioCaps 还缺论文有效 91,256-row train manifest，MECAT 还缺论文 847 条中的排除 ID 和检索 caption 字段。WavCaps 的 `<=31s` 文字条件与 275,618 计数不一致，论文精确 filtered manifest/blocklist 未发布。`+Cl` 的论文 early-stopping split 也未命名，而公开 launcher 使用 evaluation 早停。当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
 - 下一步：保持 DATA-04 为用户唯一待执行步骤；成功后在同一 CPU 服务器执行 DATA-05，再依次完成 DATA-06/07 与 DATA-08/09。CPU 数据步骤完成后再申请 1×A100-80GB 做 Qwen3B-Cl 正式 embedding 小批校验。
