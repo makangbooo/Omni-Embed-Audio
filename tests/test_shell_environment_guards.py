@@ -51,6 +51,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_data10_clotho_trainval_validation.sh",
             "run_model03_model04_audit.sh",
             "run_data11_mecat_wavcaps_provenance.sh",
+            "run_negative_embedding_evaluation.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -69,14 +70,20 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn("command -v conda", resolver)
 
     def test_embedding_evaluation_wrapper_refuses_nonempty_output(self) -> None:
-        source = (
-            REPOSITORY_ROOT / "scripts/run_embedding_evaluation.sh"
-        ).read_text(encoding="utf-8")
-        self.assertIn('[[ -d "${OUTPUT_DIR}" ]]', source)
-        self.assertIn('Output directory is not empty', source)
-        self.assertIn('> >(tee "${OUTPUT_DIR}/stdout.log")', source)
-        self.assertIn('2> >(tee "${OUTPUT_DIR}/stderr.log" >&2)', source)
-        self.assertNotIn("rm -rf", source)
+        wrappers = (
+            "run_embedding_evaluation.sh",
+            "run_negative_embedding_evaluation.sh",
+        )
+        for filename in wrappers:
+            with self.subTest(script=filename):
+                source = (REPOSITORY_ROOT / "scripts" / filename).read_text(
+                    encoding="utf-8"
+                )
+                self.assertIn('[[ -d "${OUTPUT_DIR}" ]]', source)
+                self.assertIn('Output directory is not empty', source)
+                self.assertIn('> >(tee "${OUTPUT_DIR}/stdout.log")', source)
+                self.assertIn('2> >(tee "${OUTPUT_DIR}/stderr.log" >&2)', source)
+                self.assertNotIn("rm -rf", source)
 
     def test_large_raw_result_tree_is_ignored(self) -> None:
         source = (REPOSITORY_ROOT / ".gitignore").read_text(encoding="utf-8")

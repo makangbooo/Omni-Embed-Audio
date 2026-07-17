@@ -49,6 +49,10 @@ from AudioRetrieval.evaluation.canonical import (
     evaluate_id_retrieval,
     evaluate_query_to_candidates,
 )
+from AudioRetrieval.evaluation.negative_canonical import (
+    CanonicalNegativeRetrievalResult,
+    evaluate_negative_id_retrieval,
+)
 from AudioRetrieval.evaluation.uiq_schema import (
     ReleasedUIQQuery,
     load_released_uiq,
@@ -99,6 +103,8 @@ __all__ = [
     "evaluate_caption_to_caption",
     "evaluate_id_retrieval",
     "evaluate_query_to_candidates",
+    "CanonicalNegativeRetrievalResult",
+    "evaluate_negative_id_retrieval",
     "ReleasedUIQQuery",
     "load_released_uiq",
     "released_uiq_summary",
