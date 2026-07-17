@@ -80,3 +80,58 @@ variants. Until then, results must be labelled `[CODE]` protocol or
 `AudioRetrieval.evaluation.uiq_schema` validates this released schema, keeps
 duplicate negative rows, rejects duplicate positive IDs, and exposes the query
 text through a common immutable record. It does not invent missing HN IDs.
+
+## Embedding evaluation artifact contract
+
+`scripts/evaluate_embedding_artifacts.py` evaluates already generated `.npy`
+embeddings without loading a model. `scripts/run_embedding_evaluation.sh`
+provides the remote CPU wrapper and captures stdout/stderr.
+
+Each run uses a new directory whose basename equals `experiment_id`. Existing
+artifacts are never overwritten. A successful formal run contains at least:
+
+- `config.yaml`, `command.sh`, `python_command.sh`, `environment.txt`,
+  `python_environment.txt`, `gpu_info.txt`, `git_commit.txt`, and
+  `git_status.txt`;
+- copied `query_embeddings.npy` and `candidate_embeddings.npy` plus their
+  JSONL metadata;
+- `similarities.npy`, `ranks.npy`, `rankings.npy`, explicit positive/ignored
+  indices, and evaluated query indices;
+- `metrics.json` with protocol label/source, task, paper table, input and
+  artifact SHA256 values, shapes, counts, tie policy, and R@1/5/10;
+- wrapper `stdout.log`, `stderr.log`, and `exit_code.txt`.
+
+Formal evaluation rejects a dirty Git worktree by default. T2T configuration
+must declare `query_selection=all` or reference an immutable JSON list with
+`query_selection=indices`; no random selection is performed. Failed runs keep
+`metrics.json` with the exception and traceback.
+
+The input file is JSON (and is copied as JSON-compatible `config.yaml`). The
+minimum T2A/UIQ configuration is:
+
+```json
+{
+  "schema_version": 1,
+  "experiment_id": "oea_qwen3b_clotho_t2a_seed42_YYYYMMDD_HHMMSS",
+  "model": "OEA-Qwen3B (+Cl)",
+  "checkpoint": "/absolute/path/to/step_40.pt",
+  "dataset": "Clotho v2 evaluation",
+  "task": "t2a",
+  "paper_table": "Table 2",
+  "protocol_label": "canonical-all-captions",
+  "protocol_source": "INFERRED",
+  "seed": 42,
+  "query_embeddings": "/absolute/path/to/query_embeddings.npy",
+  "candidate_embeddings": "/absolute/path/to/candidate_embeddings.npy",
+  "query_metadata": "/absolute/path/to/query_metadata.jsonl",
+  "candidate_metadata": "/absolute/path/to/candidate_metadata.jsonl",
+  "query_selection": "all"
+}
+```
+
+`model`, `checkpoint`, `dataset`, and integer `seed` are mandatory. The
+evaluator records the seed for provenance but does not use randomness itself.
+For T2T, candidate paths may be omitted because the query caption bank is also
+the candidate bank. Because the paper does not publish caption-selection
+details, a chosen protocol must not be marked `PAPER` unless new evidence is
+found.

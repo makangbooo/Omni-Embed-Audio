@@ -40,6 +40,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_checkpoint_inspection.sh",
             "resume_environment.sh",
             "run_data02_clotho_validation.sh",
+            "run_embedding_evaluation.sh",
         )
         for filename in wrappers:
             with self.subTest(script=filename):
@@ -56,6 +57,16 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn('${CONDA_EXE:-}', resolver)
         self.assertIn('${CONDA_PREFIX:-}', resolver)
         self.assertIn("command -v conda", resolver)
+
+    def test_embedding_evaluation_wrapper_refuses_nonempty_output(self) -> None:
+        source = (
+            REPOSITORY_ROOT / "scripts/run_embedding_evaluation.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn('[[ -d "${OUTPUT_DIR}" ]]', source)
+        self.assertIn('Output directory is not empty', source)
+        self.assertIn('> >(tee "${OUTPUT_DIR}/stdout.log")', source)
+        self.assertIn('2> >(tee "${OUTPUT_DIR}/stderr.log" >&2)', source)
+        self.assertNotIn("rm -rf", source)
 
 
 if __name__ == "__main__":
