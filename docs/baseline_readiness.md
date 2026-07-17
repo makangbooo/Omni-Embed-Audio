@@ -37,9 +37,9 @@ it imports no model library, downloads nothing, and uses no GPU.
 | Robust-CLAP | Adapter and UIQ text precomputer only | `[MISSING]`; local checkpoint/source trees are named but not identified | `BLOCKED` |
 | MGA-CLAP | Adapter, runner, Hydra config/loader, CLI choice | `[MISSING]`; source tree/checkpoint are untracked | `BLOCKED` |
 | M2D-CLAP | Adapter and vendored portable model only | `[MISSING]`; no checkpoint revision/SHA256 | `BLOCKED` |
-| Nemotron-3B | Base-lock pipeline, fixed Clotho protocol, lock resolver, resumable base-only generator/wrapper | Base snapshot is pinned by MODEL-03; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
-| Qwen2.5-Omni-3B | Base-lock pipeline, fixed Clotho protocol, lock resolver, resumable base-only generator/wrapper | Base snapshot is pinned by MODEL-01; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
-| Qwen2.5-Omni-7B | Base-lock pipeline, fixed Clotho protocol, lock resolver, resumable base-only generator/wrapper | Base snapshot is pinned by MODEL-04; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
+| Nemotron-3B | Base-lock pipeline, fixed Clotho protocol, resumable base-only generator/wrapper, and four-protocol CPU finalizer | Base snapshot is pinned by MODEL-03; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
+| Qwen2.5-Omni-3B | Base-lock pipeline, fixed Clotho protocol, resumable base-only generator/wrapper, and four-protocol CPU finalizer | Base snapshot is pinned by MODEL-01; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
+| Qwen2.5-Omni-7B | Base-lock pipeline, fixed Clotho protocol, resumable base-only generator/wrapper, and four-protocol CPU finalizer | Base snapshot is pinned by MODEL-04; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
 
 No row is currently formal-ready. This is not solely a checkpoint-download
 problem: Robust-CLAP and M2D-CLAP lack normal baseline entrypoints; MGA-CLAP's
@@ -77,6 +77,7 @@ remote stage has run.
 4. Run the non-overwriting vanilla base-lock pipeline for each complete base
    snapshot and commit only the small locks. Then run a lock-bound GPU fixture
    before full Clotho embedding generation.
-5. Reuse the canonical embedding evaluators and identical candidate/query IDs;
-   do not use the legacy runner's metric output as proof until its protocol is
-   reconciled with the fixed evaluation contract.
+5. Run `scripts/run_vanilla_clotho_retrieval_suite.sh` on the completed full
+   embedding bank. It revalidates the base-only lock, protocol SHA, dimensions,
+   and no-OEA/LoRA/projection flags before producing the four canonical
+   T2A/T2T protocols; do not use the legacy runner's metric output as proof.
