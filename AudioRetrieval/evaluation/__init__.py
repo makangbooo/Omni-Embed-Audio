@@ -49,6 +49,11 @@ from AudioRetrieval.evaluation.canonical import (
     evaluate_id_retrieval,
     evaluate_query_to_candidates,
 )
+from AudioRetrieval.evaluation.uiq_schema import (
+    ReleasedUIQQuery,
+    load_released_uiq,
+    released_uiq_summary,
+)
 
 if TYPE_CHECKING:
     from AudioRetrieval.evaluation.runners import (
@@ -94,6 +99,9 @@ __all__ = [
     "evaluate_caption_to_caption",
     "evaluate_id_retrieval",
     "evaluate_query_to_candidates",
+    "ReleasedUIQQuery",
+    "load_released_uiq",
+    "released_uiq_summary",
     # Runners
     "BaselineRunner",
     "UIQRunner",

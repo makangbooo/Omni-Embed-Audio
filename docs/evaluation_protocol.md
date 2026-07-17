@@ -57,3 +57,26 @@ Before Table 2 or Table 3 is called an exact reproduction, obtain the authors'
 query-selection and MECAT manifest details or run clearly separated protocol
 variants. Until then, results must be labelled `[CODE]` protocol or
 `[INFERRED]` protocol rather than `[PAPER]` protocol.
+
+## Released UIQ schema audit
+
+- `[CODE]` All 15 released JSONL files use
+  `audio_id/dataset/dataset_slug/query_type`, not the legacy
+  `clip_id/uiq[].bucket/query` schema consumed by the public `UIQRunner`.
+- `[CODE]` Positive rows store their text in `generated_query`; negative rows
+  store it in `negative_query` and include `negative_captions`.
+- `[CODE]` The release contains exactly 13,053 rows: 4,530 AudioCaps, 4,722
+  Clotho, and 3,801 MECAT rows.
+- `[CODE]` Each positive file contains one row per audio ID. Negative files
+  intentionally repeat targets: 630/542/409 rows correspond to only
+  255/247/176 unique AudioCaps/Clotho/MECAT target IDs.
+- `[CODE]` Negative rows do not contain a hard-negative audio ID despite the
+  UIQ README saying they reference a pre-mined clip. They must not be used for
+  HNSR/TFR-HN until a pairing is obtained or explicitly reconstructed.
+- `[CODE]` Clotho positive IDs include `.wav`, while negative IDs are stems.
+  The adapter preserves these IDs verbatim; candidate resolution must record
+  any exact or stem-based mapping rather than silently normalizing them.
+
+`AudioRetrieval.evaluation.uiq_schema` validates this released schema, keeps
+duplicate negative rows, rejects duplicate positive IDs, and exposes the query
+text through a common immutable record. It does not invent missing HN IDs.
