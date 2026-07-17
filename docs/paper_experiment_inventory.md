@@ -21,9 +21,9 @@
 | EXP-03 | §3.2.3；附录 E；表 1、10 | LLM UIQ 有效性评测 | 与 EXP-02 相同的 75 样例 | Claude Opus 4.5 | 5 点 Likert、Human–LLM agreement（正文报告 r/p） | `[MISSING]` 无评测脚本或原始响应 | Claude Opus 4.5 API、75 样例清单 | D | BLOCKED |
 | EXP-04 | §3.2.3；附录 I | UIQ 与真实 Freesound 查询 token-length 分析 | UIQ 13,053 条；Freesound 查询统计 | 分词器 `[MISSING]` | token 数分布、均值；对照文献 1.8 tokens | `[MISSING]` 无脚本、无真实查询日志/分词定义 | Freesound 查询数据或文献可复算统计 | C | BLOCKED |
 | EXP-05 | §3.3；附录 K | 四阶段 hard-negative mining + 人工复核 | 三个评测集 | MGA-CLAP + BGE-large-en-v1.5 | Top-20、声学相似度、语义相似度、保留率、最终配对数 | `[CODE] preprocess hard-negatives` 默认 Top-50；另有 LAION-CLAP 替代脚本 Top-20 | MGA-CLAP 权重、BGE、完整音频/captions、人工复核记录 | C（动态阈值与最终配对未发布） | BLOCKED |
-| EXP-06 | 附录 B.1；表 6 | 数据来源与潜在污染关系审计 | WavCaps 子集与 7 个评测集 | 文件/来源匹配 | 来源对应关系 | `[MISSING]` 无 provenance 脚本 | 各数据集 metadata | B | TODO |
-| EXP-07 | §4.1；附录 B.2 | AudioCaps test–WavCaps AudioSet_SL 重叠 | 975 AudioCaps test clips；108,317 WavCaps AudioSet_SL | 规范化 YouTube ID 精确匹配 | 173/975=17.7%；865 caption rows；占 WavCaps 0.16% | `[CODE]` DATA-06/07 已固定 AudioCaps 2.0 test 975 clips；WavCaps overlap/blocklist 实现仍缺 | 固定 WavCaps AudioSet_SL metadata | B | IN_PROGRESS |
-| EXP-08 | §4.1；附录 B.3 | Clotho evaluation–WavCaps Freesound 重叠 | 1,045 Clotho evaluation clips | filename case-insensitive 精确匹配；可扩展 fingerprint | 638/1,045=61.0% | `[MISSING]` 无重叠或 blocklist 脚本 | Clotho v2.1 metadata、WavCaps Freesound metadata | B | TODO |
+| EXP-06 | 附录 B.1；表 6 | 数据来源与潜在污染关系审计 | WavCaps 子集与 7 个评测集 | 文件/来源匹配 | 来源对应关系 | `[CODE]` DATA-09 已实现 AudioCaps/Clotho metadata provenance；MECAT 仍待 DATA-04/05 | 固定 WavCaps/AudioCaps/Clotho metadata；MECAT manifest | B | IN_PROGRESS |
+| EXP-07 | §4.1；附录 B.2 | AudioCaps test–WavCaps AudioSet_SL 重叠 | 975 AudioCaps test clips；108,317 WavCaps AudioSet_SL | 规范化 YouTube ID 精确匹配 | 173/975=17.7%；865 caption rows；占 WavCaps 0.16% | `[CODE]` DATA-09 在固定 revision 全量元数据上实现并复算 | 固定 WavCaps AudioSet_SL metadata | B | COMPLETED |
+| EXP-08 | §4.1；附录 B.3 | Clotho evaluation–WavCaps Freesound 重叠 | 1,045 Clotho evaluation clips | filename case-insensitive 精确匹配；可扩展 fingerprint | 638/1,045=61.0% | `[CODE]` DATA-09 精确复现 638 个匹配文件名；这些文件名映射到 1,017 个 WavCaps 候选，64 个文件名有歧义 | Clotho v2.1 metadata、WavCaps FreeSound metadata | B | COMPLETED |
 | EXP-09 | §4.1；附录 B.4 | MECAT–WavCaps 无显著重叠核验 | MECAT 与 WavCaps | filename + embedding 检查，具体阈值 `[MISSING]` | 重叠数/率 | `[CODE]` DATA-04/05 已固定官方 `00A/test` 848 条并实现完整性检查；重叠实现仍缺 | MECAT 848 条公开 manifest、论文 847 条排除 ID `[MISSING]`、WavCaps metadata、嵌入模型/阈值 | C | IN_PROGRESS |
 | EXP-10 | §5.1；表 2 | caption Text-to-Audio 完整基线 | AudioCaps 975、Clotho 1,045、MECAT 847（发布 UIQ 为 848，需澄清） | 4 CLAP + 3 vanilla LALM + 6 OEA | R@1/5/10 | README 把 Hydra `key=value` 语法传给 argparse CLI，命令会报参数错误；即使改调 `eval_hydra.py` 也只加载裸 backbone；主 evaluator 不支持 MECAT | 13 模型/权重、3 数据集、统一候选集 | C（需评测入口补全） | TODO |
 | EXP-11 | §5.2；表 3 | caption Text-to-Text 完整基线 | 同 EXP-10 captions/candidates | 同 EXP-10 | R@1/5/10 | `[CODE] eval_core.py` 有 T2T；无论文全矩阵命令/manifest | 13 模型/权重、自动/人工 captions 的确切版本 | C | TODO |
@@ -65,7 +65,7 @@
 6. `[CODE]` README 声称 `evaluation/` 实现 HNSR/TFR/Δ-Rank，但 Python 源码没有这些函数。
 7. `[PAPER]` 训练使用 PyTorch DDP、BF16、validation R@10 early stopping；`[CODE]` trainer 无 DDP、无 seed、无 scheduler/warmup/grad clipping，autocast 未显式指定 BF16，并按 validation loss 早停。
 8. `[PAPER]` 音频输入使用 `passage:`；`[CODE]` `_build_audio_messages` 明确忽略 `passage_prefix`。这是论文方法与公开实现的实质差异，需用官方 checkpoint smoke test 判定实际训练口径。
-9. `[PAPER]` WavCaps 过滤到 ≤31 秒并应用泄漏 blocklist；`[CODE]` manifest 默认 `--max-duration=None`，没有生成或应用论文 blocklist 的实现。
+9. `[PAPER]` WavCaps 写作过滤到 `<=31` 秒并报告 275,618 条；固定公开元数据按该条件为 275,691，只有 `[INFERRED]` `0 < duration < 31` 精确得到 275,618。DATA-09 已精确复现 173 个 AudioCaps 和 638 个 Clotho 重叠，但论文 blocklist、Clotho 重复文件名消歧规则和最终训练 manifest 仍 `[MISSING]`。
 10. `[PAPER]` hard-negative Stage 2 使用动态声学阈值保留约 3×最终数量；`[CODE]` 替代脚本直接保留 Top-3，通用 pipeline 默认 Top-50，均不能证明等同论文。
 11. `[PAPER][CODE]` AudioCaps v2 官方 README 与论文均写 91,256 train；DATA-06/07 已固定官方 commit，但公共 OEA `csv.DictReader` 只能产生 91,254 个有效记录。3 个 bare-CR caption 尾部可修复但计数仍为 91,254；论文有效 91,256-row manifest `[MISSING]`。
 12. `[PAPER]/[CODE]` 正文 MECAT 为 847 对，UIQ 发布为 848 个正查询 ID；需作者 manifest 解释 1 条差异。

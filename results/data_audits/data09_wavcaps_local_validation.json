@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_source": "two local full-data passes over pinned official metadata; second pass verified existing artifact hashes",
+  "validated_code_commit": "3c5b1e9c689026c1bc0dc06cecb85fddff1e485c",
+  "wavcaps_revision": "0930ec11ded28fa0eaa910fde2f6fc3538acbeac",
+  "audiocaps_commit": "d004db3ea1b01cf4fd0347dd8d27db90cadc8809",
+  "clotho_version": "2.1",
+  "source_counts": {
+    "AudioSet_SL": 108317,
+    "BBC_Sound_Effects": 31201,
+    "FreeSound": 262300,
+    "SoundBible": 1232,
+    "total": 403050
+  },
+  "duration_reconciliation": {
+    "duration_lt_31": 275624,
+    "duration_le_31": 275691,
+    "positive_duration_lt_31": 275618,
+    "positive_duration_le_31": 275685,
+    "non_positive_duration": 6,
+    "duration_equal_31": 67,
+    "paper_reported_samples": 275618,
+    "paper_written_predicate": "duration <= 31 seconds",
+    "exact_public_metadata_reconstruction": "0 < duration < 31 seconds",
+    "source_tag": "[INFERRED] count-equivalent predicate; exact paper manifest remains unpublished"
+  },
+  "audiocaps_overlap": {
+    "audiocaps_unique_test_ids": 975,
+    "wavcaps_audioset_sl_overlaps": 173,
+    "eligible_blocked_rows": 173,
+    "paper_reported_overlap": 173
+  },
+  "clotho_overlap": {
+    "clotho_evaluation_rows": 1045,
+    "filename_matched_clotho_rows": 638,
+    "paper_reported_overlap": 638,
+    "wavcaps_candidate_rows": 1017,
+    "ambiguous_clotho_filenames": 64,
+    "sound_id_and_filename_confirmed_rows": 611,
+    "eligible_conservative_candidate_rows": 383
+  },
+  "training_count_reconciliation": {
+    "duration_eligible_before_leakage": 275618,
+    "audiocaps_rows_removed": 173,
+    "clotho_candidate_rows_removed": 383,
+    "conservative_metadata_only_training_rows": 275062,
+    "exact_paper_post_blocklist_count": "[MISSING]"
+  },
+  "artifacts": {
+    "all_metadata_manifest": {
+      "rows": 403050,
+      "size_bytes": 262733469,
+      "sha256": "ad1c1ce7e6294c985398ab8dd1a4e66ac3021f392e6fc39fefa6c48de4bb3ba7"
+    },
+    "audiocaps_test_blocklist": {
+      "rows": 173,
+      "size_bytes": 35984,
+      "sha256": "77da39bcfa6283cff1fa59fdb0c012d16067e0dd6bfc3efdd2423ed4c1921a1d"
+    },
+    "clotho_filename_overlap": {
+      "rows": 638,
+      "size_bytes": 243238,
+      "sha256": "c40700763ce2094c909ee424cf3fa57b7057c2186bc2c0137f6313e7958c7cc4"
+    },
+    "clotho_conservative_candidate_blocklist": {
+      "rows": 1017,
+      "size_bytes": 261815,
+      "sha256": "11c2a1d1f6e97f98f117dfb7c453419f554dd4bff4bdc724ee1c30ab88adb805"
+    },
+    "clotho_sound_id_filename_confirmed": {
+      "rows": 611,
+      "size_bytes": 148171,
+      "sha256": "d6c51f269e8a81ef7b470d5f266595c6949573c6819928f930abc34fb6e7afb1"
+    }
+  }
+}

@@ -53,11 +53,14 @@
 
 ### WavCaps
 
-- `[PAPER]` 训练实际使用 275,618 samples，长度 ≤31 秒。
-- `[CODE]` 公共 `cvssp/WavCaps` revision `0930ec11ded28fa0eaa910fde2f6fc3538acbeac` 的所有仓库文件合计 819.51 GB；原始统计为 403,050 clips。
-- `[MISSING]` 论文使用的 275,618-row 精确 manifest、validation split、去泄漏后的最终数量、两个 blocklist 文件。
-- 优先请求作者/用户已有的精确 filtered manifest；若没有，再从公共 WavCaps 全量构建。
+- `[CODE]` 已固定公共 `cvssp/WavCaps` revision `0930ec11ded28fa0eaa910fde2f6fc3538acbeac`。DATA-08 只下载 8 个 metadata/官方 blacklist 文件，共 176,863,095 bytes；完整仓库（含音频）约 819.51 GB。
+- `[CODE]` 固定元数据共有 403,050 条：AudioSet_SL 108,317、BBC 31,201、FreeSound 262,300、SoundBible 1,232。
+- `[PAPER]` 报告长度 `<=31` 秒后为 275,618；公共元数据按该条件为 275,691，只有 `[INFERRED]` `0 < duration < 31` 才精确得到 275,618。论文精确 filtered manifest 仍为 `[MISSING]`。
+- DATA-09 已精确复现 173 个 AudioCaps test 重叠和 638 个 Clotho evaluation 文件名重叠。638 个文件名对应 1,017 个 WavCaps 候选（64 个文件名存在歧义），因此 Clotho 保守 blocklist 是 `[INFERRED]`，不是论文未公开的原始 blocklist。
+- `[MISSING]` 论文 validation split、精确去泄漏 blocklist、重复文件名消歧规则和去泄漏后的最终训练数量。metadata-only 保守重建为 275,062 条，不能标为 exact。
+- 当前先在远程 CPU 侧复算 176.86 MB metadata；训练前才需要下载/准备全量 WavCaps 音频。
 - 目录要求：`datasets/wavcaps/{metadata,audio}`；manifest 写入 `data/manifests/wavcaps/`，blocklist 写入 `data/blocklists/`。
+- 详见 `docs/wavcaps_data_audit.md`。
 
 ### AudioCaps v2
 
@@ -72,7 +75,8 @@
 
 - 官方 Zenodo record `4783391`：development 4.5 GB、validation 1.3 GB、evaluation 1.2 GB，metadata/captions 约 3.3 MB，总下载 7.1 GB。
 - `[PAPER]` 追加训练为 3,839 clips；evaluation 为 1,045 clips。
-- 需要确认论文是 v2.0 还是已修复的 v2.1 音频文件；推荐使用 v2.1 并在报告标记版本差异。
+- DATA-02 已在远程完整验证 v2.1 evaluation：1,045/1,045 音频成功解码、每条 5 captions、四类正 UIQ ID 全部精确对齐；manifest MD5 `253c1b275e3618fa94750150d7962da5`。
+- `[INFERRED]` 论文只写 v2；当前使用修复后的 v2.1 并在报告标记版本差异。development/validation 仍需完成 DATA-03 下载和 checksum。
 
 ### MECAT
 

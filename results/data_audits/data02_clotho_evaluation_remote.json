@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_source": "user-returned remote DATA-02 stdout and data_statistics.json",
+  "run_directory": "logs/data02_clotho_validation_20260717_233100",
+  "git_commit": "7a8fb5001c336929d5556fe2db7dda6f9212b25c",
+  "git_status_short": "",
+  "wrapper_exit_code": 0,
+  "validation_exit_code": 0,
+  "extraction_mode": "verified_existing extraction reused",
+  "dataset": "Clotho",
+  "version": "2.1",
+  "split": "evaluation",
+  "source_checksums": {
+    "audio_archive_md5": "4569624ccadf96223f19cb59fe4f849f",
+    "captions_md5": "1b16b9e57cf7bdb7f13a13802aeb57e2",
+    "metadata_md5": "13946f054d4e1bf48079813aac61bf77"
+  },
+  "caption_rows": 1045,
+  "metadata_rows": 1045,
+  "audio_files": 1045,
+  "decoded_files": 1045,
+  "caption_count_per_audio": 5,
+  "total_audio_bytes": 2065364516,
+  "total_duration_seconds": 23416.309931972788,
+  "duration_min_seconds": 15.003174603174603,
+  "duration_max_seconds": 30.0,
+  "duration_mean_seconds": 22.407952088012237,
+  "sample_rate_counts": {
+    "44100": 1045
+  },
+  "channel_counts": {
+    "1": 1045
+  },
+  "uiq": {
+    "question": {
+      "rows": 1045,
+      "unique_audio_ids": 1045,
+      "exact_audio_id_set_match": true
+    },
+    "imperative": {
+      "rows": 1045,
+      "unique_audio_ids": 1045,
+      "exact_audio_id_set_match": true
+    },
+    "paraphrase": {
+      "rows": 1045,
+      "unique_audio_ids": 1045,
+      "exact_audio_id_set_match": true
+    },
+    "tagging": {
+      "rows": 1045,
+      "unique_audio_ids": 1045,
+      "exact_audio_id_set_match": true
+    },
+    "negative": {
+      "rows": 542,
+      "unique_raw_audio_ids": 247,
+      "raw_exact_matches": 0,
+      "inferred_append_wav_matches": 542,
+      "inferred_unmatched_ids": [],
+      "mapping_source": "[INFERRED] released negative audio_id omits .wav; this is alignment evidence, not an official target/HN pairing"
+    }
+  },
+  "manifest": {
+    "path": "/home/jg525/datasets/oea/clotho_v2.1/manifests/clotho_evaluation_manifest.jsonl",
+    "rows": 1045,
+    "size_bytes": 950467,
+    "md5": "253c1b275e3618fa94750150d7962da5"
+  }
+}
