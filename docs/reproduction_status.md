@@ -25,6 +25,7 @@
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | TODO | `7a8fb50` | Clotho 1,045 条 evaluation manifest 已完整验证；GPU 正式 embedding 尚未安排 | 完整 AudioCaps/MECAT 候选集尚未准备；全三数据集表仍不能运行 | CPU 数据步骤完成后申请 1×A100-80GB，先做 Qwen3B-Cl 小批校验再生成全量 embedding |
 | 2 官方权重 | Qwen3B-Cl 全量 checkpoint embedding 生成器 | COMPLETED | `03850ff` | 固定 1,045 audio/5,225 caption、单批原子工件、SHA256、严格离线/单 GPU、精确 resume identity 和失败 attempt 已实现；完整 67 项测试通过 | GPU 正式运行尚未开始；论文 `passage:` 与公开代码 no-prefix 冲突已显式标记 | CPU 数据步骤完成后先做少量 chunk GPU 校验，再启动可恢复全量生成 |
+| 2 官方权重 | Qwen3B-Cl/Clotho T2A/T2T 四协议 CPU 评测套件 | COMPLETED | `2a3a1bd` | default-joint T2A all captions、T2A-only seed0、default T2T seed0、T2T all-caption sensitivity 已分栏；生成工件/协议/排名/日志/commit/exit 全量复核和非覆盖失败证据已实现；完整 122 项测试通过 | 远程正式 embedding 尚未生成；论文未公开 caption 选择，四协议不得择优冒充论文口径 | GPU embedding 完成后在 CPU 服务器运行套件并回传 `suite_metrics.json`/CSV |
 | 2 指标 | Canonical T2A/T2T/UIQ embedding evaluator | COMPLETED | `43158ae` | 确定性 ID 检索、caption 多正例/排除 self、显式 query 子集、完整排名和严格输入校验已实现；相关 15 项测试通过 | 论文未公开 T2T caption 选择与 tie 口径；已在协议文档标为 `[MISSING]` | 接入 checkpoint embedding 生成器 |
 | 2 指标 | 可审计 embedding 实验输出 runner | COMPLETED | `5ed57a7` | CPU-only runner 已保存固定 embedding、metadata、完整排名、输入/工件 SHA256、seed、Git/环境/命令和失败证据；相关测试总计 27 项通过 | 无；正式运行要求干净 worktree 和显式协议来源 | 用 Qwen3B-Cl + Clotho evaluation 完成首个正式 T2A/T2T 闭环 |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 保留为 canonical negative evaluator 的公式回归测试 |
@@ -53,6 +54,6 @@
 
 - 当前阶段：环境、首批官方权重、checkpoint 结构审计、inference-only 权重提取及单卡 GPU smoke 已完成。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：Clotho DATA-02 远程全量解码/manifest/UIQ 校验通过；WavCaps DATA-09 精确复现论文的 173 个 AudioCaps 和 638 个 Clotho 重叠计数；DATA-10 完成 development/validation 四个 CSV 全量审计与远程全量校验实现；MODEL-03/04 只读完整性审计器完成；DATA-11 在固定元数据上发现 4 个 MECAT 同源视频候选；显式 target/HN negative artifact evaluator 完成；完整 116 项测试通过。
+- 最近完成：Clotho DATA-02 远程全量解码/manifest/UIQ 校验通过；WavCaps DATA-09 精确复现论文的 173 个 AudioCaps 和 638 个 Clotho 重叠计数；DATA-10 完成 development/validation 四个 CSV 全量审计与远程全量校验实现；MODEL-03/04 只读完整性审计器完成；DATA-11 在固定元数据上发现 4 个 MECAT 同源视频候选；显式 target/HN negative artifact evaluator 和 Qwen3B-Cl/Clotho 四协议 CPU retrieval suite 完成；完整 122 项测试通过。
 - 当前阻塞：正式论文全三数据集表仍缺 AudioCaps 与 MECAT 音频；AudioCaps 还缺论文有效 91,256-row train manifest，MECAT 还缺论文 847 条中的排除 ID 和检索 caption 字段。WavCaps 的 `<=31s` 文字条件与 275,618 计数不一致，论文精确 filtered manifest/blocklist 未发布。`+Cl` 的论文 early-stopping split 也未命名，而公开 launcher 使用 evaluation 早停。当前 5 条样例只证明首个官方 checkpoint 的最小前向闭环，不代表论文 Recall 复现。
 - 下一步：保持 DATA-04 为用户唯一待执行步骤；成功后在同一 CPU 服务器执行 DATA-05，再依次完成 DATA-06/07、DATA-08/09 与 DATA-11 canonical 复算。CPU 数据步骤完成后再申请 1×A100-80GB 做 Qwen3B-Cl 正式 embedding 小批校验。

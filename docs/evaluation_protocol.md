@@ -187,3 +187,45 @@ text prefix from audio-only messages. The first checkpoint evaluation follows
 the public-code audio-only/no-prefix path and is labelled accordingly. A
 prefix-including A/B run must be reported separately; neither result may be
 silently substituted for the other.
+
+## Qwen3B-Cl Clotho retrieval suite
+
+After the resumable generator reaches `status=complete`, the fixed CPU-only
+suite is launched with:
+
+```bash
+bash scripts/run_qwen3b_clotho_retrieval_suite.sh \
+  /absolute/path/to/completed_embedding_directory
+```
+
+Its source config is
+`configs/eval/qwen3b_cl_clotho_retrieval_suite.json`. Before evaluating, the
+suite rechecks the generation config SHA256, checkpoint revision and SHA256,
+generator Git ancestry, generation status, every recorded artifact hash,
+metadata order/counts, array shapes and finiteness, and unit L2 norms. The
+prepare/finalize implementation is
+`scripts/prepare_embedding_evaluation_suite.py`.
+
+The public evaluator changes caption selection according to the requested
+task set. Because the paper does not identify which branch produced Tables 2
+and 3, the suite keeps four results separate:
+
+| Protocol | Task | Queries | Source | Public-code basis |
+|---|---|---:|---|---|
+| `t2a_public_code_default_joint_all_captions` | T2A | 5,225 | `[CODE]` | default joint task set includes A2T, so all captions are used |
+| `t2a_public_code_t2a_only_seed0` | T2A | 1,045 | `[CODE]` | T2A-only branch uses `random.Random(0).choice` once per clip |
+| `t2t_public_code_default_seed0` | T2T | 1,045 | `[CODE]` | default `t2t_queries_per_clip=1` with effective seed 0 |
+| `t2t_all_captions_sensitivity` | T2T | 5,225 | `[INFERRED]` | all-caption sensitivity analysis for the unpublished paper choice |
+
+The seed-0 indices are materialized once with clip/query IDs and reused by
+both one-caption protocols. No random choice occurs inside the canonical
+evaluator. These variants must not be selected after observing Recall; all
+four are reported with their protocol labels.
+
+Each sub-run retains the canonical complete rankings and wrapper audit bundle.
+Finalization independently rehashes every source, ranking, copied input,
+config, log, Git record, and exit code, then writes `retrieval_summary.csv`
+and `suite_metrics.json`. A changed or failed artifact stops finalization and
+is recorded under `failures/`; completed suite metrics are never overwritten.
+The four protocols require no GPU once embeddings exist and use less than
+approximately 0.6 GB of additional result storage.
