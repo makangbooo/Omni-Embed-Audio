@@ -159,6 +159,20 @@ or a separately labelled, auditable reconstruction is available.
 
 ## Resumable official-checkpoint embedding generation
 
+Before the full candidate/query bank is authorized, run the lock-bound fixture
+entrypoint on one A100-80GB:
+
+```bash
+bash scripts/run_qwen3b_cl_clotho_lock_bound_smoke.sh
+```
+
+This is a formal-path smoke, not a paper result. It resolves the committed
+Qwen3B-Cl model lock, verifies the same complete base/checkpoint inventory used
+by the full run, and invokes the same resumable generator and public-code prompt
+protocol on 5 bundled Clotho audio candidates and all 25 associated captions.
+The full wrapper remains a separate long operation and must not be started until
+the smoke report reaches `status=complete` with 5 candidate and 25 query rows.
+
 `scripts/generate_oea_embeddings.py` and
 `scripts/run_qwen3b_cl_clotho_embeddings.sh` implement the first formal
 OEA-Qwen3B (+Cl) embedding pass over the canonical Clotho evaluation manifest.

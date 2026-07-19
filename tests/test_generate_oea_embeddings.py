@@ -43,6 +43,38 @@ class GenerateOEAEmbeddingsTest(unittest.TestCase):
             config["audio_prompt_protocol"]["runtime"]["value"],
         )
 
+    def test_lock_bound_smoke_matches_formal_model_protocol(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        formal = load_config(
+            repository_root / "configs/eval/qwen3b_cl_clotho_embeddings.json"
+        )
+        smoke = load_config(
+            repository_root
+            / "configs/eval/qwen3b_cl_clotho_lock_bound_smoke_embeddings.json"
+        )
+        rows = load_manifest(
+            repository_root
+            / "configs/eval/fixtures/vanilla_clotho_5_manifest.jsonl",
+            expected_examples=5,
+            caption_count=5,
+        )
+
+        self.assertEqual(smoke["expected_examples"], 5)
+        self.assertEqual(len(rows), 5)
+        self.assertEqual(sum(len(row["captions"]) for row in rows), 25)
+        for field in (
+            "official_variant_id",
+            "model",
+            "base_model",
+            "checkpoint",
+            "model_config",
+            "audio_prompt_protocol",
+            "audio_batch_size",
+            "text_batch_size",
+        ):
+            with self.subTest(field=field):
+                self.assertEqual(smoke[field], formal[field])
+
     def create_manifest(self, root: Path) -> Path:
         rows = []
         for index in range(2):

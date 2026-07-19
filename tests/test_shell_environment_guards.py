@@ -41,6 +41,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "resume_environment.sh",
             "run_data02_clotho_validation.sh",
             "run_embedding_evaluation.sh",
+            "run_qwen3b_cl_clotho_lock_bound_smoke.sh",
             "run_qwen3b_cl_clotho_embeddings.sh",
             "download_data04_mecat_00a_test.sh",
             "run_data05_mecat_validation.sh",
@@ -162,6 +163,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
 
     def test_formal_embedding_wrappers_resolve_the_committed_model_lock(self) -> None:
         wrappers = (
+            "run_qwen3b_cl_clotho_lock_bound_smoke.sh",
             "run_qwen3b_cl_clotho_embeddings.sh",
             "run_qwen3b_cl_clotho_positive_uiq_embeddings.sh",
         )
@@ -179,6 +181,13 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             REPOSITORY_ROOT / "scripts/run_qwen3b_cl_clotho_embeddings.sh"
         ).read_text(encoding="utf-8")
         self.assertIn('--config "${RESOLVED_CONFIG}"', caption)
+        smoke = (
+            REPOSITORY_ROOT
+            / "scripts/run_qwen3b_cl_clotho_lock_bound_smoke.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("vanilla_clotho_5_manifest.jsonl", smoke)
+        self.assertIn("5 audio candidates and 25 caption queries", smoke)
+        self.assertIn('--config "${RESOLVED_CONFIG}"', smoke)
         uiq = (
             REPOSITORY_ROOT
             / "scripts/run_qwen3b_cl_clotho_positive_uiq_embeddings.sh"

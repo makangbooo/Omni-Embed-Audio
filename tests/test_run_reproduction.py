@@ -65,6 +65,7 @@ class RunReproductionTest(unittest.TestCase):
         self.assertEqual(len(stage_ids), len(set(stage_ids)))
         self.assertEqual(stage_ids[:4], ["data04", "data05", "data06", "data07"])
         self.assertEqual(stage_ids.count("official_eval_embeddings"), 1)
+        self.assertEqual(stage_ids.count("official_eval_smoke"), 1)
         self.assertIn("train_qwen3b", stage_ids)
         self.assertIn("vanilla_model_lock", stage_ids)
         self.assertIn("vanilla_smoke_embeddings", stage_ids)
@@ -88,12 +89,16 @@ class RunReproductionTest(unittest.TestCase):
         )
         self.assertEqual(
             [step["resource"] for step in payload["steps"]],
-            ["CPU", "1xA100-80GB", "CPU"],
+            ["CPU", "1xA100-80GB", "1xA100-80GB", "CPU"],
         )
         self.assertIn(
             "--verify-existing-derived", payload["steps"][0]["command"]
         )
-        self.assertIn("<embedding_dir>", payload["steps"][2]["command"])
+        self.assertIn(
+            "scripts/run_qwen3b_cl_clotho_lock_bound_smoke.sh",
+            payload["steps"][1]["command"],
+        )
+        self.assertIn("<embedding_dir>", payload["steps"][3]["command"])
 
     def test_render_command_requires_runtime_directory_only_on_execute(self) -> None:
         stage = self.registry["official_eval_metrics"]

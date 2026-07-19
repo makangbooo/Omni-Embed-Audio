@@ -202,7 +202,7 @@
     {
       "stage_id": "official_model_lock",
       "kind": "executable",
-      "status": "TODO",
+      "status": "COMPLETED",
       "resource": "CPU",
       "duration": "30-150 minutes",
       "long_operation": true,
@@ -215,6 +215,17 @@
       "description": "Audit one exact base/checkpoint pair, verify or extract inference weights, and create a portable model lock."
     },
     {
+      "stage_id": "official_eval_smoke",
+      "kind": "executable",
+      "status": "WAITING_USER",
+      "resource": "1xA100-80GB",
+      "duration": "5-20 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/run_qwen3b_cl_clotho_lock_bound_smoke.sh"],
+      "required_arguments": [],
+      "description": "Run the formal lock-bound generator on the fixed five-audio/25-caption fixture before any full Clotho embedding run."
+    },
+    {
       "stage_id": "official_eval_embeddings",
       "kind": "executable",
       "status": "BLOCKED",
@@ -223,7 +234,7 @@
       "long_operation": true,
       "command": ["bash", "scripts/run_qwen3b_cl_clotho_embeddings.sh"],
       "required_arguments": [],
-      "blocked_reason": "A reviewed Qwen3B-Cl model lock must be generated, committed, and pulled before GPU execution.",
+      "blocked_reason": "The committed Qwen3B-Cl model lock is ready; the lock-bound five-audio/25-caption GPU smoke must complete before this long run is authorized.",
       "description": "Generate the formal Qwen3B-Cl Clotho audio/caption embedding bank from a committed model lock."
     },
     {
@@ -283,6 +294,7 @@
       "long_operation": true,
       "children": [
         "official_model_lock",
+        "official_eval_smoke",
         "official_eval_embeddings",
         "official_eval_metrics"
       ],
@@ -296,7 +308,7 @@
       "resource": "1xA100-80GB -> CPU",
       "duration": "multi-step",
       "long_operation": true,
-      "children": ["official_eval_embeddings", "uiq_embeddings", "uiq_metrics"],
+      "children": ["official_eval_smoke", "official_eval_embeddings", "uiq_embeddings", "uiq_metrics"],
       "blocked_reason": "The committed model lock and both GPU embedding inputs required by the CPU UIQ suite are pending.",
       "description": "Cross-server positive-UIQ evaluation plan; negative UIQ remains separately blocked by missing HN audio IDs."
     },
