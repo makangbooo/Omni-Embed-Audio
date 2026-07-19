@@ -228,13 +228,13 @@
     {
       "stage_id": "official_qwen3b_smoke",
       "kind": "executable",
-      "status": "WAITING_USER",
+      "status": "COMPLETED",
       "resource": "1xBF16-GPU",
-      "duration": "5-20 minutes",
+      "duration": "1 minute 26 seconds observed",
       "long_operation": false,
       "command": ["bash", "scripts/run_qwen3b_clotho_lock_bound_smoke.sh"],
       "required_arguments": [],
-      "description": "Run the AudioCaps-trained OEA-Qwen3B checkpoint against the fixed five-audio/25-caption fixture using its committed model lock."
+      "description": "Completed on one RTX 4090: the AudioCaps-trained OEA-Qwen3B checkpoint produced 5x512 candidate and 25x512 query embeddings with no pending chunks, exit 0, and a 10,143,924,224-byte peak reserved allocation."
     },
     {
       "stage_id": "official_eval_embeddings",
