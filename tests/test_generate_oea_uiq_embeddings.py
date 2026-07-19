@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -18,6 +20,23 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
 class GenerateOEAUIQEmbeddingsTest(unittest.TestCase):
+    def test_direct_script_entrypoint_resolves_repository_packages(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(REPOSITORY_ROOT / "scripts/generate_oea_uiq_embeddings.py"),
+                    "--help",
+                ],
+                cwd=directory,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("--base-embedding-config", completed.stdout)
+
     def test_fixed_config_pins_all_released_positive_files(self) -> None:
         config = load_uiq_config(
             REPOSITORY_ROOT

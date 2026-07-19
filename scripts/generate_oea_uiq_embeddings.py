@@ -8,6 +8,7 @@ import json
 import os
 import random
 import subprocess
+import sys
 import time
 import traceback
 from datetime import datetime, timezone
@@ -15,6 +16,11 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 import numpy as np
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from AudioRetrieval.evaluation.uiq_schema import load_released_uiq
 from scripts.build_official_oea_eval_config import (
@@ -40,7 +46,6 @@ from scripts.generate_oea_embeddings import (
 )
 
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 RELEASED_QUERY_TYPES = ("question", "imperative", "paraphrase", "tagging")
 
 
