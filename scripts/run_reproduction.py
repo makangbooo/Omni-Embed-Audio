@@ -26,8 +26,11 @@ ALLOWED_KINDS = {"executable", "group", "blocked"}
 ALLOWED_RESOURCES = {
     "CPU",
     "1xA100-80GB",
+    "1xBF16-GPU",
     "CPU -> 1xA100-80GB -> CPU",
+    "CPU -> 1xBF16-GPU -> CPU",
     "1xA100-80GB -> CPU",
+    "1xBF16-GPU -> CPU",
     "GPU count not yet fixed",
     "CPU/GPU not yet fixed",
     "multiple CPU/GPU server handoffs",

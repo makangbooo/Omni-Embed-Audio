@@ -89,7 +89,7 @@ class RunReproductionTest(unittest.TestCase):
         )
         self.assertEqual(
             [step["resource"] for step in payload["steps"]],
-            ["CPU", "1xA100-80GB", "1xA100-80GB", "CPU"],
+            ["CPU", "1xBF16-GPU", "1xBF16-GPU", "CPU"],
         )
         self.assertIn(
             "--verify-existing-derived", payload["steps"][0]["command"]

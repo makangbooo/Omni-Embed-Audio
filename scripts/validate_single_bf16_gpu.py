@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed unless exactly one visible A100 GPU has at least 79 GiB."""
+"""Fail closed unless exactly one CUDA GPU is visible and supports BF16."""
 
 from __future__ import annotations
 
@@ -9,9 +9,6 @@ import os
 from pathlib import Path
 import sys
 from typing import Any, Sequence
-
-
-MINIMUM_TOTAL_MEMORY_BYTES = 79 * 1024**3
 
 
 def parse_args() -> argparse.Namespace:
@@ -33,21 +30,6 @@ def validate_observation(
         errors.append(f"expected exactly one visible GPU, found {len(devices)}")
     if not bf16_supported:
         errors.append("BF16 is not supported")
-    if len(devices) == 1:
-        device = devices[0]
-        name = device.get("name")
-        total_memory_bytes = device.get("total_memory_bytes")
-        if not isinstance(name, str) or "A100" not in name:
-            errors.append(f"expected an A100 GPU, found {name!r}")
-        if (
-            not isinstance(total_memory_bytes, int)
-            or isinstance(total_memory_bytes, bool)
-            or total_memory_bytes < MINIMUM_TOTAL_MEMORY_BYTES
-        ):
-            errors.append(
-                "expected at least 79 GiB GPU memory, "
-                f"found {total_memory_bytes!r} bytes"
-            )
     return errors
 
 
@@ -95,9 +77,12 @@ def main() -> int:
         "status": "complete" if not errors else "failed",
         "expected": {
             "visible_gpu_count": 1,
-            "name_contains": "A100",
-            "minimum_total_memory_bytes": MINIMUM_TOTAL_MEMORY_BYTES,
+            "cuda_available": True,
             "bf16_supported": True,
+            "note": (
+                "GPU model and memory are recorded, not restricted here. "
+                "Each model/variant still requires a measured smoke before a full run."
+            ),
         },
         "observed": {
             "CUDA_VISIBLE_DEVICES": os.environ.get("CUDA_VISIBLE_DEVICES"),

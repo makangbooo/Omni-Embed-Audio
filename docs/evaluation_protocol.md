@@ -160,7 +160,7 @@ or a separately labelled, auditable reconstruction is available.
 ## Resumable official-checkpoint embedding generation
 
 Before the full candidate/query bank is authorized, run the lock-bound fixture
-entrypoint on one A100-80GB:
+entrypoint on one BF16-capable GPU:
 
 ```bash
 bash scripts/run_qwen3b_cl_clotho_lock_bound_smoke.sh
@@ -171,7 +171,9 @@ Qwen3B-Cl model lock, verifies the same complete base/checkpoint inventory used
 by the full run, and invokes the same resumable generator and public-code prompt
 protocol on 5 bundled Clotho audio candidates and all 25 associated captions.
 All formal Qwen3B-Cl GPU wrappers fail closed unless PyTorch sees exactly one
-A100 with at least 79 GiB total memory and BF16 support; the observed inventory
+CUDA GPU with BF16 support. GPU model and total memory are recorded rather than
+restricted: the measured RTX 4090 smoke used 9.14 GiB allocated, while Table 5
+efficiency measurements remain A100-SXM4-80GB-specific. The observed inventory
 and any rejection reasons are saved as `gpu_preflight.json` in the attempt.
 The full wrapper remains a separate long operation and must not be started until
 the smoke report reaches `status=complete` with 5 candidate and 25 query rows.

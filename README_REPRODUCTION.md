@@ -105,7 +105,8 @@ bash scripts/run_reproduction.sh \
 |---|---|---|
 | DATA-04/05/06/07/08/09/10/11 | CPU | 下载固定小型资源、安全解压、manifest/泄漏/UIQ 校验 |
 | 单变体资源审计、checkpoint 复核、OEA/vanilla 模型锁 | CPU | 读取量较大，真实运行前仍需长任务报告；vanilla 锁不加载 LoRA 或 projection |
-| OEA Caption/UIQ 与 vanilla base-only embedding | 1×A100-80GB | 严格离线、单卡、可恢复；必须使用已提交模型锁；vanilla 保留 base hidden dimension，不加载 LoRA/projection |
+| OEA Qwen3B Caption/UIQ embedding | 1×BF16 GPU | RTX 4090 24GB 已实测峰值 allocated 9.14 GiB；严格离线、单卡、可恢复并绑定已提交模型锁；Table 5/16 绝对效率仍单独使用 A100-SXM4-80GB |
+| Vanilla base-only embedding | 1×A100-80GB（首轮保守配置） | 尚无真实模型锁与显存 smoke；不得根据 OEA-Qwen3B 的 4090 结果推断其资源需求 |
 | T2A/T2T/UIQ 指标 | CPU | 从固定 embedding 运行完整排名和指标 |
 | Qwen3B 训练 | BLOCKED | 缺 world size、seed、精确 AudioCaps manifest、完整 stage 配置和 Clotho early-stop split |
 | 基线 | BLOCKED | 7 个非 OEA 模型中 5 个具备完整静态代码入口、3 个具备固定资源身份、0 个可正式评测；三个 vanilla 仍缺真实锁与 GPU smoke |

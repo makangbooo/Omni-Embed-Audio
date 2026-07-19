@@ -134,7 +134,7 @@
 |---|---|---|
 | 磁盘（最低分阶段） | 约 1.5–2.0 TB | `[INFERRED]` 不长期保留全部压缩包/中间 checkpoint |
 | 磁盘（完整可审计） | 2.5 TB；建议 3 TB | WavCaps 819.51 GB 压缩源 + 解压/筛选 + 117.49 GB OEA/base + 数据/基线/checkpoints |
-| 官方权重评测 | 1×A100-80GB 优先；可评估 1×4090 | 论文 7B inference peak 18.3 GB，但当前 checkpoint 加载会产生额外峰值 |
+| 官方权重评测 | Qwen3B 已实测可用 1×RTX 4090 24GB；A100-80GB 用于论文效率硬件对齐 | Qwen3B-Cl 5/25 smoke 峰值 allocated 9.14 GiB；7B 尚无本项目真实 smoke，不能据论文 18.3 GB 直接承诺 4090 可运行 |
 | 第一个 3B 训练闭环 | 4–8×A100，80GB 优先 | `[INFERRED]` 公开 trainer 无 DDP，需先补齐；论文训练 GPU 数 `[MISSING]` |
 | 7B 全量训练 | 8×A100-80GB 优先 | `[INFERRED]` 避免小 micro-batch 和 checkpoint 峰值 |
 | smoke/单元测试 | 1×4090 或 1×A100 | 64–256 样本、单卡 |
