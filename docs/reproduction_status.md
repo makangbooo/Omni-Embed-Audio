@@ -35,10 +35,10 @@
 | 2 官方权重 | Qwen3B-Cl/Clotho T2A/T2T 四协议 CPU 评测套件 | COMPLETED | `97dab6a` | CPU 运行 `...retrieval_suite_seed42_20260719_185937`：suite 与四协议 exit 均为 0，525 MB；T2A 两口径、T2T `[CODE]` 与 `[INFERRED]` 敏感性均已分栏；小型摘要 SHA256 `37fb82db...a4a0`，结果 CSV SHA256 `b16a86e5...836` | 论文未公开 caption 选择与 T2T self/tie 口径，四协议不得择优冒充论文口径；严格论文观察继续标为 blocked | 已将 12 个 close 观察及 6 个 strict blocked 观察统一写入结果汇总 |
 | 2 指标 | Canonical T2A/T2T/UIQ embedding evaluator | COMPLETED | `43158ae` | 确定性 ID 检索、caption 多正例/排除 self、显式 query 子集、完整排名和严格输入校验已实现；相关 15 项测试通过 | 论文未公开 T2T caption 选择与 tie 口径；已在协议文档标为 `[MISSING]` | 接入 checkpoint embedding 生成器 |
 | 2 指标 | 可审计 embedding 实验输出 runner | COMPLETED | `5ed57a7` | CPU-only runner 已保存固定 embedding、metadata、完整排名、输入/工件 SHA256、seed、Git/环境/命令和失败证据；相关测试总计 27 项通过 | 无；正式运行要求干净 worktree 和显式协议来源 | 用 Qwen3B-Cl + Clotho evaluation 完成首个正式 T2A/T2T 闭环 |
-| 2 结果管理 | 论文值/复现观测/证据统一汇总契约 | COMPLETED | `97dab6a` | Tables 1–17 与 910 个论文指标仍保持 910/910 转录匹配；当前汇总含 18 个观察：12 个 Qwen3B-Cl/Clotho 分栏 close 与 6 个 strict blocked；本地证据、远程工件路径/哈希、delta 和状态计数均已生成 | 无；close 为显式人工审阅结论，未由生成器自动阈值判定 | 后续正式实验继续仅凭小型固定 JSON 证据追加观察 |
+| 2 结果管理 | 论文值/复现观测/证据统一汇总契约 | COMPLETED | `35e064f` | Tables 1–17 与 910 个论文指标仍保持 910/910 转录匹配；当前汇总含 30 个观察：24 个 Qwen3B-Cl/Clotho 分栏 close 与 6 个 strict blocked；本地证据、远程工件路径/哈希、delta 和状态计数均已生成 | 无；close 为显式人工审阅结论，未由生成器自动阈值判定 | 后续正式实验继续仅凭小型固定 JSON 证据追加观察 |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 保留为 canonical negative evaluator 的公式回归测试 |
 | 2 指标 | 显式 target/HN 的可审计 negative embedding evaluator | COMPLETED | `cd4d00b` | 严格 query/target/HN ID 覆盖、optimistic rank、确定性完整排序、per-query 证据、输入/输出 SHA256、失败保留和 CPU wrapper 已实现；完整 116 项测试通过 | 工具完成不等于表 17 已解锁；发布数据仍无 HN audio ID | 获得作者 pairing 后才运行正式表 17；否则仅运行单独标记的重建协议 |
-| 2 UIQ | Tables 12–15 正向 UIQ | WAITING_USER | `574609e` | RTX 4090 正式运行 `...positive_uiq_embeddings_seed42_20260719_205537` 完成：四类各 1,045、总计 4,180×512、pending=0、exit 0、43 MB；峰值 allocated 8.963 GiB/reserved 9.299 GiB；三个工件 SHA256 已固定。首次入口失败及修复后新运行均保留为独立审计证据 | GPU 阶段已完成；等待把共享 `/home/jg525` 切到 CPU 服务器。AudioCaps/MECAT 音频候选集仍未准备，MECAT 847/848 口径未决 | CPU 运行四协议 canonical-ID 套件，计算 Clotho Question/Imperative/Paraphrase/Keyphrase 的 Tables 12–15 指标 |
+| 2 UIQ | Tables 12–15 正向 UIQ | IN_PROGRESS | `35e064f` | Qwen3B-Cl/Clotho 首个完整闭环完成：RTX 4090 生成四类 4,180×512 embedding；CPU suite `...positive_uiq_suite_seed42_20260719_211752` 四协议与 wrapper 共五个 exit 均为 0、100 MB；12 个 R@k 与论文绝对差均不超过 0.575 个百分点，全部作为 `[CODE] close` 写入统一结果表；MRR/DCG 作为额外审计指标保留 | 当前变体/数据集无阻塞；完整 Tables 12–15 仍缺其余五个 OEA 变体、四个 CLAP、AudioCaps/MECAT，且 MECAT 847/848 口径未决 | 固化 12 个观察和 suite 哈希；随后在 CPU 侧重新审计已下载模型/数据，选择下一个无需训练的官方权重评测闭环 |
 | 2 Negative | Tables 4/17 否定查询 | BLOCKED | N/A | 未开始 | 发布文件无 HN audio ID | 请求作者 pairing 或审计式重建 |
 | 3 数据 | WavCaps duration + leakage blocklists | IN_PROGRESS | `3c5b1e9` | 本地两次全量 metadata pass 已完成；精确复现 173 个 AudioCaps 与 638 个 Clotho 文件名重叠 | 论文 `<=31s` 与公开元数据计数冲突；精确 filtered manifest、Clotho 消歧和论文 blocklist 未发布 | 远程执行 DATA-08/09 复算；训练前再准备音频 |
 | 3 数据 | DATA-08：固定 WavCaps metadata 下载 | TODO | `3c5b1e9` | 8 个固定文件、176,863,095 bytes、逐文件 SHA256/LFS ID 已提交并通过本地真实下载 | 当前按步骤先完成 DATA-04/05/06/07 | 后续在 CPU 服务器下载，不需要 GPU 或 819 GB 音频 |
@@ -61,8 +61,8 @@
 
 ## 当前焦点
 
-- 当前阶段：Qwen3B-Cl/Clotho 官方权重 T2A/T2T 已完成 GPU 全量生成与 CPU 四协议评测；正在固化结果并准备正向 UIQ。
+- 当前阶段：Qwen3B-Cl/Clotho 官方权重 T2A/T2T 与四类正向 UIQ 已完成首个完整闭环；正在固化 Tables 12–15 并选择下一个无需训练的官方权重评测。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：RTX 4090 在 commit `97dab6a` 完成 1,045 audio/5,225 caption 全量 embedding，随后 CPU 四协议 suite 全部 exit 0。T2A all-caption 与论文差值不超过 0.307 个百分点，T2T all-caption sensitivity 不超过 0.157 个百分点；所有协议均按预声明来源分栏，严格论文口径仍保留 `[MISSING]`。
-- 当前阻塞：Clotho 正向 UIQ GPU embedding 已完成，等待把共享目录切换到 CPU 服务器运行指标套件。完整三数据集表仍缺 AudioCaps/MECAT 音频和若干论文未公开口径。训练阶段按用户要求暂停。
-- 下一步：push UIQ 成功审计和 CPU 套件入口修复；CPU 侧计算 Tables 12–15 并把小型指标证据纳入统一结果表。
+- 当前阻塞：Qwen3B-Cl/Clotho 当前闭环无阻塞；完整三数据集/多模型表仍缺 AudioCaps/MECAT 音频、部分模型资源和若干论文未公开口径。训练阶段按用户要求暂停。
+- 下一步：push Tables 12–15 的 12 个 close 观察、suite 审计和 30 行统一结果汇总；随后在 CPU 侧重新审计模型/数据资源完成度，选择下一个官方权重评测。

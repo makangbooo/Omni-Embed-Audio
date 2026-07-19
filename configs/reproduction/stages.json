@@ -268,7 +268,7 @@
     {
       "stage_id": "uiq_metrics",
       "kind": "executable",
-      "status": "WAITING_USER",
+      "status": "COMPLETED",
       "resource": "CPU",
       "duration": "5-20 minutes",
       "long_operation": false,
@@ -279,7 +279,7 @@
         "{uiq_embedding_dir}"
       ],
       "required_arguments": ["caption_embedding_dir", "uiq_embedding_dir"],
-      "description": "Both required embedding directories are complete; waiting for the shared filesystem to be mounted on a CPU server before evaluating Tables 12-15."
+      "description": "Completed the four predeclared canonical-ID protocols for Qwen3B-Cl/Clotho Tables 12-15."
     },
     {
       "stage_id": "official_eval",
@@ -299,12 +299,12 @@
     {
       "stage_id": "uiq_eval",
       "kind": "group",
-      "status": "WAITING_USER",
+      "status": "COMPLETED",
       "resource": "1xBF16-GPU -> CPU",
       "duration": "multi-step",
       "long_operation": true,
       "children": ["official_eval_smoke", "official_eval_embeddings", "uiq_embeddings", "uiq_metrics"],
-      "description": "Positive-UIQ embeddings are complete; waiting for the CPU metrics handoff. Negative UIQ remains separately blocked by missing HN audio IDs."
+      "description": "Completed the cross-server Qwen3B-Cl/Clotho positive-UIQ evaluation. Negative UIQ remains separately blocked by missing HN audio IDs."
     },
     {
       "stage_id": "train_qwen3b",
