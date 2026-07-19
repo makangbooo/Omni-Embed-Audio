@@ -66,6 +66,7 @@ class RunReproductionTest(unittest.TestCase):
         self.assertEqual(stage_ids[:4], ["data04", "data05", "data06", "data07"])
         self.assertEqual(stage_ids.count("official_eval_embeddings"), 1)
         self.assertEqual(stage_ids.count("official_eval_smoke"), 1)
+        self.assertIn("official_qwen3b_embeddings", self.registry)
         self.assertIn("train_qwen3b", stage_ids)
         self.assertIn("vanilla_model_lock", stage_ids)
         self.assertIn("vanilla_smoke_embeddings", stage_ids)
@@ -115,6 +116,27 @@ class RunReproductionTest(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "requires --embedding-dir"):
             render_command(stage, values, allow_missing=False)
+
+    def test_qwen3b_full_requires_explicit_smoke_metrics_on_execute(self) -> None:
+        stage = self.registry["official_qwen3b_embeddings"]
+        values = {
+            "variant": "oea_qwen3b",
+            "backbone": "vanilla_nemotron_3b",
+            "embedding_dir": None,
+            "caption_embedding_dir": None,
+            "uiq_embedding_dir": None,
+            "smoke_metrics": None,
+        }
+        self.assertIn(
+            "<smoke_metrics>", render_command(stage, values, allow_missing=True)
+        )
+        with self.assertRaisesRegex(ValueError, "smoke-metrics"):
+            render_command(stage, values, allow_missing=False)
+        values["smoke_metrics"] = "/tmp/smoke/generation_metrics.json"
+        self.assertIn(
+            "/tmp/smoke/generation_metrics.json",
+            render_command(stage, values, allow_missing=False),
+        )
 
     def test_vanilla_plan_preserves_cpu_gpu_gpu_cpu_handoff(self) -> None:
         payload = plan_payload(

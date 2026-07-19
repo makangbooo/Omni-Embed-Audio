@@ -237,6 +237,21 @@
       "description": "Completed on one RTX 4090: the AudioCaps-trained OEA-Qwen3B checkpoint produced 5x512 candidate and 25x512 query embeddings with no pending chunks, exit 0, and a 10,143,924,224-byte peak reserved allocation."
     },
     {
+      "stage_id": "official_qwen3b_embeddings",
+      "kind": "executable",
+      "status": "WAITING_USER",
+      "resource": "1xBF16-GPU",
+      "duration": "15-30 minutes estimated from measured smoke and completed Qwen3B-Cl run",
+      "long_operation": true,
+      "command": [
+        "bash",
+        "scripts/run_qwen3b_clotho_embeddings.sh",
+        "{smoke_metrics}"
+      ],
+      "required_arguments": ["smoke_metrics"],
+      "description": "Generate 1,045 candidate and 5,225 caption embeddings for the AudioCaps-trained OEA-Qwen3B checkpoint only after the explicit immutable smoke gate passes."
+    },
+    {
       "stage_id": "official_eval_embeddings",
       "kind": "executable",
       "status": "COMPLETED",

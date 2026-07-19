@@ -57,6 +57,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_qwen3b_cl_clotho_positive_uiq_embeddings.sh",
             "run_qwen3b_clotho_positive_uiq_suite.sh",
             "run_official_checkpoint_preparation.sh",
+            "run_qwen3b_clotho_embeddings.sh",
             "run_reproduction.sh",
         )
         for filename in wrappers:
@@ -209,6 +210,20 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn("5 audio candidates and 25 caption queries", qwen3b_smoke)
         self.assertIn('--config "${RESOLVED_CONFIG}"', qwen3b_smoke)
         self.assertNotIn("rm -rf", qwen3b_smoke)
+
+        qwen3b_full = (
+            REPOSITORY_ROOT / "scripts/run_qwen3b_clotho_embeddings.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("results/model_locks/oea_qwen3b.json", qwen3b_full)
+        self.assertIn("configs/eval/qwen3b_clotho_embeddings.json", qwen3b_full)
+        self.assertIn("SMOKE_METRICS", qwen3b_full)
+        self.assertIn("verify_oea_smoke_gate.py", qwen3b_full)
+        self.assertIn("smoke_gate.json", qwen3b_full)
+        self.assertIn("build_official_oea_eval_config.py", qwen3b_full)
+        self.assertIn("validate_single_bf16_gpu.py", qwen3b_full)
+        self.assertIn("gpu_preflight.json", qwen3b_full)
+        self.assertIn("1,045 audio candidates and 5,225 caption queries", qwen3b_full)
+        self.assertNotIn("rm -rf", qwen3b_full)
 
     def test_unified_reproduction_entry_is_plan_first_and_non_destructive(self) -> None:
         wrapper = (REPOSITORY_ROOT / "scripts/run_reproduction.sh").read_text(

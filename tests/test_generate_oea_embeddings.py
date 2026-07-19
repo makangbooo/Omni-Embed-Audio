@@ -104,6 +104,33 @@ class GenerateOEAEmbeddingsTest(unittest.TestCase):
         self.assertEqual(smoke["audio_batch_size"], 1)
         self.assertEqual(smoke["text_batch_size"], 1)
 
+    def test_qwen3b_ac_smoke_matches_full_clotho_model_protocol(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        smoke = load_config(
+            repository_root
+            / "configs/eval/qwen3b_clotho_lock_bound_smoke_embeddings.json"
+        )
+        full = load_config(
+            repository_root / "configs/eval/qwen3b_clotho_embeddings.json"
+        )
+
+        self.assertEqual(smoke["expected_examples"], 5)
+        self.assertEqual(full["expected_examples"], 1045)
+        for field in (
+            "official_variant_id",
+            "model",
+            "base_model",
+            "checkpoint",
+            "model_config",
+            "audio_prompt_protocol",
+            "seed",
+            "caption_count_per_audio",
+            "audio_batch_size",
+            "text_batch_size",
+        ):
+            with self.subTest(field=field):
+                self.assertEqual(smoke[field], full[field])
+
     def create_manifest(self, root: Path) -> Path:
         rows = []
         for index in range(2):
