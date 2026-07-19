@@ -187,6 +187,39 @@ class BuildOfficialOEAEvalConfigTest(unittest.TestCase):
                 write_json_once_or_verify(path, {"value": 2})
             self.assertEqual(json.loads(path.read_text(encoding="utf-8")), {"value": 1})
 
+    def test_committed_qwen3b_smoke_resolves_against_committed_lock(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        protocol_path = (
+            root / "configs/eval/qwen3b_clotho_lock_bound_smoke_embeddings.json"
+        )
+        lock_path = root / "results/model_locks/oea_qwen3b.json"
+        protocol = json.loads(protocol_path.read_text(encoding="utf-8"))
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        resolved = build_resolved_config(
+            protocol,
+            lock,
+            protocol_identity=portable_file_identity(
+                protocol_path, repository_root=root
+            ),
+            model_lock_identity=portable_file_identity(
+                lock_path, repository_root=root
+            ),
+            git_commit="a" * 40,
+        )
+        binding = verify_official_model_lock_binding(
+            resolved, repository_root=root
+        )
+
+        self.assertEqual(binding["variant_id"], "oea_qwen3b")
+        self.assertEqual(
+            binding["model_lock"]["repository_path"],
+            "results/model_locks/oea_qwen3b.json",
+        )
+        self.assertEqual(
+            resolved["checkpoint"]["sha256"],
+            "b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

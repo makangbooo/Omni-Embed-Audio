@@ -196,6 +196,20 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn('--base-embedding-config "${RESOLVED_BASE_CONFIG}"', uiq)
 
+        qwen3b_smoke = (
+            REPOSITORY_ROOT
+            / "scripts/run_qwen3b_clotho_lock_bound_smoke.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("results/model_locks/oea_qwen3b.json", qwen3b_smoke)
+        self.assertIn("build_official_oea_eval_config.py", qwen3b_smoke)
+        self.assertIn("config_resolution.json", qwen3b_smoke)
+        self.assertIn("validate_single_bf16_gpu.py", qwen3b_smoke)
+        self.assertIn("gpu_preflight.json", qwen3b_smoke)
+        self.assertIn("vanilla_clotho_5_manifest.jsonl", qwen3b_smoke)
+        self.assertIn("5 audio candidates and 25 caption queries", qwen3b_smoke)
+        self.assertIn('--config "${RESOLVED_CONFIG}"', qwen3b_smoke)
+        self.assertNotIn("rm -rf", qwen3b_smoke)
+
     def test_unified_reproduction_entry_is_plan_first_and_non_destructive(self) -> None:
         wrapper = (REPOSITORY_ROOT / "scripts/run_reproduction.sh").read_text(
             encoding="utf-8"

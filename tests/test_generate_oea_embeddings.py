@@ -75,6 +75,35 @@ class GenerateOEAEmbeddingsTest(unittest.TestCase):
             with self.subTest(field=field):
                 self.assertEqual(smoke[field], formal[field])
 
+    def test_qwen3b_ac_lock_bound_smoke_pins_committed_variant(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        smoke = load_config(
+            repository_root
+            / "configs/eval/qwen3b_clotho_lock_bound_smoke_embeddings.json"
+        )
+        rows = load_manifest(
+            repository_root
+            / "configs/eval/fixtures/vanilla_clotho_5_manifest.jsonl",
+            expected_examples=5,
+            caption_count=5,
+        )
+
+        self.assertEqual(smoke["official_variant_id"], "oea_qwen3b")
+        self.assertEqual(smoke["model"], "OEA-Qwen3B")
+        self.assertEqual(smoke["expected_examples"], 5)
+        self.assertEqual(len(rows), 5)
+        self.assertEqual(sum(len(row["captions"]) for row in rows), 25)
+        self.assertEqual(
+            smoke["checkpoint"]["revision"],
+            "f6c4b3b86385fd7ecbe3bacf45548a2259af8db4",
+        )
+        self.assertEqual(
+            smoke["checkpoint"]["sha256"],
+            "b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101",
+        )
+        self.assertEqual(smoke["audio_batch_size"], 1)
+        self.assertEqual(smoke["text_batch_size"], 1)
+
     def create_manifest(self, root: Path) -> Path:
         rows = []
         for index in range(2):

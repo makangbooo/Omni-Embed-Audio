@@ -226,6 +226,17 @@
       "description": "Run the formal lock-bound generator on the fixed five-audio/25-caption fixture before any full Clotho embedding run."
     },
     {
+      "stage_id": "official_qwen3b_smoke",
+      "kind": "executable",
+      "status": "WAITING_USER",
+      "resource": "1xBF16-GPU",
+      "duration": "5-20 minutes",
+      "long_operation": false,
+      "command": ["bash", "scripts/run_qwen3b_clotho_lock_bound_smoke.sh"],
+      "required_arguments": [],
+      "description": "Run the AudioCaps-trained OEA-Qwen3B checkpoint against the fixed five-audio/25-caption fixture using its committed model lock."
+    },
+    {
       "stage_id": "official_eval_embeddings",
       "kind": "executable",
       "status": "COMPLETED",
