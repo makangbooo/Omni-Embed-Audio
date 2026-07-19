@@ -239,9 +239,9 @@
     {
       "stage_id": "official_qwen3b_embeddings",
       "kind": "executable",
-      "status": "WAITING_USER",
+      "status": "COMPLETED",
       "resource": "1xBF16-GPU",
-      "duration": "15-30 minutes estimated from measured smoke and completed Qwen3B-Cl run",
+      "duration": "10 minutes 46 seconds observed for successful core generation",
       "long_operation": true,
       "command": [
         "bash",
@@ -249,7 +249,7 @@
         "{smoke_metrics}"
       ],
       "required_arguments": ["smoke_metrics"],
-      "description": "Generate 1,045 candidate and 5,225 caption embeddings for the AudioCaps-trained OEA-Qwen3B checkpoint only after the explicit immutable smoke gate passes."
+      "description": "Completed on one RTX 4090 after the immutable smoke gate passed: 1,045 candidate and 5,225 caption embeddings, no pending chunks, exit 0, and a 10,861,150,208-byte peak reserved allocation."
     },
     {
       "stage_id": "official_eval_embeddings",
