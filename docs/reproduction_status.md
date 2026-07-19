@@ -19,14 +19,14 @@
 | 1 环境 | GPU-02：CUDA/BF16/NCCL 验证 | COMPLETED | `711ef28` | 1×A100-SXM4-80GB 验证通过；原始日志保存在共享目录 | 无；`flash-attn` 为非必需可选项 | 下载首批固定 revision 模型资源 |
 | 1 环境 | CPU-03：安装 DATA-02 的 7-Zip 工具 | COMPLETED | `a54cf5e` | `7zip=26.02` 已在共享 `oea-repro` 可用；install/wrapper exit 均为 0 | 无；Conda 报告目标包已安装，未发生依赖 transaction | 启动并行资源下载 |
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
-| 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | IN_PROGRESS | `ae2c3fb` | 最近检查的主容器未发现活动下载进程；已有 partial/完成状态需重新核对 | 进程可能曾在另一实例运行，不能仅凭当前容器 `pgrep` 判定完成 | 后续单独运行只读完整性检查，再决定是否断点续传 |
+| 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | COMPLETED | `18e4c3b` | 固定 revision 的 3 个文件、9,466,844,378 bytes 全部通过逐文件内容审计；`step_350.pt` 提取为 59,069,203-byte inference-only 权重，SHA256 `b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101` | 无；原始 checkpoint 与派生权重均未提交到 Git | GPU 服务器拉取已提交的 5,262-byte 模型锁后运行独立锁绑定 smoke |
 | 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | IN_PROGRESS | `48c9b3c` | 已知 base/AC 完整，Cl 曾保留 partial；最近检查的主容器无活动下载进程 | CAS 链路不稳定；最终 Cl 文件尚无完成证据 | 后续单独核对 manifest、partial 与 LFS SHA256，再断点续传 |
 | 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | IN_PROGRESS | `48c9b3c` | 已知 base 完整、AC 曾保留 partial、Cl 未有开始证据；最近检查的主容器无活动下载进程 | CAS 链路不稳定；跨实例状态未确认 | 后续单独核对全部目录与 manifest，再断点续传 |
 | 2 官方权重 | MODEL-03/04 只读完整性审计器 | COMPLETED | `f4309a7` | 远程尚未运行；本地实现及 105 项完整测试通过 | 无；工具完成不代表六个 asset 已完成 | DATA-04 保持为唯一用户步骤；随后在 CPU 侧运行审计并按 asset 决定续传 |
 | 2 官方权重 | 六变体按变体资源审计入口 | COMPLETED | `d2f066c` | 注册表驱动地只选择一个 base 与一个 checkpoint；Qwen3B AC 跨 MODEL-01/02 manifest 已覆盖；报告固定 scope/registry/逐文件 Git-LFS 身份，完整 172 项测试通过 | 尚未在远程对六个变体逐一运行；工具完成不代表资源完整 | DATA-04 后按已知下载状态选择变体，在 CPU 侧运行只读审计；超过 30 分钟的读取任务执行前单独汇报 |
 | 2 官方权重 | 六变体原始 checkpoint 固定、结构审计与推理权重提取器 | COMPLETED | `ee28245` | 六个不可变 revision 的真实文件名/字节数/LFS SHA256 已固定；FakeTensor LoRA 子集统计、逐 checkpoint 非覆盖提取、逐张量等值复核和失败工件已实现；完整 160 项测试通过 | 除已验证的 Qwen3B-Cl 外，其余五个派生权重尚未在远程生成；工具完成不代表原始下载已完整 | 保持 DATA-04 为唯一用户步骤；之后对已完成的原始 checkpoint 先做 CPU 结构审计，再凭派生 SHA256 生成模型专属评测配置 |
-| 2 官方权重 | 六变体可移植模型资源锁生成器 | COMPLETED | `af8de47` | 已实现基础模型全文件 Git/LFS 身份、官方原始 checkpoint、派生 checkpoint SHA256、实测 LoRA 结构与两份证据报告的统一锁定；无关 asset 未完成不会弱化所选资源；完整 165 项测试通过 | 除 Qwen3B-Cl 外尚无其余派生权重与正式模型锁；生成器完成不代表下载或提取已完成 | 各原始 checkpoint 完整后在 CPU 侧完成审计/提取并生成小型锁 JSON，再据锁建立评测配置 |
-| 2 官方权重 | 官方模型 CPU 三阶段流水线与已有派生权重只读复核 | COMPLETED | `ea638f9` | Qwen3B-Cl 修复后真实远程运行 `logs/official_model_pipeline_oea_qwen3b_cl_20260719_163246` 三阶段 exit 均为 0；5,292-byte 模型锁已按远程原始字节提交，SHA256 `790d12ccc8f25ea29eecb37519db5c24262253f85dcb9055b473a45304589e36` | 无；首次失败证据 `..._145123` 仍保留，修复和锁提交均未修改任何权重或评测参数 | GPU 服务器拉取 `repro/oea-full` 后由锁绑定 smoke 再次验证正式生成路径 |
+| 2 官方权重 | 六变体可移植模型资源锁生成器 | COMPLETED | `18e4c3b` | Qwen3B-Cl 与 Qwen3B 两个变体均已完成真实远程审计、派生权重提取和正式模型锁；基础模型全文件、原始/派生 checkpoint SHA256 及实测 LoRA 结构均已锁定 | Nemo3B AC/Cl 与 Qwen7B AC/Cl 四个变体仍需完成资源审计和模型锁 | 先完成 Qwen3B 锁绑定 GPU smoke，再按已下载资源状态选择其余变体 |
+| 2 官方权重 | 官方模型 CPU 三阶段流水线与已有派生权重只读复核 | COMPLETED | `18e4c3b` | Qwen3B-Cl 的 5,292-byte 锁 SHA256 为 `790d12cc...e36`；Qwen3B 运行 `logs/official_model_pipeline_oea_qwen3b_20260719_215427`，资源审计、checkpoint 准备、模型锁三阶段 exit 均为 0，5,262-byte 锁 SHA256 `b6c819311206f583e861991c0678b0b3b61cc2fd346c98c1c30f67c62d0127fa` | 无；两套派生权重均只保留在远程模型缓存 | GPU 服务器拉取 Qwen3B 模型锁后在 RTX 4090 上运行同锁小批 embedding smoke |
 | 2 官方权重 | 正式评测协议与可移植模型锁强绑定 | COMPLETED | `97dab6a` | Caption/UIQ GPU 生成器、CPU 套件及 5/25 smoke 均强制解析已提交模型锁；三个正式 Qwen3B wrapper 使用不可绕过的单 CUDA GPU + BF16 能力门禁并记录型号/显存到 `gpu_preflight.json`；4090 与 A100 均被单元覆盖，完整 233 项测试通过 | 无；Qwen3B 正确性评测不再把 A100 误写成必要条件 | 保持锁和协议哈希不变，后续变体先做独立 smoke |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
 | 2 官方权重 | Qwen3B-Cl 正式生成器锁绑定 5/25 GPU smoke | COMPLETED | `97dab6a` | RTX 4090 运行 `...lock_bound_smoke_seed42_20260719_174309`：能力门禁 complete、5×512/25×512、allocated 9.14 GiB、reserved 9.45 GiB、exit 0；模型锁 SHA256 为 `790d12cc...e36` | 无；旧外层 A100 断言与继续执行的矛盾证据仍保留 | 已据此授权并完成同锁全量生成 |
@@ -61,8 +61,8 @@
 
 ## 当前焦点
 
-- 当前阶段：Qwen3B-Cl/Clotho 官方权重 T2A/T2T 与四类正向 UIQ 已完成首个完整闭环；正在固化 Tables 12–15 并选择下一个无需训练的官方权重评测。
+- 当前阶段：Qwen3B-Cl/Clotho 官方权重 T2A/T2T 与四类正向 UIQ 已完成首个完整闭环；Qwen3B AudioCaps checkpoint 的 CPU 审计、推理权重提取和模型锁已完成，正在准备独立 GPU smoke。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：RTX 4090 在 commit `97dab6a` 完成 1,045 audio/5,225 caption 全量 embedding，随后 CPU 四协议 suite 全部 exit 0。T2A all-caption 与论文差值不超过 0.307 个百分点，T2T all-caption sensitivity 不超过 0.157 个百分点；所有协议均按预声明来源分栏，严格论文口径仍保留 `[MISSING]`。
+- 最近完成：CPU 三阶段流水线 `official_model_pipeline_oea_qwen3b_20260719_215427` 全部 exit 0；Qwen3B 原始 checkpoint SHA256 `afb22d02...4b44`，派生 inference-only 权重 SHA256 `b1d0f559...5f101`，正式模型锁 SHA256 `b6c81931...127fa`。
 - 当前阻塞：Qwen3B-Cl/Clotho 当前闭环无阻塞；完整三数据集/多模型表仍缺 AudioCaps/MECAT 音频、部分模型资源和若干论文未公开口径。训练阶段按用户要求暂停。
-- 下一步：push Tables 12–15 的 12 个 close 观察、suite 审计和 30 行统一结果汇总；随后在 CPU 侧重新审计模型/数据资源完成度，选择下一个官方权重评测。
+- 下一步：远程 GPU 服务器拉取包含 Qwen3B 模型锁的最新 commit，先运行 5-audio/25-query 锁绑定 smoke，通过后再决定同变体 Clotho 全量 embedding 评测。
