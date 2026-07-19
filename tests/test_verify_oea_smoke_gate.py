@@ -3,6 +3,8 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -34,6 +36,22 @@ def file_identity(path: Path) -> dict[str, object]:
 
 
 class VerifyOEASmokeGateTest(unittest.TestCase):
+    def test_direct_script_entrypoint_bootstraps_repository_imports(self) -> None:
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(REPOSITORY_ROOT / "scripts/verify_oea_smoke_gate.py"),
+                "--help",
+            ],
+            cwd=REPOSITORY_ROOT,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("--full-protocol-config", completed.stdout)
+
     def create_fixture(self, root: Path) -> tuple[Path, dict[str, object]]:
         run_dir = root / "oea_qwen3b_ac_clotho_lock_bound_smoke_seed42_fixture"
         run_dir.mkdir()

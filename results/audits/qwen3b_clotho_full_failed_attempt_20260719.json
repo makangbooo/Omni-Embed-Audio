@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "evidence_type": "remote_run_compact_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "Transcribed from the complete failure summary emitted by the committed GPU wrapper. The immutable failed attempt remains in the recorded remote run directory."
+  },
+  "experiment": "OEA-Qwen3B AudioCaps checkpoint full Clotho embedding generation",
+  "run_id": "oea_qwen3b_ac_clotho_embeddings_seed42_20260719_231724",
+  "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_ac_clotho_embeddings_seed42_20260719_231724",
+  "attempt_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_ac_clotho_embeddings_seed42_20260719_231724/attempts/attempt_20260719_231724",
+  "git_commit": "9ff1854da8b3eea49092c43a0ff20ed5341deb2e",
+  "started_at": "2026-07-19T23:17:24+08:00",
+  "finished_at": "2026-07-19T23:18:08+08:00",
+  "exit_code": 1,
+  "gpu_preflight": {
+    "status": "complete",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_uuid": "GPU-0a94912f-3318-25ac-749d-075d01c78e6e",
+    "gpu_total_memory_bytes": 25250627584,
+    "torch": "2.7.1+cu126",
+    "compiled_cuda": "12.6",
+    "bf16_supported": true
+  },
+  "smoke_metrics": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_ac_clotho_lock_bound_smoke_seed42_20260719_224120/generation_metrics.json",
+  "failure": {
+    "stage": "smoke-gate Python entrypoint import, before smoke evidence verification and before model loading",
+    "error_type": "ModuleNotFoundError",
+    "error": "No module named 'scripts'",
+    "generation_metrics_created": false,
+    "embedding_chunks_created": false,
+    "model_loaded": false,
+    "run_directory_size": "44K"
+  },
+  "root_cause": {
+    "source": "CODE",
+    "analysis": "Executing python scripts/verify_oea_smoke_gate.py sets sys.path[0] to the scripts directory. The gate imported scripts.build_official_oea_eval_config without first inserting the repository root, while module-import unit tests implicitly supplied the repository root and did not cover the deployed entrypoint."
+  },
+  "remediation": {
+    "type": "minimal bootstrap patch",
+    "changes": [
+      "Insert the resolved repository root into sys.path before importing the scripts package.",
+      "Add a subprocess regression test that executes the exact direct script entrypoint with --help."
+    ],
+    "result_impact": "None. The failure occurred before model loading, embedding generation, metric computation, or any modification of candidate/query sets."
+  }
+}

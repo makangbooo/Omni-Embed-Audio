@@ -8,9 +8,14 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any, Mapping
 
 import numpy as np
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from scripts.build_official_oea_eval_config import (
     compare_protocol_to_lock,
@@ -18,8 +23,6 @@ from scripts.build_official_oea_eval_config import (
     verify_official_model_lock_binding,
 )
 
-
-REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_CANDIDATES = 5
 EXPECTED_QUERIES = 25
 CRITICAL_INFERENCE_PATHS = (
