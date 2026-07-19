@@ -133,23 +133,26 @@ def main() -> int:
     atomic_write_json(report_path, report)
 
     try:
+        resource_audit_command = [
+            sys.executable,
+            str(
+                REPOSITORY_ROOT
+                / "scripts/audit_official_oea_variant_resources.py"
+            ),
+            "--registry",
+            str(registry),
+            "--variant",
+            args.variant,
+            "--model-root",
+            str(model_root),
+            "--output",
+            str(resource_audit),
+        ]
+        if args.verify_existing_derived:
+            resource_audit_command.append("--allow-registered-derived")
         run_stage(
             name="resource_audit",
-            command=[
-                sys.executable,
-                str(
-                    REPOSITORY_ROOT
-                    / "scripts/audit_official_oea_variant_resources.py"
-                ),
-                "--registry",
-                str(registry),
-                "--variant",
-                args.variant,
-                "--model-root",
-                str(model_root),
-                "--output",
-                str(resource_audit),
-            ],
+            command=resource_audit_command,
             report=report,
             report_path=report_path,
         )

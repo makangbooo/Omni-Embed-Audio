@@ -5,6 +5,7 @@ import unittest
 
 from scripts.audit_official_oea_variant_resources import (
     REPOSITORY_ROOT,
+    registered_derived_allowance,
     resolve_variant_audit_plan,
 )
 from scripts.prepare_official_oea_checkpoint import EXPECTED_VARIANT_IDS
@@ -56,6 +57,13 @@ class AuditOfficialOEAVariantResourcesTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unknown variant"):
             resolve_variant_audit_plan("oea_unknown")
 
+    def test_registered_derived_allowance_is_exactly_variant_scoped(self) -> None:
+        plan = resolve_variant_audit_plan("oea_qwen3b_cl")
+        self.assertEqual(
+            registered_derived_allowance(plan),
+            {"oea_qwen3b_cl": ("step_40_inference_only.pt",)},
+        )
+
     def test_cpu_wrapper_is_read_only_clean_and_registry_driven(self) -> None:
         wrapper = (
             REPOSITORY_ROOT
@@ -70,6 +78,7 @@ class AuditOfficialOEAVariantResourcesTest(unittest.TestCase):
         self.assertIn("audit_official_oea_variant_resources.py", wrapper)
         self.assertIn("load_checkpoint_registry", implementation)
         self.assertIn("audit_resources", implementation)
+        self.assertIn("--allow-registered-derived", implementation)
         for forbidden in ("snapshot_download", "rm -rf", "Remove-Item"):
             self.assertNotIn(forbidden, wrapper)
             self.assertNotIn(forbidden, implementation)

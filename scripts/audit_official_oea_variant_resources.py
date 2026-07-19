@@ -26,6 +26,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--allow-registered-derived",
+        action="store_true",
+        help=(
+            "Allow only the selected variant's registry-declared derived checkpoint "
+            "beside the immutable source snapshot. The checkpoint preparation stage "
+            "must independently verify its tensors."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -72,6 +81,11 @@ def resolve_variant_audit_plan(
     }
 
 
+def registered_derived_allowance(plan: dict[str, Any]) -> dict[str, tuple[str, ...]]:
+    checkpoint = plan["variant"]["checkpoint_asset"]
+    return {checkpoint["name"]: (checkpoint["derived_file"],)}
+
+
 def main() -> int:
     args = parse_args()
     plan = resolve_variant_audit_plan(args.variant, args.registry)
@@ -86,6 +100,11 @@ def main() -> int:
         output=args.output,
         asset_names=tuple(plan["asset_names"]),
         scope=plan,
+        allowed_extra_files_by_asset=(
+            registered_derived_allowance(plan)
+            if args.allow_registered_derived
+            else None
+        ),
     )
 
 

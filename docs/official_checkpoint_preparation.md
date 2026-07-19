@@ -184,6 +184,11 @@ prevents every later stage and remains in `pipeline_manifest.json`. All large
 intermediate reports stay in the ignored timestamped `logs/` directory. The
 only repository-visible output is
 `results/model_locks/<variant_id>.json`; an existing lock is never overwritten.
+When `--verify-existing-derived` is selected, the resource audit permits only
+the one derived filename declared for that variant in the checkpoint registry
+and records it separately as an allowed local file. Every other extra file
+still fails the immutable-snapshot gate, and the following checkpoint stage
+independently reconstructs and compares the allowed artifact tensor by tensor.
 
 This is a CPU task with `CUDA_VISIBLE_DEVICES` empty and no model download. It
 does use Hugging Face metadata access and reads every selected base-model file

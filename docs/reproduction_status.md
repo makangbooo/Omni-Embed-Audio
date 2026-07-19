@@ -1,6 +1,6 @@
 # Omni-Embed-Audio 复现状态
 
-最后更新：2026-07-18（Asia/Shanghai）
+最后更新：2026-07-19（Asia/Shanghai）
 
 状态值仅使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、`COMPLETED`、`FAILED`、`BLOCKED`。
 
@@ -26,7 +26,7 @@
 | 2 官方权重 | 六变体按变体资源审计入口 | COMPLETED | `d2f066c` | 注册表驱动地只选择一个 base 与一个 checkpoint；Qwen3B AC 跨 MODEL-01/02 manifest 已覆盖；报告固定 scope/registry/逐文件 Git-LFS 身份，完整 172 项测试通过 | 尚未在远程对六个变体逐一运行；工具完成不代表资源完整 | DATA-04 后按已知下载状态选择变体，在 CPU 侧运行只读审计；超过 30 分钟的读取任务执行前单独汇报 |
 | 2 官方权重 | 六变体原始 checkpoint 固定、结构审计与推理权重提取器 | COMPLETED | `ee28245` | 六个不可变 revision 的真实文件名/字节数/LFS SHA256 已固定；FakeTensor LoRA 子集统计、逐 checkpoint 非覆盖提取、逐张量等值复核和失败工件已实现；完整 160 项测试通过 | 除已验证的 Qwen3B-Cl 外，其余五个派生权重尚未在远程生成；工具完成不代表原始下载已完整 | 保持 DATA-04 为唯一用户步骤；之后对已完成的原始 checkpoint 先做 CPU 结构审计，再凭派生 SHA256 生成模型专属评测配置 |
 | 2 官方权重 | 六变体可移植模型资源锁生成器 | COMPLETED | `af8de47` | 已实现基础模型全文件 Git/LFS 身份、官方原始 checkpoint、派生 checkpoint SHA256、实测 LoRA 结构与两份证据报告的统一锁定；无关 asset 未完成不会弱化所选资源；完整 165 项测试通过 | 除 Qwen3B-Cl 外尚无其余派生权重与正式模型锁；生成器完成不代表下载或提取已完成 | 各原始 checkpoint 完整后在 CPU 侧完成审计/提取并生成小型锁 JSON，再据锁建立评测配置 |
-| 2 官方权重 | 官方模型 CPU 三阶段流水线与已有派生权重只读复核 | COMPLETED | `dd376d8` | 已固定“精确资源审计 → 原始 checkpoint 审计及安全提取/已有派生权重逐张量复核 → 可移植模型锁”执行顺序；所有阶段保留命令、Git、输入身份、退出码与失败证据；完整 177 项测试通过 | 尚未在远程对真实完整模型运行；工具完成不代表六变体资源已完整 | DATA-04 后先按已知资源状态选择 Qwen3B-Cl，在执行预计超过 30 分钟的 CPU 读取任务前单独汇报资源预算，再使用只读复核模式生成正式模型锁 |
+| 2 官方权重 | 官方模型 CPU 三阶段流水线与已有派生权重只读复核 | WAITING_USER | `c50b4c1` | Qwen3B-Cl 首次真实远程运行在 `logs/official_model_pipeline_oea_qwen3b_cl_20260719_145123` 保留完整失败证据：base 18/18 与原始 checkpoint 3/3 文件均通过，唯一失败项是注册表声明的 `step_40_inference_only.pt` 被原始快照门禁误判为额外文件；最小修复仅在 `--verify-existing-derived` 模式允许当前变体注册表声明的唯一派生路径，并继续拒绝其他额外文件 | 等待远程拉取修复后重跑；原始/派生权重及评测参数均未修改 | 本地回归测试、commit/push 后，远程先检查未提交修改再拉取 `repro/oea-full`，按原命令重跑并核对 allowed-file 记录与逐张量复核 |
 | 2 官方权重 | 正式评测协议与可移植模型锁强绑定 | COMPLETED | `d2b54ba` | Caption/UIQ GPU 生成器及其 CPU 评测套件均要求已提交的模型锁；解析配置扩展为完整 base 文件清单，并在运行和汇总两端复核协议、模型锁、checkpoint、逐文件 SHA256 与 Git commit；断点续跑仅复用完全一致配置；完整 183 项测试通过 | 正式 Qwen3B-Cl 模型锁尚未在远程流水线生成并回传 Git，因此绑定入口尚未对真实模型运行 | DATA-04 后按长任务规则运行 Qwen3B-Cl CPU 模型流水线，审阅并提交小型模型锁，再申请 1×A100-80GB 执行 embedding 小批校验 |
 | 2 官方权重 | 5 个 Clotho 样例 Qwen3B-Cl smoke | COMPLETED | `fba8c3c` | 运行 `..._20260716_130619` 严格离线成功；5 音频/5 查询、544 LoRA、双 head、512 维归一化 embedding 全部通过；峰值 9.141 GiB allocated | 无；首次失败 `..._20260716_125636` 仍保留 | 固定小型结果摘要并进入检索指标单元测试 |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | TODO | `7a8fb50` | Clotho 1,045 条 evaluation manifest 已完整验证；GPU 正式 embedding 尚未安排 | 完整 AudioCaps/MECAT 候选集尚未准备；全三数据集表仍不能运行 | CPU 数据步骤完成后申请 1×A100-80GB，先做 Qwen3B-Cl 小批校验再生成全量 embedding |

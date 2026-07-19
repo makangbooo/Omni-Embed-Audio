@@ -267,6 +267,7 @@ def audit_local_asset(
     model_root: Path,
     asset: dict[str, Any],
     remote_files: list[dict[str, Any]],
+    allowed_extra_files: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     model_root = model_root.resolve()
     destination = destination_for(model_root, asset)
@@ -283,6 +284,8 @@ def audit_local_asset(
         "local_files": [],
         "missing_files": [],
         "extra_files": [],
+        "allowed_extra_files": sorted(allowed_extra_files),
+        "present_allowed_extra_files": [],
         "incomplete_files": [],
         "unsafe_symlinks": [],
         "errors": [],
@@ -325,8 +328,14 @@ def audit_local_asset(
 
     remote_by_path = {item["path"]: item for item in remote_files}
     pinned_by_path = {item["path"]: item for item in pinned_file_specs(asset)}
+    allowed_extra_set = set(allowed_extra_files)
     report["missing_files"] = sorted(set(remote_by_path) - set(local_by_path))
-    report["extra_files"] = sorted(set(local_by_path) - set(remote_by_path))
+    report["present_allowed_extra_files"] = sorted(
+        (set(local_by_path) - set(remote_by_path)) & allowed_extra_set
+    )
+    report["extra_files"] = sorted(
+        set(local_by_path) - set(remote_by_path) - allowed_extra_set
+    )
     if report["extra_files"]:
         report["errors"].append("local resource contains files absent from pinned snapshot")
 
@@ -397,12 +406,15 @@ def audit_resources(
     output: Path,
     asset_names: tuple[str, ...] = (),
     scope: dict[str, Any] | None = None,
+    allowed_extra_files_by_asset: dict[str, tuple[str, ...]] | None = None,
 ) -> int:
     model_root = model_root.resolve()
     output = output.resolve()
     ensure_external_model_root(model_root)
     requested_assets = normalize_asset_selection(list(asset_names))
     requested_set = set(requested_assets)
+    allowed_extra_files_by_asset = allowed_extra_files_by_asset or {}
+    normalize_asset_selection(list(allowed_extra_files_by_asset))
     if not manifest_paths:
         raise ValueError("at least one model resource manifest is required")
     if scope is not None and not isinstance(scope, dict):
@@ -421,6 +433,10 @@ def audit_resources(
         "huggingface_hub_version": huggingface_hub_version,
         "operation": "read-only metadata and local-content audit; no downloads",
         "requested_assets": list(requested_assets),
+        "allowed_extra_files_by_asset": {
+            name: sorted(paths)
+            for name, paths in sorted(allowed_extra_files_by_asset.items())
+        },
         "assets": [],
     }
     if scope is not None:
@@ -455,6 +471,9 @@ def audit_resources(
                         model_root=model_root,
                         asset=asset,
                         remote_files=remote_files,
+                        allowed_extra_files=allowed_extra_files_by_asset.get(
+                            name, ()
+                        ),
                     )
                 except Exception as exc:  # noqa: BLE001 - audit every remaining asset
                     asset_report = {
@@ -472,6 +491,12 @@ def audit_resources(
         if missing_requests:
             raise ValueError(
                 f"requested assets absent from supplied manifests: {missing_requests}"
+            )
+        unused_allowances = sorted(set(allowed_extra_files_by_asset) - seen_names)
+        if unused_allowances:
+            raise ValueError(
+                "allowed extra files reference assets absent from supplied manifests: "
+                f"{unused_allowances}"
             )
         if not report["assets"]:
             raise ValueError("model resource audit selected no assets")

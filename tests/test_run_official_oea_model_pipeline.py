@@ -87,6 +87,7 @@ class RunOfficialOEAModelPipelineTest(unittest.TestCase):
         self.assertLess(audit_position, preparation_position)
         self.assertLess(preparation_position, lock_position)
         self.assertIn("--verify-existing-derived", implementation)
+        self.assertIn("--allow-registered-derived", implementation)
         self.assertIn("--verify-existing-derived", wrapper)
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
         self.assertIn("requires a clean Git worktree", wrapper)

@@ -262,6 +262,52 @@ class AuditModelResourcesTest(unittest.TestCase):
         self.assertEqual(report["extra_files"], ["unexpected.txt"])
         self.assertTrue(any("marker mismatch" in error for error in report["errors"]))
 
+    def test_exact_allowlisted_derived_file_is_reported_but_not_rejected(self) -> None:
+        config = b"{}"
+        weights = b"weights"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            destination = self.prepare(root, config, weights)
+            derived = destination / "weights_inference_only.bin"
+            derived.write_bytes(b"verified later by checkpoint preparation")
+            (destination / "unexpected.txt").write_text(
+                "unexpected", encoding="utf-8"
+            )
+            report = audit_local_asset(
+                model_root=root,
+                asset=dict(self.ASSET),
+                remote_files=self.remote_files(config, weights),
+                allowed_extra_files=("weights_inference_only.bin",),
+            )
+
+        self.assertEqual(report["status"], "failed")
+        self.assertEqual(
+            report["allowed_extra_files"], ["weights_inference_only.bin"]
+        )
+        self.assertEqual(
+            report["present_allowed_extra_files"],
+            ["weights_inference_only.bin"],
+        )
+        self.assertEqual(report["extra_files"], ["unexpected.txt"])
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            destination = self.prepare(root, config, weights)
+            (destination / "weights_inference_only.bin").write_bytes(b"derived")
+            report = audit_local_asset(
+                model_root=root,
+                asset=dict(self.ASSET),
+                remote_files=self.remote_files(config, weights),
+                allowed_extra_files=("weights_inference_only.bin",),
+            )
+
+        self.assertEqual(report["status"], "complete")
+        self.assertEqual(report["extra_files"], [])
+        self.assertEqual(
+            report["present_allowed_extra_files"],
+            ["weights_inference_only.bin"],
+        )
+
     def test_size_and_lfs_corruption_are_failed(self) -> None:
         config = b"{}"
         expected_weights = b"expected"
