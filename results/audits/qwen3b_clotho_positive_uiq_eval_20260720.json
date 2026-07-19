@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_run_truncated_terminal_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "The attachment begins inside suite_metrics.json, but retains the complete summary CSV, both final artifact hashes, the wrapper attempt exit code, all four protocol exit codes, output size, and final clean Git status. Those retained finalization records are sufficient to audit completion without rerunning the suite."
+  },
+  "git_commit": "c44a7d53dbd1cae508b0f25446f28825b6528c04",
+  "model": "OEA-Qwen3B",
+  "dataset": "Clotho v2.1 evaluation UIQ",
+  "checkpoint": "JudeJiwoo/OEA-Qwen3B-AC@f6c4b3b86385fd7ecbe3bacf45548a2259af8db4/step_350_inference_only.pt#sha256:b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101",
+  "suite": {
+    "suite_id": "oea_qwen3b_ac_clotho_positive_uiq_suite_seed42_20260720_011600",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_ac_clotho_positive_uiq_suite_seed42_20260720_011600",
+    "status": "complete",
+    "exit_code": 0,
+    "completion_evidence": "wrapper attempt exit 0, four protocol exits 0, finalized suite_metrics.json, finalized positive_uiq_summary.csv, error=null",
+    "resource": "CPU",
+    "gpu_disabled": true,
+    "seed": 42,
+    "protocol_count": 4,
+    "all_exit_codes": [0, 0, 0, 0, 0],
+    "remote_directory_size": "100M",
+    "positive_uiq_summary": {
+      "size_bytes": 1798,
+      "sha256": "d4f3c04f5db72c0fa55558e102a2170b81c01158f5489cef32b463c83aedd4de"
+    },
+    "suite_metrics": {
+      "sha256": "8b6eea496df65378ea4aa17a82316d60f3a3183228a4f7725751638b68be7d26"
+    }
+  },
+  "protocols": {
+    "question_released_uiq": {
+      "paper_table": "Table 12",
+      "released_query_type": "question",
+      "paper_query_type": "Question",
+      "protocol_source": "CODE",
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 21.5311004784689,
+        "R@5": 44.49760765550239,
+        "R@10": 59.52153110047846,
+        "MRR": 0.33418030055511394,
+        "DCG": 0.46619417566361876
+      }
+    },
+    "imperative_released_uiq": {
+      "paper_table": "Table 13",
+      "released_query_type": "imperative",
+      "paper_query_type": "Imperative",
+      "protocol_source": "CODE",
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 22.48803827751196,
+        "R@5": 46.2200956937799,
+        "R@10": 59.13875598086125,
+        "MRR": 0.3433320344153834,
+        "DCG": 0.4727782777115885
+      }
+    },
+    "paraphrase_released_uiq": {
+      "paper_table": "Table 14",
+      "released_query_type": "paraphrase",
+      "paper_query_type": "Paraphrase",
+      "protocol_source": "CODE",
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 20.95693779904306,
+        "R@5": 46.79425837320574,
+        "R@10": 60.0956937799043,
+        "MRR": 0.33856524282466866,
+        "DCG": 0.4706698927289504
+      }
+    },
+    "tagging_released_uiq": {
+      "paper_table": "Table 15",
+      "released_query_type": "tagging",
+      "paper_query_type": "Keyphrase",
+      "protocol_source": "CODE",
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 24.30622009569378,
+        "R@5": 49.665071770334926,
+        "R@10": 61.72248803827751,
+        "MRR": 0.36463625434573854,
+        "DCG": 0.49220091543930106
+      }
+    }
+  },
+  "protocol_boundary": {
+    "source": "CODE",
+    "note": "Each released UIQ query is matched to exactly one canonical Clotho candidate ID. The public-code audio candidate bank omits the passage: prefix stated by PAPER, so these observations remain explicitly labeled CODE rather than strict paper-protocol reproductions."
+  }
+}

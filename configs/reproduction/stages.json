@@ -339,7 +339,7 @@
     {
       "stage_id": "official_qwen3b_uiq_metrics",
       "kind": "executable",
-      "status": "WAITING_USER",
+      "status": "COMPLETED",
       "resource": "CPU",
       "duration": "5-20 minutes",
       "long_operation": false,
@@ -350,7 +350,7 @@
         "{uiq_embedding_dir}"
       ],
       "required_arguments": ["caption_embedding_dir", "uiq_embedding_dir"],
-      "description": "Evaluate the four released canonical-ID positive-UIQ protocols for AudioCaps-trained Qwen3B/Clotho using the completed caption and UIQ embedding banks."
+      "description": "Completed all four released canonical-ID positive-UIQ protocols for AudioCaps-trained Qwen3B/Clotho; wrapper and four protocol attempts exited 0 and produced a 100 MB audited suite."
     },
     {
       "stage_id": "official_eval",

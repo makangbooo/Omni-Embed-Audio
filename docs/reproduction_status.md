@@ -38,12 +38,12 @@
 | 2 官方权重 | Qwen3B-Cl/Clotho T2A/T2T 四协议 CPU 评测套件 | COMPLETED | `97dab6a` | CPU 运行 `...retrieval_suite_seed42_20260719_185937`：suite 与四协议 exit 均为 0，525 MB；T2A 两口径、T2T `[CODE]` 与 `[INFERRED]` 敏感性均已分栏；小型摘要 SHA256 `37fb82db...a4a0`，结果 CSV SHA256 `b16a86e5...836` | 论文未公开 caption 选择与 T2T self/tie 口径，四协议不得择优冒充论文口径；严格论文观察继续标为 blocked | 已将 12 个 close 观察及 6 个 strict blocked 观察统一写入结果汇总 |
 | 2 指标 | Canonical T2A/T2T/UIQ embedding evaluator | COMPLETED | `43158ae` | 确定性 ID 检索、caption 多正例/排除 self、显式 query 子集、完整排名和严格输入校验已实现；相关 15 项测试通过 | 论文未公开 T2T caption 选择与 tie 口径；已在协议文档标为 `[MISSING]` | 接入 checkpoint embedding 生成器 |
 | 2 指标 | 可审计 embedding 实验输出 runner | COMPLETED | `5ed57a7` | CPU-only runner 已保存固定 embedding、metadata、完整排名、输入/工件 SHA256、seed、Git/环境/命令和失败证据；相关测试总计 27 项通过 | 无；正式运行要求干净 worktree 和显式协议来源 | 用 Qwen3B-Cl + Clotho evaluation 完成首个正式 T2A/T2T 闭环 |
-| 2 结果管理 | 论文值/复现观测/证据统一汇总契约 | COMPLETED | `2ceb719` | Tables 1–17 与 910 个论文指标保持 910/910 转录匹配；当前汇总含 48 个观察：Qwen3B-Cl/Clotho 的 24 个 close、Qwen3B-AC/Clotho 的 12 个 close，以及两变体共 12 个 strict blocked；本地证据、远程工件路径/哈希、delta 和状态计数均已生成 | 无；close 为显式人工审阅结论，未由生成器自动阈值判定 | 后续正式实验继续仅凭小型固定 JSON 证据追加观察 |
+| 2 结果管理 | 论文值/复现观测/证据统一汇总契约 | COMPLETED | `c44a7d5` | Tables 1–17 与 910 个论文指标保持 910/910 转录匹配；当前汇总含 60 个观察：Qwen3B-Cl/Clotho 与 Qwen3B-AC/Clotho 各 24 个 close，以及两变体共 12 个 strict blocked；本地证据、远程工件路径/哈希、delta 和状态计数均已生成 | 无；close 为显式人工审阅结论，未由生成器自动阈值判定 | 后续正式实验继续仅凭小型固定 JSON 证据追加观察 |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 保留为 canonical negative evaluator 的公式回归测试 |
 | 2 指标 | 显式 target/HN 的可审计 negative embedding evaluator | COMPLETED | `cd4d00b` | 严格 query/target/HN ID 覆盖、optimistic rank、确定性完整排序、per-query 证据、输入/输出 SHA256、失败保留和 CPU wrapper 已实现；完整 116 项测试通过 | 工具完成不等于表 17 已解锁；发布数据仍无 HN audio ID | 获得作者 pairing 后才运行正式表 17；否则仅运行单独标记的重建协议 |
-| 2 UIQ | Tables 12–15 正向 UIQ | IN_PROGRESS | `35e064f` | Qwen3B-Cl/Clotho 首个完整闭环完成：RTX 4090 生成四类 4,180×512 embedding；CPU suite `...positive_uiq_suite_seed42_20260719_211752` 四协议与 wrapper 共五个 exit 均为 0、100 MB；12 个 R@k 与论文绝对差均不超过 0.575 个百分点，全部作为 `[CODE] close` 写入统一结果表；MRR/DCG 作为额外审计指标保留 | 当前变体/数据集无阻塞；完整 Tables 12–15 仍缺其余五个 OEA 变体、四个 CLAP、AudioCaps/MECAT，且 MECAT 847/848 口径未决 | 固化 12 个观察和 suite 哈希；随后在 CPU 侧重新审计已下载模型/数据，选择下一个无需训练的官方权重评测闭环 |
+| 2 UIQ | Tables 12–15 正向 UIQ | IN_PROGRESS | `c44a7d5` | Qwen3B-Cl 与 Qwen3B-AC 在 Clotho 上均完成 4,180×512 GPU query embedding 和四协议 CPU suite；两次 suite 的 wrapper 与各四个协议 exit 均为 0、各约 100 MB；共 24 个 R@k 均作为 `[CODE] close` 分栏，MRR/DCG 作为额外审计指标保留 | 两个 Qwen3B/Clotho 变体无阻塞；完整 Tables 12–15 仍缺其余四个 OEA 变体、四个 CLAP、AudioCaps/MECAT，且 MECAT 847/848 口径未决 | 固化 Qwen3B-AC 的 12 个观察和 suite 哈希；随后选择下一个无需训练的官方权重评测闭环 |
 | 2 UIQ | Qwen3B-AC/Clotho 正向 UIQ embedding | COMPLETED | `98af9d4` | RTX 4090 运行 `...positive_uiq_embeddings_seed42_20260720_010106`：4,180 条四类查询全部完成、形状 4,180×512、pending=0、exit 0、43 MB；峰值 allocated 9.0 GiB/reserved 9.3 GiB；六个核心工件 SHA256 已固定 | 无；顶层紧凑摘要的 `gpu_name=None` 仅因字段位于 `model_load`，GPU preflight 与模型加载记录均为 RTX 4090 | 大型 embedding 保留远程路径与哈希，供 CPU 四协议套件复用 |
-| 2 UIQ | Qwen3B-AC/Clotho 正向 UIQ 四协议 CPU 套件 | WAITING_USER | `98af9d4` | caption bank 与 4,180×512 UIQ query bank 均已完成并固定哈希；CPU wrapper 已通过完整测试 | 需要在挂载同一 `/home/jg525` 的 CPU 服务器执行四个预声明协议 | 运行 Tables 12–15 suite，并将 12 个 R@k 与论文值分栏写入统一汇总 |
+| 2 UIQ | Qwen3B-AC/Clotho 正向 UIQ 四协议 CPU 套件 | COMPLETED | `c44a7d5` | CPU suite `...positive_uiq_suite_seed42_20260720_011600`：wrapper 与四协议共五个 exit 全为 0、100 MB；Question=`21.5311/44.4976/59.5215`、Imperative=`22.4880/46.2201/59.1388`、Paraphrase=`20.9569/46.7943/60.0957`、Keyphrase=`24.3062/49.6651/61.7225`；suite/CSV SHA256 已固定 | 无；公开代码音频候选无论文所述 `passage:` 前缀，因此标为 `[CODE] close` 而非严格论文协议 | 将 12 个 R@k 写入统一汇总；大型排名保留远程路径与哈希 |
 | 2 Negative | Tables 4/17 否定查询 | BLOCKED | N/A | 未开始 | 发布文件无 HN audio ID | 请求作者 pairing 或审计式重建 |
 | 3 数据 | WavCaps duration + leakage blocklists | IN_PROGRESS | `3c5b1e9` | 本地两次全量 metadata pass 已完成；精确复现 173 个 AudioCaps 与 638 个 Clotho 文件名重叠 | 论文 `<=31s` 与公开元数据计数冲突；精确 filtered manifest、Clotho 消歧和论文 blocklist 未发布 | 远程执行 DATA-08/09 复算；训练前再准备音频 |
 | 3 数据 | DATA-08：固定 WavCaps metadata 下载 | TODO | `3c5b1e9` | 8 个固定文件、176,863,095 bytes、逐文件 SHA256/LFS ID 已提交并通过本地真实下载 | 当前按步骤先完成 DATA-04/05/06/07 | 后续在 CPU 服务器下载，不需要 GPU 或 819 GB 音频 |
@@ -66,8 +66,8 @@
 
 ## 当前焦点
 
-- 当前阶段：Qwen3B-Cl/Clotho 已完成 T2A/T2T 与四类正向 UIQ；Qwen3B-AC/Clotho 已完成 T2A/T2T 和四类正向 UIQ embedding，正在转入 UIQ CPU 四协议指标计算。
+- 当前阶段：Qwen3B-Cl 与 Qwen3B-AC 在 Clotho 上均已完成 T2A/T2T 与四类正向 UIQ 的官方权重闭环；训练继续暂停，正在选择下一个无需训练的官方评测变体。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：远程 CPU 套件 `oea_qwen3b_ac_clotho_retrieval_suite_seed42_20260720_003516` 四协议全部成功，结果与论文表 2/3 已分栏比较并写入统一汇总。
+- 最近完成：远程 CPU 套件 `oea_qwen3b_ac_clotho_positive_uiq_suite_seed42_20260720_011600` 四类正向 UIQ 全部成功，12 个 R@k 与论文 Tables 12–15 的绝对差均不超过 0.388 个百分点。
 - 当前阻塞：Qwen3B-Cl/Clotho 当前闭环无阻塞；完整三数据集/多模型表仍缺 AudioCaps/MECAT 音频、部分模型资源和若干论文未公开口径。训练阶段按用户要求暂停。
-- 下一步：在挂载同一 `/home/jg525` 的 CPU 服务器复用已固定的 caption/UIQ embedding，运行 Qwen3B-AC/Clotho 四协议 UIQ 套件并登记 Tables 12–15 的 12 个 R@k。
+- 下一步：完成 Qwen3B-AC/Clotho UIQ 观察登记后，在 CPU 侧审计已下载模型和数据，选择下一个不涉及训练的官方权重评测闭环；需要更换 GPU 时再通知用户。

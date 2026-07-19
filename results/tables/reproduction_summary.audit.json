@@ -7,8 +7,8 @@
   "inputs": {
     "observations": {
       "path": "results/observations/reproduction_observations.jsonl",
-      "sha256": "08b10bcbe8a5852d9ae25e6ffa2c340ee63831dbe89f6c0fd4b7f48906503f9c",
-      "size_bytes": 40833
+      "sha256": "fecb98f0870c90f97e206e2cb5e63306ce5638b34d6dd29f514576aa4f6ae0bc",
+      "size_bytes": 52246
     },
     "paper_registry": {
       "path": "configs/results/paper_reported_metrics.jsonl",
@@ -16,20 +16,20 @@
       "size_bytes": 386143
     }
   },
-  "observation_count": 48,
+  "observation_count": 60,
   "output": {
     "path": "results/tables/reproduction_summary.csv",
-    "sha256": "3a83ab4df9b0358ffbf3ce94b807d1cc0d2d91a291749c623b650c20bd2fbafc",
-    "size_bytes": 26010
+    "sha256": "e97a7fdecd0389b5547cdcd9a9a605060aa4f815a02633e65d1e8fc752c91c6f",
+    "size_bytes": 33312
   },
   "paper_metric_count": 910,
   "schema_version": 1,
   "status": "complete",
   "status_counts": {
     "blocked": 12,
-    "close": 36
+    "close": 48
   },
-  "summary_row_count": 48,
+  "summary_row_count": 60,
   "unit_counts": {
     "count": 6,
     "gigabytes": 12,
@@ -40,7 +40,7 @@
     "score_1_to_5": 36,
     "score_standard_deviation": 18
   },
-  "unobserved_paper_metric_count": 886,
+  "unobserved_paper_metric_count": 874,
   "unobserved_paper_metric_ids": [
     "table11_laion_clap_three_dataset_mean_t2a_r1",
     "table11_laion_clap_three_dataset_mean_t2a_r10",
@@ -174,9 +174,6 @@
     "table12_oea_qwen3b_cl_mecat_question_r1",
     "table12_oea_qwen3b_cl_mecat_question_r10",
     "table12_oea_qwen3b_cl_mecat_question_r5",
-    "table12_oea_qwen3b_clotho_question_r1",
-    "table12_oea_qwen3b_clotho_question_r10",
-    "table12_oea_qwen3b_clotho_question_r5",
     "table12_oea_qwen3b_mecat_question_r1",
     "table12_oea_qwen3b_mecat_question_r10",
     "table12_oea_qwen3b_mecat_question_r5",
@@ -261,9 +258,6 @@
     "table13_oea_qwen3b_cl_mecat_imperative_r1",
     "table13_oea_qwen3b_cl_mecat_imperative_r10",
     "table13_oea_qwen3b_cl_mecat_imperative_r5",
-    "table13_oea_qwen3b_clotho_imperative_r1",
-    "table13_oea_qwen3b_clotho_imperative_r10",
-    "table13_oea_qwen3b_clotho_imperative_r5",
     "table13_oea_qwen3b_mecat_imperative_r1",
     "table13_oea_qwen3b_mecat_imperative_r10",
     "table13_oea_qwen3b_mecat_imperative_r5",
@@ -348,9 +342,6 @@
     "table14_oea_qwen3b_cl_mecat_paraphrase_r1",
     "table14_oea_qwen3b_cl_mecat_paraphrase_r10",
     "table14_oea_qwen3b_cl_mecat_paraphrase_r5",
-    "table14_oea_qwen3b_clotho_paraphrase_r1",
-    "table14_oea_qwen3b_clotho_paraphrase_r10",
-    "table14_oea_qwen3b_clotho_paraphrase_r5",
     "table14_oea_qwen3b_mecat_paraphrase_r1",
     "table14_oea_qwen3b_mecat_paraphrase_r10",
     "table14_oea_qwen3b_mecat_paraphrase_r5",
@@ -435,9 +426,6 @@
     "table15_oea_qwen3b_cl_mecat_keyphrase_r1",
     "table15_oea_qwen3b_cl_mecat_keyphrase_r10",
     "table15_oea_qwen3b_cl_mecat_keyphrase_r5",
-    "table15_oea_qwen3b_clotho_keyphrase_r1",
-    "table15_oea_qwen3b_clotho_keyphrase_r10",
-    "table15_oea_qwen3b_clotho_keyphrase_r5",
     "table15_oea_qwen3b_mecat_keyphrase_r1",
     "table15_oea_qwen3b_mecat_keyphrase_r10",
     "table15_oea_qwen3b_mecat_keyphrase_r5",
