@@ -398,6 +398,35 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             config["expected_generation_protocol_sha256"],
         )
 
+    def test_qwen3b_ac_suite_preserves_protocols_and_binds_its_own_lock(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        clotho_tuned = load_suite_config(
+            repository_root
+            / "configs/eval/qwen3b_cl_clotho_retrieval_suite.json"
+        )
+        audiocaps_tuned = load_suite_config(
+            repository_root / "configs/eval/qwen3b_clotho_retrieval_suite.json"
+        )
+
+        self.assertEqual(audiocaps_tuned["model"], "OEA-Qwen3B")
+        self.assertEqual(audiocaps_tuned["official_variant_id"], "oea_qwen3b")
+        self.assertEqual(
+            audiocaps_tuned["official_model_lock_path"],
+            "results/model_locks/oea_qwen3b.json",
+        )
+        self.assertEqual(
+            file_identity(
+                repository_root / "configs/eval/qwen3b_clotho_embeddings.json"
+            )["sha256"],
+            audiocaps_tuned["expected_generation_protocol_sha256"],
+        )
+        self.assertEqual(
+            audiocaps_tuned["protocols"], clotho_tuned["protocols"]
+        )
+        self.assertNotEqual(
+            audiocaps_tuned["checkpoint"], clotho_tuned["checkpoint"]
+        )
+
     def test_vanilla_fixed_configs_bind_exact_base_only_protocols(self) -> None:
         repository_root = Path(__file__).resolve().parents[1]
         expected = {

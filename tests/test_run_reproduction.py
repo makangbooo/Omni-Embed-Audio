@@ -67,6 +67,7 @@ class RunReproductionTest(unittest.TestCase):
         self.assertEqual(stage_ids.count("official_eval_embeddings"), 1)
         self.assertEqual(stage_ids.count("official_eval_smoke"), 1)
         self.assertIn("official_qwen3b_embeddings", self.registry)
+        self.assertIn("official_qwen3b_metrics", self.registry)
         self.assertIn("train_qwen3b", stage_ids)
         self.assertIn("vanilla_model_lock", stage_ids)
         self.assertIn("vanilla_smoke_embeddings", stage_ids)

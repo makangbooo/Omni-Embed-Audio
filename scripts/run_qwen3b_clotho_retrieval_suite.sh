@@ -12,11 +12,29 @@ if [[ "$#" -ne 1 ]]; then
 fi
 
 EMBEDDING_DIR="$(cd "$1" && pwd)"
-CONFIG="${ROOT_DIR}/configs/eval/qwen3b_cl_clotho_retrieval_suite.json"
-SUITE_ID="${SUITE_ID:-oea_qwen3b_clotho_retrieval_suite_seed42_$(date +%Y%m%d_%H%M%S)}"
+CONFIG="${RETRIEVAL_SUITE_CONFIG:-${ROOT_DIR}/configs/eval/qwen3b_cl_clotho_retrieval_suite.json}"
+SUITE_PREFIX="${RETRIEVAL_SUITE_PREFIX:-oea_qwen3b_clotho_retrieval_suite_seed42}"
+SUITE_ID="${SUITE_ID:-${SUITE_PREFIX}_$(date +%Y%m%d_%H%M%S)}"
 SUITE_DIR="${RESULT_ROOT:-${ROOT_DIR}/results/raw}/${SUITE_ID}"
 ATTEMPT_ID="attempt_$(date +%Y%m%d_%H%M%S)"
 ATTEMPT_DIR="${SUITE_DIR}/attempts/${ATTEMPT_ID}"
+
+if [[ ! -f "${CONFIG}" ]]; then
+  echo "[ERROR] Retrieval suite config is missing: ${CONFIG}" >&2
+  exit 3
+fi
+CONFIG="$(cd "$(dirname "${CONFIG}")" && pwd)/$(basename "${CONFIG}")"
+case "${CONFIG}" in
+  "${ROOT_DIR}"/*) ;;
+  *)
+    echo "[ERROR] Retrieval suite config must be inside the repository: ${CONFIG}" >&2
+    exit 3
+    ;;
+esac
+if ! git ls-files --error-unmatch -- "${CONFIG#${ROOT_DIR}/}" >/dev/null 2>&1; then
+  echo "[ERROR] Retrieval suite config must be tracked by Git: ${CONFIG}" >&2
+  exit 3
+fi
 
 if [[ -e "${ATTEMPT_DIR}" ]]; then
   echo "[ERROR] Attempt directory exists; refusing to overwrite: ${ATTEMPT_DIR}" >&2
@@ -30,8 +48,10 @@ record_exit() {
 trap record_exit EXIT
 
 {
-  printf 'SUITE_ID=%q RESULT_ROOT=%q ' \
-    "${SUITE_ID}" "${RESULT_ROOT:-${ROOT_DIR}/results/raw}"
+  printf 'SUITE_ID=%q RESULT_ROOT=%q RETRIEVAL_SUITE_CONFIG=%q ' \
+    "${SUITE_ID}" "${RESULT_ROOT:-${ROOT_DIR}/results/raw}" \
+    "${CONFIG}"
+  printf 'RETRIEVAL_SUITE_PREFIX=%q ' "${SUITE_PREFIX}"
   printf '%q ' "$0" "$@"
   printf '\n'
 } > "${ATTEMPT_DIR}/command.sh"

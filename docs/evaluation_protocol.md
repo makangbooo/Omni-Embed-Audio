@@ -268,6 +268,22 @@ is recorded under `failures/`; completed suite metrics are never overwritten.
 The four protocols require no GPU once embeddings exist and use less than
 approximately 0.6 GB of additional result storage.
 
+The AudioCaps-trained `OEA-Qwen3B` variant uses the identical four protocol
+definitions through a separately bound suite:
+
+```bash
+bash scripts/run_qwen3b_ac_clotho_retrieval_suite.sh \
+  /absolute/path/to/completed_qwen3b_ac_embedding_directory
+```
+
+Its source config is `configs/eval/qwen3b_clotho_retrieval_suite.json`. It
+binds `results/model_locks/oea_qwen3b.json`, the `OEA-Qwen3B-AC` checkpoint,
+and the full-generation protocol SHA256. The wrapper delegates only the
+common CPU orchestration; the suite audit rejects a `Qwen3B-Cl` directory or
+any mismatched model/checkpoint/protocol identity. This makes the Base versus
+`+Cl` comparison use the same query selection and metric definitions without
+conflating their model resources.
+
 ## Qwen3B-Cl Clotho positive-UIQ suite
 
 The released Clotho Question, Imperative, Paraphrase, and `tagging` files each

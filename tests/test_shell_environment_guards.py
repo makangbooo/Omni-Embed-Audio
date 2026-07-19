@@ -149,7 +149,26 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn("run_embedding_evaluation.sh", source)
         self.assertIn("prepare_embedding_evaluation_suite.py finalize", source)
         self.assertIn("Use a new SUITE_ID", source)
+        self.assertIn("RETRIEVAL_SUITE_CONFIG", source)
+        self.assertIn("RETRIEVAL_SUITE_PREFIX", source)
+        self.assertIn("git ls-files --error-unmatch", source)
+        self.assertIn("must be inside the repository", source)
         self.assertNotIn("rm -rf", source)
+
+        audiocaps_source = (
+            REPOSITORY_ROOT
+            / "scripts/run_qwen3b_ac_clotho_retrieval_suite.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "configs/eval/qwen3b_clotho_retrieval_suite.json",
+            audiocaps_source,
+        )
+        self.assertIn("run_qwen3b_clotho_retrieval_suite.sh", audiocaps_source)
+        self.assertIn(
+            "oea_qwen3b_ac_clotho_retrieval_suite_seed42",
+            audiocaps_source,
+        )
+        self.assertNotIn("rm -rf", audiocaps_source)
 
     def test_positive_uiq_suite_is_cpu_only_and_non_overwriting(self) -> None:
         source = (

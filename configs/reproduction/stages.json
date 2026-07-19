@@ -278,6 +278,21 @@
       "description": "Run the four fixed T2A/T2T protocols over a completed embedding directory."
     },
     {
+      "stage_id": "official_qwen3b_metrics",
+      "kind": "executable",
+      "status": "WAITING_USER",
+      "resource": "CPU",
+      "duration": "5-20 minutes",
+      "long_operation": false,
+      "command": [
+        "bash",
+        "scripts/run_qwen3b_ac_clotho_retrieval_suite.sh",
+        "{embedding_dir}"
+      ],
+      "required_arguments": ["embedding_dir"],
+      "description": "Run the same four fixed T2A/T2T protocols over the completed AudioCaps-trained OEA-Qwen3B embedding directory with its own model lock and generation protocol binding."
+    },
+    {
       "stage_id": "uiq_embeddings",
       "kind": "executable",
       "status": "COMPLETED",

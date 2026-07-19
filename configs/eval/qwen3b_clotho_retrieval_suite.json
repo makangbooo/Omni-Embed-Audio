@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "suite_prefix": "oea_qwen3b_ac_clotho_retrieval_suite_seed42",
+  "model": "OEA-Qwen3B",
+  "dataset": "Clotho v2.1 evaluation",
+  "embedding_seed": 42,
+  "expected_candidate_count": 1045,
+  "expected_query_count": 5225,
+  "expected_embedding_dim": 512,
+  "expected_captions_per_clip": 5,
+  "expected_generation_protocol_sha256": "e27398bc12f3fb9bcfd130dde074835df718950f2be9cf874448e4807af1bd6f",
+  "official_variant_id": "oea_qwen3b",
+  "official_model_lock_path": "results/model_locks/oea_qwen3b.json",
+  "minimum_generator_commit": "91fd25bdc74d0eeed5a241752cc909a7aa7a223b",
+  "checkpoint": {
+    "repo_id": "JudeJiwoo/OEA-Qwen3B-AC",
+    "revision": "f6c4b3b86385fd7ecbe3bacf45548a2259af8db4",
+    "local_subpath": "OEA-Qwen3B-AC/step_350_inference_only.pt",
+    "size_bytes": 59069203,
+    "sha256": "b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101",
+    "source": "DERIVED_FROM_CODE_CHECKPOINT"
+  },
+  "embedding_protocol": {
+    "audio": "public-code audio-only chat message without passage: insertion",
+    "text": "query: prefix",
+    "source": "CODE",
+    "paper_conflict": "PAPER states passage: for audio; this suite does not hide that conflict"
+  },
+  "protocols": [
+    {
+      "protocol_id": "t2a_public_code_default_joint_all_captions",
+      "task": "t2a",
+      "paper_table": "Table 2",
+      "query_selection": "all",
+      "protocol_label": "public-code-default-joint-all-captions",
+      "protocol_source": "CODE",
+      "expected_evaluated_queries": 5225,
+      "note": "eval_core default joint task set includes A2T, so T2A evaluates all five captions per clip"
+    },
+    {
+      "protocol_id": "t2a_public_code_t2a_only_seed0",
+      "task": "t2a",
+      "paper_table": "Table 2",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "protocol_label": "public-code-t2a-only-seed0-one-caption",
+      "protocol_source": "CODE",
+      "expected_evaluated_queries": 1045,
+      "note": "eval_core samples one caption per clip when text_to_audio is requested without audio_to_text"
+    },
+    {
+      "protocol_id": "t2t_public_code_default_seed0",
+      "task": "t2t",
+      "paper_table": "Table 3",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "protocol_label": "public-code-default-seed0-one-caption",
+      "protocol_source": "CODE",
+      "expected_evaluated_queries": 1045,
+      "note": "eval_core defaults t2t_queries_per_clip to one and uses random.Random(0) when no caption seed is supplied"
+    },
+    {
+      "protocol_id": "t2t_all_captions_sensitivity",
+      "task": "t2t",
+      "paper_table": "Table 3 sensitivity",
+      "query_selection": "all",
+      "protocol_label": "canonical-all-captions-sensitivity",
+      "protocol_source": "INFERRED",
+      "expected_evaluated_queries": 5225,
+      "note": "all-caption sensitivity run because PAPER does not publish the T2T caption-query selection"
+    }
+  ]
+}
