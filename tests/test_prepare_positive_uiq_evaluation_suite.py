@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -282,6 +284,26 @@ def synthetic_uiq_embeddings(root: Path) -> Path:
 
 
 class PreparePositiveUIQEvaluationSuiteTest(unittest.TestCase):
+    def test_direct_script_entrypoint_resolves_repository_packages(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(
+                        REPOSITORY_ROOT
+                        / "scripts/prepare_positive_uiq_evaluation_suite.py"
+                    ),
+                    "--help",
+                ],
+                cwd=directory,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("{prepare,finalize}", completed.stdout)
+
     def test_fixed_config_pins_generators_and_four_paper_tables(self) -> None:
         config = load_suite_config(
             REPOSITORY_ROOT

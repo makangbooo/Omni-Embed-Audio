@@ -38,7 +38,7 @@
 | 2 结果管理 | 论文值/复现观测/证据统一汇总契约 | COMPLETED | `97dab6a` | Tables 1–17 与 910 个论文指标仍保持 910/910 转录匹配；当前汇总含 18 个观察：12 个 Qwen3B-Cl/Clotho 分栏 close 与 6 个 strict blocked；本地证据、远程工件路径/哈希、delta 和状态计数均已生成 | 无；close 为显式人工审阅结论，未由生成器自动阈值判定 | 后续正式实验继续仅凭小型固定 JSON 证据追加观察 |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 保留为 canonical negative evaluator 的公式回归测试 |
 | 2 指标 | 显式 target/HN 的可审计 negative embedding evaluator | COMPLETED | `cd4d00b` | 严格 query/target/HN ID 覆盖、optimistic rank、确定性完整排序、per-query 证据、输入/输出 SHA256、失败保留和 CPU wrapper 已实现；完整 116 项测试通过 | 工具完成不等于表 17 已解锁；发布数据仍无 HN audio ID | 获得作者 pairing 后才运行正式表 17；否则仅运行单独标记的重建协议 |
-| 2 UIQ | Tables 12–15 正向 UIQ | WAITING_USER | `04891dd` | RTX 4090 首次正式尝试 `...positive_uiq_embeddings_seed42_20260719_201534` 已通过 GPU、模型锁与配置预检，但在模型加载前因直接脚本入口未加入仓库根目录而以 `ModuleNotFoundError: AudioRetrieval` 退出；原始失败证据完整保留，未产生 embedding；最小入口补丁及直接执行回归测试已通过完整 234 项测试 | 等待远程拉取入口修复；旧运行的 resolved config 已绑定失败时 commit，因此必须保留旧失败目录并用新 `RUN_ID` 重跑，不能跨 commit 篡改运行身份；AudioCaps/MECAT 音频候选集仍未准备，MECAT 847/848 口径未决 | 拉取修复 commit，在同一 RTX 4090 上以新 `RUN_ID` 生成 4,180 条 Clotho Question/Imperative/Paraphrase/Keyphrase embedding |
+| 2 UIQ | Tables 12–15 正向 UIQ | WAITING_USER | `574609e` | RTX 4090 正式运行 `...positive_uiq_embeddings_seed42_20260719_205537` 完成：四类各 1,045、总计 4,180×512、pending=0、exit 0、43 MB；峰值 allocated 8.963 GiB/reserved 9.299 GiB；三个工件 SHA256 已固定。首次入口失败及修复后新运行均保留为独立审计证据 | GPU 阶段已完成；等待把共享 `/home/jg525` 切到 CPU 服务器。AudioCaps/MECAT 音频候选集仍未准备，MECAT 847/848 口径未决 | CPU 运行四协议 canonical-ID 套件，计算 Clotho Question/Imperative/Paraphrase/Keyphrase 的 Tables 12–15 指标 |
 | 2 Negative | Tables 4/17 否定查询 | BLOCKED | N/A | 未开始 | 发布文件无 HN audio ID | 请求作者 pairing 或审计式重建 |
 | 3 数据 | WavCaps duration + leakage blocklists | IN_PROGRESS | `3c5b1e9` | 本地两次全量 metadata pass 已完成；精确复现 173 个 AudioCaps 与 638 个 Clotho 文件名重叠 | 论文 `<=31s` 与公开元数据计数冲突；精确 filtered manifest、Clotho 消歧和论文 blocklist 未发布 | 远程执行 DATA-08/09 复算；训练前再准备音频 |
 | 3 数据 | DATA-08：固定 WavCaps metadata 下载 | TODO | `3c5b1e9` | 8 个固定文件、176,863,095 bytes、逐文件 SHA256/LFS ID 已提交并通过本地真实下载 | 当前按步骤先完成 DATA-04/05/06/07 | 后续在 CPU 服务器下载，不需要 GPU 或 819 GB 音频 |
@@ -64,5 +64,5 @@
 - 当前阶段：Qwen3B-Cl/Clotho 官方权重 T2A/T2T 已完成 GPU 全量生成与 CPU 四协议评测；正在固化结果并准备正向 UIQ。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：RTX 4090 在 commit `97dab6a` 完成 1,045 audio/5,225 caption 全量 embedding，随后 CPU 四协议 suite 全部 exit 0。T2A all-caption 与论文差值不超过 0.307 个百分点，T2T all-caption sensitivity 不超过 0.157 个百分点；所有协议均按预声明来源分栏，严格论文口径仍保留 `[MISSING]`。
-- 当前阻塞：Clotho 正向 UIQ 首次 RTX 4090 尝试在模型加载前暴露直接脚本入口路径缺陷；失败证据已保留，等待远程拉取最小修复。旧运行身份绑定失败时 commit，修复后必须使用新 `RUN_ID`。完整三数据集表仍缺 AudioCaps/MECAT 音频和若干论文未公开口径。训练阶段按用户要求暂停。
-- 下一步：远程拉取 UIQ 入口修复，在同一 RTX 4090 上以新 `RUN_ID` 生成 4,180 条正向 UIQ query embedding，完成后切回 CPU 计算 Tables 12–15。
+- 当前阻塞：Clotho 正向 UIQ GPU embedding 已完成，等待把共享目录切换到 CPU 服务器运行指标套件。完整三数据集表仍缺 AudioCaps/MECAT 音频和若干论文未公开口径。训练阶段按用户要求暂停。
+- 下一步：push UIQ 成功审计和 CPU 套件入口修复；CPU 侧计算 Tables 12–15 并把小型指标证据纳入统一结果表。

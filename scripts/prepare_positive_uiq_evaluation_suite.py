@@ -8,12 +8,18 @@ import csv
 import io
 import json
 import subprocess
+import sys
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 import numpy as np
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from scripts.evaluate_embedding_artifacts import (
     file_identity,
@@ -35,7 +41,6 @@ from scripts.prepare_embedding_evaluation_suite import (
 )
 
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 RELEASED_QUERY_TYPES = ("question", "imperative", "paraphrase", "tagging")
 
 

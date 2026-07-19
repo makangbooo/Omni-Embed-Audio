@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_run_compact_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "Transcribed from the complete summary emitted by the committed GPU wrapper. Large embeddings and raw logs remain at the recorded remote paths and are not copied into ordinary Git."
+  },
+  "model": "OEA-Qwen3B (+Cl)",
+  "dataset": "Clotho v2.1 evaluation UIQ",
+  "model_lock": {
+    "path": "results/model_locks/oea_qwen3b_cl.json",
+    "sha256": "790d12ccc8f25ea29eecb37519db5c24262253f85dcb9055b473a45304589e36"
+  },
+  "failed_attempt": {
+    "run_id": "oea_qwen3b_clotho_positive_uiq_embeddings_seed42_20260719_201534",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_positive_uiq_embeddings_seed42_20260719_201534",
+    "git_commit": "04891ddac613ad2f3aebe80576ed721b205bc5b9",
+    "status": "failed",
+    "exit_code": 1,
+    "error": "ModuleNotFoundError: No module named 'AudioRetrieval'",
+    "failure_stage": "direct Python entrypoint before model loading",
+    "preservation_note": "The failed run directory remains immutable. Its resolved config is bound to the failed commit and was not reused after the fix."
+  },
+  "successful_run": {
+    "run_id": "oea_qwen3b_clotho_positive_uiq_embeddings_seed42_20260719_205537",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_positive_uiq_embeddings_seed42_20260719_205537",
+    "git_commit": "574609e3749724dc7dfc352a046502bb8fb6e121",
+    "status": "complete",
+    "exit_code": 0,
+    "started_at": "2026-07-19T12:56:20.578897+00:00",
+    "finished_at": "2026-07-19T13:01:54.692514+00:00",
+    "seed": 42,
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_total_memory_bytes": 25250627584,
+    "gpu_peak_allocated_bytes": 9624072192,
+    "gpu_peak_reserved_bytes": 9984540672,
+    "query_count": 4180,
+    "query_type_counts": {
+      "question": 1045,
+      "imperative": 1045,
+      "paraphrase": 1045,
+      "tagging": 1045
+    },
+    "completed_text_chunks": 4180,
+    "pending_text_chunks": 0,
+    "query_embedding_shape": [4180, 512],
+    "remote_directory_size": "43M",
+    "resolved_base_embedding_config": {
+      "size_bytes": 5594,
+      "sha256": "7b29f3b500638cdd7faf415509071ae2cd1544b7f7daed2973571cc8c72365f4"
+    },
+    "artifacts": {
+      "query_embeddings.npy": {
+        "size_bytes": 8560768,
+        "sha256": "1db8bbc68bffea084003d0a4a742a5d8164b2ef94fc6fece1dc1b6e11d833206"
+      },
+      "query_metadata.jsonl": {
+        "size_bytes": 1635369,
+        "sha256": "27037a7ba1dc1fcb097bdadcb1a723ee0a41eab0a8fd186bdc2dabb5d4d22d31"
+      },
+      "generation_metrics.json": {
+        "sha256": "5d6a1795a68f1d5a02a3546d39b073d0d6daa8eecfdc7fdc89de70c6d7ae0c75"
+      }
+    },
+    "attempt_exit_codes": [0]
+  },
+  "non_fatal_warnings": [
+    "Transformers reported that preprocessor.json video processor configuration is deprecated.",
+    "Transformers reported an unrecognized mrope_section key for default rope scaling."
+  ],
+  "next_stage": {
+    "resource": "CPU",
+    "task": "Evaluate the four predeclared canonical-ID positive-UIQ protocols for Tables 12-15 using the fixed Clotho candidate bank."
+  }
+}

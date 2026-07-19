@@ -254,10 +254,10 @@
     {
       "stage_id": "uiq_embeddings",
       "kind": "executable",
-      "status": "WAITING_USER",
+      "status": "COMPLETED",
       "resource": "1xBF16-GPU",
-      "duration": "over 30 minutes",
-      "long_operation": true,
+      "duration": "5 minutes 34 seconds observed",
+      "long_operation": false,
       "command": [
         "bash",
         "scripts/run_qwen3b_cl_clotho_positive_uiq_embeddings.sh"
@@ -268,7 +268,7 @@
     {
       "stage_id": "uiq_metrics",
       "kind": "executable",
-      "status": "BLOCKED",
+      "status": "WAITING_USER",
       "resource": "CPU",
       "duration": "5-20 minutes",
       "long_operation": false,
@@ -279,8 +279,7 @@
         "{uiq_embedding_dir}"
       ],
       "required_arguments": ["caption_embedding_dir", "uiq_embedding_dir"],
-      "blocked_reason": "Completed caption-candidate and positive-UIQ embedding directories must both be supplied.",
-      "description": "Evaluate Tables 12-15 from completed caption-candidate and UIQ-query directories."
+      "description": "Both required embedding directories are complete; waiting for the shared filesystem to be mounted on a CPU server before evaluating Tables 12-15."
     },
     {
       "stage_id": "official_eval",
@@ -305,7 +304,7 @@
       "duration": "multi-step",
       "long_operation": true,
       "children": ["official_eval_smoke", "official_eval_embeddings", "uiq_embeddings", "uiq_metrics"],
-      "description": "Cross-server positive-UIQ evaluation plan waiting for one BF16 GPU; negative UIQ remains separately blocked by missing HN audio IDs."
+      "description": "Positive-UIQ embeddings are complete; waiting for the CPU metrics handoff. Negative UIQ remains separately blocked by missing HN audio IDs."
     },
     {
       "stage_id": "train_qwen3b",
