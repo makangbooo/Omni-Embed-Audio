@@ -32,6 +32,7 @@
 | 2 官方权重 | Qwen3B-Cl 正式生成器锁绑定 5/25 GPU smoke | COMPLETED | `97dab6a` | RTX 4090 运行 `...lock_bound_smoke_seed42_20260719_174309`：能力门禁 complete、5×512/25×512、allocated 9.14 GiB、reserved 9.45 GiB、exit 0；模型锁 SHA256 为 `790d12cc...e36` | 无；旧外层 A100 断言与继续执行的矛盾证据仍保留 | 已据此授权并完成同锁全量生成 |
 | 2 官方权重 | Qwen3B 正式生成器锁绑定 5/25 GPU smoke | COMPLETED | `2de1ee7` | RTX 4090 运行 `...lock_bound_smoke_seed42_20260719_224120`：能力门禁 complete、5×512/25×512、allocated 9.14 GiB、reserved 9.45 GiB、pending=0、exit 0；模型锁 SHA256 为 `b6c81931...127fa` | 无；两条 Transformers 兼容性提示为非致命警告 | 固化小型审计记录，并用该证据约束同变体 Clotho 全量 embedding |
 | 2 官方权重 | Qwen3B 全量 checkpoint embedding 生成器 | COMPLETED | `91fd25b` | 同一 RUN_ID 保留首次 exit 1 后，`attempt_20260719_232512` 成功：smoke gate passed、1,045 audio/5,225 caption、512 维、pending=0、exit 0、63 MB；RTX 4090 峰值 allocated/reserved 9.31/10.12 GiB，五个最终工件 SHA256 已固定 | 无；首次失败和非致命 Transformers 警告均保留 | 在 CPU 服务器复用该固定 embedding 目录运行 Qwen3B-AC/Clotho T2A/T2T 多口径套件 |
+| 2 官方权重 | Qwen3B-AC/Clotho T2A/T2T 四协议 CPU 评测套件 | WAITING_USER | `6fb6a1f` | 专属 suite 配置绑定 Qwen3B-AC checkpoint、模型锁和生成协议 SHA256；四个协议与已完成的 Qwen3B-Cl 套件逐字段相同。公共 wrapper 仅接受仓库内已跟踪配置，完整 244 项测试通过 | 等待 CPU 服务器拉取最新 commit 并运行固定 embedding 目录 | 执行约 5–20 分钟 CPU 套件，生成四套完整排名、metrics、retrieval_summary.csv 和 suite_metrics.json |
 | 2 官方权重 | Tables 2/3：单个 3B 官方权重 T2A/T2T | IN_PROGRESS | `97dab6a` | Qwen3B-Cl/Clotho 闭环已完成：T2A `[CODE]` all-caption R@1/5/10=`22.7368/49.4737/63.3110`；T2T `[CODE]` seed0=`64.4019/76.1722/80.7656`；另保留两套预声明协议；12 个观测均分栏写入结果汇总 | `[MISSING]` 论文 caption 选择、T2T self/tie 口径；AudioCaps/MECAT 音频候选集和其余模型仍未准备 | 先复现同一模型的 Clotho 正向 UIQ，再扩展其他权重和数据集 |
 | 2 官方权重 | Qwen3B-Cl 全量 checkpoint embedding 生成器 | COMPLETED | `97dab6a` | RTX 4090 真实运行 `...embeddings_seed42_20260719_181621`：1,045 audio/5,225 caption 全部完成、512 维、pending=0、exit 0、63 MB；峰值 allocated 9.307 GiB/reserved 10.115 GiB；四个最终工件 SHA256 已固定 | 论文 `passage:` 与公开代码 no-prefix 冲突已显式标记；公开代码协议不能冒充严格论文协议 | 大型 embedding 保留远程路径与哈希，供 UIQ CPU 套件复用 |
 | 2 官方权重 | Qwen3B-Cl/Clotho T2A/T2T 四协议 CPU 评测套件 | COMPLETED | `97dab6a` | CPU 运行 `...retrieval_suite_seed42_20260719_185937`：suite 与四协议 exit 均为 0，525 MB；T2A 两口径、T2T `[CODE]` 与 `[INFERRED]` 敏感性均已分栏；小型摘要 SHA256 `37fb82db...a4a0`，结果 CSV SHA256 `b16a86e5...836` | 论文未公开 caption 选择与 T2T self/tie 口径，四协议不得择优冒充论文口径；严格论文观察继续标为 blocked | 已将 12 个 close 观察及 6 个 strict blocked 观察统一写入结果汇总 |
@@ -63,8 +64,8 @@
 
 ## 当前焦点
 
-- 当前阶段：Qwen3B-Cl/Clotho 官方权重 T2A/T2T 与四类正向 UIQ 已完成首个完整闭环；Qwen3B AudioCaps checkpoint 的锁绑定 smoke 和全量 Clotho embedding 也已完成，准备转入 CPU T2A/T2T 指标评测。
+- 当前阶段：Qwen3B-Cl/Clotho 官方权重 T2A/T2T 与四类正向 UIQ 已完成首个完整闭环；Qwen3B AudioCaps checkpoint 的锁绑定 smoke、全量 Clotho embedding 和专属 CPU 套件代码均已完成，等待 CPU 指标运行。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：RTX 4090 上的 Qwen3B-AC 全量重试 `.../attempt_20260719_232512` exit 0；1045×512 candidate 与 5225×512 query embedding 全部完成，核心生成约 10 分 46 秒，固定输出目录为 63 MB。
+- 最近完成：`6fb6a1f` 提交 Qwen3B-AC/Clotho 专属 CPU retrieval suite；它与 Qwen3B-Cl 使用相同四协议，但强制绑定独立 checkpoint、模型锁和生成协议，完整 244 项测试通过。
 - 当前阻塞：Qwen3B-Cl/Clotho 当前闭环无阻塞；完整三数据集/多模型表仍缺 AudioCaps/MECAT 音频、部分模型资源和若干论文未公开口径。训练阶段按用户要求暂停。
-- 下一步：审计并参数化现有 Clotho CPU 检索套件，以 Qwen3B-AC 的固定 embedding 目录运行与 Qwen3B-Cl 相同的 T2A/T2T 四口径协议；不重新编码音频或文本。
+- 下一步：在 CPU 服务器对固定目录 `oea_qwen3b_ac_clotho_embeddings_seed42_20260719_231724` 运行四协议 T2A/T2T 套件；该步骤不重新编码音频或文本，也不需要 GPU。
