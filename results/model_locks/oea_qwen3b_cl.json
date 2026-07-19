@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "status": "locked",
+  "variant_id": "oea_qwen3b_cl",
+  "model": "OEA-Qwen3B (+Cl)",
+  "training_variant": "AudioCaps + Clotho",
+  "source_tags": {
+    "base_model": "[CODE] immutable official revision; every selected file verified by resource audit",
+    "source_checkpoint": "[CODE] immutable official LFS identity verified by resource audit",
+    "derived_checkpoint": "[DERIVED] weights-only LoRA/projection artifact verified against the fixed source checkpoint",
+    "structure": "[CODE] measured from the fixed source checkpoint; not architecture-inferred"
+  },
+  "base_model": {
+    "repo_id": "Qwen/Qwen2.5-Omni-3B",
+    "revision": "f75b40e3da2003cdd6e1829b1f420ca70797c34e",
+    "local_subdir": "Qwen2.5-Omni-3B",
+    "source": "CODE+AUDIT",
+    "files": {
+      ".gitattributes": {
+        "size_bytes": 1519,
+        "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+      },
+      "LICENSE": {
+        "size_bytes": 7387,
+        "sha256": "ae8ef9d3fb476f735d9b9abeaab73b7f778b121c77427cd918ec3da01eefbc44"
+      },
+      "README.md": {
+        "size_bytes": 36788,
+        "sha256": "9b436a82898fa8f1e8559d1aea114052e7d471c4a5319676e033cbacc08ebcc1"
+      },
+      "added_tokens.json": {
+        "size_bytes": 579,
+        "sha256": "e81a2cc3bd867a1217019eed202d1d8a07e1063ece716f22060dda14f6cc07d8"
+      },
+      "chat_template.json": {
+        "size_bytes": 1313,
+        "sha256": "1933f7ca08e6503460e981d9037ddc0b851196abfa3aceea52d6ee0c0fdfd9f0"
+      },
+      "config.json": {
+        "size_bytes": 13183,
+        "sha256": "20790f362c37a1718a3e764f597ae33dfc20177399762018dffaabf8321d4dd1"
+      },
+      "generation_config.json": {
+        "size_bytes": 74,
+        "sha256": "b9acf52072249e0e1850541d51ca4c85a30b9d7e23c2f2093ec0fb4139059ac7"
+      },
+      "merges.txt": {
+        "size_bytes": 1671853,
+        "sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+      },
+      "model-00001-of-00003.safetensors": {
+        "size_bytes": 4994850880,
+        "sha256": "349972cebff443030e9e96e1e930d7230979c6961cf046fa29fc580e4bcf49a6"
+      },
+      "model-00002-of-00003.safetensors": {
+        "size_bytes": 4999787448,
+        "sha256": "b29a76dfefb3aa33a5bd0faa19c681d039a44de57223653ea0e933df728c6d8c"
+      },
+      "model-00003-of-00003.safetensors": {
+        "size_bytes": 1978024880,
+        "sha256": "8f2138170a87ec604b53232491a96d6dcf19e0724aca37e69aace143e508b170"
+      },
+      "model.safetensors.index.json": {
+        "size_bytes": 241817,
+        "sha256": "5b7629198e2ef80e37612a491d9bfd71639d2f212632d36d8ab086922e74e129"
+      },
+      "preprocessor_config.json": {
+        "size_bytes": 667,
+        "sha256": "b47055ce61463ce143e9aab741d55c0aa520801a0a5d63be73c5b17cecb6bc69"
+      },
+      "special_tokens_map.json": {
+        "size_bytes": 832,
+        "sha256": "dc241604d085780a33f760f69c47e6622451104c20eee3cd3a12b6e884b43f44"
+      },
+      "spk_dict.pt": {
+        "size_bytes": 259544,
+        "sha256": "6a05609b28f5d42b7b748f0f07592545c8f1f6885b9ae8fff64baf56e86b2a18"
+      },
+      "tokenizer.json": {
+        "size_bytes": 11421870,
+        "sha256": "8441917e39ae0244e06d704b95b3124795cec478e297f9afac39ba670d7e9d99"
+      },
+      "tokenizer_config.json": {
+        "size_bytes": 6469,
+        "sha256": "569aa7a9171e36dfff80f0a7550ab0c9c09e46ac840fea5030641417394fb0d2"
+      },
+      "vocab.json": {
+        "size_bytes": 2776833,
+        "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      }
+    }
+  },
+  "checkpoint": {
+    "repo_id": "JudeJiwoo/OEA-Qwen3B-Cl",
+    "revision": "54ccd008d4a1340d2a1f8edcd5dd0e82c61367a4",
+    "local_subpath": "OEA-Qwen3B-Cl/step_40_inference_only.pt",
+    "size_bytes": 59068647,
+    "sha256": "f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a",
+    "source": "DERIVED_FROM_CODE_CHECKPOINT",
+    "source_checkpoint": {
+      "local_subpath": "OEA-Qwen3B-Cl/step_40.pt",
+      "size_bytes": 9466833858,
+      "sha256": "d5f2648c19b07fe5b33c22873098f9b9d749dfe2fb48e5d3dedfcea827c39b5c"
+    }
+  },
+  "measured_structure": {
+    "lora_tensor_count": 544,
+    "lora_tensor_bytes": 50462720
+  },
+  "evidence": {
+    "checkpoint_registry": {
+      "path": "configs/checkpoints/official_oea_checkpoints.json",
+      "size_bytes": 3211,
+      "sha256": "2e3a9baf9adf725c4e247981433721759c4dbb8d4fbd8612a36f6c6cfeb8526a"
+    },
+    "model_resource_audit": {
+      "path": "logs/official_model_pipeline_oea_qwen3b_cl_20260719_163246/pipeline/model_resource_audit.json",
+      "size_bytes": 18612,
+      "sha256": "9bc2e5f8e5b0a7cb655715cc1ae4411cd195a352db175cf529bf02f330dcbb90"
+    },
+    "checkpoint_preparation": {
+      "path": "logs/official_model_pipeline_oea_qwen3b_cl_20260719_163246/pipeline/checkpoint_preparation/preparation_manifest.json",
+      "size_bytes": 3381,
+      "sha256": "ea62f56d238a1c1f1e677232800c7fb8f95bf0802c92158e8225f6c24dc3a573"
+    },
+    "resource_audit_git_commit": "6b3aa1bdb12220f5d0b58206dff30680f2dab790",
+    "checkpoint_preparation_git_commit": "6b3aa1bdb12220f5d0b58206dff30680f2dab790",
+    "checkpoint_preparation_operation": "inspect_and_verify_existing"
+  },
+  "builder_git_commit": "6b3aa1bdb12220f5d0b58206dff30680f2dab790"
+}
