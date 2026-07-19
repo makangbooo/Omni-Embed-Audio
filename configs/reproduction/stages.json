@@ -280,9 +280,9 @@
     {
       "stage_id": "official_qwen3b_metrics",
       "kind": "executable",
-      "status": "WAITING_USER",
+      "status": "COMPLETED",
       "resource": "CPU",
-      "duration": "5-20 minutes",
+      "duration": "completed; exact wall-clock start was not retained in the compact evidence",
       "long_operation": false,
       "command": [
         "bash",
@@ -290,7 +290,7 @@
         "{embedding_dir}"
       ],
       "required_arguments": ["embedding_dir"],
-      "description": "Run the same four fixed T2A/T2T protocols over the completed AudioCaps-trained OEA-Qwen3B embedding directory with its own model lock and generation protocol binding."
+      "description": "Completed all four fixed T2A/T2T protocols over the AudioCaps-trained OEA-Qwen3B embedding directory; suite and attempt exited 0 and produced a 525 MB audited result directory."
     },
     {
       "stage_id": "uiq_embeddings",

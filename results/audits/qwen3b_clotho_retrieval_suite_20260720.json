@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_run_compact_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "Transcribed from the compact success block, complete retrieval-summary CSV, artifact hashes, attempt exit code, output size, and final clean Git-status section emitted by the committed wrapper. The pasted terminal output was truncated outside these required sections; no required audit field was lost. Large rankings and raw logs remain at the recorded remote path."
+  },
+  "git_commit": "2ceb719defbba9e3bb45c7f4a119ecf2374dfdff",
+  "model": "OEA-Qwen3B",
+  "training_variant": "AudioCaps",
+  "dataset": "Clotho v2.1 evaluation",
+  "seed": 42,
+  "model_lock": {
+    "path": "results/model_locks/oea_qwen3b.json",
+    "size_bytes": 5262,
+    "sha256": "b6c819311206f583e861991c0678b0b3b61cc2fd346c98c1c30f67c62d0127fa"
+  },
+  "embedding_protocol": {
+    "path": "configs/eval/qwen3b_clotho_embeddings.json",
+    "size_bytes": 2817,
+    "sha256": "e27398bc12f3fb9bcfd130dde074835df718950f2be9cf874448e4807af1bd6f"
+  },
+  "embedding_run": {
+    "run_id": "oea_qwen3b_ac_clotho_embeddings_seed42_20260719_231724",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_ac_clotho_embeddings_seed42_20260719_231724",
+    "audit_path": "results/audits/qwen3b_clotho_full_embeddings_20260720.json"
+  },
+  "retrieval_suite": {
+    "suite_id": "oea_qwen3b_ac_clotho_retrieval_suite_seed42_20260720_003516",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_ac_clotho_retrieval_suite_seed42_20260720_003516",
+    "attempt_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_ac_clotho_retrieval_suite_seed42_20260720_003516/attempts/attempt_20260720_003516",
+    "finished_at": "2026-07-20T00:35:47+08:00",
+    "status": "complete",
+    "exit_code": 0,
+    "binding_type": "official_oea",
+    "protocol_count": 4,
+    "remote_directory_size": "525M",
+    "artifacts": {
+      "suite_metrics.json": {
+        "sha256": "91ca967d2c76baa1df3379ba4d73c97ecc15b8b2a7c0e0edd7df5f2773f9173c"
+      },
+      "retrieval_summary.csv": {
+        "size_bytes": 2133,
+        "sha256": "8a8ab5a073074d4121f0caf1092593b68b7747efce657715174ce3e7771e1a7c"
+      }
+    },
+    "protocols": {
+      "t2a_public_code_default_joint_all_captions": {
+        "task": "t2a",
+        "protocol_source": "CODE",
+        "query_selection": "all",
+        "evaluated_queries": 5225,
+        "metrics_artifact_sha256": "0d5aa93f15324d4c5274ce6c413c3cd64be2bc3b9cd130cd92b44bff8ffe2f0e",
+        "metrics": {
+          "R@1": 19.004784688995215,
+          "R@5": 41.952153110047846,
+          "R@10": 55.961722488038276,
+          "MRR": 0.30792355803052635,
+          "DCG": 0.4426473849283853
+        }
+      },
+      "t2a_public_code_t2a_only_seed0": {
+        "task": "t2a",
+        "protocol_source": "CODE",
+        "query_selection": "public_code_seed0_one_per_clip",
+        "query_selection_seed": 0,
+        "evaluated_queries": 1045,
+        "metrics_artifact_sha256": "3219cd4faea55a87118093a5904e654cb169f819e4347561e8f3674b2fe1e626",
+        "metrics": {
+          "R@1": 19.330143540669855,
+          "R@5": 41.72248803827751,
+          "R@10": 55.69377990430622,
+          "MRR": 0.3110590821078915,
+          "DCG": 0.4450335320146445
+        }
+      },
+      "t2t_public_code_default_seed0": {
+        "task": "t2t",
+        "protocol_source": "CODE",
+        "query_selection": "public_code_seed0_one_per_clip",
+        "query_selection_seed": 0,
+        "evaluated_queries": 1045,
+        "metrics_artifact_sha256": "83fb8c119ee267c9957d1ebb8c6ca82b0ec69d1c34c0d01fc9b0018a7a82203f",
+        "metrics": {
+          "R@1": 61.33971291866028,
+          "R@5": 74.16267942583733,
+          "R@10": 79.33014354066987,
+          "MRR": 0.6741043505656872,
+          "DCG": 0.7354958692515788
+        }
+      },
+      "t2t_all_captions_sensitivity": {
+        "task": "t2t",
+        "protocol_source": "INFERRED",
+        "query_selection": "all",
+        "evaluated_queries": 5225,
+        "metrics_artifact_sha256": "fd38b092a767bdf3418af4de2d14e456c7e6d97858e6943972d296718326cac2",
+        "metrics": {
+          "R@1": 62.79425837320575,
+          "R@5": 73.8755980861244,
+          "R@10": 78.3157894736842,
+          "MRR": 0.6802899518391492,
+          "DCG": 0.7390050580164594
+        }
+      }
+    }
+  },
+  "paper_values": {
+    "source": "PAPER",
+    "table_2_clotho_t2a": {
+      "R@1": 19.18,
+      "R@5": 42.05,
+      "R@10": 55.85
+    },
+    "table_3_clotho_t2t": {
+      "R@1": 62.81,
+      "R@5": 73.76,
+      "R@10": 78.22
+    }
+  },
+  "paper_protocol_limitation": {
+    "status": "MISSING",
+    "note": "The paper does not identify the Clotho caption-selection protocol, and it does not fully specify T2T self-exclusion or tie handling. All four protocols were declared before the run and remain separate; closeness to the paper values is not used to select one after the run."
+  }
+}

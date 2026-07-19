@@ -107,13 +107,14 @@ JSON paths, and invalid `exact` labels.
 
 All 17 paper tables are classified. The 13 numeric result tables contribute
 910 registered paper metrics, and the PDF transcription audit currently
-matches 910/910 cells. The first formal Qwen3B-Cl/Clotho T2A/T2T run
-contributes 12 reviewed `close` observations from four predeclared
-public-code/sensitivity protocols. Its positive-UIQ run contributes another 12
-reviewed `close` observations for Tables 12–15. Six strict Table 2/3
-observations remain `blocked` because the paper and public evaluation command
-do not fully specify caption selection and the T2T self/tie protocol. The
-remaining 892 registered metrics are unobserved
+matches 910/910 cells. The Qwen3B-Cl/Clotho T2A/T2T run contributes 12
+reviewed `close` observations from four predeclared public-code/sensitivity
+protocols, and its positive-UIQ run contributes another 12 reviewed `close`
+observations for Tables 12–15. The AudioCaps-trained Qwen3B/Clotho run adds 12
+more reviewed `close` T2A/T2T observations under the same four protocols.
+Twelve strict Table 2/3 observations across the two variants remain `blocked`
+because the paper and public evaluation command do not fully specify caption
+selection and the T2T self/tie protocol. The remaining 886 registered metrics are unobserved
 pending formal runs; they are not represented as reproduced values.
 
 The four predeclared public-code retrieval protocols remain runnable and must
