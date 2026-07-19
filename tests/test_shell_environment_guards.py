@@ -56,6 +56,8 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_qwen3b_clotho_retrieval_suite.sh",
             "run_qwen3b_cl_clotho_positive_uiq_embeddings.sh",
             "run_qwen3b_clotho_positive_uiq_suite.sh",
+            "run_qwen3b_ac_clotho_positive_uiq_embeddings.sh",
+            "run_qwen3b_ac_clotho_positive_uiq_suite.sh",
             "run_official_checkpoint_preparation.sh",
             "run_qwen3b_clotho_embeddings.sh",
             "run_reproduction.sh",
@@ -171,15 +173,25 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertNotIn("rm -rf", audiocaps_source)
 
     def test_positive_uiq_suite_is_cpu_only_and_non_overwriting(self) -> None:
-        source = (
-            REPOSITORY_ROOT / "scripts/run_qwen3b_clotho_positive_uiq_suite.sh"
-        ).read_text(encoding="utf-8")
-        self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
-        self.assertIn("prepare_positive_uiq_evaluation_suite.py prepare", source)
-        self.assertIn("run_embedding_evaluation.sh", source)
-        self.assertIn("prepare_positive_uiq_evaluation_suite.py finalize", source)
-        self.assertIn("Use a new SUITE_ID", source)
-        self.assertNotIn("rm -rf", source)
+        wrappers = (
+            "run_qwen3b_clotho_positive_uiq_suite.sh",
+            "run_qwen3b_ac_clotho_positive_uiq_suite.sh",
+        )
+        for filename in wrappers:
+            with self.subTest(script=filename):
+                source = (REPOSITORY_ROOT / "scripts" / filename).read_text(
+                    encoding="utf-8"
+                )
+                self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
+                self.assertIn(
+                    "prepare_positive_uiq_evaluation_suite.py prepare", source
+                )
+                self.assertIn("run_embedding_evaluation.sh", source)
+                self.assertIn(
+                    "prepare_positive_uiq_evaluation_suite.py finalize", source
+                )
+                self.assertIn("Use a new SUITE_ID", source)
+                self.assertNotIn("rm -rf", source)
 
     def test_formal_embedding_wrappers_resolve_the_committed_model_lock(self) -> None:
         wrappers = (
@@ -243,6 +255,21 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn("gpu_preflight.json", qwen3b_full)
         self.assertIn("1,045 audio candidates and 5,225 caption queries", qwen3b_full)
         self.assertNotIn("rm -rf", qwen3b_full)
+
+        qwen3b_uiq = (
+            REPOSITORY_ROOT
+            / "scripts/run_qwen3b_ac_clotho_positive_uiq_embeddings.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("results/model_locks/oea_qwen3b.json", qwen3b_uiq)
+        self.assertIn("configs/eval/qwen3b_clotho_embeddings.json", qwen3b_uiq)
+        self.assertIn(
+            "configs/eval/qwen3b_clotho_positive_uiq_embeddings.json",
+            qwen3b_uiq,
+        )
+        self.assertIn("build_official_oea_eval_config.py", qwen3b_uiq)
+        self.assertIn("validate_single_bf16_gpu.py", qwen3b_uiq)
+        self.assertIn("gpu_preflight.json", qwen3b_uiq)
+        self.assertNotIn("rm -rf", qwen3b_uiq)
 
     def test_unified_reproduction_entry_is_plan_first_and_non_destructive(self) -> None:
         wrapper = (REPOSITORY_ROOT / "scripts/run_reproduction.sh").read_text(

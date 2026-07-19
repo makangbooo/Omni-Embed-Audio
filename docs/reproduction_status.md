@@ -42,6 +42,7 @@
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 保留为 canonical negative evaluator 的公式回归测试 |
 | 2 指标 | 显式 target/HN 的可审计 negative embedding evaluator | COMPLETED | `cd4d00b` | 严格 query/target/HN ID 覆盖、optimistic rank、确定性完整排序、per-query 证据、输入/输出 SHA256、失败保留和 CPU wrapper 已实现；完整 116 项测试通过 | 工具完成不等于表 17 已解锁；发布数据仍无 HN audio ID | 获得作者 pairing 后才运行正式表 17；否则仅运行单独标记的重建协议 |
 | 2 UIQ | Tables 12–15 正向 UIQ | IN_PROGRESS | `35e064f` | Qwen3B-Cl/Clotho 首个完整闭环完成：RTX 4090 生成四类 4,180×512 embedding；CPU suite `...positive_uiq_suite_seed42_20260719_211752` 四协议与 wrapper 共五个 exit 均为 0、100 MB；12 个 R@k 与论文绝对差均不超过 0.575 个百分点，全部作为 `[CODE] close` 写入统一结果表；MRR/DCG 作为额外审计指标保留 | 当前变体/数据集无阻塞；完整 Tables 12–15 仍缺其余五个 OEA 变体、四个 CLAP、AudioCaps/MECAT，且 MECAT 847/848 口径未决 | 固化 12 个观察和 suite 哈希；随后在 CPU 侧重新审计已下载模型/数据，选择下一个无需训练的官方权重评测闭环 |
+| 2 UIQ | Qwen3B-AC/Clotho 正向 UIQ embedding 与四协议套件 | WAITING_USER | `5eb1d3e` | 已固定 Qwen3B-AC 模型锁、caption 生成协议、四份 released UIQ、4,180×512 输出契约和专属 GPU/CPU wrapper；同一权重的 25-query smoke 与 5,225-caption 全量文本路径已测得峰值显存低于 11 GiB | 需要切换到 1×RTX 4090 或同等 BF16 GPU 执行 4,180 条文本查询编码 | GPU 生成完成后回到 CPU 运行四协议 Tables 12–15 suite，并将 12 个 R@k 写入统一汇总 |
 | 2 Negative | Tables 4/17 否定查询 | BLOCKED | N/A | 未开始 | 发布文件无 HN audio ID | 请求作者 pairing 或审计式重建 |
 | 3 数据 | WavCaps duration + leakage blocklists | IN_PROGRESS | `3c5b1e9` | 本地两次全量 metadata pass 已完成；精确复现 173 个 AudioCaps 与 638 个 Clotho 文件名重叠 | 论文 `<=31s` 与公开元数据计数冲突；精确 filtered manifest、Clotho 消歧和论文 blocklist 未发布 | 远程执行 DATA-08/09 复算；训练前再准备音频 |
 | 3 数据 | DATA-08：固定 WavCaps metadata 下载 | TODO | `3c5b1e9` | 8 个固定文件、176,863,095 bytes、逐文件 SHA256/LFS ID 已提交并通过本地真实下载 | 当前按步骤先完成 DATA-04/05/06/07 | 后续在 CPU 服务器下载，不需要 GPU 或 819 GB 音频 |
@@ -68,4 +69,4 @@
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：远程 CPU 套件 `oea_qwen3b_ac_clotho_retrieval_suite_seed42_20260720_003516` 四协议全部成功，结果与论文表 2/3 已分栏比较并写入统一汇总。
 - 当前阻塞：Qwen3B-Cl/Clotho 当前闭环无阻塞；完整三数据集/多模型表仍缺 AudioCaps/MECAT 音频、部分模型资源和若干论文未公开口径。训练阶段按用户要求暂停。
-- 下一步：为 Qwen3B-AC/Clotho 增加锁绑定正向 UIQ embedding 与 CPU retrieval suite；生成 4,180 个 UIQ 查询 embedding 时需要 1×RTX 4090 或同等 BF16 GPU，指标计算仍在 CPU 执行。
+- 下一步：本地提交并推送 Qwen3B-AC/Clotho 正向 UIQ 锁绑定代码；随后在 1×RTX 4090 上生成 4,180 个 UIQ 查询 embedding，指标计算仍在 CPU 执行。

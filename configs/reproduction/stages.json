@@ -323,6 +323,36 @@
       "description": "Completed the four predeclared canonical-ID protocols for Qwen3B-Cl/Clotho Tables 12-15."
     },
     {
+      "stage_id": "official_qwen3b_uiq_embeddings",
+      "kind": "executable",
+      "status": "WAITING_USER",
+      "resource": "1xBF16-GPU",
+      "duration": "approximately 5-10 minutes, based on the same-backbone Qwen3B-Cl run",
+      "long_operation": false,
+      "command": [
+        "bash",
+        "scripts/run_qwen3b_ac_clotho_positive_uiq_embeddings.sh"
+      ],
+      "required_arguments": [],
+      "description": "Generate 4,180 released positive-UIQ query embeddings from the AudioCaps-trained Qwen3B model lock after its exact text path passed the lock-bound smoke and full caption run."
+    },
+    {
+      "stage_id": "official_qwen3b_uiq_metrics",
+      "kind": "executable",
+      "status": "TODO",
+      "resource": "CPU",
+      "duration": "5-20 minutes",
+      "long_operation": false,
+      "command": [
+        "bash",
+        "scripts/run_qwen3b_ac_clotho_positive_uiq_suite.sh",
+        "{caption_embedding_dir}",
+        "{uiq_embedding_dir}"
+      ],
+      "required_arguments": ["caption_embedding_dir", "uiq_embedding_dir"],
+      "description": "Evaluate the four released canonical-ID positive-UIQ protocols for AudioCaps-trained Qwen3B/Clotho after the GPU query embedding pass completes."
+    },
+    {
       "stage_id": "official_eval",
       "kind": "group",
       "status": "COMPLETED",

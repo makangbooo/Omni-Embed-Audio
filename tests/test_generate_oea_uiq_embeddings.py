@@ -38,22 +38,35 @@ class GenerateOEAUIQEmbeddingsTest(unittest.TestCase):
         self.assertIn("--base-embedding-config", completed.stdout)
 
     def test_fixed_config_pins_all_released_positive_files(self) -> None:
-        config = load_uiq_config(
-            REPOSITORY_ROOT
-            / "configs/eval/qwen3b_cl_clotho_positive_uiq_embeddings.json"
-        )
-        self.assertEqual(config["expected_examples"], 1045)
-        self.assertEqual(config["expected_total_queries"], 4180)
-        self.assertEqual(config["expected_embedding_dim"], 512)
-        self.assertEqual(
-            tuple(row["released_query_type"] for row in config["query_sources"]),
-            RELEASED_QUERY_TYPES,
-        )
-        self.assertEqual(config["query_sources"][-1]["paper_query_type"], "Keyphrase")
-        self.assertEqual(config["query_sources"][-1]["released_query_type"], "tagging")
-        verify_repository_resource(config["base_embedding_config"])
-        for source in config["query_sources"]:
-            verify_repository_resource(source)
+        configs = {
+            "qwen3b_cl_clotho_positive_uiq_embeddings.json": "OEA-Qwen3B (+Cl)",
+            "qwen3b_clotho_positive_uiq_embeddings.json": "OEA-Qwen3B",
+        }
+        for filename, expected_model in configs.items():
+            with self.subTest(config=filename):
+                config = load_uiq_config(
+                    REPOSITORY_ROOT / "configs/eval" / filename
+                )
+                self.assertEqual(config["model"], expected_model)
+                self.assertEqual(config["expected_examples"], 1045)
+                self.assertEqual(config["expected_total_queries"], 4180)
+                self.assertEqual(config["expected_embedding_dim"], 512)
+                self.assertEqual(
+                    tuple(
+                        row["released_query_type"]
+                        for row in config["query_sources"]
+                    ),
+                    RELEASED_QUERY_TYPES,
+                )
+                self.assertEqual(
+                    config["query_sources"][-1]["paper_query_type"], "Keyphrase"
+                )
+                self.assertEqual(
+                    config["query_sources"][-1]["released_query_type"], "tagging"
+                )
+                verify_repository_resource(config["base_embedding_config"])
+                for source in config["query_sources"]:
+                    verify_repository_resource(source)
 
     def make_fixture(self, root: Path) -> tuple[list[dict[str, object]], dict[str, object]]:
         manifest = [

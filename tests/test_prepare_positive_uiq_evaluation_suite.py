@@ -330,6 +330,25 @@ class PreparePositiveUIQEvaluationSuiteTest(unittest.TestCase):
             config["expected_uiq_generation_config_sha256"],
         )
 
+        qwen3b_config = load_suite_config(
+            REPOSITORY_ROOT
+            / "configs/eval/qwen3b_clotho_positive_uiq_suite.json"
+        )
+        self.assertEqual(qwen3b_config["model"], "OEA-Qwen3B")
+        self.assertEqual(qwen3b_config["official_variant_id"], "oea_qwen3b")
+        self.assertEqual(
+            qwen3b_config["official_model_lock_path"],
+            "results/model_locks/oea_qwen3b.json",
+        )
+        qwen3b_uiq_config = file_identity(
+            REPOSITORY_ROOT
+            / "configs/eval/qwen3b_clotho_positive_uiq_embeddings.json"
+        )
+        self.assertEqual(
+            qwen3b_uiq_config["sha256"],
+            qwen3b_config["expected_uiq_generation_config_sha256"],
+        )
+
     def test_type_major_metadata_selection_is_exact(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
