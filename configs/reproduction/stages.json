@@ -217,7 +217,7 @@
     {
       "stage_id": "official_eval_smoke",
       "kind": "executable",
-      "status": "WAITING_USER",
+      "status": "COMPLETED",
       "resource": "1xBF16-GPU",
       "duration": "5-20 minutes",
       "long_operation": false,
@@ -228,19 +228,18 @@
     {
       "stage_id": "official_eval_embeddings",
       "kind": "executable",
-      "status": "BLOCKED",
+      "status": "COMPLETED",
       "resource": "1xBF16-GPU",
       "duration": "over 30 minutes",
       "long_operation": true,
       "command": ["bash", "scripts/run_qwen3b_cl_clotho_embeddings.sh"],
       "required_arguments": [],
-      "blocked_reason": "The committed Qwen3B-Cl model lock is ready; the lock-bound five-audio/25-caption GPU smoke must complete before this long run is authorized.",
       "description": "Generate the formal Qwen3B-Cl Clotho audio/caption embedding bank from a committed model lock."
     },
     {
       "stage_id": "official_eval_metrics",
       "kind": "executable",
-      "status": "BLOCKED",
+      "status": "COMPLETED",
       "resource": "CPU",
       "duration": "5-20 minutes",
       "long_operation": false,
@@ -250,13 +249,12 @@
         "{embedding_dir}"
       ],
       "required_arguments": ["embedding_dir"],
-      "blocked_reason": "A complete official_eval_embeddings directory must be supplied from the GPU server.",
       "description": "Run the four fixed T2A/T2T protocols over a completed embedding directory."
     },
     {
       "stage_id": "uiq_embeddings",
       "kind": "executable",
-      "status": "BLOCKED",
+      "status": "WAITING_USER",
       "resource": "1xBF16-GPU",
       "duration": "over 30 minutes",
       "long_operation": true,
@@ -265,7 +263,6 @@
         "scripts/run_qwen3b_cl_clotho_positive_uiq_embeddings.sh"
       ],
       "required_arguments": [],
-      "blocked_reason": "A reviewed Qwen3B-Cl model lock must be committed and the Clotho manifest must remain fixed.",
       "description": "Generate 4,180 released positive-UIQ query embeddings from the committed model lock."
     },
     {
@@ -288,7 +285,7 @@
     {
       "stage_id": "official_eval",
       "kind": "group",
-      "status": "BLOCKED",
+      "status": "COMPLETED",
       "resource": "CPU -> 1xBF16-GPU -> CPU",
       "duration": "multi-step",
       "long_operation": true,
@@ -298,19 +295,17 @@
         "official_eval_embeddings",
         "official_eval_metrics"
       ],
-      "blocked_reason": "The model lock, GPU embedding bank, and CPU metric handoff have not yet completed in order.",
-      "description": "Cross-server official Qwen3B-Cl evaluation plan; group stages are intentionally plan-only."
+      "description": "Completed cross-server Qwen3B-Cl/Clotho official-checkpoint evaluation plan."
     },
     {
       "stage_id": "uiq_eval",
       "kind": "group",
-      "status": "BLOCKED",
+      "status": "WAITING_USER",
       "resource": "1xBF16-GPU -> CPU",
       "duration": "multi-step",
       "long_operation": true,
       "children": ["official_eval_smoke", "official_eval_embeddings", "uiq_embeddings", "uiq_metrics"],
-      "blocked_reason": "The committed model lock and both GPU embedding inputs required by the CPU UIQ suite are pending.",
-      "description": "Cross-server positive-UIQ evaluation plan; negative UIQ remains separately blocked by missing HN audio IDs."
+      "description": "Cross-server positive-UIQ evaluation plan waiting for one BF16 GPU; negative UIQ remains separately blocked by missing HN audio IDs."
     },
     {
       "stage_id": "train_qwen3b",

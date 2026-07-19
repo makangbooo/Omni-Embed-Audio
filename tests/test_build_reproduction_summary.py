@@ -275,12 +275,17 @@ class BuildReproductionSummaryTests(unittest.TestCase):
         )
         with DEFAULT_OUTPUT.open(encoding="utf-8", newline="") as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(len(rows), 6)
-        self.assertEqual({row["status"] for row in rows}, {"blocked"})
-        self.assertTrue(all(row["reproduced_value"] == "" for row in rows))
+        self.assertEqual(len(rows), 18)
+        self.assertEqual({row["status"] for row in rows}, {"blocked", "close"})
+        blocked = [row for row in rows if row["status"] == "blocked"]
+        close = [row for row in rows if row["status"] == "close"]
+        self.assertEqual(len(blocked), 6)
+        self.assertEqual(len(close), 12)
+        self.assertTrue(all(row["reproduced_value"] == "" for row in blocked))
+        self.assertTrue(all(row["reproduced_value"] != "" for row in close))
         self.assertEqual(result["paper_metric_count"], 910)
         self.assertEqual(result["unobserved_paper_metric_count"], 904)
-        self.assertEqual(result["status_counts"], {"blocked": 6})
+        self.assertEqual(result["status_counts"], {"blocked": 6, "close": 12})
 
 
 if __name__ == "__main__":

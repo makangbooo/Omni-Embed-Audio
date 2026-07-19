@@ -7,8 +7,8 @@
   "inputs": {
     "observations": {
       "path": "results/observations/reproduction_observations.jsonl",
-      "sha256": "ea300770b222dc5e4fee0a9f9cfa6f0f97874056d5ef0b7d56aa913b37a1fad5",
-      "size_bytes": 3628
+      "sha256": "b3a4eb6562d070c075d0fcd941e7a7199ba3223a056cd380ec9a3d3f4bd28b90",
+      "size_bytes": 14886
     },
     "paper_registry": {
       "path": "configs/results/paper_reported_metrics.jsonl",
@@ -16,19 +16,20 @@
       "size_bytes": 386143
     }
   },
-  "observation_count": 6,
+  "observation_count": 18,
   "output": {
     "path": "results/tables/reproduction_summary.csv",
-    "sha256": "f1767ad0ed7ca4c423df21a19f441f211906d546b11fca47ede1149d5dd27a47",
-    "size_bytes": 2947
+    "sha256": "ff4b2ca65d25b3885e3c2a9c160db8419a767b0da871fb7dfcd93e04f32a6670",
+    "size_bytes": 9608
   },
   "paper_metric_count": 910,
   "schema_version": 1,
   "status": "complete",
   "status_counts": {
-    "blocked": 6
+    "blocked": 6,
+    "close": 12
   },
-  "summary_row_count": 6,
+  "summary_row_count": 18,
   "unit_counts": {
     "count": 6,
     "gigabytes": 12,

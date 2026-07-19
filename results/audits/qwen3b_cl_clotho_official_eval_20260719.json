@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_run_compact_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "Transcribed from the complete summary sections emitted by the committed wrappers. Large embeddings, rankings, and raw logs remain at the recorded remote paths and are not copied into ordinary Git."
+  },
+  "git_commit": "97dab6ad91024a0e2fc0fd712fdb21b9893cfbec",
+  "model": "OEA-Qwen3B (+Cl)",
+  "dataset": "Clotho v2.1 evaluation",
+  "model_lock": {
+    "path": "results/model_locks/oea_qwen3b_cl.json",
+    "sha256": "790d12ccc8f25ea29eecb37519db5c24262253f85dcb9055b473a45304589e36"
+  },
+  "embedding_run": {
+    "run_id": "oea_qwen3b_clotho_embeddings_seed42_20260719_181621",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_embeddings_seed42_20260719_181621",
+    "status": "complete",
+    "exit_code": 0,
+    "started_at": "2026-07-19T10:16:55.991869+00:00",
+    "finished_at": "2026-07-19T10:29:47.640671+00:00",
+    "seed": 42,
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_peak_allocated_bytes": 9993822208,
+    "gpu_peak_reserved_bytes": 10861150208,
+    "candidate_count": 1045,
+    "query_count": 5225,
+    "candidate_embedding_shape": [1045, 512],
+    "query_embedding_shape": [5225, 512],
+    "completed_audio_chunks": 1045,
+    "completed_text_chunks": 5225,
+    "pending_audio_chunks": 0,
+    "pending_text_chunks": 0,
+    "remote_directory_size": "63M",
+    "artifacts": {
+      "candidate_embeddings.npy": {
+        "size_bytes": 2140288,
+        "sha256": "515f2b908ca9ed14dbc1926b61d5470b849b6435d1fa45486d2c5225815ca26a"
+      },
+      "query_embeddings.npy": {
+        "size_bytes": 10700928,
+        "sha256": "d37ed675626ef8f027f2f23fb4aefc513aebd42dc8ec5f66fe549f9292aa8bc2"
+      },
+      "candidate_metadata.jsonl": {
+        "size_bytes": 187045,
+        "sha256": "ef3e45248333b19caa52f883ddcf7e750ef0ec983e6c2dcb11bebeca203b6a75"
+      },
+      "query_metadata.jsonl": {
+        "size_bytes": 1311369,
+        "sha256": "59d375ad0acc8442cab5a6630d4721d9cbb7668ef21b001ed73d3e6a0f3465e6"
+      }
+    }
+  },
+  "retrieval_suite": {
+    "suite_id": "oea_qwen3b_clotho_retrieval_suite_seed42_20260719_185937",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_retrieval_suite_seed42_20260719_185937",
+    "status": "complete",
+    "exit_code": 0,
+    "protocol_count": 4,
+    "all_protocol_exit_codes": [0, 0, 0, 0],
+    "remote_directory_size": "525M",
+    "retrieval_summary": {
+      "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_retrieval_suite_seed42_20260719_185937/retrieval_summary.csv",
+      "size_bytes": 2135,
+      "sha256": "b16a86e54003e091277bd9f88dfade6ea5a2c667a69b5ee482afe736b70eb836"
+    },
+    "protocols": {
+      "t2a_public_code_default_joint_all_captions": {
+        "task": "t2a",
+        "protocol_source": "CODE",
+        "query_selection": "all",
+        "evaluated_queries": 5225,
+        "metrics": {
+          "R@1": 22.736842105263158,
+          "R@5": 49.473684210526315,
+          "R@10": 63.311004784689,
+          "MRR": 0.35968555938911373,
+          "DCG": 0.48879258993364455
+        }
+      },
+      "t2a_public_code_t2a_only_seed0": {
+        "task": "t2a",
+        "protocol_source": "CODE",
+        "query_selection": "public_code_seed0_one_per_clip",
+        "query_selection_seed": 0,
+        "evaluated_queries": 1045,
+        "metrics": {
+          "R@1": 21.913875598086126,
+          "R@5": 49.760765550239235,
+          "R@10": 64.21052631578948,
+          "MRR": 0.3538949579895793,
+          "DCG": 0.48478308882939014
+        }
+      },
+      "t2t_public_code_default_seed0": {
+        "task": "t2t",
+        "protocol_source": "CODE",
+        "query_selection": "public_code_seed0_one_per_clip",
+        "query_selection_seed": 0,
+        "evaluated_queries": 1045,
+        "metrics": {
+          "R@1": 64.40191387559808,
+          "R@5": 76.17224880382774,
+          "R@10": 80.76555023923446,
+          "MRR": 0.7009463685972187,
+          "DCG": 0.7575288793599091
+        }
+      },
+      "t2t_all_captions_sensitivity": {
+        "task": "t2t",
+        "protocol_source": "INFERRED",
+        "query_selection": "all",
+        "evaluated_queries": 5225,
+        "metrics": {
+          "R@1": 64.36363636363637,
+          "R@5": 75.13875598086125,
+          "R@10": 79.73205741626795,
+          "MRR": 0.6953029782532181,
+          "DCG": 0.7519069306231252
+        }
+      }
+    }
+  },
+  "paper_protocol_limitation": {
+    "status": "MISSING",
+    "note": "The paper does not identify the Clotho caption-selection protocol, and it does not fully specify T2T self-exclusion or tie handling. All four predeclared protocols are retained separately; closeness to the paper values is not used to select one after the run."
+  }
+}
