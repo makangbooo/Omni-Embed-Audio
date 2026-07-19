@@ -325,21 +325,21 @@
     {
       "stage_id": "official_qwen3b_uiq_embeddings",
       "kind": "executable",
-      "status": "WAITING_USER",
+      "status": "COMPLETED",
       "resource": "1xBF16-GPU",
-      "duration": "approximately 5-10 minutes, based on the same-backbone Qwen3B-Cl run",
+      "duration": "6 minutes observed on 1xRTX-4090",
       "long_operation": false,
       "command": [
         "bash",
         "scripts/run_qwen3b_ac_clotho_positive_uiq_embeddings.sh"
       ],
       "required_arguments": [],
-      "description": "Generate 4,180 released positive-UIQ query embeddings from the AudioCaps-trained Qwen3B model lock after its exact text path passed the lock-bound smoke and full caption run."
+      "description": "Completed all 4,180 released positive-UIQ query embeddings from the AudioCaps-trained Qwen3B model lock on RTX 4090; output is 4,180x512 with zero pending chunks."
     },
     {
       "stage_id": "official_qwen3b_uiq_metrics",
       "kind": "executable",
-      "status": "TODO",
+      "status": "WAITING_USER",
       "resource": "CPU",
       "duration": "5-20 minutes",
       "long_operation": false,
@@ -350,7 +350,7 @@
         "{uiq_embedding_dir}"
       ],
       "required_arguments": ["caption_embedding_dir", "uiq_embedding_dir"],
-      "description": "Evaluate the four released canonical-ID positive-UIQ protocols for AudioCaps-trained Qwen3B/Clotho after the GPU query embedding pass completes."
+      "description": "Evaluate the four released canonical-ID positive-UIQ protocols for AudioCaps-trained Qwen3B/Clotho using the completed caption and UIQ embedding banks."
     },
     {
       "stage_id": "official_eval",
