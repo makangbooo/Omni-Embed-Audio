@@ -170,6 +170,9 @@ This is a formal-path smoke, not a paper result. It resolves the committed
 Qwen3B-Cl model lock, verifies the same complete base/checkpoint inventory used
 by the full run, and invokes the same resumable generator and public-code prompt
 protocol on 5 bundled Clotho audio candidates and all 25 associated captions.
+All formal Qwen3B-Cl GPU wrappers fail closed unless PyTorch sees exactly one
+A100 with at least 79 GiB total memory and BF16 support; the observed inventory
+and any rejection reasons are saved as `gpu_preflight.json` in the attempt.
 The full wrapper remains a separate long operation and must not be started until
 the smoke report reaches `status=complete` with 5 candidate and 25 query rows.
 

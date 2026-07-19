@@ -62,6 +62,8 @@ export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 } > "${ATTEMPT_DIR}/environment.txt" 2>&1
 nvidia-smi --query-gpu=index,uuid,name,memory.total,driver_version \
   --format=csv > "${ATTEMPT_DIR}/gpu_info.txt"
+python scripts/validate_single_a100_80gb.py \
+  --output "${ATTEMPT_DIR}/gpu_preflight.json"
 
 echo "[INFO] Lock-bound smoke run ID: ${RUN_ID}"
 echo "[INFO] Output directory: ${OUTPUT_DIR}"

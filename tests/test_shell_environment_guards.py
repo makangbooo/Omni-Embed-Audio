@@ -175,6 +175,8 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
                 self.assertIn("results/model_locks/oea_qwen3b_cl.json", source)
                 self.assertIn("build_official_oea_eval_config.py", source)
                 self.assertIn("config_resolution.json", source)
+                self.assertIn("validate_single_a100_80gb.py", source)
+                self.assertIn("gpu_preflight.json", source)
                 self.assertNotIn("rm -rf", source)
 
         caption = (
