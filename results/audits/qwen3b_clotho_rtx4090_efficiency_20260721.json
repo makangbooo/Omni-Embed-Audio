@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_terminal_audit",
+  "experiment_id": "oea_qwen3b_clotho_rtx4090_efficiency_20260721_211229",
+  "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_rtx4090_efficiency_20260721_211229",
+  "git_commit": "a2c13da95f629092a65d35c3a1a749be908057c4",
+  "git_status_short": "",
+  "exit_code": 0,
+  "model": "OEA-Qwen3B (+Cl)",
+  "dataset": "Clotho v2.1 evaluation",
+  "checkpoint": "JudeJiwoo/OEA-Qwen3B-Cl@54ccd008d4a1340d2a1f8edcd5dd0e82c61367a4:OEA-Qwen3B-Cl/step_40_inference_only.pt#sha256=f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a",
+  "claim_scope": {
+    "source": "INFERRED",
+    "hardware_alignment": "hardware-mismatched",
+    "allowed_claim": "cross-hardware engineering comparison and same-RTX4090 SpeechXBT baseline",
+    "forbidden_claim": "same-hardware reproduction of PAPER A100 latency, throughput, or peak memory"
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "gpu_total_memory_bytes": 25250627584,
+    "driver": "580.76.05",
+    "torch": "2.7.1+cu126",
+    "torch_cuda": "12.6",
+    "bf16_supported": true,
+    "visible_gpu_count": 1
+  },
+  "protocol": {
+    "batch_size": 1,
+    "warmup_iterations": 10,
+    "audio_measurement_count": 1045,
+    "text_measurement_count": 5225,
+    "sample_order": "canonical Clotho manifest order",
+    "timer": "time.perf_counter_ns with CUDA synchronization before and after every encode",
+    "scope": "preprocessing, model forward, projection, L2 normalization, and device-to-host copy",
+    "source": "INFERRED"
+  },
+  "results": {
+    "model_load_seconds": 66.23360244417563,
+    "audio": {
+      "count": 1045,
+      "mean_ms": 295.5149720650718,
+      "std_ms": 83.64480341108481,
+      "min_ms": 132.915478,
+      "p50_ms": 287.7148,
+      "p95_ms": 423.28609759999995,
+      "max_ms": 750.455744,
+      "throughput_queries_per_second": 3.383923301794002
+    },
+    "text": {
+      "count": 5225,
+      "mean_ms": 38.37270308210526,
+      "std_ms": 1.6314625168277854,
+      "min_ms": 36.123269,
+      "p50_ms": 38.228004,
+      "p95_ms": 40.6877112,
+      "max_ms": 59.504617,
+      "throughput_queries_per_second": 26.06019174256036
+    },
+    "model_resident_allocated_bytes": 9593701888,
+    "model_resident_reserved_bytes": 9946791936,
+    "gpu_peak_allocated_bytes": 9993822208,
+    "gpu_peak_reserved_bytes": 10861150208,
+    "gpu_peak_allocated_gib": 9.307472229003906,
+    "gpu_peak_reserved_gib": 10.115234375,
+    "parameters": {
+      "lora_parameters": 12615680,
+      "audio_head_parameters": 1049600,
+      "text_head_parameters": 1049600,
+      "released_checkpoint_lora_plus_heads": 14714880,
+      "released_checkpoint_lora_plus_heads_m": 14.71488
+    }
+  },
+  "paper_reference": {
+    "source": "PAPER Table 5 / Appendix Table 16",
+    "hardware": "A100-SXM4-80GB",
+    "audio_ms_per_clip": 539.3,
+    "text_ms_per_query": 2.6,
+    "peak_gpu_memory_gb": 11.6,
+    "trainable_parameters_m": 16.2,
+    "comparison_note": "Latency and memory deltas are confounded by hardware and unpublished timing scope. They are not assigned a reproduction status from this run."
+  },
+  "parameter_discrepancy": {
+    "paper_m": 16.2,
+    "released_checkpoint_lora_plus_heads_m": 14.71488,
+    "absolute_delta_m": -1.48512,
+    "relative_delta_percent": -9.167407407407397,
+    "source": "PAPER versus CODE+MEASURED",
+    "status": "unresolved",
+    "note": "The released inference artifact contains 544 LoRA tensors plus the two projection heads. PAPER does not define its trainable-parameter counting procedure or identify an alternate checkpoint structure, so this exact checkpoint count is reported without guessing the missing 1.48512M parameters."
+  },
+  "artifacts": {
+    "metrics": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_rtx4090_efficiency_20260721_211229/metrics.json",
+      "size_human": "8.1K",
+      "sha256": "fa3c277e0c8824650bdfdd5a29f5b91a388901f1884c189f4a8874e45c741605"
+    },
+    "latencies": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_rtx4090_efficiency_20260721_211229/latencies.jsonl",
+      "size_bytes": 426114,
+      "sha256": "1e66e0cbcf45f21cab9c01e28eb84ffab2d73e334e412715fa97922c7987efc2"
+    },
+    "resolved_model_config": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_rtx4090_efficiency_20260721_211229/resolved_model_config.json",
+      "size_bytes": 5594,
+      "sha256": "7c657bea141555ebb3cebd0b85b9f3887c4f1fda01a1834b8101db60da0a9dcb"
+    }
+  },
+  "warnings": {
+    "fatal": false,
+    "items": [
+      "Transformers warned that preprocessor.json video configuration is deprecated.",
+      "Transformers reported unrecognized mrope_section keys for default rope scaling."
+    ]
+  }
+}

@@ -10,7 +10,7 @@ as reproduced experiments.
 |---|---|---|---|---|
 | OEA-4 | Clotho A2T: 1,045 audio queries against a frozen bank of 5,225 captions | `[CODE]` public A2T runner; not paper-reported | COMPLETED | CPU suite exit 0; R@1/5/10 = 27.2727/52.8230/66.6986; audit JSON and remote artifact hashes fixed |
 | OEA-5 | Target-corpus OEA zero-shot A2T over a frozen text index | `[MISSING]` target corpus/protocol must be fixed before a formal run | IN_PROGRESS | Dataset-agnostic evaluator is tested; target-corpus configuration and formal run remain pending |
-| OEA-6 | Audio-query encoding latency, peak memory, and throughput | `[PAPER]` efficiency reporting; current hardware may differ | IN_PROGRESS | Peak memory exists from embedding generation; controlled latency/throughput benchmark pending |
+| OEA-6 | Audio-query encoding latency, peak memory, and throughput | `[PAPER]` A100 reference plus separately labelled hardware runs | IN_PROGRESS | RTX 4090 controlled benchmark complete; A100 same-hardware run pending |
 
 ## OEA-4 protocol
 
@@ -94,3 +94,26 @@ hardware-mismatched` claim scope into `metrics.json`. That result may be used
 as the same-4090 SpeechXBT baseline and displayed beside the paper reference,
 but it cannot establish whether the A100 paper latency or peak memory was
 reproduced. The original A100 entrypoint and guard remain intact.
+
+The RTX 4090 run completed at commit `a2c13da` with exit code 0 and a clean
+worktree. It measured all 1,045 audio clips and all 5,225 captions. Audio
+encoding was 295.515 ms mean (83.645 ms population standard deviation),
+287.715 ms P50, 423.286 ms P95, and 3.384 clips/s. Text encoding was 38.373 ms
+mean (1.631 ms population standard deviation), 38.228 ms P50, 40.688 ms P95,
+and 26.060 queries/s. Peak allocated/reserved memory was 9.307/10.115 GiB.
+The raw 6,270 latency rows have SHA256 `1e66e0cb...7efc2`, and the finalized
+metrics SHA256 is `fa3c277e...41605`.
+
+These latency and memory values are not assigned a Table 5/16 reproduction
+status: the GPU differs from PAPER and PAPER omits the exact timing scope. The
+large text-latency difference also demonstrates why the end-to-end timing
+boundary must remain explicit instead of being silently compared with a
+possibly GPU-only or batched paper measurement.
+
+The released checkpoint contains 12,615,680 LoRA parameters and two 1,049,600
+parameter projection heads, for an exact measured total of 14.71488M. PAPER
+reports 16.2M but does not publish its counting procedure or a different
+checkpoint structure. The 1.48512M (9.167%) shortfall is therefore recorded as
+an unresolved `[PAPER]` versus `[CODE+MEASURED]` discrepancy, not filled by an
+inferred component. Full small evidence is in
+`results/audits/qwen3b_clotho_rtx4090_efficiency_20260721.json`.
