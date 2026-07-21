@@ -75,6 +75,32 @@ R@1/5/10, MRR, and DCG. Its `paper_table` is explicitly
 `OEA-4 extension (not paper-reported)`; it must not be presented as a missing
 OEA paper value.
 
+### Frozen target-corpus index contract
+
+`scripts/evaluate_frozen_text_index.py` is the dataset-agnostic OEA-5
+evaluator. It requires unique explicit query/document IDs and an external
+JSONL qrels file; missing queries, missing documents, duplicate qrels, and
+non-positive relevance grades are hard errors. It reports R@1/5/10, MRR@10,
+and graded nDCG@10 with deterministic candidate-index tie breaking.
+
+The candidate embedding and metadata files are the frozen text index. Their
+byte sizes and SHA256 values are checked before and after scoring; a change
+during evaluation fails the run. Large index files are referenced by identity
+rather than duplicated in every result directory. The result retains the
+index identity, top ranking indices/scores, per-query evidence, qrels/input
+hashes, Git state, command, logs, and failure traceback. The runnable wrapper
+is:
+
+```bash
+bash scripts/run_frozen_text_index_evaluation.sh \
+  /absolute/path/to/fixed_config.json \
+  /absolute/path/to/new_output_directory
+```
+
+`configs/eval/frozen_text_index_example.json` is intentionally non-runnable:
+the target corpus, split, document construction, qrels semantics, and absolute
+artifact paths remain `[MISSING]` until they are explicitly frozen.
+
 ## Required protocol resolution
 
 Before Table 2 or Table 3 is called an exact reproduction, obtain the authors'

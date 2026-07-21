@@ -44,6 +44,13 @@ split, document unit, qrels semantics, document text construction, candidate
 count, and metric set. No dataset choice or qrels conversion may be inferred
 after observing results.
 
+The dataset-agnostic evaluator is implemented, but that implementation is not
+counted as an experiment. It consumes explicit query/document metadata and
+graded JSONL qrels, hashes the frozen text embedding and metadata files before
+and after scoring, and writes deterministic top rankings plus per-query
+evidence. OEA-5 remains `IN_PROGRESS` until a fixed target-corpus configuration
+is committed and a formal official-checkpoint run produces final metrics.
+
 ## OEA-6 measurement boundary
 
 Existing full Clotho embedding runs record approximately 9.31 GiB allocated
