@@ -61,6 +61,7 @@ def load_benchmark_config(path: Path) -> dict[str, Any]:
     if config.get("schema_version") != 1:
         raise ValueError("unsupported benchmark config schema_version")
     required = {
+        "claim_scope",
         "dataset",
         "experiment_prefix",
         "hardware",
@@ -82,6 +83,15 @@ def load_benchmark_config(path: Path) -> dict[str, Any]:
         hardware.get("required_gpu_name"), str
     ):
         raise ValueError("hardware.required_gpu_name must be a string")
+    claim_scope = config["claim_scope"]
+    if not isinstance(claim_scope, dict):
+        raise ValueError("claim_scope must be an object")
+    for field in ("hardware_alignment", "result_label", "allowed_claim"):
+        if (
+            not isinstance(claim_scope.get(field), str)
+            or not claim_scope[field].strip()
+        ):
+            raise ValueError(f"claim_scope.{field} must be a non-empty string")
     protocol = config["timing_protocol"]
     if not isinstance(protocol, dict):
         raise ValueError("timing_protocol must be an object")
@@ -219,6 +229,7 @@ def main() -> int:
                 "model": benchmark_config["model"],
                 "paper_model_label": benchmark_config["paper_model_label"],
                 "dataset": benchmark_config["dataset"],
+                "claim_scope": benchmark_config["claim_scope"],
                 "benchmark_config": file_identity(benchmark_config_path),
                 "model_config": file_identity(model_config_path),
                 "manifest": file_identity(manifest_path),
@@ -243,7 +254,7 @@ def main() -> int:
         required_gpu_name = benchmark_config["hardware"]["required_gpu_name"]
         if observed_gpu_name != required_gpu_name:
             raise RuntimeError(
-                f"paper-comparison benchmark requires {required_gpu_name!r}, "
+                f"benchmark config requires {required_gpu_name!r}, "
                 f"observed {observed_gpu_name!r}"
             )
         report["hardware"] = {

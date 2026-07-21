@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "evidence_type": "remote_terminal_audit",
+  "failure_class": "expected_hardware_guard",
+  "git_commit": "931a71f597a595ba056f0b44e1a817baba579cad",
+  "git_status_short": "",
+  "experiment_id": "oea_qwen3b_clotho_a100_efficiency_20260721_204014",
+  "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_a100_efficiency_20260721_204014",
+  "resource": {
+    "observed_gpu": "NVIDIA GeForce RTX 4090",
+    "observed_gpu_memory_bytes": 25250627584,
+    "required_gpu": "NVIDIA A100-SXM4-80GB",
+    "torch": "2.7.1+cu126",
+    "torch_cuda": "12.6",
+    "driver": "580.76.05"
+  },
+  "inputs": {
+    "model": "OEA-Qwen3B (+Cl)",
+    "dataset": "Clotho v2.1 evaluation",
+    "manifest_sha256": "3522e98706072d1baee398247c6fc20c95ec62bed5d330988cdc39d90cbae05e",
+    "checkpoint_sha256": "f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a",
+    "model_config_sha256": "43c5f5bae7eb0fb0fc4355c21dacf6a3f0d057c3d4d787687c8e9d51011734b4"
+  },
+  "run": {
+    "model_load_seconds": 85.53214462380856,
+    "model_loaded_successfully": true,
+    "latency_measurements_started": false,
+    "exit_code": 1,
+    "metrics_size_bytes": 6881,
+    "metrics_sha256": "5325cc09a3dcfb124aa0783d31ce5d99d8e1a3cedfc15c02f872fe08e16a5a48",
+    "stderr_size_bytes": 1247,
+    "error": "RuntimeError(\"paper-comparison benchmark requires 'NVIDIA A100-SXM4-80GB', observed 'NVIDIA GeForce RTX 4090'\")"
+  },
+  "root_cause": "The A100-only benchmark configuration was intentionally executed on an RTX 4090. Model, checkpoint, manifest, environment, and clean-worktree checks passed; the explicit GPU-name guard then rejected the hardware before warmup or measurement.",
+  "impact": "No scientific metric was produced and no existing result was overwritten. The failed directory is retained as required evidence.",
+  "resolution": "Keep the A100 entrypoint unchanged and add a separate RTX 4090 hardware-mismatched benchmark configuration and wrapper.",
+  "outer_preflight_note": "The pasted outer-shell preflight contained torch.**version**, which is invalid Python. It was outside the audited wrapper and the shell continued; it did not cause the recorded wrapper failure. Future commands use python -c with torch.__version__ and do not end by exiting the interactive shell."
+}

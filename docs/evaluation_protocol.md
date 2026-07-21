@@ -131,6 +131,21 @@ paper-comparison result. Measurements on an RTX 4090 or other GPU must use a
 separate experiment label and must not be compared as an exact absolute-latency
 reproduction.
 
+The RTX 4090 engineering comparison uses the identical checkpoint, manifest,
+sample order, warmup, batch size, timer, synchronization, and timing boundary,
+but a distinct immutable hardware requirement and experiment prefix:
+
+```bash
+bash scripts/run_qwen3b_cl_clotho_efficiency_rtx4090.sh
+```
+
+Its config is
+`configs/eval/qwen3b_cl_clotho_efficiency_rtx4090.json`. The result is labelled
+`[INFERRED] hardware-mismatched`: it may be shown beside the paper values and
+used as the same-RTX4090 SpeechXBT baseline, but its latency, throughput, and
+peak-memory deltas cannot determine whether the A100 paper result was reproduced.
+The A100 entrypoint and hardware guard remain unchanged.
+
 ## Required protocol resolution
 
 Before Table 2 or Table 3 is called an exact reproduction, obtain the authors'

@@ -1,19 +1,20 @@
 {
   "schema_version": 1,
-  "experiment_prefix": "oea_qwen3b_clotho_a100_efficiency",
+  "experiment_prefix": "oea_qwen3b_clotho_rtx4090_efficiency",
   "model": "OEA-Qwen3B (+Cl)",
   "paper_model_label": "OEA-Qwen3B",
   "dataset": "Clotho v2.1 evaluation",
   "claim_scope": {
-    "hardware_alignment": "same-hardware-model",
+    "hardware_alignment": "hardware-mismatched",
     "result_label": "INFERRED",
-    "allowed_claim": "same-model and same-GPU-name comparison with PAPER under a separately declared timing protocol",
-    "forbidden_claim": "exact paper-protocol reproduction because PAPER omits timing details"
+    "allowed_claim": "cross-hardware engineering comparison and same-RTX4090 SpeechXBT baseline",
+    "forbidden_claim": "same-hardware reproduction of PAPER A100 latency, throughput, or peak memory"
   },
   "hardware": {
-    "required_gpu_name": "NVIDIA A100-SXM4-80GB",
+    "required_gpu_name": "NVIDIA GeForce RTX 4090",
+    "measurement_hardware": "RTX 4090 24GB",
     "paper_hardware": "A100-SXM4-80GB",
-    "source": "PAPER"
+    "source": "MEASURED+PAPER"
   },
   "model_protocol_config": "configs/eval/qwen3b_cl_clotho_embeddings.json",
   "model_lock": "results/model_locks/oea_qwen3b_cl.json",
@@ -33,6 +34,6 @@
     "text_ms_per_query": 2.6,
     "peak_gpu_memory_gb": 11.6,
     "trainable_parameters_m": 16.2,
-    "source": "PAPER Table 5 / Appendix Table 16"
+    "source": "PAPER Table 5 / Appendix Table 16; values are reference-only for this hardware-mismatched run"
   }
 }
