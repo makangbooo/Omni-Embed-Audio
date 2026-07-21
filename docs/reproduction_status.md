@@ -1,6 +1,6 @@
 # Omni-Embed-Audio 复现状态
 
-最后更新：2026-07-19（Asia/Shanghai）
+最后更新：2026-07-21（Asia/Shanghai）
 
 状态值仅使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、`COMPLETED`、`FAILED`、`BLOCKED`。
 
@@ -36,6 +36,7 @@
 | 2 官方权重 | Tables 2/3：Qwen3B 两个官方权重 T2A/T2T | IN_PROGRESS | `2ceb719` | Qwen3B-Cl 与 Qwen3B-AC 在 Clotho 上均完成全量 embedding 和同构四协议 CPU 套件；两变体共 24 个数值观察作为 `close` 分栏，12 个严格论文口径观察继续 `blocked` | `[MISSING]` 论文 caption 选择、T2T self/tie 口径；AudioCaps/MECAT 音频候选集和其他四个 OEA 变体仍未完成 | 先完成 Qwen3B-AC/Clotho 正向 UIQ，再扩展其他权重和数据集 |
 | 2 官方权重 | Qwen3B-Cl 全量 checkpoint embedding 生成器 | COMPLETED | `97dab6a` | RTX 4090 真实运行 `...embeddings_seed42_20260719_181621`：1,045 audio/5,225 caption 全部完成、512 维、pending=0、exit 0、63 MB；峰值 allocated 9.307 GiB/reserved 10.115 GiB；四个最终工件 SHA256 已固定 | 论文 `passage:` 与公开代码 no-prefix 冲突已显式标记；公开代码协议不能冒充严格论文协议 | 大型 embedding 保留远程路径与哈希，供 UIQ CPU 套件复用 |
 | 2 官方权重 | Qwen3B-Cl/Clotho T2A/T2T 四协议 CPU 评测套件 | COMPLETED | `97dab6a` | CPU 运行 `...retrieval_suite_seed42_20260719_185937`：suite 与四协议 exit 均为 0，525 MB；T2A 两口径、T2T `[CODE]` 与 `[INFERRED]` 敏感性均已分栏；小型摘要 SHA256 `37fb82db...a4a0`，结果 CSV SHA256 `b16a86e5...836` | 论文未公开 caption 选择与 T2T self/tie 口径，四协议不得择优冒充论文口径；严格论文观察继续标为 blocked | 已将 12 个 close 观察及 6 个 strict blocked 观察统一写入结果汇总 |
+| 2 OEA-4 A2T | Qwen3B-Cl/Clotho 1,045 音频查询→5,225 冻结 caption 候选 | IN_PROGRESS | `df3a532` | 已实现 `[CODE]` 五正例 A2T canonical evaluator、锁绑定 CPU suite、完整排名/哈希/失败保留和回归测试；尚未在远程固定 embedding 上正式运行 | 正式指标必须复用已完成 Qwen3B-Cl embedding 目录；本地没有大型 embedding 工件 | 在 CPU 服务器运行 `run_qwen3b_cl_clotho_a2t_suite.sh`，回传 suite metrics 与摘要 |
 | 2 指标 | Canonical T2A/T2T/UIQ embedding evaluator | COMPLETED | `43158ae` | 确定性 ID 检索、caption 多正例/排除 self、显式 query 子集、完整排名和严格输入校验已实现；相关 15 项测试通过 | 论文未公开 T2T caption 选择与 tie 口径；已在协议文档标为 `[MISSING]` | 接入 checkpoint embedding 生成器 |
 | 2 指标 | 可审计 embedding 实验输出 runner | COMPLETED | `5ed57a7` | CPU-only runner 已保存固定 embedding、metadata、完整排名、输入/工件 SHA256、seed、Git/环境/命令和失败证据；相关测试总计 27 项通过 | 无；正式运行要求干净 worktree 和显式协议来源 | 用 Qwen3B-Cl + Clotho evaluation 完成首个正式 T2A/T2T 闭环 |
 | 2 结果管理 | 论文值/复现观测/证据统一汇总契约 | COMPLETED | `c44a7d5` | Tables 1–17 与 910 个论文指标保持 910/910 转录匹配；当前汇总含 60 个观察：Qwen3B-Cl/Clotho 与 Qwen3B-AC/Clotho 各 24 个 close，以及两变体共 12 个 strict blocked；本地证据、远程工件路径/哈希、delta 和状态计数均已生成 | 无；close 为显式人工审阅结论，未由生成器自动阈值判定 | 后续正式实验继续仅凭小型固定 JSON 证据追加观察 |
