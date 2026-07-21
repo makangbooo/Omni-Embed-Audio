@@ -77,3 +77,20 @@ mean, population standard deviation, P50, P95, throughput, model-resident and
 peak memory, load time, and LoRA/projection parameter counts. Because the paper
 does not publish these timing details, reproduced measurements will remain
 labelled `[INFERRED]` rather than silently treated as the exact paper protocol.
+
+The first attempted efficiency run, at commit `931a71f`, deliberately retained
+its failure evidence after the A100 configuration was scheduled on an RTX
+4090. The model, checkpoint, manifest, and clean-worktree checks passed and the
+model loaded successfully; the exact GPU-name guard then stopped the run before
+warmup or latency measurement. This is classified as an expected scheduling
+guard rather than a model failure. Its small evidence is retained in
+`results/audits/qwen3b_clotho_a100_efficiency_on_rtx4090_failed_20260721.json`.
+
+Commit `4676525` adds a separate RTX 4090 entrypoint with the identical model,
+data order, warmup, batch size, timer, synchronization, and timing boundary.
+It has a distinct config and experiment prefix, requires the exact
+`NVIDIA GeForce RTX 4090` name, and writes an explicit `[INFERRED]
+hardware-mismatched` claim scope into `metrics.json`. That result may be used
+as the same-4090 SpeechXBT baseline and displayed beside the paper reference,
+but it cannot establish whether the A100 paper latency or peak memory was
+reproduced. The original A100 entrypoint and guard remain intact.
