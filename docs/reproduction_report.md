@@ -10,7 +10,7 @@ as reproduced experiments.
 |---|---|---|---|---|
 | OEA-4 | Clotho A2T: 1,045 audio queries against a frozen bank of 5,225 captions | `[CODE]` public A2T runner; not paper-reported | COMPLETED | CPU suite exit 0; R@1/5/10 = 27.2727/52.8230/66.6986; audit JSON and remote artifact hashes fixed |
 | OEA-5 | Target-corpus OEA zero-shot A2T over a frozen text index | `[MISSING]` target corpus/protocol must be fixed before a formal run | IN_PROGRESS | Dataset-agnostic evaluator is tested; target-corpus configuration and formal run remain pending |
-| OEA-6 | Audio-query encoding latency, peak memory, and throughput | `[PAPER]` A100 reference plus separately labelled hardware runs | IN_PROGRESS | RTX 4090 controlled benchmark complete; A100 same-hardware run pending |
+| OEA-6 | Audio-query encoding latency, peak memory, and throughput | `[PAPER]` A100 reference plus separately labelled hardware runs | COMPLETED | A100 and RTX 4090 controlled benchmarks complete; strict Table 5/16 protocol remains blocked by unpublished definitions |
 
 ## OEA-4 protocol
 
@@ -117,3 +117,31 @@ checkpoint structure. The 1.48512M (9.167%) shortfall is therefore recorded as
 an unresolved `[PAPER]` versus `[CODE+MEASURED]` discrepancy, not filled by an
 inferred component. Full small evidence is in
 `results/audits/qwen3b_clotho_rtx4090_efficiency_20260721.json`.
+
+The A100 run then completed at commit `9f62e20` on exactly one
+`NVIDIA A100-SXM4-80GB`, with BF16 available, exit code 0, an empty final Git
+status, and no active GPU process after completion. All 1,045 audio clips and
+5,225 captions were measured. Audio encoding was 273.207 ms mean (65.855 ms
+population standard deviation), 267.578 ms P50, 381.090 ms P95, and 3.660
+clips/s. Text encoding was 46.638 ms mean (4.225 ms population standard
+deviation), 45.318 ms P50, 52.117 ms P95, and 21.442 queries/s. Peak
+allocated/reserved memory was 9.307/10.115 GiB (9.994/10.861 decimal GB).
+The raw 6,270 latency rows have SHA256 `4e4e4003...6a5ae`; the finalized
+metrics SHA256 is `25702e36...b6095`.
+
+This is a completed `[INFERRED] same-hardware-model` controlled benchmark, but
+not an exact paper-protocol reproduction. Relative to PAPER, its declared
+end-to-end means are 49.340% lower for audio and 1,693.774% higher for text.
+Those large and opposing deltas cannot be attributed to the GPU or model:
+PAPER omits its timer, batching, synchronization, preprocessing, cache, and
+device-transfer boundary. PAPER also does not define allocated versus reserved
+peak memory or decimal GB versus GiB. Consequently the eight strict Table 5
+and duplicate Table 16 observations are recorded as `blocked`, while the
+controlled numeric measurements remain visible in the audit evidence.
+
+The same released checkpoint again contains exactly 14.71488M LoRA plus
+projection-head parameters, 1.48512M (9.167%) below PAPER's 16.2M. The public
+materials do not provide the training-time counting procedure or identify the
+checkpoint variant used for the efficiency row, so no missing component is
+invented. Complete A100 evidence is retained in
+`results/audits/qwen3b_clotho_a100_efficiency_20260721.json`.

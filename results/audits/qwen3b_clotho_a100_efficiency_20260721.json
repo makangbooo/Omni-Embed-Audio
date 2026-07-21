@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_terminal_audit",
+  "experiment_id": "oea_qwen3b_clotho_a100_efficiency_20260721_214156",
+  "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_a100_efficiency_20260721_214156",
+  "git_commit": "9f62e201062e9895c011fd8554c2092f7f8759c3",
+  "git_status_short": "",
+  "precheck_exit_code": 0,
+  "run_exit_code": 0,
+  "attempt_exit_code": 0,
+  "model": "OEA-Qwen3B (+Cl)",
+  "paper_model_label": "OEA-Qwen3B",
+  "dataset": "Clotho v2.1 evaluation",
+  "checkpoint": "JudeJiwoo/OEA-Qwen3B-Cl@54ccd008d4a1340d2a1f8edcd5dd0e82c61367a4:OEA-Qwen3B-Cl/step_40_inference_only.pt#sha256=f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a",
+  "claim_scope": {
+    "source": "INFERRED",
+    "hardware_alignment": "same-hardware-model",
+    "allowed_claim": "same model architecture and same GPU product comparison with PAPER under the separately declared end-to-end timing protocol",
+    "forbidden_claim": "exact paper-protocol reproduction because PAPER omits its timing, memory, and parameter-counting procedures"
+  },
+  "hardware": {
+    "hostname": "bitahub-a20549304612810752382614",
+    "gpu_uuid": "GPU-9b99f678-9af8-3f56-61bb-18f69a824a29",
+    "gpu_name": "NVIDIA A100-SXM4-80GB",
+    "gpu_total_memory_bytes": 85094825984,
+    "driver": "580.95.05",
+    "torch": "2.7.1+cu126",
+    "torch_cuda": "12.6",
+    "bf16_supported": true,
+    "visible_gpu_count": 1
+  },
+  "protocol": {
+    "batch_size": 1,
+    "warmup_iterations": 10,
+    "audio_measurement_count": 1045,
+    "text_measurement_count": 5225,
+    "sample_order": "canonical Clotho manifest order",
+    "timer": "time.perf_counter_ns with CUDA synchronization before and after every encode",
+    "scope": "preprocessing, model forward, projection, L2 normalization, and device-to-host copy",
+    "source": "INFERRED"
+  },
+  "results": {
+    "model_load_seconds": 80.08374952618033,
+    "audio": {
+      "count": 1045,
+      "mean_ms": 273.2067010832536,
+      "std_ms": 65.85509452809114,
+      "min_ms": 169.456365,
+      "p50_ms": 267.577678,
+      "p95_ms": 381.08958739999997,
+      "max_ms": 676.576569,
+      "throughput_queries_per_second": 3.6602323297160724
+    },
+    "text": {
+      "count": 5225,
+      "mean_ms": 46.63812150200957,
+      "std_ms": 4.224755234714488,
+      "min_ms": 42.915254,
+      "p50_ms": 45.317885,
+      "p95_ms": 52.1170846,
+      "max_ms": 208.000411,
+      "throughput_queries_per_second": 21.441686924652647
+    },
+    "model_resident_allocated_bytes": 9593701888,
+    "model_resident_reserved_bytes": 9946791936,
+    "gpu_peak_allocated_bytes": 9993822208,
+    "gpu_peak_reserved_bytes": 10861150208,
+    "gpu_peak_allocated_gib": 9.307472229003906,
+    "gpu_peak_reserved_gib": 10.115234375,
+    "gpu_peak_allocated_decimal_gb": 9.993822208,
+    "gpu_peak_reserved_decimal_gb": 10.861150208,
+    "parameters": {
+      "lora_parameters": 12615680,
+      "audio_head_parameters": 1049600,
+      "text_head_parameters": 1049600,
+      "released_checkpoint_lora_plus_heads": 14714880,
+      "released_checkpoint_lora_plus_heads_m": 14.71488
+    }
+  },
+  "paper_reference": {
+    "source": "PAPER Table 5 / Appendix Table 16",
+    "hardware": "A100-SXM4-80GB",
+    "audio_ms_per_clip": 539.3,
+    "text_ms_per_query": 2.6,
+    "peak_gpu_memory_gb": 11.6,
+    "trainable_parameters_m": 16.2
+  },
+  "comparison_only": {
+    "status": "no strict reproduction status assigned",
+    "audio_mean_signed_delta_ms": -266.0932989167464,
+    "audio_mean_relative_delta_percent": -49.3404967396155,
+    "text_mean_signed_delta_ms": 44.03812150200957,
+    "text_mean_relative_delta_percent": 1693.773903923445,
+    "allocated_decimal_gb_signed_delta": -1.606177792,
+    "allocated_decimal_gb_relative_delta_percent": -13.84636027586207,
+    "reserved_decimal_gb_signed_delta": -0.738849792,
+    "reserved_decimal_gb_relative_delta_percent": -6.36939475862069,
+    "released_checkpoint_parameter_signed_delta_m": -1.48512,
+    "released_checkpoint_parameter_relative_delta_percent": -9.167407407407407,
+    "note": "The latency deltas use an INFERRED end-to-end scope. The two memory deltas are alternative allocator readings, not selectable reproductions of PAPER's undefined peak-memory statistic. The parameter delta compares the released inference artifact with PAPER's undefined training-time counting procedure."
+  },
+  "strict_paper_assessment": {
+    "status": "blocked",
+    "table_5_and_16_metrics": {
+      "audio_encoding_ms_per_clip": "blocked",
+      "text_encoding_ms_per_query": "blocked",
+      "peak_gpu_memory_gb": "blocked",
+      "trainable_parameters_m": "blocked"
+    },
+    "reasons": [
+      "PAPER does not publish warmup, repeat count, batch size, timer, cache state, or the exact preprocessing and transfer timing boundary.",
+      "PAPER does not define whether peak GPU memory is allocated or reserved, whether it includes model load, or whether GB is decimal or binary.",
+      "PAPER does not publish its trainable-parameter counting procedure or the training code needed to reconstruct the 16.2M count.",
+      "PAPER's efficiency row does not identify a base versus +Cl checkpoint; the user-scoped SpeechXBT baseline uses the released +Cl checkpoint."
+    ],
+    "note": "The controlled benchmark itself completed successfully. Blocked applies only to promotion of its measurements to strict Table 5/16 reproductions."
+  },
+  "artifacts": {
+    "metrics": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_a100_efficiency_20260721_214156/metrics.json",
+      "size_bytes": 8180,
+      "sha256": "25702e36ce9dfb95cd6a081335ca80e80bfd1b98c76ad64938b44b3c15cb6095"
+    },
+    "latencies": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_a100_efficiency_20260721_214156/latencies.jsonl",
+      "size_bytes": 426103,
+      "sha256": "4e4e40032b865a38dd3907527dcd092e6f78712dd51abcbdb66ca397d816a5ae"
+    },
+    "resolved_model_config": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_a100_efficiency_20260721_214156/resolved_model_config.json",
+      "size_bytes": 5594,
+      "sha256": "ff5f540ecf03cfc493ca5c1df81e3f07130fde37525349414fafadc7aa9bcc46"
+    }
+  },
+  "warnings": {
+    "fatal": false,
+    "items": [
+      "Transformers warned that preprocessor.json video configuration is deprecated.",
+      "Transformers reported unrecognized mrope_section keys for default rope scaling."
+    ]
+  }
+}

@@ -7,8 +7,8 @@
   "inputs": {
     "observations": {
       "path": "results/observations/reproduction_observations.jsonl",
-      "sha256": "fecb98f0870c90f97e206e2cb5e63306ce5638b34d6dd29f514576aa4f6ae0bc",
-      "size_bytes": 52246
+      "sha256": "9d986e46558ab69ad1883e005a765e9a2cbcd2f64c9af64ff36ff2c867201e66",
+      "size_bytes": 58979
     },
     "paper_registry": {
       "path": "configs/results/paper_reported_metrics.jsonl",
@@ -16,20 +16,20 @@
       "size_bytes": 386143
     }
   },
-  "observation_count": 60,
+  "observation_count": 68,
   "output": {
     "path": "results/tables/reproduction_summary.csv",
-    "sha256": "e97a7fdecd0389b5547cdcd9a9a605060aa4f815a02633e65d1e8fc752c91c6f",
-    "size_bytes": 33312
+    "sha256": "b527e74720c6521a1f4ea14cc5a9bc6a0739c8b84ac741fe7416fdd085c552f1",
+    "size_bytes": 37737
   },
   "paper_metric_count": 910,
   "schema_version": 1,
   "status": "complete",
   "status_counts": {
-    "blocked": 12,
+    "blocked": 20,
     "close": 48
   },
-  "summary_row_count": 60,
+  "summary_row_count": 68,
   "unit_counts": {
     "count": 6,
     "gigabytes": 12,
@@ -40,7 +40,7 @@
     "score_1_to_5": 36,
     "score_standard_deviation": 18
   },
-  "unobserved_paper_metric_count": 874,
+  "unobserved_paper_metric_count": 866,
   "unobserved_paper_metric_ids": [
     "table11_laion_clap_three_dataset_mean_t2a_r1",
     "table11_laion_clap_three_dataset_mean_t2a_r10",
@@ -472,10 +472,6 @@
     "table16_oea_nemo3b_clotho_a100_inference_efficiency_peak_gpu_gb",
     "table16_oea_nemo3b_clotho_a100_inference_efficiency_text_ms_per_query",
     "table16_oea_nemo3b_clotho_a100_inference_efficiency_trainable_params_m",
-    "table16_oea_qwen3b_clotho_a100_inference_efficiency_audio_ms_per_clip",
-    "table16_oea_qwen3b_clotho_a100_inference_efficiency_peak_gpu_gb",
-    "table16_oea_qwen3b_clotho_a100_inference_efficiency_text_ms_per_query",
-    "table16_oea_qwen3b_clotho_a100_inference_efficiency_trainable_params_m",
     "table16_oea_qwen7b_clotho_a100_inference_efficiency_audio_ms_per_clip",
     "table16_oea_qwen7b_clotho_a100_inference_efficiency_peak_gpu_gb",
     "table16_oea_qwen7b_clotho_a100_inference_efficiency_text_ms_per_query",
@@ -872,10 +868,6 @@
     "table5_oea_nemo3b_clotho_a100_inference_efficiency_peak_gpu_gb",
     "table5_oea_nemo3b_clotho_a100_inference_efficiency_text_ms_per_query",
     "table5_oea_nemo3b_clotho_a100_inference_efficiency_trainable_params_m",
-    "table5_oea_qwen3b_clotho_a100_inference_efficiency_audio_ms_per_clip",
-    "table5_oea_qwen3b_clotho_a100_inference_efficiency_peak_gpu_gb",
-    "table5_oea_qwen3b_clotho_a100_inference_efficiency_text_ms_per_query",
-    "table5_oea_qwen3b_clotho_a100_inference_efficiency_trainable_params_m",
     "table5_oea_qwen7b_clotho_a100_inference_efficiency_audio_ms_per_clip",
     "table5_oea_qwen7b_clotho_a100_inference_efficiency_peak_gpu_gb",
     "table5_oea_qwen7b_clotho_a100_inference_efficiency_text_ms_per_query",
