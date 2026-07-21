@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_terminal_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "The retained output contains the finalized suite plan, protocol metrics, suite metrics, summary and suite hashes, exit code 0, empty protocol stderr, and a clean final Git status. The earlier FileNotFoundError came only from an auxiliary precheck that expected a nonexistent embedding-root metrics.json; the formal suite independently bound the complete embedding generation record and completed successfully."
+  },
+  "git_commit": "b4986d3b129e97911fde93290f57dd55e4b21139",
+  "git_status_short": "",
+  "model": "OEA-Qwen3B (+Cl)",
+  "dataset": "Clotho v2.1 evaluation",
+  "checkpoint": "JudeJiwoo/OEA-Qwen3B-Cl@54ccd008d4a1340d2a1f8edcd5dd0e82c61367a4:OEA-Qwen3B-Cl/step_40_inference_only.pt#sha256=f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a",
+  "protocol_boundary": {
+    "source": "CODE",
+    "paper_table": "OEA-4 extension (not paper-reported)",
+    "note": "OEA does not report Clotho A2T in a paper table. This is an official-checkpoint public-code extension and is not entered as a reproduced paper value."
+  },
+  "embedding_source": {
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_embeddings_seed42_20260719_181621",
+    "generation_status": "complete",
+    "audio_embedding_shape": [1045, 512],
+    "caption_embedding_shape": [5225, 512],
+    "audio_embeddings_sha256": "515f2b908ca9ed14dbc1926b61d5470b849b6435d1fa45486d2c5225815ca26a",
+    "caption_embeddings_sha256": "d37ed675626ef8f027f2f23fb4aefc513aebd42dc8ec5f66fe549f9292aa8bc2",
+    "audio_metadata_sha256": "ef3e45248333b19caa52f883ddcf7e750ef0ec983e6c2dcb11bebeca203b6a75",
+    "caption_metadata_sha256": "59d375ad0acc8442cab5a6630d4721d9cbb7668ef21b001ed73d3e6a0f3465e6"
+  },
+  "suite": {
+    "suite_id": "oea_qwen3b_clotho_a2t_suite_seed42_20260721_201518",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_clotho_a2t_suite_seed42_20260721_201518",
+    "resource": "CPU",
+    "gpu_disabled": true,
+    "seed": 42,
+    "status": "complete",
+    "protocol_count": 1,
+    "exit_code": 0,
+    "stderr_size_bytes": 0,
+    "retrieval_summary": {
+      "size_bytes": 757,
+      "sha256": "8c58983adb1fe9809322c438a718f0a4af341ba79902336e433eb81e2a77e7fc"
+    },
+    "suite_metrics": {
+      "sha256": "fd38d78ced6d5616682637f3dd7ba7b370e03fe31c07e68e031971f0d7178351"
+    }
+  },
+  "protocol": {
+    "protocol_id": "a2t_public_code_joint_all_captions_multi_positive",
+    "task": "a2t",
+    "query_count": 1045,
+    "candidate_count": 5225,
+    "positives_per_query": 5,
+    "normalization_applied": true,
+    "tie_policy": "optimistic_strict_greater",
+    "metrics_sha256": "70c5c7e5f5c150b80ef9133c1553f8ee5e5fd1bed924f915e85f84362d03648d",
+    "metrics": {
+      "R@1": 27.27272727272727,
+      "R@5": 52.822966507177036,
+      "R@10": 66.69856459330144,
+      "MRR": 0.3956823540273816,
+      "DCG": 0.5174117282903825
+    },
+    "ranking_artifacts": {
+      "ranks_sha256": "eab5f1fb9fd196d55718c19a270319bb3b98a51162689682e0ff974a0f513b9c",
+      "rankings_sha256": "ff7de4b1612b83b8b634de1f363ecbfa59eb4963cb0ff120040a8bc51effbdd2",
+      "similarities_sha256": "a68b01c3d468b631152e3787c7be4c778dfea4bfd960cea92cf70df59ba96ead",
+      "positive_indices_sha256": "f5507566ba9ddd2e1f4e056851084a1576dfc652c921e48788778ef786308627"
+    }
+  },
+  "precheck_anomaly": {
+    "status": "non_blocking",
+    "error": "FileNotFoundError for embedding-root metrics.json",
+    "impact": "none on the formal suite",
+    "reason": "The auxiliary shell precheck assumed the wrong completion-record filename. The suite itself read the actual embedding-generation evidence, verified status=complete and fixed input identities, and returned exit code 0."
+  }
+}

@@ -8,8 +8,8 @@ as reproduced experiments.
 
 | ID | Evaluation | Source | Status | Evidence |
 |---|---|---|---|---|
-| OEA-4 | Clotho A2T: 1,045 audio queries against a frozen bank of 5,225 captions | `[CODE]` public A2T runner; not paper-reported | IN_PROGRESS | Canonical implementation and tests exist; formal remote metrics pending |
-| OEA-5 | Target-corpus OEA zero-shot A2T over a frozen text index | `[MISSING]` target corpus/protocol must be fixed before a formal run | TODO | No code + run + final-metric bundle yet |
+| OEA-4 | Clotho A2T: 1,045 audio queries against a frozen bank of 5,225 captions | `[CODE]` public A2T runner; not paper-reported | COMPLETED | CPU suite exit 0; R@1/5/10 = 27.2727/52.8230/66.6986; audit JSON and remote artifact hashes fixed |
+| OEA-5 | Target-corpus OEA zero-shot A2T over a frozen text index | `[MISSING]` target corpus/protocol must be fixed before a formal run | IN_PROGRESS | Dataset-agnostic evaluator is tested; target-corpus configuration and formal run remain pending |
 | OEA-6 | Audio-query encoding latency, peak memory, and throughput | `[PAPER]` efficiency reporting; current hardware may differ | IN_PROGRESS | Peak memory exists from embedding generation; controlled latency/throughput benchmark pending |
 
 ## OEA-4 protocol
@@ -30,11 +30,21 @@ as reproduced experiments.
 - Claim boundary: OEA does not report A2T in a paper table. The result is an
   official-checkpoint `[CODE]` extension, not a reconstructed paper value.
 
-The formal run must preserve the configuration, input and output SHA256
-identities, complete similarities and rankings, positive mappings, Git commit,
-clean worktree state, command, environment, stdout, stderr, exit code, and
-final metrics. This section remains `IN_PROGRESS` until that bundle has been
-executed and reviewed.
+The formal CPU run completed at Git commit
+`b4986d3b129e97911fde93290f57dd55e4b21139` with an empty worktree status and
+exit code 0. It evaluated all 1,045 audio queries against all 5,225 frozen
+caption candidates and produced R@1 = 27.2727, R@5 = 52.8230, R@10 = 66.6986,
+MRR = 0.395682, and DCG = 0.517412. The protocol `stderr.log` is empty. The
+summary CSV SHA256 is `8c58983a...7e7fc`, and the finalized suite-metrics
+SHA256 is `fd38d78c...8351`. Complete small evidence is retained in
+`results/audits/qwen3b_cl_clotho_a2t_eval_20260721.json`; large similarities,
+rankings, and embeddings remain at the recorded remote paths with fixed hashes.
+
+An auxiliary precheck printed a `FileNotFoundError` because it expected an
+embedding-root `metrics.json` that this generator does not create. This did
+not affect the formal suite: the suite independently verified the actual
+embedding-generation status and input hashes, finalized all required audit
+artifacts, emitted empty stderr, and returned exit code 0.
 
 ## OEA-5 unresolved protocol decisions
 
