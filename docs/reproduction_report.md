@@ -57,3 +57,13 @@ Existing full Clotho embedding runs record approximately 9.31 GiB allocated
 and 10.12 GiB reserved on an RTX 4090. These are workload-level peak-memory
 observations, not yet a controlled per-query latency/throughput benchmark.
 Hardware-specific results will be reported separately from paper values.
+
+The formal implementation now pins the paper values (539.3 ms/audio, 2.60
+ms/text, 11.6 GB, and 16.2M parameters) and a separate reproducible measurement
+protocol: one A100-SXM4-80GB, BF16, batch size 1, ten warmup calls per modality,
+the complete Clotho evaluation split, per-call CUDA synchronization, and
+end-to-end public-encoder wall time. It records every raw latency and reports
+mean, population standard deviation, P50, P95, throughput, model-resident and
+peak memory, load time, and LoRA/projection parameter counts. Because the paper
+does not publish these timing details, reproduced measurements will remain
+labelled `[INFERRED]` rather than silently treated as the exact paper protocol.

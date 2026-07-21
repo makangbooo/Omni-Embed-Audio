@@ -101,6 +101,36 @@ bash scripts/run_frozen_text_index_evaluation.sh \
 the target corpus, split, document construction, qrels semantics, and absolute
 artifact paths remain `[MISSING]` until they are explicitly frozen.
 
+### OEA-Qwen3B efficiency benchmark
+
+`[PAPER]` Table 5 and Appendix Table 16 report OEA-Qwen3B on Clotho and an
+A100-SXM4-80GB as 539.3 ms/audio clip, 2.60 ms/text query, 11.6 GB peak GPU
+memory, and 16.2M trainable parameters. `[MISSING]` The paper does not publish
+warmup count, repeat count, batch size, timer implementation, cache state, or
+the exact preprocessing/device-transfer timing boundary.
+
+The committed `[INFERRED]` reproduction protocol therefore fixes one visible
+`NVIDIA A100-SXM4-80GB`, BF16, batch size 1, ten warmup audio and text calls,
+all 1,045 Clotho audio clips and all 5,225 captions in canonical manifest
+order, `time.perf_counter_ns`, and a CUDA synchronization immediately before
+and after every public `encode_batch` call. The wall-clock scope includes
+preprocessing, model forward, projection, L2 normalization, and device-to-host
+copy. Results report raw per-item latency plus mean, population standard
+deviation, min, P50, P95, max, throughput, model-resident memory, workload peak
+allocated/reserved memory, model-load time, and LoRA/head parameter counts.
+
+The formal non-resumable entrypoint is:
+
+```bash
+bash scripts/run_qwen3b_cl_clotho_efficiency.sh
+```
+
+The wrapper resolves the committed Qwen3B-Cl model lock, requires a clean
+worktree, runs fully offline, and refuses non-A100 hardware for the
+paper-comparison result. Measurements on an RTX 4090 or other GPU must use a
+separate experiment label and must not be compared as an exact absolute-latency
+reproduction.
+
 ## Required protocol resolution
 
 Before Table 2 or Table 3 is called an exact reproduction, obtain the authors'
