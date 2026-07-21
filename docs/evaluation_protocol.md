@@ -51,6 +51,30 @@ dataset, or random-number side effects.
 9. Formal paper-table runs must save the explicit query indices, candidate
    IDs, positive indices, embeddings, rankings, metrics, and Git commit.
 
+### Audio-to-text extension for SpeechXBT-OEA
+
+`[CODE]` The public baseline and precomputed-embedding runners also implement
+audio-to-text (A2T), although the paper does not report an A2T table. For
+Clotho, every one of the 1,045 audio embeddings is a query, all 5,225 caption
+embeddings form the frozen text candidate bank, and all five captions with the
+same exact clip ID are positives. Rank uses the best-scoring positive under
+the same optimistic strict-greater tie policy. Missing target groups, duplicate
+audio query IDs, count drift, and implicit query filtering are errors.
+
+The fixed official-checkpoint entrypoint is:
+
+```bash
+bash scripts/run_qwen3b_cl_clotho_a2t_suite.sh \
+  /absolute/path/to/completed_qwen3b_cl_embedding_directory
+```
+
+This CPU-only suite reuses the already generated, lock-bound Qwen3B-Cl Clotho
+embeddings. It writes all similarities, rankings, multi-positive mappings,
+input/output SHA256 values, Git state, environment, commands, logs, and final
+R@1/5/10, MRR, and DCG. Its `paper_table` is explicitly
+`OEA-4 extension (not paper-reported)`; it must not be presented as a missing
+OEA paper value.
+
 ## Required protocol resolution
 
 Before Table 2 or Table 3 is called an exact reproduction, obtain the authors'

@@ -27,6 +27,7 @@ if str(REPOSITORY_ROOT) not in sys.path:
 from AudioRetrieval.evaluation.canonical import (  # noqa: E402
     CanonicalRetrievalResult,
     evaluate_caption_to_caption,
+    evaluate_grouped_id_retrieval,
     evaluate_id_retrieval,
 )
 
@@ -124,8 +125,8 @@ def load_config(path: Path) -> dict[str, Any]:
     missing = sorted(required - set(config))
     if missing:
         raise ValueError(f"evaluation config missing fields: {missing}")
-    if config["task"] not in {"t2a", "t2t", "uiq"}:
-        raise ValueError("task must be one of: t2a, t2t, uiq")
+    if config["task"] not in {"a2t", "t2a", "t2t", "uiq"}:
+        raise ValueError("task must be one of: a2t, t2a, t2t, uiq")
     if config["protocol_source"] not in {"PAPER", "CODE", "INFERRED"}:
         raise ValueError("protocol_source must be PAPER, CODE, or INFERRED")
     if not isinstance(config["experiment_id"], str) or not config["experiment_id"]:
@@ -316,7 +317,7 @@ def run_evaluation(
             candidate_embeddings_path = candidate_embeddings_path or query_embeddings_path
             candidate_metadata_path = candidate_metadata_path or query_metadata_path
         elif candidate_embeddings_path is None or candidate_metadata_path is None:
-            raise ValueError("t2a/uiq require candidate embeddings and metadata")
+            raise ValueError("a2t/t2a/uiq require candidate embeddings and metadata")
 
         input_paths = {
             "config": config_path,
@@ -360,6 +361,25 @@ def run_evaluation(
             result = evaluate_caption_to_caption(
                 query_embeddings,
                 clip_ids,
+                query_indices=query_indices,
+                normalize=bool(config.get("normalize_embeddings", True)),
+            )
+        elif config["task"] == "a2t":
+            target_ids = metadata_strings(
+                query_metadata,
+                str(config.get("query_target_id_field", "target_id")),
+                "query metadata",
+            )
+            candidate_group_ids = metadata_strings(
+                candidate_metadata,
+                str(config.get("candidate_group_id_field", "clip_id")),
+                "candidate metadata",
+            )
+            result = evaluate_grouped_id_retrieval(
+                query_embeddings,
+                target_ids,
+                candidate_embeddings,
+                candidate_group_ids,
                 query_indices=query_indices,
                 normalize=bool(config.get("normalize_embeddings", True)),
             )

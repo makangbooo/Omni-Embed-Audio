@@ -227,13 +227,18 @@ def load_suite_config(path: Path) -> dict[str, Any]:
             raise ValueError(
                 f"protocol {index} missing fields: {protocol_missing}"
             )
-        if protocol["task"] not in {"t2a", "t2t"}:
-            raise ValueError(f"protocol {index}: task must be t2a or t2t")
+        if protocol["task"] not in {"a2t", "t2a", "t2t"}:
+            raise ValueError(f"protocol {index}: task must be a2t, t2a, or t2t")
         if protocol["query_selection"] not in {
             "all",
             "public_code_seed0_one_per_clip",
         }:
             raise ValueError(f"protocol {index}: unsupported query_selection")
+        if (
+            protocol["task"] == "a2t"
+            and protocol["query_selection"] != "all"
+        ):
+            raise ValueError(f"protocol {index}: A2T must evaluate all audio queries")
         if protocol["protocol_source"] not in {"CODE", "INFERRED"}:
             raise ValueError(f"protocol {index}: invalid protocol_source")
         protocol_id = protocol["protocol_id"]
@@ -609,34 +614,57 @@ def build_evaluation_config(
     selection_indices_path: Path,
 ) -> dict[str, Any]:
     paths = audit["paths"]
+    task = protocol["task"]
+    if task == "a2t":
+        query_embeddings = paths["candidate_embeddings"]
+        candidate_embeddings = paths["query_embeddings"]
+        query_metadata = paths["candidate_metadata"]
+        candidate_metadata = paths["query_metadata"]
+    else:
+        query_embeddings = paths["query_embeddings"]
+        candidate_embeddings = (
+            paths["query_embeddings"]
+            if task == "t2t"
+            else paths["candidate_embeddings"]
+        )
+        query_metadata = paths["query_metadata"]
+        candidate_metadata = (
+            paths["query_metadata"]
+            if task == "t2t"
+            else paths["candidate_metadata"]
+        )
+
     evaluation_config: dict[str, Any] = {
         "schema_version": 1,
         "experiment_id": f"{suite_id}__{protocol['protocol_id']}",
         "model": suite_config["model"],
         "checkpoint": evaluation_resource_identity(suite_config, audit),
         "dataset": suite_config["dataset"],
-        "task": protocol["task"],
+        "task": task,
         "paper_table": protocol["paper_table"],
         "protocol_label": protocol["protocol_label"],
         "protocol_source": protocol["protocol_source"],
         "protocol_note": protocol["note"],
         "seed": suite_config["embedding_seed"],
         "embedding_seed": suite_config["embedding_seed"],
-        "query_embeddings": paths["query_embeddings"],
-        "candidate_embeddings": (
-            paths["query_embeddings"]
-            if protocol["task"] == "t2t"
-            else paths["candidate_embeddings"]
-        ),
-        "query_metadata": paths["query_metadata"],
-        "candidate_metadata": (
-            paths["query_metadata"]
-            if protocol["task"] == "t2t"
-            else paths["candidate_metadata"]
-        ),
+        "query_embeddings": query_embeddings,
+        "candidate_embeddings": candidate_embeddings,
+        "query_metadata": query_metadata,
+        "candidate_metadata": candidate_metadata,
         "normalize_embeddings": True,
         "require_clean_git": True,
     }
+    if task == "a2t":
+        evaluation_config.update(
+            {
+                "query_target_id_field": "candidate_id",
+                "candidate_group_id_field": "clip_id",
+                "positive_definition": (
+                    "all caption candidates whose clip_id equals the audio "
+                    "query candidate_id"
+                ),
+            }
+        )
     if protocol["query_selection"] == "all":
         evaluation_config["query_selection"] = "all"
     else:
@@ -874,20 +902,24 @@ def validate_protocol_run(
         "git_status_short": "",
         "evaluated_query_count": protocol["expected_evaluated_queries"],
         "query_embedding_shape": [
-            config["expected_query_count"],
+            (
+                config["expected_candidate_count"]
+                if protocol["task"] == "a2t"
+                else config["expected_query_count"]
+            ),
             config["expected_embedding_dim"],
         ],
         "candidate_embedding_shape": [
             (
                 config["expected_query_count"]
-                if protocol["task"] == "t2t"
+                if protocol["task"] in {"a2t", "t2t"}
                 else config["expected_candidate_count"]
             ),
             config["expected_embedding_dim"],
         ],
         "candidate_count": (
             config["expected_query_count"]
-            if protocol["task"] == "t2t"
+            if protocol["task"] in {"a2t", "t2t"}
             else config["expected_candidate_count"]
         ),
         "query_selection": (
@@ -923,20 +955,30 @@ def validate_protocol_run(
 
     source_files = audit["source_files"]
     config_path = Path(protocol["config"])
-    expected_inputs = {
-        "config": file_identity(config_path),
-        "query_embeddings": source_files["query_embeddings"],
-        "candidate_embeddings": source_files[
+    if protocol["task"] == "a2t":
+        query_source = "candidate_embeddings"
+        candidate_source = "query_embeddings"
+        query_metadata_source = "candidate_metadata"
+        candidate_metadata_source = "query_metadata"
+    else:
+        query_source = "query_embeddings"
+        candidate_source = (
             "query_embeddings"
             if protocol["task"] == "t2t"
             else "candidate_embeddings"
-        ],
-        "query_metadata": source_files["query_metadata"],
-        "candidate_metadata": source_files[
+        )
+        query_metadata_source = "query_metadata"
+        candidate_metadata_source = (
             "query_metadata"
             if protocol["task"] == "t2t"
             else "candidate_metadata"
-        ],
+        )
+    expected_inputs = {
+        "config": file_identity(config_path),
+        "query_embeddings": source_files[query_source],
+        "candidate_embeddings": source_files[candidate_source],
+        "query_metadata": source_files[query_metadata_source],
+        "candidate_metadata": source_files[candidate_metadata_source],
     }
     if protocol["query_selection"] != "all":
         expected_inputs["query_indices"] = file_identity(

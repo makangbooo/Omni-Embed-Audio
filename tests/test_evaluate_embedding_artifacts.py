@@ -18,6 +18,72 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
 
 
 class EvaluateEmbeddingArtifactsTest(unittest.TestCase):
+    def test_a2t_writes_multi_positive_audit_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            np.save(root / "audio.npy", np.eye(2, dtype=np.float32))
+            np.save(
+                root / "captions.npy",
+                np.asarray(
+                    [[1.0, 0.0], [0.8, 0.2], [0.0, 1.0], [0.2, 0.8]],
+                    dtype=np.float32,
+                ),
+            )
+            write_jsonl(
+                root / "audio.jsonl",
+                [{"candidate_id": "a"}, {"candidate_id": "b"}],
+            )
+            write_jsonl(
+                root / "captions.jsonl",
+                [
+                    {"clip_id": "a"},
+                    {"clip_id": "a"},
+                    {"clip_id": "b"},
+                    {"clip_id": "b"},
+                ],
+            )
+            config = {
+                "schema_version": 1,
+                "checkpoint": "synthetic-checkpoint",
+                "dataset": "synthetic",
+                "experiment_id": "synthetic_a2t",
+                "model": "synthetic-model",
+                "task": "a2t",
+                "paper_table": "not-paper-reported",
+                "protocol_label": "all-caption-multi-positive",
+                "protocol_source": "CODE",
+                "query_embeddings": "audio.npy",
+                "candidate_embeddings": "captions.npy",
+                "query_metadata": "audio.jsonl",
+                "candidate_metadata": "captions.jsonl",
+                "query_target_id_field": "candidate_id",
+                "candidate_group_id_field": "clip_id",
+                "query_selection": "all",
+                "require_clean_git": False,
+                "seed": 42,
+            }
+            (root / "config.json").write_text(json.dumps(config), encoding="utf-8")
+            output = root / "synthetic_a2t"
+            with patch(
+                "scripts.evaluate_embedding_artifacts.git_output",
+                side_effect=["abc123", ""],
+            ):
+                report = run_evaluation(
+                    config_path=root / "config.json", output_dir=output
+                )
+
+            self.assertEqual(report["status"], "complete")
+            self.assertEqual(report["task"], "a2t")
+            self.assertEqual(report["evaluated_query_count"], 2)
+            self.assertEqual(report["candidate_count"], 4)
+            self.assertEqual(report["metrics"]["R@1"], 100.0)
+            self.assertEqual(
+                json.loads(
+                    (output / "positive_indices.json").read_text(encoding="utf-8")
+                ),
+                [[0, 1], [2, 3]],
+            )
+
     def test_t2a_writes_complete_audit_bundle(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

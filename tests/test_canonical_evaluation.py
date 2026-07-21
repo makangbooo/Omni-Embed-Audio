@@ -6,12 +6,39 @@ import numpy as np
 
 from AudioRetrieval.evaluation.canonical import (
     evaluate_caption_to_caption,
+    evaluate_grouped_id_retrieval,
     evaluate_id_retrieval,
     evaluate_query_to_candidates,
 )
 
 
 class CanonicalEvaluationTest(unittest.TestCase):
+    def test_a2t_accepts_all_captions_of_the_target_clip(self) -> None:
+        audio = np.eye(2, dtype=np.float32)
+        captions = np.asarray(
+            [[0.8, 0.2], [1.0, 0.0], [0.0, 1.0], [0.2, 0.8]],
+            dtype=np.float32,
+        )
+        result = evaluate_grouped_id_retrieval(
+            audio,
+            ["a", "b"],
+            captions,
+            ["a", "a", "b", "b"],
+        )
+
+        self.assertEqual(result.ranks.tolist(), [1, 1])
+        self.assertEqual(result.positive_indices, ((0, 1), (2, 3)))
+        self.assertEqual(result.metrics["R@1"], 100.0)
+
+    def test_a2t_rejects_missing_caption_group(self) -> None:
+        with self.assertRaisesRegex(KeyError, "absent from candidate groups"):
+            evaluate_grouped_id_retrieval(
+                np.asarray([[1.0, 0.0]], dtype=np.float32),
+                ["missing"],
+                np.asarray([[1.0, 0.0]], dtype=np.float32),
+                ["present"],
+            )
+
     def test_t2a_uses_every_explicit_caption_query(self) -> None:
         audio = np.eye(3, dtype=np.float32)
         captions = np.array(

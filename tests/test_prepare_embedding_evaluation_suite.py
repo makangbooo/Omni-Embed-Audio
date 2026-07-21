@@ -107,6 +107,16 @@ def synthetic_suite_config(root: Path) -> Path:
     }
     protocols = [
         {
+            "protocol_id": "a2t_all",
+            "task": "a2t",
+            "paper_table": "not-paper-reported",
+            "query_selection": "all",
+            "protocol_label": "code-a2t-all",
+            "protocol_source": "CODE",
+            "expected_evaluated_queries": 2,
+            "note": "synthetic",
+        },
+        {
             "protocol_id": "t2a_all",
             "task": "t2a",
             "paper_table": "Table 2",
@@ -364,6 +374,27 @@ def synthetic_vanilla_embedding_directory(root: Path) -> Path:
 
 
 class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
+    def test_fixed_a2t_config_is_public_code_extension(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        config = load_suite_config(
+            repository_root / "configs/eval/qwen3b_cl_clotho_a2t_suite.json"
+        )
+        self.assertEqual(config["model"], "OEA-Qwen3B (+Cl)")
+        self.assertEqual(len(config["protocols"]), 1)
+        protocol = config["protocols"][0]
+        self.assertEqual(protocol["task"], "a2t")
+        self.assertEqual(protocol["query_selection"], "all")
+        self.assertEqual(protocol["protocol_source"], "CODE")
+        self.assertIn("not paper-reported", protocol["paper_table"])
+        self.assertEqual(protocol["expected_evaluated_queries"], 1045)
+        self.assertEqual(
+            file_identity(
+                repository_root
+                / "configs/eval/qwen3b_cl_clotho_embeddings.json"
+            )["sha256"],
+            config["expected_generation_protocol_sha256"],
+        )
+
     def test_fixed_config_separates_all_public_code_protocols(self) -> None:
         repository_root = Path(__file__).resolve().parents[1]
         config = load_suite_config(
@@ -525,7 +556,7 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             plan = json.loads(
                 (suite_dir / "suite_plan.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(len(plan["protocols"]), 4)
+            self.assertEqual(len(plan["protocols"]), 5)
             self.assertEqual(
                 json.loads(
                     (suite_dir / "selections/seed0_indices.json").read_text(
@@ -576,11 +607,11 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             report_path = suite_dir / "suite_metrics.json"
             report = json.loads(report_path.read_text(encoding="utf-8"))
             self.assertEqual(report["status"], "complete")
-            self.assertEqual(report["protocol_count"], 4)
+            self.assertEqual(report["protocol_count"], 5)
             summary = (suite_dir / "retrieval_summary.csv").read_text(
                 encoding="utf-8"
             )
-            self.assertEqual(len(summary.splitlines()), 21)
+            self.assertEqual(len(summary.splitlines()), 26)
             original = report_path.read_bytes()
             with patch(
                 "scripts.prepare_embedding_evaluation_suite.git_output",

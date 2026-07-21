@@ -231,6 +231,60 @@ def evaluate_id_retrieval(
     )
 
 
+def evaluate_grouped_id_retrieval(
+    query_embeddings: np.ndarray,
+    query_target_ids: Sequence[str],
+    candidate_embeddings: np.ndarray,
+    candidate_group_ids: Sequence[str],
+    *,
+    query_indices: Sequence[int] | None = None,
+    normalize: bool = True,
+) -> CanonicalRetrievalResult:
+    """Evaluate queries against candidates grouped under possibly repeated IDs.
+
+    This is the canonical audio-to-text (A2T) primitive for caption datasets:
+    each audio query has one target clip ID, while all captions carrying that
+    clip ID are positives. Unlike :func:`evaluate_id_retrieval`, duplicate
+    candidate IDs are intentional and preserved. Missing target groups are
+    errors rather than silently skipped.
+    """
+
+    if len(query_target_ids) != np.asarray(query_embeddings).shape[0]:
+        raise ValueError("query_target_ids length does not match query embeddings")
+    if len(candidate_group_ids) != np.asarray(candidate_embeddings).shape[0]:
+        raise ValueError(
+            "candidate_group_ids length does not match candidate embeddings"
+        )
+
+    group_lookup: dict[str, list[int]] = {}
+    for index, group_id in enumerate(candidate_group_ids):
+        value = str(group_id)
+        if not value:
+            raise ValueError(f"candidate_group_ids[{index}] must be non-empty")
+        group_lookup.setdefault(value, []).append(index)
+
+    missing = sorted(
+        {
+            str(target_id)
+            for target_id in query_target_ids
+            if str(target_id) not in group_lookup
+        }
+    )
+    if missing:
+        raise KeyError(
+            "query target IDs are absent from candidate groups: "
+            f"{missing[:10]}"
+        )
+    positives = [tuple(group_lookup[str(target_id)]) for target_id in query_target_ids]
+    return evaluate_query_to_candidates(
+        query_embeddings,
+        candidate_embeddings,
+        positives,
+        query_indices=query_indices,
+        normalize=normalize,
+    )
+
+
 def evaluate_caption_to_caption(
     caption_embeddings: np.ndarray,
     caption_clip_ids: Sequence[str],
