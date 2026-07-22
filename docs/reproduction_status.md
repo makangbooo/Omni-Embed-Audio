@@ -1,6 +1,6 @@
 # Omni-Embed-Audio 复现状态
 
-最后更新：2026-07-21（Asia/Shanghai）
+最后更新：2026-07-22（Asia/Shanghai）
 
 状态值仅使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、`COMPLETED`、`FAILED`、`BLOCKED`。
 
@@ -37,7 +37,7 @@
 | 2 官方权重 | Qwen3B-Cl 全量 checkpoint embedding 生成器 | COMPLETED | `97dab6a` | RTX 4090 真实运行 `...embeddings_seed42_20260719_181621`：1,045 audio/5,225 caption 全部完成、512 维、pending=0、exit 0、63 MB；峰值 allocated 9.307 GiB/reserved 10.115 GiB；四个最终工件 SHA256 已固定 | 论文 `passage:` 与公开代码 no-prefix 冲突已显式标记；公开代码协议不能冒充严格论文协议 | 大型 embedding 保留远程路径与哈希，供 UIQ CPU 套件复用 |
 | 2 官方权重 | Qwen3B-Cl/Clotho T2A/T2T 四协议 CPU 评测套件 | COMPLETED | `97dab6a` | CPU 运行 `...retrieval_suite_seed42_20260719_185937`：suite 与四协议 exit 均为 0，525 MB；T2A 两口径、T2T `[CODE]` 与 `[INFERRED]` 敏感性均已分栏；小型摘要 SHA256 `37fb82db...a4a0`，结果 CSV SHA256 `b16a86e5...836` | 论文未公开 caption 选择与 T2T self/tie 口径，四协议不得择优冒充论文口径；严格论文观察继续标为 blocked | 已将 12 个 close 观察及 6 个 strict blocked 观察统一写入结果汇总 |
 | 2 OEA-4 A2T | Qwen3B-Cl/Clotho 1,045 音频查询→5,225 冻结 caption 候选 | COMPLETED | `b4986d3` | CPU suite `...a2t_suite_seed42_20260721_201518` 在 clean worktree 完成：status=complete、protocol_count=1、exit 0、stderr 为空；R@1/5/10=`27.2727/52.8230/66.6986`，MRR=`0.395682`，DCG=`0.517412`；CSV/Suite SHA256 已固定 | 无；该任务是未见于论文表格的 `[CODE]` 官方 checkpoint 扩展，不能标成论文数值复现；额外预检误读不存在的根目录 `metrics.json`，但不影响套件的独立完整性校验与结果 | 小型审计证据已登记；OEA-6 也已完成，下一项用户范围任务为 OEA-5 协议确认 |
-| 2 OEA-5 Frozen index | 目标语料 OEA zero-shot A2T | IN_PROGRESS | `6e31251` | 已实现数据集无关的显式 query/document/qrels evaluator、冻结索引前后哈希检查、R@k/MRR@10/graded nDCG@10、top-ranking 与逐查询证据、失败保留和 CPU wrapper | `[MISSING]` 目标语料、split、文档单位、qrels 语义和文本构造尚未由用户确认；因此没有正式配置、embedding 或最终指标 | 确认目标语料后新增只读数据适配和官方 checkpoint embedding 配置；不得从结果反推协议 |
+| 2 OEA-5 Frozen index | SQuTR 六个官方子集上的 OEA zero-shot A2T | IN_PROGRESS | `3e77c7c` | 目标语料已固定为 SQuTR；已实现数据集无关的显式 query/document/qrels evaluator、冻结索引前后哈希检查、R@k/MRR@10/graded nDCG@10、top-ranking 与逐查询证据、失败保留和 CPU wrapper；DATA-12 下载入口已提交 | 尚未下载和审计 SQuTR；音频 query split、文本候选单位、qrels 语义和文本构造必须在解压后依据官方文件确定，不凭空猜测 | 先完成 DATA-12 固定归档下载与 SHA256 校验，再实现 DATA-13 安全解压/只读 schema 审计；审计完成前不生成 embedding |
 | 2 OEA-6 RTX 4090 效率扩展 | OEA-Qwen3B-Cl 查询编码延迟、显存、吞吐与参数量 | COMPLETED | `a2c13da` | `...rtx4090_efficiency_20260721_211229`：clean worktree、exit 0；1,045 audio 均值/P50/P95=`295.515/287.715/423.286 ms`，5,225 text=`38.373/38.228/40.688 ms`；峰值 allocated/reserved=`9.307/10.115 GiB`；latencies/metrics SHA256 已固定 | `[INFERRED] hardware-mismatched`，不得据此判定 A100 论文延迟或显存是否复现；checkpoint LoRA+双 head 实测 14.71488M，对论文 16.2M 少 1.48512M，统计口径 `[MISSING]` | 小型审计证据已登记；该结果作为同 4090 SpeechXBT baseline，保留原始 latency 文件远程路径与哈希 |
 | 2 OEA-6 A100 论文同硬件对照 | OEA-Qwen3B-Cl 查询编码延迟、显存与吞吐 | COMPLETED | `9f62e20` | `...a100_efficiency_20260721_214156`：严格 A100-SXM4-80GB 门禁、clean worktree、precheck/run/attempt exit 均为 0；1,045 audio 均值/P50/P95=`273.207/267.578/381.090 ms`，5,225 text=`46.638/45.318/52.117 ms`；峰值 allocated/reserved=`9.307/10.115 GiB`；三项工件 SHA256 已固定 | `[MISSING]` 论文未公开计时边界、显存统计和参数计数口径，且未明确效率行使用 Base 或 +Cl checkpoint；因此控制实验完成，但 Tables 5/16 的八个严格论文观察继续标为 `blocked` | 登记小型 A100 审计证据和严格 blocked 观察；与 RTX 4090 结果分栏，下一步等待 OEA-5 目标语料协议 |
 | 2 指标 | Canonical T2A/T2T/UIQ embedding evaluator | COMPLETED | `43158ae` | 确定性 ID 检索、caption 多正例/排除 self、显式 query 子集、完整排名和严格输入校验已实现；相关 15 项测试通过 | 论文未公开 T2T caption 选择与 tie 口径；已在协议文档标为 `[MISSING]` | 接入 checkpoint embedding 生成器 |
@@ -63,6 +63,7 @@
 | 3 数据 | DATA-05：MECAT 848 条安全解压/解码/UIQ ID 校验 | BLOCKED | `87dbe32` | 尚未运行；安全解压、FLAC 完整解码、六字段保留、UIQ 集合校验已通过合成测试 | 等待 DATA-04 | DATA-04 完成后在同一 CPU 服务器执行 |
 | 3 数据 | MECAT 论文 847 条子集与检索 caption 口径 | BLOCKED | `87dbe32` | 官方 `00A/test` 与发布正向 UIQ 均为 848；审计文档已完成 | `[MISSING]` 被排除 ID、过滤规则、caption 字段/组合均未公开 | 不擅自删样本；先报告 848 条公开口径，继续请求作者证据 |
 | 3 数据 | DATA-11：MECAT–WavCaps 来源视频候选审计 | IN_PROGRESS | `e5bf4db` | 本地发布 UIQ 848 IDs × 固定 AudioSet_SL 108,317 rows 已完成：807 唯一来源视频、4 个同源视频候选；109 项测试通过 | DATA-05 archive manifest 与 DATA-08 远程 metadata 尚未复算；论文音频/embedding 阈值 `[MISSING]` | DATA-05/08 后在 CPU 侧运行 canonical join；不把来源视频候选写成音频重复或 blocklist |
+| 3 数据 | DATA-12：固定并下载 SQuTR 官方归档 | WAITING_USER | `3e77c7c` | 已固定 Hugging Face revision `2f1b041e...`、`source_data.zip` 精确大小 21,069,841,248 bytes、SHA256 `8956bf93...c6997c`；CPU-only 断点续传、失败保留和非覆盖校验脚本已通过完整 260 项测试 | 需要用户在远程 CPU 服务器执行长下载；当前没有已验证归档 | 运行 `scripts/download_data12_squtr.sh`；成功后返回 download manifest、大小、SHA256 和日志目录，再单独提交 DATA-13 解压/审计脚本 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | 四个 CLAP 与三个 vanilla backbone 静态就绪度审计 | COMPLETED | `d13b115` | 干净 `d13b115` 上生成 `results/audits/baseline_readiness_d13b115.json`：7 个模型、5 个代码入口完整、3 个资源身份固定、0 个正式可运行、0 证据漂移；三种 vanilla 已具备固定协议、模型锁解析、base-hidden-dimension 可恢复生成器、强制 5-audio/25-query smoke→full 闸门及锁绑定 CPU 四协议 finalizer；真实锁和 GPU smoke 均尚未运行；完整 227 项测试通过 | 无；代码/锁/指标工具完成不代表基线已评测 | DATA-04 后按长任务规则逐个生成并提交小型 vanilla base 锁，再申请 1×A100-80GB 运行锁绑定 smoke；四个 CLAP 仍需固定 source/checkpoint |
 | 5 基线 | LAION/Robust/MGA/M2D-CLAP | BLOCKED | N/A | 未开始 | checkpoint revision/统一入口不完整 | 官方 OEA 评测完成后逐个固定资源 |
@@ -70,8 +71,8 @@
 
 ## 当前焦点
 
-- 当前阶段：Qwen3B-Cl 与 Qwen3B-AC 在 Clotho 上均已完成 T2A/T2T 与四类正向 UIQ 的官方权重闭环；训练继续暂停，正在选择下一个无需训练的官方评测变体。
+- 当前阶段：SpeechXBT-OEA 所需的 OEA-4 与 OEA-6 已完成；训练继续暂停，OEA-5 已选择 SQuTR 六个官方子集并进入 DATA-12 固定归档下载阶段。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：远程 CPU 套件 `oea_qwen3b_ac_clotho_positive_uiq_suite_seed42_20260720_011600` 四类正向 UIQ 全部成功，12 个 R@k 与论文 Tables 12–15 的绝对差均不超过 0.388 个百分点。
-- 当前阻塞：Qwen3B-Cl/Clotho 当前闭环无阻塞；完整三数据集/多模型表仍缺 AudioCaps/MECAT 音频、部分模型资源和若干论文未公开口径。训练阶段按用户要求暂停。
-- 下一步：完成 Qwen3B-AC/Clotho UIQ 观察登记后，在 CPU 侧审计已下载模型和数据，选择下一个不涉及训练的官方权重评测闭环；需要更换 GPU 时再通知用户。
+- 最近完成：提交固定 SQuTR revision、精确归档大小与 SHA256 的 CPU-only 断点续传下载入口；完整 260 项测试通过。
+- 当前阻塞：SQuTR 约 21.07 GB 官方归档尚未在远程 CPU 服务器下载并验证；在读取官方归档 schema 前，不确定 split、文档单位、qrels 和文本构造的选择仍保持未决。训练阶段按用户要求暂停。
+- 下一步：用户在 CPU 服务器完成 DATA-12；收到归档 manifest/大小/SHA256 后，本地实现并提交 DATA-13 安全解压和只读 schema 审计。只有协议审计完成后才申请 1×GPU 生成 OEA zero-shot embedding。
