@@ -93,6 +93,15 @@
 - `[MISSING]` 论文使用的精确 847-row manifest、排除的 1 条样本、T2A/T2T caption 字段/组合。
 - DATA-04/05 可以完成公开 848 条数据的下载、解压、解码、六字段保存和 UIQ ID 精确对齐；严格 847 条主表在作者提供缺失信息前保持 BLOCKED。详见 `docs/mecat_data_audit.md`。
 
+### SQuTR（SpeechXBT/OEA-5 目标语料）
+
+- `[CODE]` 官方数据仓库为 `SLLMCommunity/SQuTR`，DATA-12 固定 revision `2f1b041e2e98e0d28ed68fbcf22126ef247eb719`。
+- `[CODE]` 官方仓库只发布一个 `source_data.zip`；精确大小为 21,069,841,248 bytes，LFS SHA256 为 `8956bf938de3f9ce168a1e7daf2ff61b0b7fe603fa5c3d7dc6a4314617c6997c`。
+- `[PAPER][CODE]` 数据包含 37,317 个唯一查询、四种声学条件下共 149,268 个实例和约 190.4 小时音频；六个子集为 FiQA、NQ、HotpotQA、MedicalRetrieval、DuRetrieval、T2Retrieval。
+- DATA-12 仅在 CPU 服务器下载并校验归档，不自动解压。失败时保留 `.part` 文件继续断点续传；若最终文件存在但校验失败，脚本拒绝覆盖。
+- 默认目录为 `/home/jg525/datasets/oea/squtr/source/source_data.zip`；下载阶段至少保留 30 GiB 空闲空间，后续安全解压、manifest、冻结文本 embedding 和索引阶段建议总计预留 100 GB。
+- DATA-13 将在下载完成后另行实现 ZIP 路径审计、安全解压、六子集 schema/qrels/audio 完整性验证；未经该审计，不进入 GPU embedding。
+
 ### UIQ 与 hard negatives
 
 - UIQ 文本 13,053 行已随 repo 提供，无需另行下载。

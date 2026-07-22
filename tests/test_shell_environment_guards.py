@@ -48,6 +48,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "download_data06_audiocaps_v2_metadata.sh",
             "run_data07_audiocaps_v2_metadata_validation.sh",
             "download_data08_wavcaps_metadata.sh",
+            "download_data12_squtr.sh",
             "run_data09_wavcaps_metadata_audit.sh",
             "run_data10_clotho_trainval_validation.sh",
             "run_model03_model04_audit.sh",
@@ -140,6 +141,25 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn("audit_mecat_wavcaps_provenance.py", source)
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
         self.assertNotIn("snapshot_download", source)
+        self.assertNotIn("rm -rf", source)
+
+    def test_squtr_download_is_pinned_cpu_only_and_does_not_extract(self) -> None:
+        source = (
+            REPOSITORY_ROOT / "scripts/download_data12_squtr.sh"
+        ).read_text(encoding="utf-8")
+        manifest = (
+            REPOSITORY_ROOT / "configs/resources/data12_squtr.json"
+        ).read_text(encoding="utf-8")
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
+        self.assertIn("download_http_assets.py", source)
+        self.assertIn("21069841248", source)
+        self.assertIn("does not extract", source)
+        self.assertIn("2f1b041e2e98e0d28ed68fbcf22126ef247eb719", manifest)
+        self.assertIn(
+            "8956bf938de3f9ce168a1e7daf2ff61b0b7fe603fa5c3d7dc6a4314617c6997c",
+            manifest,
+        )
+        self.assertNotIn("unzip", source)
         self.assertNotIn("rm -rf", source)
 
     def test_qwen3b_retrieval_suite_is_cpu_only_and_non_overwriting(self) -> None:

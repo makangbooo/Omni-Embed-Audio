@@ -94,9 +94,12 @@ def validate_specification(specification: dict[str, Any]) -> None:
         names.add(name)
         if not isinstance(url, str) or not url.startswith("https://"):
             raise ValueError(f"asset URL must use HTTPS: {name}")
-        if not isinstance(checksum, str) or len(checksum) != 32:
-            raise ValueError(f"invalid MD5 checksum: {name}")
-        int(checksum, 16)
+        if checksum is None and sha256 is None:
+            raise ValueError(f"asset must pin at least one checksum: {name}")
+        if checksum is not None:
+            if not isinstance(checksum, str) or len(checksum) != 32:
+                raise ValueError(f"invalid MD5 checksum: {name}")
+            int(checksum, 16)
         if sha256 is not None:
             if not isinstance(sha256, str) or len(sha256) != 64:
                 raise ValueError(f"invalid SHA256 checksum: {name}")
@@ -135,6 +138,35 @@ def curl_download(url: str, partial: Path, retries: int) -> None:
         ],
         check=True,
     )
+
+
+def verify_asset_file(path: Path, asset: dict[str, Any]) -> dict[str, Any]:
+    size_bytes = path.stat().st_size
+    expected_size = asset.get("size_bytes")
+    if expected_size is not None and size_bytes != expected_size:
+        raise RuntimeError(
+            f"file size mismatch for {path}: {size_bytes} != {expected_size}"
+        )
+
+    checksums: dict[str, str] = {}
+    expected_md5 = asset.get("md5")
+    if expected_md5 is not None:
+        checksums["md5"] = hash_file(path)
+        if checksums["md5"] != expected_md5:
+            raise RuntimeError(
+                f"MD5 mismatch for {path}: {checksums['md5']} != {expected_md5}"
+            )
+
+    expected_sha256 = asset.get("sha256")
+    if expected_sha256 is not None:
+        checksums["sha256"] = hash_file(path, "sha256")
+        if checksums["sha256"] != expected_sha256:
+            raise RuntimeError(
+                f"SHA256 mismatch for {path}: "
+                f"{checksums['sha256']} != {expected_sha256}"
+            )
+
+    return {"size_bytes": size_bytes, **checksums}
 
 
 def main() -> int:
@@ -176,7 +208,7 @@ def main() -> int:
                 "name": asset["name"],
                 "kind": asset["kind"],
                 "url": asset["url"],
-                "expected_md5": asset["md5"],
+                "expected_md5": asset.get("md5"),
                 "expected_sha256": asset.get("sha256"),
                 "expected_size_bytes": asset.get("size_bytes"),
                 "path": str(final_path),
@@ -187,12 +219,13 @@ def main() -> int:
             write_json(output, report)
 
             if final_path.exists():
-                existing_md5 = hash_file(final_path)
-                if existing_md5 != asset["md5"]:
+                try:
+                    verified = verify_asset_file(final_path, asset)
+                except RuntimeError as exc:
                     raise RuntimeError(
-                        f"existing final file has wrong MD5; refusing to overwrite: "
-                        f"{final_path} ({existing_md5})"
-                    )
+                        "existing final file failed pinned verification; "
+                        f"refusing to overwrite: {final_path} ({exc})"
+                    ) from exc
                 final_status = "verified_existing"
             else:
                 asset_report["status"] = "downloading"
@@ -201,32 +234,17 @@ def main() -> int:
                 )
                 write_json(output, report)
                 curl_download(asset["url"], partial_path, args.curl_retries)
-                downloaded_md5 = hash_file(partial_path)
-                asset_report["downloaded_md5"] = downloaded_md5
-                if downloaded_md5 != asset["md5"]:
+                try:
+                    verified = verify_asset_file(partial_path, asset)
+                except RuntimeError as exc:
                     raise RuntimeError(
-                        f"downloaded file MD5 mismatch; partial file preserved: "
-                        f"{partial_path} ({downloaded_md5})"
-                    )
+                        "downloaded file failed pinned verification; partial file "
+                        f"preserved: {partial_path} ({exc})"
+                    ) from exc
                 partial_path.replace(final_path)
                 final_status = "downloaded_and_verified"
 
-            asset_report["status"] = "verifying_all_pinned_metadata"
-            asset_report["size_bytes"] = final_path.stat().st_size
-            asset_report["md5"] = hash_file(final_path)
-            asset_report["sha256"] = hash_file(final_path, "sha256")
-            expected_size = asset.get("size_bytes")
-            if expected_size is not None and asset_report["size_bytes"] != expected_size:
-                raise RuntimeError(
-                    f"file size mismatch for {final_path}: "
-                    f"{asset_report['size_bytes']} != {expected_size}"
-                )
-            expected_sha256 = asset.get("sha256")
-            if expected_sha256 is not None and asset_report["sha256"] != expected_sha256:
-                raise RuntimeError(
-                    f"SHA256 mismatch for {final_path}: "
-                    f"{asset_report['sha256']} != {expected_sha256}"
-                )
+            asset_report.update(verified)
             asset_report["status"] = final_status
             asset_report["finished_at"] = utc_now()
             write_json(output, report)
