@@ -274,6 +274,21 @@ TTS 是独立审批点。建议优先研究与 SQuTR 同族的 CosyVoice-3，但
 每个长任务先生成 immutable config 和 cache manifest，支持 resume、失败样本表、
 结构化日志、原子写和不覆盖已有 final artifact。
 
+### 7.1 已完成的无模型 CPU 核心
+
+commit `8cc5984dc35a272934d434993006814855f39624` 已实现：
+
+- `normalization.py`：query-local population z-score、平均秩 normalization、确定性 tie-break；
+- `aggregation.py`：Whisper proxy posterior、归一化熵、Top1/Top2 margin、N-best
+  编辑距离、one/equal/max/proxy-posterior logsumexp；
+- `metrics.py`：graded nDCG、MRR、multi-positive Recall、固定候选 Oracle、clean-to-noise
+  下降和 micro WER；
+- `cache_manifest.py`：严格 JSON schema、SHA256、兼容性字段级差异、默认 Git commit
+  身份检查和不覆盖式原子发布。
+
+相关 38 项 CPU 测试通过。该完成状态只证明公式和缓存契约已验证，不代表 Whisper、
+BGE、OEA 模型推理或任何实验结果已完成。
+
 ## 8. 首批资源审批草案
 
 以下仅列出，Phase 0 未下载。

@@ -18,6 +18,8 @@
 | R-OEA4 | Qwen3B-Cl Clotho A2T | R@1/5/10 `27.2727/52.8230/66.6986` | `results/audits/qwen3b_cl_clotho_a2t_eval_20260721.json` | COMPLETE, not paper-reported |
 | R-OEA6-A100 | Qwen3B-Cl efficiency | controlled A100 result | `results/audits/qwen3b_clotho_a100_efficiency_20260721.json` | COMPLETE |
 | R-OEA6-4090 | Qwen3B-Cl efficiency | hardware-mismatched extension | `results/audits/qwen3b_clotho_rtx4090_efficiency_20260721.json` | COMPLETE |
+| C-ASRUR-RES | D1–D4 pinned manifests + resumable CPU wrapper | commit `6279b8265a3c90be92536eb96bcd98408bebfffa` | `configs/asr_uncertainty_reranking/resources/`、`scripts/run_asrur_resource_download.sh` | COMPLETE; no download executed |
+| C-ASRUR-CORE | normalization、proxy posterior、4-best aggregation、metrics、cache manifest | commit `8cc5984dc35a272934d434993006814855f39624` | `AudioRetrieval/asr_uncertainty_reranking/` | COMPLETE; 38 related CPU tests passed |
 
 ## 2. 已有远程数据
 
@@ -58,3 +60,14 @@
 | Runs | `/home/jg525/Omni-Embed-Audio/results/raw/<run_id>` | config、command、stdout/stderr、metrics、environment、commit、GPU |
 
 缓存 manifest 不匹配时直接拒绝复用，不做隐式升级或覆盖。
+
+## 5. 已锁定的 CPU 定义
+
+- z-score 使用每条 query 候选集合内的 population standard deviation；退化路由输出全零。
+- rank normalization 对同分候选使用平均秩；需要完整排序时以候选 ID 做确定性 tie-break。
+- Whisper N-best 仅生成 `proxy posterior`，不宣称严格声学后验。
+- 4-best 聚合固定支持 one-best、等权均值、最大值和
+  `logsumexp(log p_m + r_mi / T_ce)`。
+- nDCG 使用全局 qrels 的 graded ideal ranking；Oracle 只重排固定候选集合，不补入漏召回文档。
+- 指标内部值统一为 `[0,1]` fraction；最终制表时才显式转为百分比。
+- 缓存身份默认比较数据/输入哈希、模型 revision/checkpoint、tokenizer、pooling、维度、长度、dtype、归一化、seed 和 producer Git commit。跨 commit 复用必须显式允许并记录，不能静默发生。
