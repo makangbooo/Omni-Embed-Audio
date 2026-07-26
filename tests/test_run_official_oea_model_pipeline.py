@@ -117,7 +117,9 @@ class RunOfficialOEAModelPipelineTest(unittest.TestCase):
         self.assertIn('VARIANT_ID="oea_nemo3b_cl"', wrapper)
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
         self.assertIn("unset HF_HUB_OFFLINE", wrapper)
-        self.assertIn('export TRANSFORMERS_OFFLINE="1"', wrapper)
+        self.assertIn("unset TRANSFORMERS_OFFLINE", wrapper)
+        self.assertIn("unset HF_DATASETS_OFFLINE", wrapper)
+        self.assertNotIn('export TRANSFORMERS_OFFLINE="1"', wrapper)
         self.assertIn(
             "fixed-revision Hugging Face metadata API only",
             wrapper,

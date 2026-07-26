@@ -59,8 +59,11 @@ export CUDA_VISIBLE_DEVICES=""
 # The resource-audit stage must query the immutable revision metadata in order
 # to reconstruct the complete expected file inventory. This is a small API
 # request only: audit_official_oea_variant_resources.py has no download path.
+# huggingface_hub treats the legacy TRANSFORMERS_OFFLINE variable as an alias
+# for Hub offline mode, so every supported offline alias must be cleared.
 unset HF_HUB_OFFLINE
-export TRANSFORMERS_OFFLINE="1"
+unset TRANSFORMERS_OFFLINE
+unset HF_DATASETS_OFFLINE
 export HF_HUB_DISABLE_XET="1"
 
 exec > >(tee "${RUN_DIR}/stdout.log") 2> >(tee "${RUN_DIR}/stderr.log" >&2)
@@ -71,6 +74,7 @@ echo "[INFO] Portable lock evidence: ${PORTABLE_LOCK}"
 echo "[INFO] GPU disabled"
 echo "[INFO] Network policy: fixed-revision Hugging Face metadata API only"
 echo "[INFO] Model downloads remain disabled; all content verification is local"
+echo "[INFO] Hub offline aliases cleared: HF_HUB_OFFLINE/TRANSFORMERS_OFFLINE/HF_DATASETS_OFFLINE"
 echo "[INFO] No official source file will be modified or overwritten"
 
 ARGUMENTS=(
