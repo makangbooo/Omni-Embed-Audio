@@ -17,7 +17,7 @@
 | 0 | B1–B7、QG、Ours、U1–U4、A1–A9 CPU 主实验框架 | COMPLETED | `8f28c55` | 本地 345 项全仓测试通过；无下载、GPU、模型推理或真实训练 | 无；合成 smoke 明确禁止写入研究结果 | 远程拉取后执行 D1–D4 下载、DATA-13C 恢复和 FiQA 数据审计 |
 | 0 | B5/B6 主融合的 ASR 路由 | COMPLETED | 待本提交 | `[INFERRED][USER-CONFIRMED 2026-07-26]` 主路线固定为 4-best `proxy_posterior`；1-best 只作辅助诊断 | 无 | 正式结果不得根据 test/NQ 表现切换路线 |
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | 运行 FiQA/SQuTR 数据一致性审计前等待 DATA-13C final manifest |
-| 0 | D2–D4 Whisper/BGE 固定资源下载 | RUNNING_REMOTE | `41efefa` | run=`asrur_d2_d4_models_download_20260726_200414`；PID `15697` 及下载子进程仍在，manifest=`running`；当前下载 Whisper，目标目录约 121 MiB，125,829,120-byte `.incomplete` 为可恢复临时文件 | 尚无最终 exit code；BGE 两项目录尚未出现 | 不删除 `.incomplete`、不重复启动、不关闭服务器；等待三项逐一校验完成 |
+| 0 | D2–D4 Whisper/BGE 固定资源下载 | WAITING_USER | `a4c5c02` | 旧顺序 run 于 21:16 按用户要求 SIGTERM 停止，download/wrapper=`143/143`，相关 PID 全部消失；1,583,349,760-byte Whisper `.incomplete` 保留；旧 manifest 的 `running` 是未执行 finalizer 的陈旧状态 | 用户称三个并行下载已启动，但当前主机的 supplied patterns 未发现进程，尚缺各任务 PID/日志/目标目录 | 提供三个并行任务的进程、命令和日志路径；完成后按固定 manifest 校验 |
 | 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `a4c5c02` | 精确探针 old/new lock RC=`73/0`；本机无持有者，用户确认没有任何其他挂载 `/home/jg525` 的运行实例 | DPC 远端遗留锁租约；本项目不能安全自行释放 | 按 `dpc_lock_support_request.md` 联系平台；不得删除/绕过旧 lock |
 | 0/2 | DATA-13C lock owner provenance | COMPLETED | 待本提交 | wrapper 改为非截断打开 lock；成功取得后记录 hostname/PID/PPID/commit/run dir，失败时显示最后记录；4 项专项测试通过 | 该补丁不能解除当前由远端实体持有的旧锁 | 远端锁安全释放并拉取本补丁后再恢复 DATA-13C |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | WAITING_USER | 待后续提交 | 历史 LFS 审计 complete，尚未做 2026-07-26 live recheck | 需要远程 CPU 执行；全哈希可能超过 30 分钟 | DATA-13B 后执行独立资源审计 |

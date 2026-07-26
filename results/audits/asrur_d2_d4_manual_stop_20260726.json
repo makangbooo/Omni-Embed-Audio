@@ -1,0 +1,39 @@
+{
+  "audit_id": "asrur_d2_d4_manual_stop_20260726_211611",
+  "status": "user_requested_stop_complete",
+  "source": "user-supplied terminal transcript",
+  "observed_at": "2026-07-26T21:16:11+08:00",
+  "host": "bitahub-a20601801981030400524510",
+  "execution_commit": "a4c5c0222b24603ebfd885df1d784279165a3aab",
+  "run_directory": "/home/jg525/Omni-Embed-Audio/logs/asrur_d2_d4_models_download_20260726_200414",
+  "reason": "user switched D2-D4 to separate parallel downloads",
+  "terminated_processes": {
+    "wrapper_root_pid": 15697,
+    "wrapper_child_pids": [
+      15733,
+      15736
+    ],
+    "python_downloader_pid": 15826,
+    "signal": "SIGTERM"
+  },
+  "exit_codes": {
+    "download": 143,
+    "wrapper": 143
+  },
+  "post_stop_processes_remaining": 0,
+  "manifest_at_stop": {
+    "report_status": "running",
+    "error": null,
+    "asset": "whisper_large_v3",
+    "asset_status": "downloading",
+    "note": "The process was intentionally terminated before the manifest finalizer; running is stale state, not evidence of an active process."
+  },
+  "preserved_partial_files": [
+    {
+      "path": "/home/jg525/model_cache/asr/whisper-large-v3/.cache/huggingface/download/xGOKKLRSlIhH692hSVvI1-gpoa8=.a8e94b85976e5864ba3e9525c7e6c83b2a1eca42d4b797a0c7c24d778e40fd95.incomplete",
+      "size_bytes": 1583349760
+    }
+  ],
+  "other_download_processes_detected_by_supplied_patterns": 0,
+  "classification": "intentional_user_abort_not_model_download_failure"
+}
