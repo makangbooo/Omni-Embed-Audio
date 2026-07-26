@@ -13,7 +13,7 @@
 | 0 | Whisper/BGE/FiQA 首批下载批准 | COMPLETED | `6279b82` | 未下载 | 无；D1–D4 已获用户批准 | DATA-13B 后由 CPU 服务器执行 |
 | 0 | D1–D4 固定清单与 CPU 下载 wrapper | COMPLETED | `6279b82` | 未下载 | DATA-13B 运行时不 pull 共享仓库 | 35 项相关测试通过；待 DATA-13B 结束再拉取执行 |
 | 0 | CPU 核心算法与缓存契约 | COMPLETED | `8cc5984` | 未远程运行；本地 38 项相关测试通过 | 无 | 后续模型 runner 只能调用这些已测试定义 |
-| 0/2 | SQuTR DATA-13B 内容门禁 | WAITING_USER | `c3c2c6f` | attempt 1 extraction/validation/wrapper=`0/1/1`；全量解压/CRC 成功；空文档策略失败证据已保存 | 修复已按官方 loader 固化，等待远程 pull 与恢复验证 | 复用 extraction marker，仅重跑内容校验；成功后提交小型证据 |
+| 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `0212431` | attempt 1 extraction/validation/wrapper=`0/1/1`；全量解压/CRC 成功；空文档策略失败证据已保存 | 官方一致修复与可恢复 audio-probe cache 已就绪，等待远程 pull | 验证 extraction marker 后跳过重复 49 GB 读取，恢复 schema/qrels/audio；成功后提交小型证据 |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | WAITING_USER | 待后续提交 | 历史 LFS 审计 complete，尚未做 2026-07-26 live recheck | 需要远程 CPU 执行；全哈希可能超过 30 分钟 | DATA-13B 后执行独立资源审计 |
 | 1 | Nemo inference-only checkpoint 与 model lock | TODO | N/A | 未执行 | 依赖 live resource audit | 生成小型锁并提交 |
 | 1 | Nemo 5/25 OEA embedding smoke | TODO | N/A | 计划 1×RTX 4090 24GB | 依赖 model lock 和精确 GPU 命令批准 | 先提交精确 wrapper/config；预计 12–18 GiB |
@@ -36,4 +36,4 @@
 - 最近远程结果：DATA-13B attempt 1 已退出；全量解压/CRC 成功，内容校验因
   FiQA 第 742 行空文档被本地严格策略拒绝。失败证据已保存，官方一致的最小补丁已完成。
 - 当前未执行：任何新下载、GPU 计算、TTS、模型或 gate 训练。
-- 下一步：共享 CPU 服务器先拉取 `c3c2c6f` 之后的最新分支并恢复 DATA-13B；它会复用已完成 extraction marker，不重新解压 27 GB。三个退出码全为 0 后再固化 schema/manifest 统计，并启动已批准的 D1/D2–D4 CPU 下载。G1 仍须等 Nemo 实时审计、model lock 和精确 GPU 命令提交后才启动。
+- 下一步：共享 CPU 服务器拉取包含 `0212431` 的最新分支并运行 DATA-13C；它验证已完成 marker 后跳过重复 archive/tree 读取，并每 1,000 个音频持久化 probe cache。reuse/validation/wrapper 三个退出码全为 0 后再固化 schema/manifest 统计，并启动已批准的 D1/D2–D4 CPU 下载。G1 仍须等 Nemo 实时审计、model lock 和精确 GPU 命令提交后才启动。

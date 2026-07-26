@@ -83,6 +83,13 @@ invent text, alter qrels, or change the frozen candidate set. The failed
 attempt remains separately recorded; a successful recovery run is still
 required before any SQuTR embedding.
 
+Commit `0212431` adds a recovery-only wrapper that validates the exact
+full-CRC completion marker without rereading the already verified 49 GB of
+archive/extracted content. It checkpoints audio probe metadata every 1,000
+files in a cache bound to the extraction marker, structure, probe protocol,
+root path, and Git commit. Interrupted content validation can therefore reuse
+verified probes while mismatched cache identity is rejected.
+
 The dataset-agnostic evaluator consumes explicit query/document metadata and
 graded JSONL qrels, hashes frozen text embeddings and metadata before and
 after scoring, and writes deterministic rankings plus per-query evidence.

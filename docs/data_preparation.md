@@ -106,3 +106,16 @@ membership.
 The recovery run must reuse the successful extraction marker, retain the
 attempt-1 failure directory, and create a new run directory. DATA-13B remains
 incomplete until extraction/validation/wrapper exit codes are all zero.
+
+Commit `0212431` adds the dedicated CPU-only recovery entry point
+`scripts/run_data13c_squtr_content_recovery.sh`. It verifies that the existing
+completion marker exactly matches the pinned archive and structure manifests,
+checks every subset's core paths, and then skips the redundant 21 GB archive
+hash plus 28 GB extracted-tree CRC reread. Audio probes are appended to
+`.squtr_audio_probe_cache_v1.jsonl`; the cache identity includes the extraction
+marker hash, structure hash, probe protocol, absolute root, and producer Git
+commit. It is fsynced every 1,000 audio files. A restart at the same commit
+reuses exact path/size/mtime-matched probes, while a different cache identity
+is rejected instead of silently reused. The recovery uses `flock`, requires a
+clean worktree, never removes the attempt-1 candidate, and does not overwrite
+an incompatible final manifest.
