@@ -132,6 +132,10 @@ class ValidateSqutrExtractedTest(unittest.TestCase):
             )
             self.assertFalse(rows[1]["query_text_exact_match"])
             self.assertFalse(rows[0]["include_in_training"])
+            self.assertEqual(
+                report["subsets"][0]["corpus"]["fully_empty_rows"],
+                0,
+            )
 
             _, second_status, second_checksum = validate_dataset(
                 extract_root,
@@ -142,6 +146,40 @@ class ValidateSqutrExtractedTest(unittest.TestCase):
             )
             self.assertEqual(second_status, "verified_existing")
             self.assertEqual(second_checksum, checksum)
+
+    def test_fully_empty_corpus_row_is_preserved_and_audited(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            extract_root = root / "extracted"
+            write_extracted_fixture(extract_root)
+            corpus = extract_root / "source_data/en/one/corpus.jsonl"
+            write_jsonl(
+                corpus,
+                [{"_id": "d1", "title": "", "text": ""}],
+            )
+
+            report, manifest_status, _ = validate_dataset(
+                extract_root,
+                structure_manifest(),
+                root / "manifest.jsonl",
+                10,
+                audio_probe=fake_probe,
+            )
+
+            corpus_report = report["subsets"][0]["corpus"]
+            self.assertEqual(manifest_status, "created")
+            self.assertEqual(corpus_report["rows"], 1)
+            self.assertEqual(corpus_report["empty_text_rows"], 1)
+            self.assertEqual(corpus_report["fully_empty_rows"], 1)
+            self.assertEqual(
+                corpus_report["fully_empty_examples"],
+                [{"document_id": "d1", "line_number": 1}],
+            )
+            self.assertEqual(
+                len(corpus_report["fully_empty_document_ids_sha256"]),
+                64,
+            )
+            self.assertIn("preserve row", corpus_report["fully_empty_document_policy"])
 
     def test_unknown_corpus_reference_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

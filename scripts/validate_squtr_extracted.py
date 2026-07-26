@@ -90,10 +90,14 @@ def required_id(row: dict[str, Any], path: Path, line_number: int) -> str:
     return value
 
 
-def load_corpus(path: Path) -> tuple[set[str], dict[str, int]]:
+def load_corpus(path: Path) -> tuple[set[str], dict[str, Any]]:
     ids: set[str] = set()
     rows = 0
     titled = 0
+    empty_text_rows = 0
+    fully_empty_rows = 0
+    fully_empty_examples: list[dict[str, Any]] = []
+    fully_empty_id_digest = hashlib.sha256()
     for line_number, row in iter_jsonl(path):
         identifier = required_id(row, path, line_number)
         if identifier in ids:
@@ -102,14 +106,44 @@ def load_corpus(path: Path) -> tuple[set[str], dict[str, int]]:
         title = row.get("title", "")
         if not isinstance(text, str) or not isinstance(title, str):
             raise ValueError(f"invalid corpus text/title types: {path}:{line_number}")
-        if not text.strip() and not title.strip():
-            raise ValueError(f"empty corpus document: {path}:{line_number}")
+        text_is_empty = not text.strip()
+        title_is_empty = not title.strip()
+        empty_text_rows += text_is_empty
+        if text_is_empty and title_is_empty:
+            # [CODE] The pinned SQuTR CustomAudioRetrieval loader preserves
+            # every corpus row and constructs an empty string for this case.
+            # Do not filter or synthesize content: either action would change
+            # the frozen candidate set or its input text. Record the anomaly
+            # and continue so qrels closure is still verified below.
+            fully_empty_rows += 1
+            fully_empty_id_digest.update(identifier.encode("utf-8"))
+            fully_empty_id_digest.update(b"\n")
+            if len(fully_empty_examples) < 20:
+                fully_empty_examples.append(
+                    {
+                        "document_id": identifier,
+                        "line_number": line_number,
+                    }
+                )
         ids.add(identifier)
         rows += 1
         titled += bool(title.strip())
     if not ids:
         raise ValueError(f"empty corpus: {path}")
-    return ids, {"rows": rows, "titled_rows": titled}
+    return ids, {
+        "rows": rows,
+        "titled_rows": titled,
+        "empty_text_rows": empty_text_rows,
+        "fully_empty_rows": fully_empty_rows,
+        "fully_empty_examples": fully_empty_examples,
+        "fully_empty_document_ids_sha256": (
+            fully_empty_id_digest.hexdigest() if fully_empty_rows else None
+        ),
+        "fully_empty_document_policy": (
+            "[CODE] preserve row and empty constructed text exactly as the pinned "
+            "SQuTR CustomAudioRetrieval loader; do not filter or synthesize content"
+        ),
+    }
 
 
 def load_queries(path: Path, expected: int) -> dict[str, str]:

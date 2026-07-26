@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "audit_id": "squtr_data13b_attempt1_failure_20260726",
+  "status": "failed",
+  "observed_at": "2026-07-26T15:39:48+08:00",
+  "source": "user-returned remote terminal output",
+  "host": "bitahub-a20601801981030400524510",
+  "git_commit": "cd290997501483306fe13c8c2baca772ab6e2271",
+  "run_id": "data13b_squtr_validation_20260726_141640",
+  "run_directory": "/home/jg525/Omni-Embed-Audio/logs/data13b_squtr_validation_20260726_141640",
+  "exit_codes": {
+    "extraction": 0,
+    "validation": 1,
+    "wrapper": 1
+  },
+  "extraction": {
+    "status": "complete",
+    "archive_size_bytes": 21069841248,
+    "archive_sha256": "8956bf938de3f9ce168a1e7daf2ff61b0b7fe603fa5c3d7dc6a4314617c6997c",
+    "zip_member_records": 149349,
+    "file_members": 149310,
+    "directory_members": 39,
+    "uncompressed_member_bytes": 28422366590,
+    "extracted_files": 149310,
+    "full_member_crc_verified": true,
+    "unexpected_files": 0,
+    "remaining_partial_files": 0,
+    "extract_root": "/home/jg525/datasets/oea/squtr/extracted",
+    "completion_marker": "/home/jg525/datasets/oea/squtr/extracted/.data13b_extraction_complete.json"
+  },
+  "validation_failure": {
+    "error": "ValueError('empty corpus document: /home/jg525/datasets/oea/squtr/extracted/source_data/en/fiqa/corpus.jsonl:742')",
+    "failed_before_audio_validation": true,
+    "final_manifest_created": false,
+    "preserved_candidate": "/home/jg525/datasets/oea/squtr/manifests/.squtr_audio_query_manifest.jsonl.candidate-8556"
+  },
+  "root_cause": {
+    "classification": "local validator policy stricter than pinned official loader",
+    "local_behavior": "[CODE] attempt-1 validator rejected a row whose title and text were both empty",
+    "official_behavior": "[CODE] pinned SQuTR CustomAudioRetrieval preserves every corpus row and constructs title + newline + text when title is present, otherwise text; it has no empty-document rejection",
+    "official_repository": "https://github.com/ttoyekk1a/SQuTR-Spoken-Query-to-Text-Retrieval",
+    "official_revision": "cc3fb31fc0dc44fef3a44c569b344516bbaee79c",
+    "official_file": "src/retrieval/omni_emb.py",
+    "official_blob": "c81afd750894693f4618efc0c9823b6fe180e5ba"
+  },
+  "repair_policy": {
+    "filter_document": false,
+    "synthesize_text": false,
+    "change_qrels": false,
+    "change_candidate_set": false,
+    "action": "preserve the exact row and empty constructed text, record count/examples/ID-set hash, then continue qrels closure and audio validation"
+  },
+  "result_interpretation": "DATA-13B is not complete. Archive extraction and CRC passed, but corpus/query/qrels/audio content validation has not yet completed and no retrieval experiment is authorized from this attempt."
+}
