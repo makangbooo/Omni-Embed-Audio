@@ -23,9 +23,10 @@
 | C-ASRUR-PIPE | B1–B7/QG/Ours/U1–U4/A1–A9 CPU 实验框架 | commit `8f28c5590810f3e430d3ce7591266ad7f8e38f21` | `AudioRetrieval/asr_uncertainty_reranking/`、`scripts/*asrur*`、`configs/asr_uncertainty_reranking/main_experiment.json` | COMPLETE; 58 ASRUR tests and 345 full-repository tests passed; no research result generated |
 | A-MODEL-MIGRATION | OEA 模型迁移与旧缓存清理 | run `model_cache_migration_v3_20260726_214834`；exit `0`；254 files 前后相同 | `results/audits/model_cache_migration_20260726.json` | COMPLETE; `/home/jg525/model_cache` removed |
 | C-ASRUR-MODEL-AUDIT | D2–D4 离线固定 revision/LFS/size/SHA256 验收器 | commit `aac088d68f9bc60871c48db90a2603144ca1b178` | `scripts/run_asrur_model_audit.sh` | COMPLETE; 尚未对远程下载结果执行 |
-| C-ASRUR-NEMO-AUDIT | Nemo Phase 1 CPU 三阶段审计与 portable lock runner | initial `953cb34`；metadata fixes `86107ca`/`6760f7f` | `scripts/run_asrur_nemo_phase1_audit.sh`、`scripts/run_official_oea_model_pipeline.py` | COMPLETE implementation；CPU-only；固定 revision metadata API only、无模型下载；attempt 3 待用户操作 |
+| C-ASRUR-NEMO-AUDIT | Nemo Phase 1 CPU 三阶段审计与 portable lock runner | initial `953cb34`；metadata fixes `86107ca`/`6760f7f`；safe-global fix `7bd4765` | `scripts/run_asrur_nemo_phase1_audit.sh`、`scripts/run_official_oea_model_pipeline.py` | COMPLETE implementation；CPU-only；固定 revision metadata API only、无模型下载；attempt 4 待用户操作 |
 | F-ASRUR-NEMO-METADATA | Nemo Phase 1 attempt 1 metadata-policy failure | execution `d3ba9f1`；run `asrur_nemo_phase1_audit_20260726_232452`；exit `1/1` | `results/audits/asrur_nemo_phase1_metadata_policy_failure_20260726.json` | FAILED；实现协议冲突，不是模型损坏；由 `86107ca` 修复 |
 | F-ASRUR-NEMO-TRANSITIVE-OFFLINE | Nemo Phase 1 attempt 2 legacy offline-alias failure | execution `5bba16c`；run `asrur_nemo_phase1_audit_20260726_235146`；exit `1/1` | `results/audits/asrur_nemo_phase1_transitive_offline_failure_20260727.json` | FAILED；`TRANSFORMERS_OFFLINE` 被 Hub 0.36.0 视为离线别名；由 `6760f7f` 修复 |
+| F-ASRUR-NEMO-POSIXPATH | Nemo Phase 1 attempt 3 safe-global compatibility failure | execution `cd34cbc`；run `asrur_nemo_phase1_audit_20260727_000937`；resource/preparation=`0/1` | `results/audits/asrur_nemo_phase1_posixpath_alias_failure_20260727.json` | FAILED；资源全量通过，`pathlib._local.PosixPath` 精确安全别名缺失；由 `7bd4765` 修复 |
 
 ## 2. 已有远程数据
 
@@ -47,9 +48,9 @@
 
 | ID | 模型 | revision / primary file | 远程路径 | 状态 |
 |---|---|---|---|---|
-| M-NEMO-BASE | `nvidia/omni-embed-nemotron-3b` | `865db1bb...` | `/home/jg525/models/oea/omni-embed-nemotron-3b` | migrated intact by file-count/byte invariants; live content recheck pending |
+| M-NEMO-BASE | `nvidia/omni-embed-nemotron-3b` | `865db1bb...` | `/home/jg525/models/oea/omni-embed-nemotron-3b` | LIVE_CONTENT_VERIFIED；22 files / 9,423,120,401 B，attempt 3 |
 | M-OEA-NEMO-AC | `JudeJiwoo/OEA-Nemo3B-AC` | `8ed66aa...`; `step_400_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-AC` | migrated intact by file-count/byte invariants |
-| M-OEA-NEMO-CL | `JudeJiwoo/OEA-Nemo3B-Cl` | `9588912...`; `step_450_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-Cl` | migrated intact by file-count/byte invariants; live content recheck pending |
+| M-OEA-NEMO-CL | `JudeJiwoo/OEA-Nemo3B-Cl` | `9588912...`; `step_450_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-Cl` | LIVE_CONTENT_VERIFIED；3 files / 9,466,834,755 B；source SHA256 `c9013285...a96d` |
 | M-WHISPER | `openai/whisper-large-v3` | `06f233fe...`; minimal safetensors 3,091,519,764 B | `/home/jg525/models/whisper-large-v3` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
 | M-BGE-DENSE | `BAAI/bge-base-en-v1.5` | `a5beb1e3...`; minimal 438,900,399 B | `/home/jg525/models/bge-base-en-v1.5` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
 | M-BGE-RERANK | `BAAI/bge-reranker-v2-m3` | `953dc6f6...`; minimal 2,293,242,108 B | `/home/jg525/models/bge-reranker-v2-m3` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |

@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "classification": "safe_deserialization_compatibility",
+  "experiment_stage": "ASRUR Phase 1 Nemo CPU checkpoint preparation",
+  "attempt": 3,
+  "remote_run": "logs/asrur_nemo_phase1_audit_20260727_000937",
+  "execution_git_commit": "cd34cbcd6e7bf0e4ce23c05ea2495aaff1fa660e",
+  "pipeline_exit_code": 1,
+  "wrapper_exit_code": 1,
+  "stages": {
+    "resource_audit": {
+      "status": "complete",
+      "exit_code": 0,
+      "summary": {
+        "complete": 2,
+        "incomplete": 0,
+        "failed": 0
+      },
+      "assets": [
+        {
+          "name": "omni_embed_nemotron_3b",
+          "revision": "865db1bb57e369a85357cf114cbd6b3c5322d19d",
+          "verified_local_file_count": 22,
+          "verified_local_bytes": 9423120401,
+          "errors": []
+        },
+        {
+          "name": "oea_nemo3b_cl",
+          "revision": "9588912298afca0b11f5895b864ae28083f35022",
+          "verified_local_file_count": 3,
+          "verified_local_bytes": 9466834755,
+          "errors": [],
+          "source_checkpoint": {
+            "path": "step_450_best.pt",
+            "size_bytes": 9466826217,
+            "sha256": "c9013285894109487a840a843fe789e8c3ed1c67fc3fbbe9ee7391e57b2ea96d",
+            "matches_remote_lfs_sha256": true
+          }
+        }
+      ]
+    },
+    "checkpoint_preparation": {
+      "status": "failed",
+      "exit_code": 1,
+      "error": "checkpoint contains unapproved globals: ['pathlib._local.PosixPath']"
+    }
+  },
+  "root_cause": {
+    "source": "[CODE]",
+    "description": "The checkpoint was produced with a pathlib implementation that serializes PosixPath as pathlib._local.PosixPath. The exact safe-global policy only recognized the older pathlib.PosixPath name.",
+    "resource_corruption_observed": false
+  },
+  "side_effects": {
+    "source_checkpoint_modified": false,
+    "derived_checkpoint_created": false,
+    "portable_model_lock_created": false,
+    "gpu_used": false,
+    "model_content_downloaded": false
+  },
+  "fix": {
+    "git_commit": "7bd476546bd9c4f06ed160108f7d62453d124501",
+    "policy": "Map exactly pathlib.PosixPath and pathlib._local.PosixPath to pathlib.PosixPath under torch weights_only safe_globals; reject every other pickle global.",
+    "tests": "17 focused checkpoint and pipeline tests plus Python compile check"
+  }
+}
