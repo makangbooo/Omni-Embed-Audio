@@ -1,6 +1,6 @@
 # Omni-Embed-Audio 复现状态
 
-最后更新：2026-07-22（Asia/Shanghai）
+最后更新：2026-07-26（Asia/Shanghai）
 
 状态值仅使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、`COMPLETED`、`FAILED`、`BLOCKED`。
 
@@ -63,7 +63,7 @@
 | 3 数据 | DATA-05：MECAT 848 条安全解压/解码/UIQ ID 校验 | BLOCKED | `87dbe32` | 尚未运行；安全解压、FLAC 完整解码、六字段保留、UIQ 集合校验已通过合成测试 | 等待 DATA-04 | DATA-04 完成后在同一 CPU 服务器执行 |
 | 3 数据 | MECAT 论文 847 条子集与检索 caption 口径 | BLOCKED | `87dbe32` | 官方 `00A/test` 与发布正向 UIQ 均为 848；审计文档已完成 | `[MISSING]` 被排除 ID、过滤规则、caption 字段/组合均未公开 | 不擅自删样本；先报告 848 条公开口径，继续请求作者证据 |
 | 3 数据 | DATA-11：MECAT–WavCaps 来源视频候选审计 | IN_PROGRESS | `e5bf4db` | 本地发布 UIQ 848 IDs × 固定 AudioSet_SL 108,317 rows 已完成：807 唯一来源视频、4 个同源视频候选；109 项测试通过 | DATA-05 archive manifest 与 DATA-08 远程 metadata 尚未复算；论文音频/embedding 阈值 `[MISSING]` | DATA-05/08 后在 CPU 侧运行 canonical join；不把来源视频候选写成音频重复或 blocklist |
-| 3 数据 | DATA-12：固定并下载 SQuTR 官方归档 | WAITING_USER | `3e77c7c` | 已固定 Hugging Face revision `2f1b041e...`、`source_data.zip` 精确大小 21,069,841,248 bytes、SHA256 `8956bf93...c6997c`；CPU-only 断点续传、失败保留和非覆盖校验脚本已通过完整 260 项测试 | 需要用户在远程 CPU 服务器执行长下载；当前没有已验证归档 | 运行 `scripts/download_data12_squtr.sh`；成功后返回 download manifest、大小、SHA256 和日志目录，再单独提交 DATA-13 解压/审计脚本 |
+| 3 数据 | DATA-12：固定并下载 SQuTR 官方归档 | WAITING_USER | `3d58b0e` | 远程已保留 `source_data.zip.part` 16,524,500,992 / 21,069,841,248 bytes（78.4273%），无活动进程；原始日志 `data12_squtr_download_20260722_234040` 记录 HTTP/2 `CANCEL` 与 curl 内部重试丢弃本轮进度；最小补丁改为 HTTP/1.1 外层重试，每次失败保留新增 partial 字节，完整 261 项测试通过 | 剩余 4,545,340,256 bytes（约 4.3 GiB）尚未下载和 SHA256 校验 | 远程先检查干净 worktree，再拉取 `3d58b0e` 并重跑 `scripts/download_data12_squtr.sh`；不得删除 `.part` 或并行启动第二个下载器 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | 四个 CLAP 与三个 vanilla backbone 静态就绪度审计 | COMPLETED | `d13b115` | 干净 `d13b115` 上生成 `results/audits/baseline_readiness_d13b115.json`：7 个模型、5 个代码入口完整、3 个资源身份固定、0 个正式可运行、0 证据漂移；三种 vanilla 已具备固定协议、模型锁解析、base-hidden-dimension 可恢复生成器、强制 5-audio/25-query smoke→full 闸门及锁绑定 CPU 四协议 finalizer；真实锁和 GPU smoke 均尚未运行；完整 227 项测试通过 | 无；代码/锁/指标工具完成不代表基线已评测 | DATA-04 后按长任务规则逐个生成并提交小型 vanilla base 锁，再申请 1×A100-80GB 运行锁绑定 smoke；四个 CLAP 仍需固定 source/checkpoint |
 | 5 基线 | LAION/Robust/MGA/M2D-CLAP | BLOCKED | N/A | 未开始 | checkpoint revision/统一入口不完整 | 官方 OEA 评测完成后逐个固定资源 |
@@ -73,6 +73,6 @@
 
 - 当前阶段：SpeechXBT-OEA 所需的 OEA-4 与 OEA-6 已完成；训练继续暂停，OEA-5 已选择 SQuTR 六个官方子集并进入 DATA-12 固定归档下载阶段。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：提交固定 SQuTR revision、精确归档大小与 SHA256 的 CPU-only 断点续传下载入口；完整 260 项测试通过。
-- 当前阻塞：SQuTR 约 21.07 GB 官方归档尚未在远程 CPU 服务器下载并验证；在读取官方归档 schema 前，不确定 split、文档单位、qrels 和文本构造的选择仍保持未决。训练阶段按用户要求暂停。
-- 下一步：用户在 CPU 服务器完成 DATA-12；收到归档 manifest/大小/SHA256 后，本地实现并提交 DATA-13 安全解压和只读 schema 审计。只有协议审计完成后才申请 1×GPU 生成 OEA zero-shot embedding。
+- 最近完成：依据远程 HTTP/2 `CANCEL` 证据修复下载器重试语义；SQuTR 已下载 78.4273%，补丁强制 HTTP/1.1 并保证跨失败保留新增 partial 字节，完整 261 项测试通过。
+- 当前阻塞：SQuTR 剩余 4,545,340,256 bytes 尚未续传和 SHA256 校验；在读取官方归档 schema 前，不确定 split、文档单位、qrels 和文本构造的选择仍保持未决。训练阶段按用户要求暂停。
+- 下一步：用户在 CPU 服务器拉取续传补丁并完成 DATA-12；收到归档 manifest/大小/SHA256 后，本地实现并提交 DATA-13 安全解压和只读 schema 审计。只有协议审计完成后才申请 1×GPU 生成 OEA zero-shot embedding。
