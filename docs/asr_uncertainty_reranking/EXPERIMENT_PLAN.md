@@ -43,6 +43,10 @@ Go/No-Go 和用户 GPU 批准后做跨领域零样本验证。OEA-Nemo3B (+Cl) �
 | SQuTR FiQA test（648 query × 4 条件） | 正式测试 | 禁止训练/选择超参 |
 | SQuTR NQ test（3,452 query × 4 条件） | 跨领域 zero-shot | 禁止训练/选择超参 |
 
+SQuTR 官方 Hugging Face 发布页标注许可证为 `CC BY-SA 4.0`，公开下载不收取
+数据费用；使用、改编和发布派生物时仍须遵守署名与相同方式共享条款。当前归档已
+包含 `en/fiqa` 与 `en/nq` 的 corpus、queries、qrels 和四条件音频，不重复下载。
+
 强制检查：
 
 1. query ID 精确交集；
@@ -368,10 +372,11 @@ inference、TTS、微调或上传。
 1. audio-only no-prefix 主协议已确认；
 2. D1–D4 首批下载已批准；
 3. G1 的 1×RTX 4090 24GB 资源计划已确认；精确命令提交前不启动 GPU；
-4. DATA-13C attempt 3 因独占锁申请失败退出；必须先完成 CPU 只读锁审计，
-   不删除 lock、不启动 embedding；
+4. DATA-13C attempt 3 因六子集全局锁申请失败退出；旧 lock 保留为失败证据。
+   主实验仅需要 `en/fiqa` 和 `en/nq`，因此使用 DATA-13D 的独立输出、缓存和
+   scoped lock 校验 16,400 条目标音频；这不会修改或接管旧 lock；
 5. 用户已确认 Phase 0，D1–D4 下载可在独立 CPU 服务器与 DATA-13C 锁审计并行；
-   G1 GPU 仍必须等待 DATA-13C、Nemo live audit、model lock 和精确命令；
+   G1 GPU 仍必须等待 DATA-13D、Nemo live audit、model lock 和精确命令；
 6. `[INFERRED][USER-CONFIRMED 2026-07-26]` B5/B6 主融合固定使用 4-best
    proxy-posterior 分数，以便 A3 只比较融合策略；1-best 融合只保留为辅助
    诊断。该选择已在任何正式 FiQA dev/test 或 NQ 结果产生前锁定。

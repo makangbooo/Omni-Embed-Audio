@@ -121,6 +121,18 @@ distributions, and all 149,268 audio records must first pass DATA-13C on the
 remote CPU server. Only then may the official `OEA-Qwen3B (+Cl)` checkpoint
 enter a small zero-shot A2T GPU smoke test.
 
+For the ASR-uncertainty reranking main experiment, the required scope is
+smaller and fixed before any result is observed: `en/fiqa` (648 queries) and
+`en/nq` (3,452 queries), each under four acoustic conditions, for 16,400 audio
+instances. Commit `f6f799d` adds DATA-13D with a separate manifest, resumable
+probe cache, and subset-scoped lock. It preserves the failed six-subset
+DATA-13C lock as evidence and never deletes, overwrites, or acquires it. The
+same commit fixes two integration defects found during the audit: validator
+rows now contain the downstream-required `record_id`, and FiQA identity checks
+accept the official relative-path label `en/fiqa`. Thus the stale global DPC
+lock no longer blocks the FiQA/NQ main experiment, while the full six-subset
+OEA-5 extension remains pending.
+
 ## OEA-6 measurement boundary
 
 Existing full Clotho embedding runs record approximately 9.31 GiB allocated
