@@ -73,8 +73,8 @@
 
 ## 当前焦点
 
-- 当前阶段：SpeechXBT-OEA 所需的 OEA-4 与 OEA-6 已完成；训练继续暂停；OEA-5 的 SQuTR DATA-12 与 DATA-13A 已完成，DATA-13B 正在远程 CPU 全量运行。
+- 当前阶段：OEA 论文复现结果继续冻结保存；用户已将后续研究范围固定为 ASR-Uncertainty-Guided Reranking over OEA。新项目 Phase 0 只读审计与协议草案已完成，独立状态见 `docs/asr_uncertainty_reranking/STATUS.md`；训练继续暂停。OEA-5 的 SQuTR DATA-12 与 DATA-13A 已完成，DATA-13B 正在远程 CPU 全量运行，并同时作为新项目 Phase 2 的数据门禁。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：DATA-13A 在固定归档上成功完成只读审计，确认 149,349 个 ZIP records、149,268 个 WAV、28,422,366,590 解压后 bytes 和零安全违规；DATA-13B 工具在 commit `fa9322b` 实现并通过完整 278 项测试。
 - 当前阻塞：无新的外部阻塞；DATA-13B 正在读取实际 JSONL、验证 corpus/query/qrels 闭包、精确候选数和全部音频。结果未产生前不推断 qrels 语义或生成 OEA embedding。训练阶段按用户要求暂停。
-- 下一步：只读监控远程 PID `8032` 与运行目录；成功后本地固化协议与 manifest 统计，再请求切换到 1×GPU 执行小样本 official-checkpoint zero-shot A2T smoke test。
+- 下一步：只读监控远程 PID `8032` 与运行目录；成功后本地固化协议与 manifest 统计。新项目先等待用户确认 OEA audio-prefix 协议、Whisper/BGE/FiQA 首批下载和 Phase 1 的 1×A100 资源计划；任何 GPU 运行前另行提交精确命令、显存、时长和输出目录。
