@@ -18,7 +18,7 @@
 | 0 | B5/B6 主融合的 ASR 路由 | WAITING_USER | `8f28c55` | 配置暂定 `proxy_posterior`，1-best 路由保留为辅助诊断 | 用户原始定义未明确 B5/B6 使用 1-best 还是 4-best；会影响 A3 公平性 | 正式 FiQA dev/test 前确认；推荐 4-best 作为主路由 |
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | 运行 FiQA/SQuTR 数据一致性审计前等待 DATA-13C final manifest |
 | 0 | D2–D4 Whisper/BGE 固定资源下载 | RUNNING_REMOTE | `41efefa` | run=`asrur_d2_d4_models_download_20260726_200414`；PID `15697` 及下载子进程仍在，manifest=`running`；当前下载 Whisper，目标目录约 121 MiB，125,829,120-byte `.incomplete` 为可恢复临时文件 | 尚无最终 exit code；BGE 两项目录尚未出现 | 不删除 `.incomplete`、不重复启动、不关闭服务器；等待三项逐一校验完成 |
-| 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `41efefa` | attempt 3 已结束且本机无相关进程；旧 lock 为 0-byte regular file，`lslocks`/`fuser`/`lsof` 未发现本机持有者，但 non-blocking `flock` 未取得锁 | 可能为另一台共享存储服务器持锁、遗留进程继承 FD，或共享文件系统锁状态；原探针把后续 `echo` 的退出码误记为 0 | 不删除 lock；在同目录用新 probe file 验证 `flock` 能力并正确捕获旧锁退出码，同时检查 `/proc/locks`/开放 FD |
+| 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `a4c5c02` | 精确探针：old lock RC=`73`、同目录新 lock RC=`0`；本机无 DATA-13C 进程、开放 FD 或 `/proc/locks` 匹配 | 已排除本机持有者和同目录 flock 功能故障；剩余为另一台共享存储服务器持锁或 DPC 远端租约 | 不删除/绕过旧 lock；检查所有仍挂载 `/home/jg525` 的实例，若均无持有者则向平台报分布式锁租约 |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | WAITING_USER | 待后续提交 | 历史 LFS 审计 complete，尚未做 2026-07-26 live recheck | 需要远程 CPU 执行；全哈希可能超过 30 分钟 | DATA-13B 后执行独立资源审计 |
 | 1 | Nemo inference-only checkpoint 与 model lock | TODO | N/A | 未执行 | 依赖 live resource audit | 生成小型锁并提交 |
 | 1 | Nemo 5/25 OEA embedding smoke | TODO | N/A | 计划 1×RTX 4090 24GB | 依赖 model lock 和精确 GPU 命令批准 | 先提交精确 wrapper/config；预计 12–18 GiB |
@@ -50,10 +50,10 @@
   wrapper exit=`20`，reuse/validation exit 文件、v2 cache 和 final manifest
   均未生成。后续在 commit `41efefa` 上检查确认本机无相关进程；
   `.data13c_content_recovery.lock` 是 0-byte regular file，且
-  `lslocks`/`fuser`/`lsof` 均未显示本机持有者，但 non-blocking `flock` 仍未取得
-  锁。原命令末尾显示的 `LOCK_PROBE_EXIT=0` 是后续 `echo` 的退出码，不是
-  `flock` 的退出码。必须继续做同目录能力探针和跨服务器持有者排查，不得删除或
-  绕过 lock。
+  `lslocks`/`fuser`/`lsof` 均未显示本机持有者。2026-07-26 20:25 的精确探针
+  得到 old lock RC=`73`、同目录新 lock RC=`0`，本机仍无 DATA-13C 进程、
+  `/proc/locks` 或开放 FD 匹配。因此同目录 `flock` 正常，旧锁由另一台共享
+  存储服务器或 DPC 远端租约持有。不得删除或绕过 lock。
 - 当前未执行：任何 GPU 计算、TTS、模型推理或真实 gate 训练。D1 FiQA 已完成；
   D2–D4 已在 CPU 服务器进入后台下载，但尚无完成证据。
 - 下一步：两条 CPU 工作并行执行：(1) 监控 D2–D4 固定资源下载，不得

@@ -1,0 +1,46 @@
+{
+  "audit_id": "squtr_data13c_distributed_lock_probe_20260726_202556",
+  "status": "old_lock_held_outside_visible_local_process_namespace",
+  "source": "user-supplied terminal transcript",
+  "observed_at": "2026-07-26T20:25:56+08:00",
+  "host": "bitahub-a20601801981030400524510",
+  "execution_commit_context": "a4c5c0222b24603ebfd885df1d784279165a3aab",
+  "filesystem": {
+    "target": "/file_system/jg525",
+    "source": "system:/bitahub-member[/b20260317235732695cvaqgr/home/jg525]",
+    "type": "dpc",
+    "options": "rw,relatime"
+  },
+  "old_lock": {
+    "path": "/home/jg525/datasets/oea/squtr/manifests/.data13c_content_recovery.lock",
+    "nonblocking_conflict_exit_code": 73,
+    "acquired": false
+  },
+  "same_directory_capability_probe": {
+    "path": "/home/jg525/datasets/oea/squtr/manifests/.flock_probe_bitahub-a20601801981030400524510_1654.lock",
+    "conflict_exit_code": 74,
+    "actual_exit_code": 0,
+    "acquired": true
+  },
+  "local_visibility": {
+    "related_data13c_processes": 0,
+    "proc_locks_inode_matches": 0,
+    "open_file_descriptor_matches": 0
+  },
+  "interpretation": [
+    "The filesystem accepted a new flock in the same directory.",
+    "The original lock was still unavailable.",
+    "No holder was visible in this host's process namespace.",
+    "The remaining candidates are a process on another mounted host or a distributed-filesystem remote lock lease."
+  ],
+  "safety_decision": {
+    "delete_old_lock": false,
+    "bypass_with_new_production_lock": false,
+    "restart_data13c": false,
+    "next_action": "Inspect every still-running host that mounts /home/jg525, then escalate a stale distributed lock to the platform if no remote holder exists."
+  },
+  "unrelated_active_work": {
+    "d2_d4_download_wrapper_pid": 15697,
+    "download_process_active": true
+  }
+}
