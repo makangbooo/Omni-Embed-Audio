@@ -27,6 +27,8 @@
 | F-ASRUR-NEMO-METADATA | Nemo Phase 1 attempt 1 metadata-policy failure | execution `d3ba9f1`；run `asrur_nemo_phase1_audit_20260726_232452`；exit `1/1` | `results/audits/asrur_nemo_phase1_metadata_policy_failure_20260726.json` | FAILED；实现协议冲突，不是模型损坏；由 `86107ca` 修复 |
 | F-ASRUR-NEMO-TRANSITIVE-OFFLINE | Nemo Phase 1 attempt 2 legacy offline-alias failure | execution `5bba16c`；run `asrur_nemo_phase1_audit_20260726_235146`；exit `1/1` | `results/audits/asrur_nemo_phase1_transitive_offline_failure_20260727.json` | FAILED；`TRANSFORMERS_OFFLINE` 被 Hub 0.36.0 视为离线别名；由 `6760f7f` 修复 |
 | F-ASRUR-NEMO-POSIXPATH | Nemo Phase 1 attempt 3 safe-global compatibility failure | execution `cd34cbc`；run `asrur_nemo_phase1_audit_20260727_000937`；resource/preparation=`0/1` | `results/audits/asrur_nemo_phase1_posixpath_alias_failure_20260727.json` | FAILED；资源全量通过，`pathlib._local.PosixPath` 精确安全别名缺失；由 `7bd4765` 修复 |
+| A-ASRUR-NEMO-PHASE1 | Nemo Phase 1 attempt 4 CPU gate success | execution `58f80bb`；run `asrur_nemo_phase1_audit_20260727_004107`；pipeline/wrapper=`0/0` | `results/audits/asrur_nemo_phase1_success_20260727.json` | COMPLETE；resource/preparation/lock 均 complete |
+| L-OEA-NEMO-CL | OEA-Nemo3B (+Cl) canonical model lock | 5,932 B；SHA256 `fd09e4d2...c8c2` | `results/model_locks/oea_nemo3b_cl.json` | LOCKED；与远程 portable lock 逐字一致 |
 
 ## 2. 已有远程数据
 
@@ -50,7 +52,7 @@
 |---|---|---|---|---|
 | M-NEMO-BASE | `nvidia/omni-embed-nemotron-3b` | `865db1bb...` | `/home/jg525/models/oea/omni-embed-nemotron-3b` | LIVE_CONTENT_VERIFIED；22 files / 9,423,120,401 B，attempt 3 |
 | M-OEA-NEMO-AC | `JudeJiwoo/OEA-Nemo3B-AC` | `8ed66aa...`; `step_400_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-AC` | migrated intact by file-count/byte invariants |
-| M-OEA-NEMO-CL | `JudeJiwoo/OEA-Nemo3B-Cl` | `9588912...`; `step_450_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-Cl` | LIVE_CONTENT_VERIFIED；3 files / 9,466,834,755 B；source SHA256 `c9013285...a96d` |
+| M-OEA-NEMO-CL | `JudeJiwoo/OEA-Nemo3B-Cl` | `9588912...`; `step_450_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-Cl` | LIVE_CONTENT_VERIFIED；3 files / 9,466,834,755 B；source SHA256 `c9013285...a96d`；59,072,047-B derived SHA256 `2a5bee90...80c4` |
 | M-WHISPER | `openai/whisper-large-v3` | `06f233fe...`; minimal safetensors 3,091,519,764 B | `/home/jg525/models/whisper-large-v3` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
 | M-BGE-DENSE | `BAAI/bge-base-en-v1.5` | `a5beb1e3...`; minimal 438,900,399 B | `/home/jg525/models/bge-base-en-v1.5` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
 | M-BGE-RERANK | `BAAI/bge-reranker-v2-m3` | `953dc6f6...`; minimal 2,293,242,108 B | `/home/jg525/models/bge-reranker-v2-m3` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |

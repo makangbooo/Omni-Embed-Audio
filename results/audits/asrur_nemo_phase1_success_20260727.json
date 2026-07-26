@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "experiment_stage": "ASRUR Phase 1 Nemo CPU resource and checkpoint gate",
+  "attempt": 4,
+  "remote_run": "logs/asrur_nemo_phase1_audit_20260727_004107",
+  "execution_git_commit": "58f80bb760b9bacf38dc1711a41a6c9045dfb457",
+  "pipeline_exit_code": 0,
+  "wrapper_exit_code": 0,
+  "pipeline_started_at": "2026-07-26T16:41:17.195611+00:00",
+  "pipeline_finished_at": "2026-07-26T16:42:55.287801+00:00",
+  "stages": {
+    "resource_audit": {
+      "status": "complete",
+      "exit_code": 0
+    },
+    "checkpoint_preparation": {
+      "status": "complete",
+      "exit_code": 0,
+      "operation": "inspect_and_extract",
+      "unsafe_globals": [
+        "pathlib._local.PosixPath"
+      ],
+      "approved_safe_globals": [
+        "pathlib._local.PosixPath"
+      ],
+      "unexpected_unsafe_globals": []
+    },
+    "model_lock": {
+      "status": "complete",
+      "exit_code": 0
+    }
+  },
+  "source_checkpoint": {
+    "size_bytes": 9466826217,
+    "sha256": "c9013285894109487a840a843fe789e8c3ed1c67fc3fbbe9ee7391e57b2ea96d"
+  },
+  "derived_checkpoint": {
+    "path": "/home/jg525/models/oea/OEA-Nemo3B-Cl/step_450_best_inference_only.pt",
+    "size_bytes": 59072047,
+    "sha256": "2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+    "lora_tensor_count": 544,
+    "lora_tensor_bytes": 50462720
+  },
+  "portable_model_lock": {
+    "size_bytes": 5932,
+    "sha256": "fd09e4d2b482aafdae7e297275c8106e10f82a6de99780d0ccfeb22b06bfc8c2"
+  },
+  "side_effects": {
+    "source_checkpoint_modified": false,
+    "gpu_used": false,
+    "model_content_downloaded": false
+  }
+}
