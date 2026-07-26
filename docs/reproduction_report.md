@@ -90,6 +90,18 @@ files in a cache bound to the extraction marker, structure, probe protocol,
 root path, and Git commit. Interrupted content validation can therefore reuse
 verified probes while mismatched cache identity is rejected.
 
+The first recovery attempt, `data13c_squtr_content_recovery_20260726_155758`
+at `68aa615`, returned reuse/validation/wrapper codes `0/1/1`. Exact extraction
+reuse was verified without rereading the full tree, but content validation
+stopped at the first FiQA qrels row because the local validator required a
+numeric JSON score. The pinned SQuTR loader instead applies `int(...)`; the
+immutable pinned FiQA reference stores all 1,706 test scores as the string
+`"1"`. The repair accepts only losslessly integer-valued numbers/strings and
+records actual SQuTR qrels hashes, raw types, coercion counts, and normalized
+score distributions. It does not rewrite qrels or alter relevance. The
+identity-only v1 probe cache and failed candidate remain preserved; the next
+run uses a new v2 cache.
+
 The dataset-agnostic evaluator consumes explicit query/document metadata and
 graded JSONL qrels, hashes frozen text embeddings and metadata before and
 after scoring, and writes deterministic rankings plus per-query evidence.

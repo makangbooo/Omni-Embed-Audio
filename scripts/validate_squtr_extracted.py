@@ -175,25 +175,58 @@ def load_queries(path: Path, expected: int) -> dict[str, str]:
     return queries
 
 
+def parse_qrel_score(raw: Any, path: Path, line_number: int) -> int:
+    """Parse one qrel score without changing its integer relevance value.
+
+    The pinned SQuTR loader applies ``int(item.get("score", 1))`` and the
+    immutable FiQA JSONL stores scores as strings such as ``"1"``.  Accept
+    integer-valued JSON numbers and base-10 integer strings, but reject bools
+    and any lossy or ambiguous conversion.
+    """
+
+    if isinstance(raw, bool):
+        raise ValueError(f"invalid qrels score: {path}:{line_number}")
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, float):
+        if raw.is_integer():
+            return int(raw)
+        raise ValueError(f"non-integral qrels score: {path}:{line_number}")
+    if isinstance(raw, str):
+        stripped = raw.strip()
+        if not stripped:
+            raise ValueError(f"invalid qrels score: {path}:{line_number}")
+        try:
+            return int(stripped, 10)
+        except ValueError as exc:
+            raise ValueError(
+                f"invalid integer-string qrels score: {path}:{line_number}"
+            ) from exc
+    raise ValueError(f"invalid qrels score: {path}:{line_number}")
+
+
 def validate_qrels(
     path: Path, query_ids: set[str], corpus_ids: set[str]
 ) -> dict[str, Any]:
     pairs: set[tuple[str, str]] = set()
     qrel_query_ids: set[str] = set()
     scores: Counter[str] = Counter()
+    raw_score_types: Counter[str] = Counter()
+    coerced_string_scores = 0
     for line_number, row in iter_jsonl(path):
         query_raw = row.get("query-id", row.get("query_id"))
         corpus_raw = row.get("corpus-id", row.get("corpus_id"))
         query_id = str(query_raw) if query_raw is not None else ""
         corpus_id = str(corpus_raw) if corpus_raw is not None else ""
-        score = row.get("score")
-        if (
-            not query_id
-            or not corpus_id
-            or isinstance(score, bool)
-            or not isinstance(score, (int, float))
-        ):
-            raise ValueError(f"invalid qrels schema: {path}:{line_number}")
+        if not query_id or not corpus_id or "score" not in row:
+            keys = ",".join(sorted(row))
+            raise ValueError(
+                f"invalid qrels schema: {path}:{line_number}; keys={keys}"
+            )
+        score_raw = row["score"]
+        score = parse_qrel_score(score_raw, path, line_number)
+        raw_score_types[type(score_raw).__name__] += 1
+        coerced_string_scores += isinstance(score_raw, str)
         if query_id not in query_ids:
             raise ValueError(f"qrels references unknown query {query_id!r}: {path}")
         if corpus_id not in corpus_ids:
@@ -212,6 +245,15 @@ def validate_qrels(
         "queries_with_qrels": len(qrel_query_ids),
         "query_coverage_exact": qrel_query_ids == query_ids,
         "score_counts": dict(sorted(scores.items())),
+        "raw_score_type_counts": dict(sorted(raw_score_types.items())),
+        "integer_string_scores_coerced": coerced_string_scores,
+        "score_parsing_policy": (
+            "[CODE] preserve integer relevance values while accepting the pinned "
+            "SQuTR loader's int-compatible JSON string representation; reject "
+            "bools and lossy numeric conversions"
+        ),
+        "source_size_bytes": path.stat().st_size,
+        "source_sha256": sha256_file(path),
         "all_query_ids_resolved": True,
         "all_corpus_ids_resolved": True,
     }

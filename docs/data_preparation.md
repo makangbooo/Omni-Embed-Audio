@@ -119,3 +119,34 @@ reuses exact path/size/mtime-matched probes, while a different cache identity
 is rejected instead of silently reused. The recovery uses `flock`, requires a
 clean worktree, never removes the attempt-1 candidate, and does not overwrite
 an incompatible final manifest.
+
+#### DATA-13C attempt 2 and qrels score representation
+
+`[OBSERVED]` Recovery `data13c_squtr_content_recovery_20260726_155758` at
+commit `68aa615` verified the extraction completion marker and all 66 core
+paths with reuse exit code 0. It performed neither extraction nor a redundant
+full-tree reread. Validation then stopped before audio probing at
+`en/fiqa/qrels/test.jsonl:1`; validation and wrapper exit codes were both 1.
+No final manifest was published, the random candidate was preserved, and the
+v1 probe cache contains only its 475-byte identity record. The exact failure
+is committed in
+`results/audits/squtr_data13c_attempt2_failure_20260726.json`.
+
+This is another local schema-policy mismatch, not evidence of archive damage.
+`[CODE]` The pinned SQuTR loader at commit
+`cc3fb31fc0dc44fef3a44c569b344516bbaee79c` parses qrel relevance using
+`int(item.get("score", 1))`. The immutable `mteb/fiqa` test qrels fixed for
+this project at revision `5e59eeb3a7df6b85882112b747008547c21587ea`
+has the already pinned size 98,588 bytes and SHA256
+`2bccf36cea9efefcc14ae500f11bf89d50182b78b4636d73ca2eda5c1993c5c5`;
+all 1,706 rows store score as the JSON string `"1"`.
+
+The minimal repair accepts integer JSON numbers and base-10 integer strings
+without changing their integer relevance. It rejects booleans, non-integral
+floats, decimal strings, missing score fields, and all lossy conversions. The
+validation report now records each actual SQuTR qrels file's size, SHA256,
+raw score-type counts, normalized score counts, and string-coercion count.
+It does not rewrite qrels or change query/candidate membership. Because the
+identity-only v1 cache is bound to commit `68aa615`, the next run preserves it
+and uses `.squtr_audio_probe_cache_v2.jsonl` rather than deleting or silently
+relabeling prior evidence.

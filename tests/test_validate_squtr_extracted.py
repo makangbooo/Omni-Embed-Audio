@@ -307,7 +307,7 @@ class ValidateSqutrExtractedTest(unittest.TestCase):
                 qrels,
                 [{"query-id": "q1", "corpus-id": "d1", "score": True}],
             )
-            with self.assertRaisesRegex(ValueError, "invalid qrels schema"):
+            with self.assertRaisesRegex(ValueError, "invalid qrels score"):
                 validate_dataset(
                     extract_root,
                     structure_manifest(),
@@ -315,6 +315,53 @@ class ValidateSqutrExtractedTest(unittest.TestCase):
                     10,
                     audio_probe=fake_probe,
                 )
+
+    def test_integer_string_qrels_score_matches_pinned_loader(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            extract_root = root / "extracted"
+            write_extracted_fixture(extract_root)
+            qrels = extract_root / "source_data/en/one/qrels/test.jsonl"
+            write_jsonl(
+                qrels,
+                [{"query-id": "q1", "corpus-id": "d1", "score": "1"}],
+            )
+
+            report, status, _ = validate_dataset(
+                extract_root,
+                structure_manifest(),
+                root / "manifest.jsonl",
+                10,
+                audio_probe=fake_probe,
+            )
+
+            qrels_report = report["subsets"][0]["qrels"]
+            self.assertEqual(status, "created")
+            self.assertEqual(qrels_report["score_counts"], {"1": 1})
+            self.assertEqual(qrels_report["raw_score_type_counts"], {"str": 1})
+            self.assertEqual(qrels_report["integer_string_scores_coerced"], 1)
+            self.assertEqual(len(qrels_report["source_sha256"]), 64)
+            self.assertEqual(qrels_report["source_size_bytes"], qrels.stat().st_size)
+
+    def test_non_integral_qrels_scores_are_rejected(self) -> None:
+        for score in ("1.5", 1.5):
+            with self.subTest(score=score), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                extract_root = root / "extracted"
+                write_extracted_fixture(extract_root)
+                qrels = extract_root / "source_data/en/one/qrels/test.jsonl"
+                write_jsonl(
+                    qrels,
+                    [{"query-id": "q1", "corpus-id": "d1", "score": score}],
+                )
+                with self.assertRaisesRegex(ValueError, "qrels score"):
+                    validate_dataset(
+                        extract_root,
+                        structure_manifest(),
+                        root / "manifest.jsonl",
+                        10,
+                        audio_probe=fake_probe,
+                    )
 
 
 if __name__ == "__main__":
