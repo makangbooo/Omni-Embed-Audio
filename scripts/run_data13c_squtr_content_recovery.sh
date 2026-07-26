@@ -57,11 +57,26 @@ echo "[INFO] Probe cache: ${PROBE_CACHE}"
 echo "[INFO] GPU disabled"
 echo "[INFO] This recovery never deletes attempt-1 evidence or extracted data"
 
-exec 9> "${LOCK_FILE}"
+exec 9>> "${LOCK_FILE}"
 if ! flock -n 9; then
   echo "[ERROR] Another DATA-13C recovery owns ${LOCK_FILE}" >&2
+  if [[ -s "${LOCK_FILE}" ]]; then
+    echo "[ERROR] Last recorded lock owner metadata:" >&2
+    sed 's/^/[ERROR]   /' "${LOCK_FILE}" >&2
+  else
+    echo "[ERROR] Lock owner metadata is unavailable (legacy empty lock file)." >&2
+  fi
   exit 20
 fi
+{
+  printf 'schema=oea_data13c_lock_v1\n'
+  printf 'last_acquired_at=%s\n' "$(date -Is)"
+  printf 'last_owner_host=%s\n' "$(hostname)"
+  printf 'last_owner_pid=%s\n' "$$"
+  printf 'last_owner_ppid=%s\n' "${PPID}"
+  printf 'last_owner_git_commit=%s\n' "${GIT_COMMIT}"
+  printf 'last_owner_run_dir=%s\n' "${RUN_DIR}"
+} > "${LOCK_FILE}"
 
 set +e
 python scripts/verify_squtr_extraction_completion.py \

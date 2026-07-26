@@ -19,6 +19,7 @@
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | 运行 FiQA/SQuTR 数据一致性审计前等待 DATA-13C final manifest |
 | 0 | D2–D4 Whisper/BGE 固定资源下载 | RUNNING_REMOTE | `41efefa` | run=`asrur_d2_d4_models_download_20260726_200414`；PID `15697` 及下载子进程仍在，manifest=`running`；当前下载 Whisper，目标目录约 121 MiB，125,829,120-byte `.incomplete` 为可恢复临时文件 | 尚无最终 exit code；BGE 两项目录尚未出现 | 不删除 `.incomplete`、不重复启动、不关闭服务器；等待三项逐一校验完成 |
 | 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `a4c5c02` | 精确探针：old lock RC=`73`、同目录新 lock RC=`0`；本机无 DATA-13C 进程、开放 FD 或 `/proc/locks` 匹配 | 已排除本机持有者和同目录 flock 功能故障；剩余为另一台共享存储服务器持锁或 DPC 远端租约 | 不删除/绕过旧 lock；检查所有仍挂载 `/home/jg525` 的实例，若均无持有者则向平台报分布式锁租约 |
+| 0/2 | DATA-13C lock owner provenance | COMPLETED | 待本提交 | wrapper 改为非截断打开 lock；成功取得后记录 hostname/PID/PPID/commit/run dir，失败时显示最后记录；4 项专项测试通过 | 该补丁不能解除当前由远端实体持有的旧锁 | 远端锁安全释放并拉取本补丁后再恢复 DATA-13C |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | WAITING_USER | 待后续提交 | 历史 LFS 审计 complete，尚未做 2026-07-26 live recheck | 需要远程 CPU 执行；全哈希可能超过 30 分钟 | DATA-13B 后执行独立资源审计 |
 | 1 | Nemo inference-only checkpoint 与 model lock | TODO | N/A | 未执行 | 依赖 live resource audit | 生成小型锁并提交 |
 | 1 | Nemo 5/25 OEA embedding smoke | TODO | N/A | 计划 1×RTX 4090 24GB | 依赖 model lock 和精确 GPU 命令批准 | 先提交精确 wrapper/config；预计 12–18 GiB |
