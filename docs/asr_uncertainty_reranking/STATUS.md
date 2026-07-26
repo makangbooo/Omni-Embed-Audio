@@ -21,12 +21,12 @@
 | 0 | D2–D4 Whisper/BGE 固定资源下载 | RUNNING_REMOTE | `aac088d` | 旧顺序 run 已按用户要求以 `143/143` 停止；三个手工 `git clone` PID `24716/25828/26585` 均位于 `/home/jg525/models/*`，迁移时仍在运行；21:48 目录仅 `323/308/329 MiB`，不能视为权重完成 | 等待 clone/LFS 结束；尚未验证固定 revision、权重大小和 SHA256 | 下载结束后运行 `scripts/run_asrur_model_audit.sh` 严格离线验收 |
 | 0/2 | SQuTR DATA-13B/13C 六子集内容门禁 | WAITING_USER | `a4c5c02` | 精确探针 old/new lock RC=`73/0`；本机无持有者，用户确认没有任何其他挂载 `/home/jg525` 的运行实例 | DPC 远端遗留锁租约；只阻塞全六子集扩展 | 按 `dpc_lock_support_request.md` 联系平台；不得删除/绕过旧 lock |
 | 0/2 | DATA-13C lock owner provenance | COMPLETED | `090abf8` | wrapper 改为非截断打开 lock；成功取得后记录 hostname/PID/PPID/commit/run dir，失败时显示最后记录；4 项专项测试通过 | 该补丁不能解除当前由远端实体持有的旧锁 | 远端锁安全释放并拉取本补丁后再恢复 DATA-13C |
-| 0/2 | DATA-13D FiQA/NQ 目标子集门禁 | WAITING_USER | `f6f799d` | 独立 scoped lock、16,400-row manifest、可恢复音频 probe 和 FiQA ID/文本/泄漏审计已实现；28 项专项测试通过 | 需要远程 CPU 长任务；无需 GPU、下载或 D2–D4 | 拉取后运行 `scripts/run_data13d_squtr_fiqa_nq_validation.sh` |
+| 0/2 | DATA-13D FiQA/NQ 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；reuse/validation/FiQA audit/wrapper=`0/0/0/0`；16,400/16,400 音频、manifest/cache SHA256 已固定；FiQA violations 与 split leakage 均为空 | 无；源音频混合 24 kHz/16 kHz，后续 runner 必须显式重采样 | 固化审计 JSON；进入模型验收与 Phase 1/2 runner 门禁 |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | WAITING_USER | 待后续提交 | 历史 LFS 审计 complete，尚未做 2026-07-26 live recheck | 需要远程 CPU 执行；全哈希可能超过 30 分钟 | DATA-13B 后执行独立资源审计 |
 | 1 | Nemo inference-only checkpoint 与 model lock | TODO | N/A | 未执行 | 依赖 live resource audit | 生成小型锁并提交 |
 | 1 | Nemo 5/25 OEA embedding smoke | TODO | N/A | 计划 1×RTX 4090 24GB | 依赖 model lock 和精确 GPU 命令批准 | 先提交精确 wrapper/config；预计 12–18 GiB |
 | 1 | Nemo(+Cl) Clotho 表 2 T2A | TODO | N/A | 需要 1×GPU + CPU metrics | 依赖 smoke gate | 对照 21.57/47.16/60.36 |
-| 2 | FiQA corpus/qrels 协议与文档构造锁 | WAITING_USER | `f6f799d` | 严格审计器已修复 `en/fiqa` 路径识别和 `record_id` 接口；真实数据尚未执行 | 等待 DATA-13D 远程 CPU run | DATA-13D 自动固化 count/hash/leakage |
+| 2 | FiQA corpus/qrels 协议与文档构造锁 | COMPLETED | `730e0fc` | corpus/train/dev/test=`57,638/5,500/500/648`；qrel pairs=`14,166/1,238/1,706`；四条件各 648；ID、规范化文本和 split leakage 检查全通过 | FiQA corpus 有 38 个官方空文档行，按固定 SQuTR loader 保留 | 后续索引不得过滤或合成这 38 行；缓存 manifest 绑定输入 SHA256 |
 | 2 | B1/B2/B3 四条件一级召回 | TODO | N/A | 需要 GPU | 依赖数据/模型下载和 Phase 1 | 报告 nDCG/MRR/Recall/Oracle |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |
 | 3 | 1-best CE、固定融合、RRF、Gold 上限 | BLOCKED | N/A | 未开始 | 依赖 Go | 复用唯一 OEA Top-100 |
@@ -60,7 +60,7 @@
 - 当前未执行：任何 GPU 计算、TTS、模型推理或真实 gate 训练。D1 FiQA 已完成；
   OEA 模型已完整迁移到 `/home/jg525/models/oea`，D2–D4 正在
   `/home/jg525/models` 下并行 clone，但尚无权重完成证据。
-- 下一步：两条 CPU 工作并行执行：(1) 运行 DATA-13D，仅验证 `en/fiqa` 和
-  `en/nq`，旧 DATA-13C lock 只读留证；(2) 监控 D2–D4 下载，不重复启动，结束后
-  运行固定 revision/LFS/size/SHA256 离线验收。G1 仍须等 Nemo 实时审计、model lock
+- 下一步：两条 CPU 工作并行执行：(1) 对 D2–D4 完成结果运行固定
+  revision/LFS/size/SHA256 离线验收；(2) 对 Nemo base/+Cl 做实时只读复核并生成
+  model lock。DATA-13D 已完成，旧 DATA-13C lock 仅继续影响六子集扩展。G1 仍须等 model lock
   和精确 GPU 命令再次提交后才启动。

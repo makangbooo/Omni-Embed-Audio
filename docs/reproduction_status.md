@@ -72,7 +72,7 @@
 | 3 数据 | DATA-13A：SQuTR ZIP 结构与路径安全审计 | COMPLETED | `e414d74` | 远程运行 `data13_squtr_archive_audit_20260726_135100`：audit/wrapper exit 均为 0；归档 SHA256 精确匹配；149,349 records、149,310 files、39 directories、28,422,366,590 uncompressed bytes、149,268 WAV；六子集四条件计数全匹配，violations 与全部安全计数均为空；审计 JSON SHA256 `139736d2...007e` | 无；真实清单确认 query metadata 位于子集根目录，消除了 README 与官方 runner 拼接行为的路径歧义；本步未做 CRC 或解压 | DATA-13B 对每个成员做 CRC 安全解压，再验证 JSONL schema、ID/qrels 闭包和音频 |
 | 3 数据 | DATA-13B/13C：SQuTR 解压与可恢复内容校验 | WAITING_USER | `a4c5c02` | attempt 3 wrapper=`20`；old/new RC=`73/0`；用户确认无其他挂载实例；旧 v1 cache 保留，v2 cache/final manifest 未生成 | DPC 远端遗留锁租约 | 不删除/绕过旧锁；按固定故障说明请求平台释放租约 |
 | 3 数据 | DATA-13C lock owner provenance patch | COMPLETED | 待本提交 | lock 改为非截断打开；成功后记录 hostname/PID/PPID/commit/run dir，失败时打印最后记录；4 项专项测试通过 | 只改善后续审计，不解除当前远端锁 | 当前锁安全释放后拉取补丁，再启动恢复 |
-| 3 数据 | DATA-13D：SQuTR `en/fiqa` + `en/nq` 目标子集门禁 | WAITING_USER | `f6f799d` | CPU-only wrapper、独立 scoped lock、可恢复 probe cache、16,400-row manifest 和 FiQA ID/文本/泄漏审计已实现；28 项专项测试和 shell 语法检查通过 | 需要远程 CPU 执行；D2–D4 不构成本步骤依赖 | 拉取 `repro/oea-full` 后运行 `scripts/run_data13d_squtr_fiqa_nq_validation.sh`；回传 statistics、FiQA audit、哈希和退出码 |
+| 3 数据 | DATA-13D：SQuTR `en/fiqa` + `en/nq` 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；四个退出码均为 0；16,400/16,400 音频通过；manifest SHA256 `e5053d30...15e93`；FiQA count/ID/text/leakage 无 violations | 无；4,100 条 24 kHz 与 12,300 条 16 kHz 是真实源数据分布 | 主实验数据门禁解除；后续模型输入显式重采样并记录 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | 四个 CLAP 与三个 vanilla backbone 静态就绪度审计 | COMPLETED | `d13b115` | 干净 `d13b115` 上生成 `results/audits/baseline_readiness_d13b115.json`：7 个模型、5 个代码入口完整、3 个资源身份固定、0 个正式可运行、0 证据漂移；三种 vanilla 已具备固定协议、模型锁解析、base-hidden-dimension 可恢复生成器、强制 5-audio/25-query smoke→full 闸门及锁绑定 CPU 四协议 finalizer；真实锁和 GPU smoke 均尚未运行；完整 227 项测试通过 | 无；代码/锁/指标工具完成不代表基线已评测 | DATA-04 后按长任务规则逐个生成并提交小型 vanilla base 锁，再申请 1×A100-80GB 运行锁绑定 smoke；四个 CLAP 仍需固定 source/checkpoint |
 | 5 基线 | LAION/Robust/MGA/M2D-CLAP | BLOCKED | N/A | 未开始 | checkpoint revision/统一入口不完整 | 官方 OEA 评测完成后逐个固定资源 |
@@ -85,7 +85,7 @@
 - 最近完成：新项目在 `8f28c55` 已实现从严格数据审计、dense/Top-100 缓存、
   B1–B7/U1–U4、query/candidate gate、A1–A9 到 bootstrap/统一表格的 CPU
   流水线；58 项专项和 345 项全仓测试通过，没有产生真实实验数值。
-- 当前阻塞：DPC 遗留租约只阻塞全六子集 DATA-13C/OEA-5，不再阻塞 ASR reranking 主实验的 `en/fiqa` 与 `en/nq` 数据门禁。DATA-13D 使用不同输出、不同缓存和不同 scoped lock，旧 lock 只作为证据读取，绝不删除或覆盖。
-- 下一步：两条 CPU 工作并行：(1) 执行 DATA-13D，严格验证 4,100 个唯一查询 × 4 条件 = 16,400 条音频及 FiQA ID/文本一致性；(2) 继续监控 D2–D4 下载，结束后运行固定 revision/LFS/size/SHA256 离线验收。Phase 1 G1 使用 1×RTX 4090
+- 当前阻塞：主实验数据不再受 DPC 遗留租约阻塞。旧租约只影响全六子集 DATA-13C/OEA-5；DATA-13D 已以干净 commit 完成且所有门禁通过。
+- 下一步：两条 CPU 工作并行：(1) 对 D2–D4 下载结果运行固定 revision/LFS/size/SHA256 离线验收；(2) 对 Nemo base/+Cl 做当前缓存只读复核并生成 model lock。Phase 1 G1 使用 1×RTX 4090
   24GB，但必须先完成 Nemo live audit/model lock，并另行提交精确命令、显存、
   时长和输出目录。

@@ -133,6 +133,24 @@ accept the official relative-path label `en/fiqa`. Thus the stale global DPC
 lock no longer blocks the FiQA/NQ main experiment, while the full six-subset
 OEA-5 extension remains pending.
 
+DATA-13D then completed remotely at clean execution commit `730e0fc` in run
+`data13d_squtr_fiqa_nq_validation_20260726_224653`. Extraction reuse, content
+validation, FiQA identity audit, and wrapper exit codes were all zero.
+Exactly 16,400 audio instances passed the decoder probe and the generated
+manifest SHA256 is
+`e5053d30623e5a8dd1fcf695660a0b3f8d85bd33cf5979c82b7263c2f8815e93`.
+FiQA observed corpus/train/dev/test counts are 57,638/5,500/500/648; all four
+SQuTR conditions contain the same 648 test IDs, and no ID or normalized-text
+overlap was found between train, dev, and test. The official FiQA candidate set
+contains 38 fully empty constructed documents; these rows remain in the frozen
+index because the pinned loader preserves them. NQ contains 2,681,468 corpus
+rows, 3,452 queries, and 4,201 qrel pairs, with exact query/corpus closure.
+
+The source audio is not uniform: 12,300 files are 16 kHz and 4,100 are 24 kHz,
+all mono. This is recorded as an observed dataset property. Every downstream
+OEA or Whisper cache must therefore bind and record explicit resampling rather
+than assume a single source sampling rate.
+
 ## OEA-6 measurement boundary
 
 Existing full Clotho embedding runs record approximately 9.31 GiB allocated
