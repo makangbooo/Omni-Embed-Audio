@@ -301,6 +301,27 @@ commit `8cc5984dc35a272934d434993006814855f39624` 已实现：
 相关 38 项 CPU 测试通过。该完成状态只证明公式和缓存契约已验证，不代表 Whisper、
 BGE、OEA 模型推理或任何实验结果已完成。
 
+### 7.2 已完成的主实验 CPU 流水线
+
+commit `8f28c5590810f3e430d3ce7591266ad7f8e38f21` 继续实现：
+
+- FiQA corpus/query/qrels 与 SQuTR audio manifest 严格装配、count/closure 和
+  train/dev/test ID/规范化文本泄漏审计；
+- 缓存 embedding 的 exact chunked Top-K reference，以及 B1/B2/B3/U1 全 corpus
+  ranking 评测；
+- OEA Top-100、Whisper 4-best、Cross-Encoder score 的严格 query/candidate
+  identity 与顺序绑定；
+- FiQA-dev 固定融合、RRF 与两个温度的预注册网格选择；
+- query-level/candidate-level NumPy MLP gate、三随机种子、multi-positive
+  listwise loss、zero-positive-candidate query 显式排除记录；
+- B4–B7、U2–U4、A1–A9、paired bootstrap、clean-to-0dB 降幅、gate 分布与
+  统一 CSV 汇总；
+- non-overwrite 输出、输入 SHA256、Git commit/status 和命令行 provenance。
+
+本地 58 项 ASRUR 专项测试和 345 项全仓测试通过。端到端测试只使用合成缓存，
+其输出显式标为 `synthetic_smoke_only_not_a_research_result`；没有下载、模型推理、
+GPU 计算、TTS 或真实 gate 训练。
+
 ## 8. 首批资源审批草案
 
 以下仅列出，Phase 0 未下载。
@@ -349,5 +370,7 @@ inference、TTS、微调或上传。
 3. G1 的 1×RTX 4090 24GB 资源计划已确认；精确命令提交前不启动 GPU；
 4. DATA-13C attempt 3 因独占锁申请失败退出；必须先完成 CPU 只读锁审计，
    不删除 lock、不启动 embedding；
-5. 用户确认 Phase 0 汇报后，再恢复 DATA-13C；其内容门禁成功前不执行 D1–D4
-   下载或 G1 GPU 任务。
+5. 用户已确认 Phase 0，D1–D4 下载可在独立 CPU 服务器与 DATA-13C 锁审计并行；
+   G1 GPU 仍必须等待 DATA-13C、Nemo live audit、model lock 和精确命令；
+6. B5/B6 主融合暂定使用 4-best proxy-posterior 分数，以便 A3 只比较融合策略；
+   1-best 融合保留为辅助诊断。正式 FiQA dev/test 前等待用户确认该选择。

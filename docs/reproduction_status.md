@@ -39,6 +39,7 @@
 | 2 OEA-4 A2T | Qwen3B-Cl/Clotho 1,045 音频查询→5,225 冻结 caption 候选 | COMPLETED | `b4986d3` | CPU suite `...a2t_suite_seed42_20260721_201518` 在 clean worktree 完成：status=complete、protocol_count=1、exit 0、stderr 为空；R@1/5/10=`27.2727/52.8230/66.6986`，MRR=`0.395682`，DCG=`0.517412`；CSV/Suite SHA256 已固定 | 无；该任务是未见于论文表格的 `[CODE]` 官方 checkpoint 扩展，不能标成论文数值复现；额外预检误读不存在的根目录 `metrics.json`，但不影响套件的独立完整性校验与结果 | 小型审计证据已登记；OEA-6 也已完成，下一项用户范围任务为 OEA-5 协议确认 |
 | 2 OEA-5 Frozen index | SQuTR 六个官方子集上的 OEA zero-shot A2T | WAITING_USER | `db7356c` | DATA-13C attempt 3 已结束：wrapper=`20`，reuse/validation 未启动，v2 cache/final manifest 未生成 | 并发锁申请被拒绝且锁持有者未识别；不得删除 lock，也不得在内容门禁成功前生成 embedding | CPU 只读审计 lock owner/availability；恢复成功且三个退出码全为 0 后才申请 1×GPU 的 OEA zero-shot A2T smoke |
 | 2 ASR reranking 扩展 | 通用 CPU normalization、4-best proxy posterior、指标与缓存契约 | COMPLETED | `8cc5984` | 本地纯 CPU 38 项相关测试通过；无下载、GPU、推理或训练 | 无；模型适配和真实实验仍受各阶段门禁约束 | DATA-13B 后下载已批准的 FiQA/Whisper/BGE；模型 runner 复用此唯一公式实现 |
+| 2 ASR reranking 扩展 | B1–B7/QG/Ours/U1–U4/A1–A9 CPU 主实验流水线 | COMPLETED | `8f28c55` | 本地 58 项专项、345 项全仓测试通过；端到端仅合成缓存，无研究数值 | 模型 adapter 与真实缓存等待数据/模型和 GPU 阶段 | D1–D4 可在 CPU 下载；DATA-13C 成功后运行 FiQA/SQuTR 数据审计 |
 | 2 OEA-6 RTX 4090 效率扩展 | OEA-Qwen3B-Cl 查询编码延迟、显存、吞吐与参数量 | COMPLETED | `a2c13da` | `...rtx4090_efficiency_20260721_211229`：clean worktree、exit 0；1,045 audio 均值/P50/P95=`295.515/287.715/423.286 ms`，5,225 text=`38.373/38.228/40.688 ms`；峰值 allocated/reserved=`9.307/10.115 GiB`；latencies/metrics SHA256 已固定 | `[INFERRED] hardware-mismatched`，不得据此判定 A100 论文延迟或显存是否复现；checkpoint LoRA+双 head 实测 14.71488M，对论文 16.2M 少 1.48512M，统计口径 `[MISSING]` | 小型审计证据已登记；该结果作为同 4090 SpeechXBT baseline，保留原始 latency 文件远程路径与哈希 |
 | 2 OEA-6 A100 论文同硬件对照 | OEA-Qwen3B-Cl 查询编码延迟、显存与吞吐 | COMPLETED | `9f62e20` | `...a100_efficiency_20260721_214156`：严格 A100-SXM4-80GB 门禁、clean worktree、precheck/run/attempt exit 均为 0；1,045 audio 均值/P50/P95=`273.207/267.578/381.090 ms`，5,225 text=`46.638/45.318/52.117 ms`；峰值 allocated/reserved=`9.307/10.115 GiB`；三项工件 SHA256 已固定 | `[MISSING]` 论文未公开计时边界、显存统计和参数计数口径，且未明确效率行使用 Base 或 +Cl checkpoint；因此控制实验完成，但 Tables 5/16 的八个严格论文观察继续标为 `blocked` | 登记小型 A100 审计证据和严格 blocked 观察；与 RTX 4090 结果分栏，下一步等待 OEA-5 目标语料协议 |
 | 2 指标 | Canonical T2A/T2T/UIQ embedding evaluator | COMPLETED | `43158ae` | 确定性 ID 检索、caption 多正例/排除 self、显式 query 子集、完整排名和严格输入校验已实现；相关 15 项测试通过 | 论文未公开 T2T caption 选择与 tie 口径；已在协议文档标为 `[MISSING]` | 接入 checkpoint embedding 生成器 |
@@ -76,6 +77,11 @@
 
 - 当前阶段：OEA 论文复现结果继续冻结保存；用户已将后续研究范围固定为 ASR-Uncertainty-Guided Reranking over OEA。训练继续暂停。SQuTR DATA-12/13A 及 DATA-13B 的全量 extraction/CRC 已完成；DATA-13C attempt 3 因并发锁申请失败，尚未进入内容校验。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：新项目已在 `8cc5984` 实现通用 CPU normalization、4-best proxy-posterior 聚合、不确定性、nDCG/MRR/Recall/Oracle/WER/噪声指标和严格 cache manifest，38 项相关测试通过；没有产生实验数值。DATA-13A 的固定归档审计证据保持不变，DATA-13B 继续作为实际内容门禁。
+- 最近完成：新项目在 `8f28c55` 已实现从严格数据审计、dense/Top-100 缓存、
+  B1–B7/U1–U4、query/candidate gate、A1–A9 到 bootstrap/统一表格的 CPU
+  流水线；58 项专项和 345 项全仓测试通过，没有产生真实实验数值。
 - 当前阻塞：DATA-13C 独占锁持有者尚未识别；attempt 3 未进入 marker/qrels/audio 校验。空文档不删除、不填充、不改 qrels；qrels 字符串 score 只做官方 loader 一致的无损整数解析。结果未成功前不生成 OEA embedding，训练继续暂停。
-- 下一步：在 CPU 服务器只读识别 DATA-13C 锁状态；不得删除 lock。恢复并完成内容门禁后固化实际统计，再执行已批准但尚未开始的 D1–D4 CPU 下载。Phase 1 G1 使用 1×RTX 4090 24GB，但必须先完成 Nemo live audit/model lock，并另行提交精确命令、显存、时长和输出目录。
+- 下一步：两条 CPU 工作并行：(1) 只读识别 DATA-13C lock，安全恢复并固化
+  SQuTR；(2) 执行已批准的 D1–D4 固定下载。Phase 1 G1 使用 1×RTX 4090
+  24GB，但必须先完成 Nemo live audit/model lock，并另行提交精确命令、显存、
+  时长和输出目录。

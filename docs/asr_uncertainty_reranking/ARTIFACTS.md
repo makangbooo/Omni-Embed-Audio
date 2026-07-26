@@ -1,6 +1,6 @@
 # ASR-Uncertainty Reranking 资产登记
 
-最后更新：2026-07-26（Phase 0）
+最后更新：2026-07-26（Phase 0 confirmed；CPU 主实验框架完成）
 
 大型数据、权重、embedding、索引和日志不进入普通 Git。本表登记身份、路径、证据
 和使用限制。`historical remote evidence` 表示已有完成证据，但正式运行前仍要做
@@ -20,6 +20,7 @@
 | R-OEA6-4090 | Qwen3B-Cl efficiency | hardware-mismatched extension | `results/audits/qwen3b_clotho_rtx4090_efficiency_20260721.json` | COMPLETE |
 | C-ASRUR-RES | D1–D4 pinned manifests + resumable CPU wrapper | commit `6279b8265a3c90be92536eb96bcd98408bebfffa` | `configs/asr_uncertainty_reranking/resources/`、`scripts/run_asrur_resource_download.sh` | COMPLETE; no download executed |
 | C-ASRUR-CORE | normalization、proxy posterior、4-best aggregation、metrics、cache manifest | commit `8cc5984dc35a272934d434993006814855f39624` | `AudioRetrieval/asr_uncertainty_reranking/` | COMPLETE; 38 related CPU tests passed |
+| C-ASRUR-PIPE | B1–B7/QG/Ours/U1–U4/A1–A9 CPU 实验框架 | commit `8f28c5590810f3e430d3ce7591266ad7f8e38f21` | `AudioRetrieval/asr_uncertainty_reranking/`、`scripts/*asrur*`、`configs/asr_uncertainty_reranking/main_experiment.json` | COMPLETE; 58 ASRUR tests and 345 full-repository tests passed; no research result generated |
 
 ## 2. 已有远程数据
 
@@ -73,3 +74,5 @@
 - nDCG 使用全局 qrels 的 graded ideal ranking；Oracle 只重排固定候选集合，不补入漏召回文档。
 - 指标内部值统一为 `[0,1]` fraction；最终制表时才显式转为百分比。
 - 缓存身份默认比较数据/输入哈希、模型 revision/checkpoint、tokenizer、pooling、维度、长度、dtype、归一化、seed 和 producer Git commit。跨 commit 复用必须显式允许并记录，不能静默发生。
+- B5/B6 主融合路由已实现为可锁配置；当前暂定 4-best `proxy_posterior`，并保留
+  1-best 辅助诊断。该选择在正式 FiQA dev/test 前仍需用户确认。
