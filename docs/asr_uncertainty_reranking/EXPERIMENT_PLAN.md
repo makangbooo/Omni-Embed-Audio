@@ -347,4 +347,7 @@ inference、TTS、微调或上传。
 1. audio-only no-prefix 主协议已确认；
 2. D1–D4 首批下载已批准；
 3. G1 的 1×RTX 4090 24GB 资源计划已确认；精确命令提交前不启动 GPU；
-4. DATA-13B 完成前不要求共享远程仓库 pull，避免运行中代码身份变化。
+4. DATA-13C attempt 3 因独占锁申请失败退出；必须先完成 CPU 只读锁审计，
+   不删除 lock、不启动 embedding；
+5. 用户确认 Phase 0 汇报后，再恢复 DATA-13C；其内容门禁成功前不执行 D1–D4
+   下载或 G1 GPU 任务。

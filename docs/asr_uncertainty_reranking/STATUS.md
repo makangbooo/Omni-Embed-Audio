@@ -7,6 +7,7 @@
 
 | 阶段 | 任务 | 状态 | 当前 Commit | 远程状态 | 阻塞原因 | 下一步 |
 |---|---|---|---|---|---|---|
+| 0 | 2026-07-26 主实验范围与远程状态复核 | COMPLETED | `d458200` | 无下载/GPU；attempt 3 lock failure 已固化 | 无 | 等待用户确认 Phase 0 汇报 |
 | 0 | 工作区、环境、数据、模型、结果只读审计 | COMPLETED | `711b6e8` | 无 GPU/下载 | 无 | 固化 Phase 0 文档 |
 | 0 | 协议与分阶段计划 | COMPLETED | `711b6e8` | 无 GPU/下载 | 无 | 按已确认协议实施 |
 | 0 | OEA audio prefix 协议锁 | COMPLETED | `711b6e8` | 未运行 | 无；冲突仍保留为 `[PAPER-CONFLICT]` | 主协议固定为文本 `query:`、audio-only no-prefix |
