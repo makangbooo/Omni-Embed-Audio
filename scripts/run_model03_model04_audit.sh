@@ -7,7 +7,7 @@ cd "${ROOT_DIR}"
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 ENV_NAME="oea-repro"
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 RUN_ID="model03_model04_audit_$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/${RUN_ID}"
 

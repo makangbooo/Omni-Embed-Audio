@@ -23,7 +23,7 @@ if [[ -n "${MODE}" && "${MODE}" != "--verify-existing-derived" ]]; then
 fi
 
 ENV_NAME="oea-repro"
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 REGISTRY="${ROOT_DIR}/configs/checkpoints/official_oea_checkpoints.json"
 MODEL_LOCK="${ROOT_DIR}/results/model_locks/${VARIANT_ID}.json"
 RUN_ID="official_model_pipeline_${VARIANT_ID}_$(date +%Y%m%d_%H%M%S)"

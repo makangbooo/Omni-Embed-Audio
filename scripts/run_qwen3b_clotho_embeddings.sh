@@ -12,7 +12,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 SMOKE_METRICS=$1
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 DATA_ROOT="${DATA_ROOT:-/home/jg525/datasets/oea}"
 MANIFEST="${DATA_ROOT}/clotho_v2.1/manifests/clotho_evaluation_manifest.jsonl"
 PROTOCOL_CONFIG="${ROOT_DIR}/configs/eval/qwen3b_clotho_embeddings.json"

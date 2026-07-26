@@ -6,7 +6,7 @@ cd "${ROOT_DIR}"
 # shellcheck source=scripts/lib/conda.sh
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 MANIFEST="${ROOT_DIR}/configs/eval/fixtures/vanilla_clotho_5_manifest.jsonl"
 PROTOCOL_CONFIG="${ROOT_DIR}/configs/eval/qwen3b_clotho_lock_bound_smoke_embeddings.json"
 MODEL_LOCK="${MODEL_LOCK:-${ROOT_DIR}/results/model_locks/oea_qwen3b.json}"

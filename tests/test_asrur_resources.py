@@ -88,6 +88,14 @@ class ASRURResourceManifestTest(unittest.TestCase):
             sum(asset["expected_selected_bytes"] for asset in assets.values()),
         )
         self.assertEqual(manifest["expected_selected_bytes"], 5_823_662_271)
+        self.assertEqual(
+            {asset["local_subdir"] for asset in assets.values()},
+            {
+                "whisper-large-v3",
+                "bge-base-en-v1.5",
+                "bge-reranker-v2-m3",
+            },
+        )
 
     def test_wrapper_is_cpu_only_locked_and_uses_external_roots(self) -> None:
         text = (
@@ -104,7 +112,9 @@ class ASRURResourceManifestTest(unittest.TestCase):
         self.assertIn('"network_access_performed": False', text)
         self.assertIn('"download_performed": False', text)
         self.assertIn("/home/jg525/datasets/oea", text)
-        self.assertIn("/home/jg525/model_cache", text)
+        self.assertIn("/home/jg525/models", text)
+        self.assertIn("/home/jg525/.cache/huggingface", text)
+        self.assertNotIn("/home/jg525/model_cache", text)
         self.assertNotIn("rm -", text)
         self.assertNotIn("git reset", text)
 

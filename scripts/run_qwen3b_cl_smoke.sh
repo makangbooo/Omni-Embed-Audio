@@ -7,7 +7,7 @@ cd "${ROOT_DIR}"
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 ENV_NAME="oea-repro"
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 CONFIG="${CONFIG:-${ROOT_DIR}/configs/eval/qwen3b_cl_smoke.json}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-${ROOT_DIR}/outputs/experiments}"
 SEED=42

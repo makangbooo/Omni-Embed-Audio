@@ -7,7 +7,7 @@ cd "${ROOT_DIR}"
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 ENV_NAME="oea-repro"
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 RUN_ID="model02_download_$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/${RUN_ID}"
 MANIFEST="${ROOT_DIR}/configs/resources/model02_qwen3b_ac.json"

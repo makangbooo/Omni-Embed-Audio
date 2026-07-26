@@ -18,7 +18,7 @@ if [[ ! "${BACKBONE_ID}" =~ ^[a-z0-9]+(_[a-z0-9]+)*$ ]]; then
 fi
 
 ENV_NAME="oea-repro"
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 REGISTRY="${ROOT_DIR}/configs/checkpoints/vanilla_backbones.json"
 MODEL_LOCK="${ROOT_DIR}/results/model_locks/${BACKBONE_ID}.json"
 RUN_ID="vanilla_model_pipeline_${BACKBONE_ID}_$(date +%Y%m%d_%H%M%S)"

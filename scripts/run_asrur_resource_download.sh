@@ -19,8 +19,8 @@ source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 ENV_NAME="${ASRUR_ENV_NAME:-oea-repro}"
 DATA_ROOT="${DATA_ROOT:-/home/jg525/datasets/oea}"
-MODEL_CACHE_ROOT="${MODEL_CACHE_ROOT:-/home/jg525/model_cache}"
-HF_HOME="${HF_HOME:-${MODEL_CACHE_ROOT}/huggingface}"
+MODELS_ROOT="${MODELS_ROOT:-/home/jg525/models}"
+HF_HOME="${HF_HOME:-/home/jg525/.cache/huggingface}"
 HF_HUB_CACHE="${HF_HUB_CACHE:-${HF_HOME}/hub}"
 DOWNLOAD_MAX_ATTEMPTS="${ASRUR_DOWNLOAD_MAX_ATTEMPTS:-20}"
 DOWNLOAD_RETRY_BACKOFF_SECONDS="${ASRUR_DOWNLOAD_RETRY_BACKOFF_SECONDS:-30}"
@@ -36,7 +36,7 @@ case "${BUNDLE}" in
   models)
     RUN_PREFIX="asrur_d2_d4_models"
     MANIFEST="${ROOT_DIR}/configs/asr_uncertainty_reranking/resources/models.json"
-    DESTINATION_ROOT="${MODEL_CACHE_ROOT}"
+    DESTINATION_ROOT="${MODELS_ROOT}"
     ;;
   *)
     echo "[ERROR] Bundle must be exactly 'fiqa' or 'models': ${BUNDLE}" >&2
@@ -68,7 +68,7 @@ trap 'record_signal SIGTERM 143' TERM
 
 {
   printf 'DATA_ROOT=%q ' "${DATA_ROOT}"
-  printf 'MODEL_CACHE_ROOT=%q ' "${MODEL_CACHE_ROOT}"
+  printf 'MODELS_ROOT=%q ' "${MODELS_ROOT}"
   printf 'HF_HOME=%q ' "${HF_HOME}"
   printf 'HF_HUB_CACHE=%q ' "${HF_HUB_CACHE}"
   printf '%q ' "$0" "$@"

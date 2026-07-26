@@ -30,7 +30,7 @@ case "${BACKBONE_ID}" in
     ;;
 esac
 
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 DATA_ROOT="${DATA_ROOT:-/home/jg525/datasets/oea}"
 MODEL_LOCK="${MODEL_LOCK:-${ROOT_DIR}/results/model_locks/${BACKBONE_ID}.json}"
 case "${RUN_MODE}" in

@@ -18,7 +18,7 @@ if [[ ! "${VARIANT_ID}" =~ ^[a-z0-9]+(_[a-z0-9]+)*$ ]]; then
 fi
 
 ENV_NAME="oea-repro"
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 REGISTRY="${ROOT_DIR}/configs/checkpoints/official_oea_checkpoints.json"
 RUN_ID="official_model_resource_audit_${VARIANT_ID}_$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/${RUN_ID}"

@@ -34,8 +34,10 @@
       "name": "JudeJiwoo/OEA-Nemo3B-Cl",
       "revision": "9588912298afca0b11f5895b864ae28083f35022",
       "checkpoint": "step_450_best.pt",
+      "checkpoint_path": "/home/jg525/models/oea/OEA-Nemo3B-Cl/step_450_best.pt",
       "base_name": "nvidia/omni-embed-nemotron-3b",
       "base_revision": "865db1bb57e369a85357cf114cbd6b3c5322d19d",
+      "base_path": "/home/jg525/models/oea/omni-embed-nemotron-3b",
       "embedding_dim": 512,
       "audio_protocol": "audio_only_no_text_prefix",
       "text_prefix": "query:",
@@ -43,11 +45,13 @@
     },
     "original_omni": {
       "name": "nvidia/omni-embed-nemotron-3b",
-      "revision": "865db1bb57e369a85357cf114cbd6b3c5322d19d"
+      "revision": "865db1bb57e369a85357cf114cbd6b3c5322d19d",
+      "local_path": "/home/jg525/models/oea/omni-embed-nemotron-3b"
     },
     "asr": {
       "name": "openai/whisper-large-v3",
       "revision": "06f233fe06e710322aca913c1bc4249a0d71fce1",
+      "local_path": "/home/jg525/models/whisper-large-v3",
       "num_beams": 4,
       "num_return_sequences": 4,
       "do_sample": false,
@@ -58,6 +62,7 @@
     "dense": {
       "name": "BAAI/bge-base-en-v1.5",
       "revision": "a5beb1e3e68b9ab74eb54cfd186867f64f240e1a",
+      "local_path": "/home/jg525/models/bge-base-en-v1.5",
       "pooling": "cls",
       "embedding_dim": 768,
       "max_length": 512,
@@ -67,6 +72,7 @@
     "reranker": {
       "name": "BAAI/bge-reranker-v2-m3",
       "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+      "local_path": "/home/jg525/models/bge-reranker-v2-m3",
       "max_length": 512,
       "frozen": true
     }

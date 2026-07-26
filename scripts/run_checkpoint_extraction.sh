@@ -7,7 +7,7 @@ cd "${ROOT_DIR}"
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 ENV_NAME="oea-repro"
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 SOURCE="${SOURCE:-${MODEL_ROOT}/OEA-Qwen3B-Cl/step_40.pt}"
 DESTINATION="${DESTINATION:-${MODEL_ROOT}/OEA-Qwen3B-Cl/step_40_inference_only.pt}"
 RUN_ID="checkpoint_extraction_$(date +%Y%m%d_%H%M%S)"

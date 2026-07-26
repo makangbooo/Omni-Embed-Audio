@@ -6,7 +6,7 @@ cd "${ROOT_DIR}"
 # shellcheck source=scripts/lib/conda.sh
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
-MODEL_ROOT="${MODEL_ROOT:-/home/jg525/model_cache/oea}"
+MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 DATA_ROOT="${DATA_ROOT:-/home/jg525/datasets/oea}"
 MANIFEST="${DATA_ROOT}/clotho_v2.1/manifests/clotho_evaluation_manifest.jsonl"
 CONFIG="${ROOT_DIR}/configs/eval/qwen3b_cl_clotho_positive_uiq_embeddings.json"
