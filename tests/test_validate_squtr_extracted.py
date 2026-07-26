@@ -5,7 +5,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.validate_squtr_extracted import validate_dataset
+from AudioRetrieval.asr_uncertainty_reranking.data import (
+    load_squtr_audio_manifest,
+)
+from scripts.validate_squtr_extracted import (
+    select_structure_subsets,
+    validate_dataset,
+)
 
 
 def write_jsonl(path: Path, rows: list[dict]) -> None:
@@ -139,6 +145,9 @@ class ValidateSqutrExtractedTest(unittest.TestCase):
             self.assertEqual(manifest_status, "created")
             self.assertEqual(len(checksum), 64)
             self.assertEqual(len(rows), 2)
+            self.assertEqual(rows[0]["record_id"], rows[0]["sample_id"])
+            loaded = load_squtr_audio_manifest(manifest)
+            self.assertEqual(set(loaded), {row["record_id"] for row in rows})
             self.assertEqual(report["validated_audio_files"], 2)
             self.assertEqual(report["total_duration_seconds"], 2.0)
             self.assertTrue(
@@ -166,6 +175,41 @@ class ValidateSqutrExtractedTest(unittest.TestCase):
             )
             self.assertEqual(second_status, "verified_existing")
             self.assertEqual(second_checksum, checksum)
+
+    def test_explicit_subset_selection_recomputes_expected_counts(self) -> None:
+        structure = structure_manifest()
+        structure["subsets"].append(
+            {
+                "language": "en",
+                "name": "two",
+                "relative_path": "en/two",
+                "expected_unique_queries": 3,
+            }
+        )
+        structure["expected_unique_queries"] = 4
+        structure["expected_audio_instances"] = 8
+
+        selected = select_structure_subsets(structure, ["en/two"])
+
+        self.assertEqual(
+            [subset["relative_path"] for subset in selected["subsets"]],
+            ["en/two"],
+        )
+        self.assertEqual(selected["expected_unique_queries"], 3)
+        self.assertEqual(selected["expected_audio_instances"], 6)
+        self.assertEqual(len(structure["subsets"]), 2)
+        self.assertEqual(structure["expected_audio_instances"], 8)
+
+    def test_explicit_subset_selection_rejects_unknown_and_duplicate_values(
+        self,
+    ) -> None:
+        with self.assertRaisesRegex(ValueError, "unknown requested"):
+            select_structure_subsets(structure_manifest(), ["en/missing"])
+        with self.assertRaisesRegex(ValueError, "duplicate --subset"):
+            select_structure_subsets(
+                structure_manifest(),
+                ["en/one", "en/one"],
+            )
 
     def test_fully_empty_corpus_row_is_preserved_and_audited(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

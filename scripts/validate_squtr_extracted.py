@@ -26,6 +26,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--probe-cache", type=Path)
     parser.add_argument("--probe-cache-git-commit")
     parser.add_argument("--progress-every", type=int, default=1000)
+    parser.add_argument(
+        "--subset",
+        dest="subsets",
+        action="append",
+        default=[],
+        help=(
+            "Validate only this exact structure-manifest relative_path. "
+            "Repeat for multiple subsets; omit to validate every subset."
+        ),
+    )
     args = parser.parse_args()
     if args.progress_every <= 0:
         parser.error("--progress-every must be positive")
@@ -41,6 +51,52 @@ def read_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"expected JSON object: {path}")
     return value
+
+
+def select_structure_subsets(
+    structure: dict[str, Any],
+    requested_subsets: list[str],
+) -> dict[str, Any]:
+    """Return an explicitly scoped structure without mutating the source object."""
+
+    if not requested_subsets:
+        return structure
+    if len(requested_subsets) != len(set(requested_subsets)):
+        raise ValueError(f"duplicate --subset values: {requested_subsets}")
+
+    available = {
+        str(subset["relative_path"]): subset for subset in structure["subsets"]
+    }
+    unknown = sorted(set(requested_subsets) - set(available))
+    if unknown:
+        raise ValueError(
+            f"unknown requested SQuTR subsets: {unknown}; "
+            f"available={sorted(available)}"
+        )
+
+    requested_set = set(requested_subsets)
+    selected_subsets = [
+        subset
+        for subset in structure["subsets"]
+        if str(subset["relative_path"]) in requested_set
+    ]
+    selected_unique_queries = sum(
+        int(subset["expected_unique_queries"]) for subset in selected_subsets
+    )
+    selected = dict(structure)
+    selected["subsets"] = selected_subsets
+    selected["expected_unique_queries"] = selected_unique_queries
+    selected["expected_audio_instances"] = (
+        selected_unique_queries * len(structure["conditions"])
+    )
+    selected["selection"] = {
+        "mode": "explicit_subsets",
+        "requested_relative_paths": list(requested_subsets),
+        "selected_relative_paths": [
+            str(subset["relative_path"]) for subset in selected_subsets
+        ],
+    }
+    return selected
 
 
 def sha256_file(path: Path) -> str:
@@ -563,12 +619,14 @@ def validate_dataset(
                         metadata_ids.add(query_id)
                         referenced_audio.add(audio_name)
 
+                        record_id = (
+                            f"{relative_path}:{condition_id}:{query_id}"
+                        )
                         manifest.write(
                             json.dumps(
                                 {
-                                    "sample_id": (
-                                        f"{relative_path}:{condition_id}:{query_id}"
-                                    ),
+                                    "record_id": record_id,
+                                    "sample_id": record_id,
                                     "query_id": query_id,
                                     "dataset": "SQuTR",
                                     "subset": relative_path,
@@ -696,6 +754,10 @@ def validate_dataset(
             {
                 "dataset": "SQuTR",
                 "archive_root": archive_root,
+                "selected_subset_relative_paths": [
+                    str(subset["relative_path"])
+                    for subset in structure["subsets"]
+                ],
                 "subsets": subset_reports,
                 "validated_audio_files": total_audio,
                 "expected_audio_instances": expected_audio,
@@ -748,13 +810,20 @@ def main() -> int:
     extract_root = args.extract_root.expanduser().absolute()
     if extract_root.is_symlink():
         raise ValueError(f"extract root must not be a symbolic link: {extract_root}")
-    structure = read_json(args.structure_manifest)
+    structure = select_structure_subsets(
+        read_json(args.structure_manifest),
+        args.subsets,
+    )
     report: dict[str, Any] = {
         "schema_version": 1,
         "status": "running",
         "started_at": utc_now(),
         "extract_root": str(extract_root),
         "structure_manifest": str(args.structure_manifest.resolve()),
+        "requested_subsets": list(args.subsets),
+        "selected_subsets": [
+            str(subset["relative_path"]) for subset in structure["subsets"]
+        ],
         "manifest_output": str(args.manifest_output.resolve()),
     }
     write_json(args.statistics_output, report)

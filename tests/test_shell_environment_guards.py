@@ -51,6 +51,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "download_data12_squtr.sh",
             "run_data13_squtr_archive_audit.sh",
             "run_data13b_squtr_validation.sh",
+            "run_data13d_squtr_fiqa_nq_validation.sh",
             "run_data09_wavcaps_metadata_audit.sh",
             "run_data10_clotho_trainval_validation.sh",
             "run_model03_model04_audit.sh",
@@ -203,6 +204,24 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertNotIn("rm -rf", wrapper)
         self.assertNotIn("rm -rf", extractor)
         self.assertNotIn("rm -rf", validator)
+
+    def test_squtr_target_subset_validation_uses_an_independent_scoped_lock(
+        self,
+    ) -> None:
+        wrapper = (
+            REPOSITORY_ROOT
+            / "scripts/run_data13d_squtr_fiqa_nq_validation.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
+        self.assertIn("--subset en/fiqa", wrapper)
+        self.assertIn("--subset en/nq", wrapper)
+        self.assertIn(".data13d_en_fiqa_nq.lock", wrapper)
+        self.assertIn(".data13c_content_recovery.lock", wrapper)
+        self.assertIn("evidence only and will not be modified", wrapper)
+        self.assertIn("verify_squtr_extraction_completion.py", wrapper)
+        self.assertIn("audit_asrur_fiqa_data.py", wrapper)
+        self.assertNotIn("rm -rf", wrapper)
+        self.assertNotIn("extract_squtr_archive.py", wrapper)
 
     def test_qwen3b_retrieval_suite_is_cpu_only_and_non_overwriting(self) -> None:
         source = (

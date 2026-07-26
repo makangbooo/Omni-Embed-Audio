@@ -5,12 +5,22 @@ from __future__ import annotations
 import json
 import re
 import unicodedata
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Dict, Iterable, Iterator, Mapping, Sequence
 
 from .schema import AudioQuery, CorpusDocument, TextQuery, nonempty_string
 
 SQuTR_CONDITIONS = ("clean", "snr_20", "snr_10", "snr_0")
+
+
+def squtr_subset_name(value: str) -> str:
+    """Normalize a SQuTR manifest relative path to its terminal subset name."""
+
+    normalized = value.replace("\\", "/")
+    name = PurePosixPath(normalized).name
+    if not name:
+        raise ValueError(f"invalid SQuTR subset value: {value!r}")
+    return name.casefold()
 
 
 def read_jsonl(path: Path | str) -> Iterator[tuple[int, Dict[str, Any]]]:

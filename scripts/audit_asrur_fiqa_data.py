@@ -29,6 +29,7 @@ from AudioRetrieval.asr_uncertainty_reranking.data import (  # noqa: E402
     load_squtr_audio_manifest,
     load_text_queries,
     normalized_query_text,
+    squtr_subset_name,
 )
 
 
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     fiqa_records = [
         record
         for record in squtr_records.values()
-        if record.subset.casefold() == "fiqa"
+        if squtr_subset_name(record.subset) == "fiqa"
     ]
     if not fiqa_records:
         raise ValueError("SQuTR manifest contains no FiQA records")
