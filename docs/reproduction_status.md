@@ -77,4 +77,4 @@
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
 - 最近完成：DATA-13A 在固定归档上成功完成只读审计，确认 149,349 个 ZIP records、149,268 个 WAV、28,422,366,590 解压后 bytes 和零安全违规；DATA-13B 工具在 commit `fa9322b` 实现并通过完整 278 项测试。
 - 当前阻塞：无新的外部阻塞；DATA-13B 正在读取实际 JSONL、验证 corpus/query/qrels 闭包、精确候选数和全部音频。结果未产生前不推断 qrels 语义或生成 OEA embedding。训练阶段按用户要求暂停。
-- 下一步：只读监控远程 PID `8032` 与运行目录；成功后本地固化协议与 manifest 统计。新项目先等待用户确认 OEA audio-prefix 协议、Whisper/BGE/FiQA 首批下载和 Phase 1 的 1×A100 资源计划；任何 GPU 运行前另行提交精确命令、显存、时长和输出目录。
+- 下一步：只读监控远程 PID `8032` 与运行目录；成功后本地固化协议与 manifest 统计。新项目的 OEA audio-only no-prefix 主协议和 Whisper/BGE/FiQA 首批下载已获确认，Phase 1 资源计划改为 1×RTX 4090 24GB；先提交固定下载清单，DATA-13B 结束前不要求共享远程仓库 pull。任何 GPU 运行前另行提交精确命令、显存、时长和输出目录。

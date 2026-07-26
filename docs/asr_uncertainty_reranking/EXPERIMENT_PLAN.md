@@ -1,6 +1,6 @@
 # ASR-Uncertainty-Guided Reranking over OEA：实验计划
 
-版本：Phase 0 protocol draft，2026-07-26
+版本：Phase 0 protocol locked，2026-07-26
 
 ## 1. 研究范围
 
@@ -55,9 +55,9 @@ Gold transcript 只用于 U1/U2 上限和 WER，不进入正式推理特征。
 
 ### 3.1 OEA protocol decision
 
-推荐采用发布代码协议：文本候选使用 `query:`，audio-only message 不人为加入
-`passage:` 文本元素。理由是发布 checkpoint 与公开 adapter 可直接审计；论文文字
-协议另列为 `[PAPER-CONFLICT]`。用户确认前不运行 Phase 1。
+用户于 2026-07-26 确认采用发布代码协议：文本候选使用 `query:`，audio-only
+message 不人为加入 `passage:` 文本元素。发布 checkpoint 与公开 adapter 可直接
+审计；论文文字协议另列为 `[PAPER-CONFLICT]`。不根据测试结果更换主协议。
 
 ### 3.2 文档构造
 
@@ -280,13 +280,16 @@ TTS 是独立审批点。建议优先研究与 SQuTR 同族的 CosyVoice-3，但
 
 | ID | 资源与固定 revision | 许可证 | 最小下载 | 预留磁盘 | 保存目录 | 必要性 | 小替代 |
 |---|---|---|---:|---:|---|---|---|
-| D1 | `mteb/fiqa@5e59eeb...` | `unknown` | 48,881,656 B | 0.1 GB | `/home/jg525/datasets/oea/fiqa_mteb` | train/dev gate 数据与泄漏检查 | 只下载 queries/qrels 可更小，但 TTS 和训练仍需完整 qrels/corpus |
+| D1 | `mteb/fiqa@5e59eeb...` | `unknown` | 48,616,245 B | 0.1 GB | `/home/jg525/datasets/oea/fiqa_mteb` | train/dev gate 数据与泄漏检查 | 已排除重复 TSV 和 README；corpus/queries/三 split qrels JSONL 全部保留 |
 | D2 | `openai/whisper-large-v3@06f233...` minimal safetensors | Apache-2.0 | 3,091,519,764 B | 3.5 GB | `/home/jg525/model_cache/asr/whisper-large-v3` | B1、1/4-best、不确定性、WER | `turbo` 更小但改变用户指定基线，不作为正式替代 |
 | D3 | `BAAI/bge-base-en-v1.5@a5beb1...` minimal safetensors | MIT | 438,900,399 B | 0.6 GB | `/home/jg525/model_cache/retrieval/bge-base-en-v1.5` | B1/U1 dense | small 版更小但改变强基线 |
 | D4 | `BAAI/bge-reranker-v2-m3@953dc6...` minimal safetensors | Apache-2.0 | 2,293,242,108 B | 2.6 GB | `/home/jg525/model_cache/rerank/bge-reranker-v2-m3` | B4–B7 和 Ours | 无同协议小替代；可先用 mock 完成 CPU 测试 |
 
-首批合计 5,872,543,927 bytes（约 5.47 GiB），建议预留 7 GB。Nemo/SQuTR 不重复
+首批固定最小文件集合计 5,872,278,516 bytes（约 5.47 GiB），建议预留 7 GB。Nemo/SQuTR 不重复
 下载；独立 NQ snapshot 和 TTS/noise 资源均延后审批。
+
+用户已于 2026-07-26 批准 D1–D4。批准仅覆盖下载与内容校验，不覆盖 GPU
+inference、TTS、微调或上传。
 
 精确来源：
 
@@ -301,21 +304,20 @@ TTS 是独立审批点。建议优先研究与 SQuTR 同族的 CosyVoice-3，但
 
 - 模型：固定 Nemo base + `OEA-Nemo3B-Cl/step_450_best.pt`；
 - 数据：已有 Clotho v2.1 evaluation；
-- GPU：1×A100-SXM4-80GB；
+- GPU：1×RTX 4090 24GB（用户于 2026-07-26 确认）；
 - 初估峰值：12–18 GiB（正式前先用 5/25 smoke 实测）；
 - 初估时长：smoke 5–15 分钟，全量 embedding 30–90 分钟；
 - 磁盘：约 0.2 GB 新 embedding/日志，不覆盖已有结果；
 - 可恢复性：逐批缓存；失败保留 attempt 和 failure manifest；
 - 中断：不会修改原始模型/数据，临时文件与 final 分离。
 
-这不是执行批准请求。精确 wrapper、commit、RUN_ID 和输出目录将在 Nemo 实时 CPU
-审计/model lock 完成并提交后给出；在那之前无法诚实提供最终精确命令。
+4090 用于 checkpoint 正确性和检索指标；这些结果可与论文 Recall 对照，但效率、
+绝对延迟和显存不得冒充论文 A100 行。精确 wrapper、commit、RUN_ID 和输出目录
+将在 Nemo 实时 CPU 审计/model lock 完成并提交后给出；在那之前不启动 GPU。
 
 ## 10. 当前等待的决定
 
-1. 是否确认采用发布代码的 audio-only no-prefix 协议，并把论文 `passage:` 描述
-   保留为冲突敏感性分析；
-2. 是否批准 D1–D4 首批下载；
-3. 是否确认首个 GPU 阶段使用 1×A100-80GB；这只确认资源计划，不授权在精确命令
-   提交前启动 GPU；
-4. DATA-13B 完成前不要求远程仓库 pull，避免运行中代码身份变化。
+1. audio-only no-prefix 主协议已确认；
+2. D1–D4 首批下载已批准；
+3. G1 的 1×RTX 4090 24GB 资源计划已确认；精确命令提交前不启动 GPU；
+4. DATA-13B 完成前不要求共享远程仓库 pull，避免运行中代码身份变化。
