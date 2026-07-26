@@ -8,28 +8,38 @@
     "conditions": "[CODE] official README at the pinned code revision",
     "query_counts": "[PAPER][CODE] official paper and README",
     "core_paths": "[CODE] official README and src/retrieval/omni_emb.py",
-    "query_metadata_location": "[MISSING] README documents files at subset root while the official runner joins query_file under audio_path; DATA-13A observes the archive instead of choosing one"
+    "query_metadata_location": "[OBSERVED] DATA-13A found all queries_with_audio_*.jsonl files at each subset root, matching the README rather than the join performed by the official runner",
+    "archive_structure": "[OBSERVED] DATA-13A run data13_squtr_archive_audit_20260726_135100"
   },
+  "observed_archive_root": "source_data",
+  "observed_zip_member_records": 149349,
+  "observed_file_members": 149310,
+  "observed_directory_members": 39,
+  "observed_uncompressed_member_bytes": 28422366590,
   "conditions": [
     {
       "id": "clean",
       "audio_directory": "audio_clean",
-      "documented_query_file": "queries_with_audio_clean.jsonl"
+      "documented_query_file": "queries_with_audio_clean.jsonl",
+      "snr_db": null
     },
     {
       "id": "snr_20",
       "audio_directory": "audio_noise_snr_20",
-      "documented_query_file": "queries_with_audio_noise_snr_20.jsonl"
+      "documented_query_file": "queries_with_audio_noise_snr_20.jsonl",
+      "snr_db": 20
     },
     {
       "id": "snr_10",
       "audio_directory": "audio_noise_snr_10",
-      "documented_query_file": "queries_with_audio_noise_snr_10.jsonl"
+      "documented_query_file": "queries_with_audio_noise_snr_10.jsonl",
+      "snr_db": 10
     },
     {
       "id": "snr_0",
       "audio_directory": "audio_noise_snr_0",
-      "documented_query_file": "queries_with_audio_noise_snr_0.jsonl"
+      "documented_query_file": "queries_with_audio_noise_snr_0.jsonl",
+      "snr_db": 0
     }
   ],
   "core_relative_paths": [

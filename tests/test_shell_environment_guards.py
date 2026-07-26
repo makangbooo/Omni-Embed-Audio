@@ -50,6 +50,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "download_data08_wavcaps_metadata.sh",
             "download_data12_squtr.sh",
             "run_data13_squtr_archive_audit.sh",
+            "run_data13b_squtr_validation.sh",
             "run_data09_wavcaps_metadata_audit.sh",
             "run_data10_clotho_trainval_validation.sh",
             "run_model03_model04_audit.sh",
@@ -176,6 +177,32 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertNotIn("extractall", auditor)
         self.assertNotIn("unzip", wrapper)
         self.assertNotIn("rm -rf", wrapper)
+
+    def test_squtr_content_validation_is_cpu_only_resumable_and_non_overwriting(
+        self,
+    ) -> None:
+        wrapper = (
+            REPOSITORY_ROOT / "scripts/run_data13b_squtr_validation.sh"
+        ).read_text(encoding="utf-8")
+        extractor = (
+            REPOSITORY_ROOT / "scripts/extract_squtr_archive.py"
+        ).read_text(encoding="utf-8")
+        validator = (
+            REPOSITORY_ROOT / "scripts/validate_squtr_extracted.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
+        self.assertIn("40000000000", wrapper)
+        self.assertIn("extract_squtr_archive.py", wrapper)
+        self.assertIn("validate_squtr_extracted.py", wrapper)
+        self.assertIn(".data13b.part", extractor)
+        self.assertIn("refusing to overwrite", extractor)
+        self.assertIn("qrels references unknown corpus ID", validator)
+        self.assertIn("first_and_last_frame", validator)
+        self.assertNotIn("extractall", extractor)
+        self.assertNotIn("unzip", wrapper)
+        self.assertNotIn("rm -rf", wrapper)
+        self.assertNotIn("rm -rf", extractor)
+        self.assertNotIn("rm -rf", validator)
 
     def test_qwen3b_retrieval_suite_is_cpu_only_and_non_overwriting(self) -> None:
         source = (

@@ -149,6 +149,14 @@ class AuditSqutrArchiveTest(unittest.TestCase):
         )
         self.assertEqual(manifest["expected_unique_queries"], 37317)
         self.assertEqual(manifest["expected_audio_instances"], 149268)
+        self.assertEqual(manifest["observed_archive_root"], "source_data")
+        self.assertEqual(manifest["observed_zip_member_records"], 149349)
+        self.assertEqual(manifest["observed_file_members"], 149310)
+        self.assertEqual(manifest["observed_directory_members"], 39)
+        self.assertEqual(
+            manifest["observed_uncompressed_member_bytes"],
+            28422366590,
+        )
         self.assertEqual(
             [item["relative_path"] for item in manifest["subsets"]],
             [
