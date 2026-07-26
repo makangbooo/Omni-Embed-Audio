@@ -16,7 +16,7 @@
 | 0 | CPU 核心算法与缓存契约 | COMPLETED | `8cc5984` | 未远程运行；本地 38 项相关测试通过 | 无 | 后续模型 runner 只能调用这些已测试定义 |
 | 0 | B1–B7、QG、Ours、U1–U4、A1–A9 CPU 主实验框架 | COMPLETED | `8f28c55` | 本地 345 项全仓测试通过；无下载、GPU、模型推理或真实训练 | 无；合成 smoke 明确禁止写入研究结果 | 远程拉取后执行 D1–D4 下载、DATA-13C 恢复和 FiQA 数据审计 |
 | 0 | B5/B6 主融合的 ASR 路由 | WAITING_USER | `8f28c55` | 配置暂定 `proxy_posterior`，1-best 路由保留为辅助诊断 | 用户原始定义未明确 B5/B6 使用 1-best 还是 4-best；会影响 A3 公平性 | 正式 FiQA dev/test 前确认；推荐 4-best 作为主路由 |
-| 0 | D1–D4 远程下载执行 | WAITING_USER | `8f28c55` | 已批准、尚未下载；可与 SQuTR lock 审计在不同 CPU 服务器并行 | 需要用户启动远程命令 | 下载后返回两个 run 目录、exit code 与 manifest 状态 |
+| 0 | D1–D4 远程下载执行 | RUNNING_REMOTE | `41efefa` | CPU 服务器于 2026-07-26 20:04 启动：FiQA PID `15696`、Whisper/BGE PID `15697`；launch dir=`logs/asrur_download_launch_20260726_200413` | 尚无最终 exit code/download manifest，不能标记完成 | 不重复启动；检查两个 PID、launch logs、最新两个下载 run 的 exit code 与 manifest |
 | 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `41efefa` | attempt 3 已结束且本机无相关进程；旧 lock 为 0-byte regular file，`lslocks`/`fuser`/`lsof` 未发现本机持有者，但 non-blocking `flock` 未取得锁 | 可能为另一台共享存储服务器持锁、遗留进程继承 FD，或共享文件系统锁状态；原探针把后续 `echo` 的退出码误记为 0 | 不删除 lock；在同目录用新 probe file 验证 `flock` 能力并正确捕获旧锁退出码，同时检查 `/proc/locks`/开放 FD |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | WAITING_USER | 待后续提交 | 历史 LFS 审计 complete，尚未做 2026-07-26 live recheck | 需要远程 CPU 执行；全哈希可能超过 30 分钟 | DATA-13B 后执行独立资源审计 |
 | 1 | Nemo inference-only checkpoint 与 model lock | TODO | N/A | 未执行 | 依赖 live resource audit | 生成小型锁并提交 |
@@ -53,8 +53,9 @@
   锁。原命令末尾显示的 `LOCK_PROBE_EXIT=0` 是后续 `echo` 的退出码，不是
   `flock` 的退出码。必须继续做同目录能力探针和跨服务器持有者排查，不得删除或
   绕过 lock。
-- 当前未执行：D1–D4 实际下载、任何 GPU 计算、TTS、模型推理或真实 gate 训练。
-- 下一步：两台 CPU 服务器可以并行执行：(1) D1 与 D2–D4 固定资源下载；
-  (2) SQuTR lock-owner/availability 只读审计。不得删除 lock。DATA-13C 成功且
+- 当前未执行：任何 GPU 计算、TTS、模型推理或真实 gate 训练。D1–D4 已在 CPU
+  服务器进入后台下载，但尚无完成证据。
+- 下一步：两条 CPU 工作并行执行：(1) 监控 D1 与 D2–D4 固定资源下载，不得
+  重复启动；(2) SQuTR lock-owner/availability 只读审计。不得删除 lock。DATA-13C 成功且
   D1 完成后运行 FiQA/SQuTR 一致性审计。G1 仍须等 Nemo 实时审计、model lock
   和精确 GPU 命令再次提交后才启动。
