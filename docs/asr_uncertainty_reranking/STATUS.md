@@ -15,10 +15,10 @@
 | 0 | D1–D4 固定清单与 CPU 下载 wrapper | COMPLETED | `6279b82` | 未下载 | 无；与 SQuTR 内容校验无数据依赖 | 35 项相关测试通过；拉取最新分支后执行 |
 | 0 | CPU 核心算法与缓存契约 | COMPLETED | `8cc5984` | 未远程运行；本地 38 项相关测试通过 | 无 | 后续模型 runner 只能调用这些已测试定义 |
 | 0 | B1–B7、QG、Ours、U1–U4、A1–A9 CPU 主实验框架 | COMPLETED | `8f28c55` | 本地 345 项全仓测试通过；无下载、GPU、模型推理或真实训练 | 无；合成 smoke 明确禁止写入研究结果 | 远程拉取后执行 D1–D4 下载、DATA-13C 恢复和 FiQA 数据审计 |
-| 0 | B5/B6 主融合的 ASR 路由 | WAITING_USER | `8f28c55` | 配置暂定 `proxy_posterior`，1-best 路由保留为辅助诊断 | 用户原始定义未明确 B5/B6 使用 1-best 还是 4-best；会影响 A3 公平性 | 正式 FiQA dev/test 前确认；推荐 4-best 作为主路由 |
+| 0 | B5/B6 主融合的 ASR 路由 | COMPLETED | 待本提交 | `[INFERRED][USER-CONFIRMED 2026-07-26]` 主路线固定为 4-best `proxy_posterior`；1-best 只作辅助诊断 | 无 | 正式结果不得根据 test/NQ 表现切换路线 |
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | 运行 FiQA/SQuTR 数据一致性审计前等待 DATA-13C final manifest |
 | 0 | D2–D4 Whisper/BGE 固定资源下载 | RUNNING_REMOTE | `41efefa` | run=`asrur_d2_d4_models_download_20260726_200414`；PID `15697` 及下载子进程仍在，manifest=`running`；当前下载 Whisper，目标目录约 121 MiB，125,829,120-byte `.incomplete` 为可恢复临时文件 | 尚无最终 exit code；BGE 两项目录尚未出现 | 不删除 `.incomplete`、不重复启动、不关闭服务器；等待三项逐一校验完成 |
-| 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `a4c5c02` | 精确探针：old lock RC=`73`、同目录新 lock RC=`0`；本机无 DATA-13C 进程、开放 FD 或 `/proc/locks` 匹配 | 已排除本机持有者和同目录 flock 功能故障；剩余为另一台共享存储服务器持锁或 DPC 远端租约 | 不删除/绕过旧 lock；检查所有仍挂载 `/home/jg525` 的实例，若均无持有者则向平台报分布式锁租约 |
+| 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `a4c5c02` | 精确探针 old/new lock RC=`73/0`；本机无持有者，用户确认没有任何其他挂载 `/home/jg525` 的运行实例 | DPC 远端遗留锁租约；本项目不能安全自行释放 | 按 `dpc_lock_support_request.md` 联系平台；不得删除/绕过旧 lock |
 | 0/2 | DATA-13C lock owner provenance | COMPLETED | 待本提交 | wrapper 改为非截断打开 lock；成功取得后记录 hostname/PID/PPID/commit/run dir，失败时显示最后记录；4 项专项测试通过 | 该补丁不能解除当前由远端实体持有的旧锁 | 远端锁安全释放并拉取本补丁后再恢复 DATA-13C |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | WAITING_USER | 待后续提交 | 历史 LFS 审计 complete，尚未做 2026-07-26 live recheck | 需要远程 CPU 执行；全哈希可能超过 30 分钟 | DATA-13B 后执行独立资源审计 |
 | 1 | Nemo inference-only checkpoint 与 model lock | TODO | N/A | 未执行 | 依赖 live resource audit | 生成小型锁并提交 |

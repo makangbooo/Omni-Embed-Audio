@@ -81,7 +81,7 @@
     "overlap_mode": "overlap_coefficient",
     "overlap_mode_source": "INFERRED_preregistered_default",
     "fusion_asr_source": "proxy_posterior",
-    "fusion_asr_source_status": "INFERRED_pending_user_confirmation_before_formal_test",
+    "fusion_asr_source_status": "INFERRED_user_confirmed_2026-07-26",
     "overlap_cutoffs": [
       10,
       20,

@@ -28,6 +28,14 @@ class ConfigurationExperimentTest(unittest.TestCase):
         self.assertEqual(inventory["baseline_and_upper_bound_method_count"], 15)
         self.assertEqual(inventory["ablation_count"], 9)
         self.assertEqual(inventory["fiqa_formal_gate_cells"], 12)
+        self.assertEqual(
+            config["candidate_protocol"]["fusion_asr_source"],
+            "proxy_posterior",
+        )
+        self.assertEqual(
+            config["candidate_protocol"]["fusion_asr_source_status"],
+            "INFERRED_user_confirmed_2026-07-26",
+        )
 
     def test_cached_reranking_never_changes_candidate_membership(self) -> None:
         query = RerankQueryInput(

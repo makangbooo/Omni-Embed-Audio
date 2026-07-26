@@ -74,5 +74,6 @@
 - nDCG 使用全局 qrels 的 graded ideal ranking；Oracle 只重排固定候选集合，不补入漏召回文档。
 - 指标内部值统一为 `[0,1]` fraction；最终制表时才显式转为百分比。
 - 缓存身份默认比较数据/输入哈希、模型 revision/checkpoint、tokenizer、pooling、维度、长度、dtype、归一化、seed 和 producer Git commit。跨 commit 复用必须显式允许并记录，不能静默发生。
-- B5/B6 主融合路由已实现为可锁配置；当前暂定 4-best `proxy_posterior`，并保留
-  1-best 辅助诊断。该选择在正式 FiQA dev/test 前仍需用户确认。
+- B5/B6 主融合路由已实现为可锁配置；`[INFERRED][USER-CONFIRMED
+  2026-07-26]` 正式主路线固定为 4-best `proxy_posterior`，1-best 只保留为
+  辅助诊断。不得在看到 FiQA test 或 NQ 结果后切换该路线。

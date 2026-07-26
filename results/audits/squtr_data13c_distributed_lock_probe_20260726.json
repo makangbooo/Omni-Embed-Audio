@@ -27,17 +27,22 @@
     "proc_locks_inode_matches": 0,
     "open_file_descriptor_matches": 0
   },
+  "cross_host_confirmation": {
+    "source": "user confirmation",
+    "confirmed_at": "2026-07-26",
+    "other_running_instances_mounting_home_jg525": 0
+  },
   "interpretation": [
     "The filesystem accepted a new flock in the same directory.",
     "The original lock was still unavailable.",
     "No holder was visible in this host's process namespace.",
-    "The remaining candidates are a process on another mounted host or a distributed-filesystem remote lock lease."
+    "The user confirmed there is no other running instance mounting /home/jg525; the remaining diagnosis is a distributed-filesystem remote lock lease."
   ],
   "safety_decision": {
     "delete_old_lock": false,
     "bypass_with_new_production_lock": false,
     "restart_data13c": false,
-    "next_action": "Inspect every still-running host that mounts /home/jg525, then escalate a stale distributed lock to the platform if no remote holder exists."
+    "next_action": "Escalate the stale distributed lock lease to the platform using docs/asr_uncertainty_reranking/dpc_lock_support_request.md."
   },
   "unrelated_active_work": {
     "d2_d4_download_wrapper_pid": 15697,

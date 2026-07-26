@@ -372,5 +372,6 @@ inference、TTS、微调或上传。
    不删除 lock、不启动 embedding；
 5. 用户已确认 Phase 0，D1–D4 下载可在独立 CPU 服务器与 DATA-13C 锁审计并行；
    G1 GPU 仍必须等待 DATA-13C、Nemo live audit、model lock 和精确命令；
-6. B5/B6 主融合暂定使用 4-best proxy-posterior 分数，以便 A3 只比较融合策略；
-   1-best 融合保留为辅助诊断。正式 FiQA dev/test 前等待用户确认该选择。
+6. `[INFERRED][USER-CONFIRMED 2026-07-26]` B5/B6 主融合固定使用 4-best
+   proxy-posterior 分数，以便 A3 只比较融合策略；1-best 融合只保留为辅助
+   诊断。该选择已在任何正式 FiQA dev/test 或 NQ 结果产生前锁定。
