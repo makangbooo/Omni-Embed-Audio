@@ -23,8 +23,9 @@
 | C-ASRUR-PIPE | B1–B7/QG/Ours/U1–U4/A1–A9 CPU 实验框架 | commit `8f28c5590810f3e430d3ce7591266ad7f8e38f21` | `AudioRetrieval/asr_uncertainty_reranking/`、`scripts/*asrur*`、`configs/asr_uncertainty_reranking/main_experiment.json` | COMPLETE; 58 ASRUR tests and 345 full-repository tests passed; no research result generated |
 | A-MODEL-MIGRATION | OEA 模型迁移与旧缓存清理 | run `model_cache_migration_v3_20260726_214834`；exit `0`；254 files 前后相同 | `results/audits/model_cache_migration_20260726.json` | COMPLETE; `/home/jg525/model_cache` removed |
 | C-ASRUR-MODEL-AUDIT | D2–D4 离线固定 revision/LFS/size/SHA256 验收器 | commit `aac088d68f9bc60871c48db90a2603144ca1b178` | `scripts/run_asrur_model_audit.sh` | COMPLETE; 尚未对远程下载结果执行 |
-| C-ASRUR-NEMO-AUDIT | Nemo Phase 1 CPU 三阶段审计与 portable lock runner | initial `953cb34`；metadata fix `86107ca` | `scripts/run_asrur_nemo_phase1_audit.sh`、`scripts/run_official_oea_model_pipeline.py` | COMPLETE implementation；CPU-only；固定 revision metadata API only、无模型下载；rerun 待用户操作 |
+| C-ASRUR-NEMO-AUDIT | Nemo Phase 1 CPU 三阶段审计与 portable lock runner | initial `953cb34`；metadata fixes `86107ca`/`6760f7f` | `scripts/run_asrur_nemo_phase1_audit.sh`、`scripts/run_official_oea_model_pipeline.py` | COMPLETE implementation；CPU-only；固定 revision metadata API only、无模型下载；attempt 3 待用户操作 |
 | F-ASRUR-NEMO-METADATA | Nemo Phase 1 attempt 1 metadata-policy failure | execution `d3ba9f1`；run `asrur_nemo_phase1_audit_20260726_232452`；exit `1/1` | `results/audits/asrur_nemo_phase1_metadata_policy_failure_20260726.json` | FAILED；实现协议冲突，不是模型损坏；由 `86107ca` 修复 |
+| F-ASRUR-NEMO-TRANSITIVE-OFFLINE | Nemo Phase 1 attempt 2 legacy offline-alias failure | execution `5bba16c`；run `asrur_nemo_phase1_audit_20260726_235146`；exit `1/1` | `results/audits/asrur_nemo_phase1_transitive_offline_failure_20260727.json` | FAILED；`TRANSFORMERS_OFFLINE` 被 Hub 0.36.0 视为离线别名；由 `6760f7f` 修复 |
 
 ## 2. 已有远程数据
 
