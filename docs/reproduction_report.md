@@ -71,6 +71,18 @@ using `title + newline + text` when title is nonempty and `text` otherwise.
 Query-text mismatches are reported because SQuTR documents an upstream
 normalization step; no text is silently changed to improve results.
 
+The first real DATA-13B attempt, `data13b_squtr_validation_20260726_141640`,
+returned extraction/validation/wrapper exit codes `0/1/1`. Extraction is
+complete and CRC-clean for all 149,310 files, but validation stopped at
+`en/fiqa/corpus.jsonl:742` because the local validator rejected a row with
+empty title and text. No final evaluation manifest was created. The pinned
+official SQuTR loader preserves such a row as an empty constructed string, so
+commit `c3c2c6f` removes only the stricter local rejection and adds explicit
+empty-row count/example/ID-hash auditing. It does not filter the document,
+invent text, alter qrels, or change the frozen candidate set. The failed
+attempt remains separately recorded; a successful recovery run is still
+required before any SQuTR embedding.
+
 The dataset-agnostic evaluator consumes explicit query/document metadata and
 graded JSONL qrels, hashes frozen text embeddings and metadata before and
 after scoring, and writes deterministic rankings plus per-query evidence.

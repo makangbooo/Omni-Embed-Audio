@@ -80,3 +80,29 @@ Query-text differences are reported rather than silently rewritten: the
 official benchmark documents a text-normalization stage, so exact equality
 with the original text query is not assumed. The formal OEA-5 protocol remains
 gated on a successful remote DATA-13B report.
+
+#### DATA-13B attempt 1 and recovery
+
+`[OBSERVED]` Attempt `data13b_squtr_validation_20260726_141640` at commit
+`cd29099` completed extraction with exit code 0: all 149,310 files were
+extracted, every ZIP member passed CRC, and no unexpected or partial file
+remained. Content validation then stopped before audio probing with exit code
+1 at `en/fiqa/corpus.jsonl:742`, where both the document title and text are
+empty. The wrapper also returned 1, no final manifest was published, and the
+failed candidate was preserved. The exact failure is committed in
+`results/audits/squtr_data13b_attempt1_failure_20260726.json`.
+
+This is a validator-policy mismatch, not evidence of archive corruption.
+`[CODE]` The pinned SQuTR `CustomAudioRetrieval` loader at commit
+`cc3fb31fc0dc44fef3a44c569b344516bbaee79c` preserves every corpus row and
+constructs `title + "\n" + text` when title exists, otherwise `text`; it does
+not reject empty constructed text. Commit `c3c2c6f` therefore makes the
+minimal non-semantic repair: preserve the row and empty text exactly, record
+the count, up to 20 ID/line examples, and a SHA256 of the complete empty-ID
+sequence, then continue qrels closure and audio validation. It does not delete
+the document, inject placeholder text, alter qrels, or change candidate
+membership.
+
+The recovery run must reuse the successful extraction marker, retain the
+attempt-1 failure directory, and create a new run directory. DATA-13B remains
+incomplete until extraction/validation/wrapper exit codes are all zero.
