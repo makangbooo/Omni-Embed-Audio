@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_source": "user_supplied_remote_terminal_output",
+  "executed_at": "2026-07-26T21:48:34+08:00",
+  "hostname": "bitahub-a20601801981030400524510",
+  "execution_git_commit": "a4c5c0222b24603ebfd885df1d784279165a3aab",
+  "run_directory": "/home/jg525/Omni-Embed-Audio/logs/model_cache_migration_v3_20260726_214834",
+  "exit_code": 0,
+  "source": "/home/jg525/model_cache/oea",
+  "destination": "/home/jg525/models/oea",
+  "same_filesystem_device": 156,
+  "active_model_cache_references_before_move": 0,
+  "oea_before": {
+    "file_count": 254,
+    "apparent_bytes": 352974767304,
+    "allocated_bytes": 117658992640
+  },
+  "oea_after": {
+    "file_count": 254,
+    "apparent_bytes": 352974767304,
+    "allocated_bytes": 117658992640
+  },
+  "removed_model_cache_remainder": {
+    "authorized_by_user": true,
+    "file_count": 107,
+    "root_removed": true
+  },
+  "d2_d4_safety_check": [
+    {
+      "pid": 24716,
+      "cwd": "/file_system/jg525/models/whisper-large-v3"
+    },
+    {
+      "pid": 25828,
+      "cwd": "/file_system/jg525/models/bge-base-en-v1.5"
+    },
+    {
+      "pid": 26585,
+      "cwd": "/file_system/jg525/models/bge-reranker-v2-m3"
+    }
+  ],
+  "post_migration_allocated_human": {
+    "oea": "110G",
+    "whisper_large_v3_in_progress": "323M",
+    "bge_base_en_v1_5_in_progress": "308M",
+    "bge_reranker_v2_m3_in_progress": "329M"
+  },
+  "conclusion": "OEA was atomically moved without count or byte drift; the authorized non-OEA remainder and model_cache root were removed. D2-D4 clone directories were outside the deletion root and remained active. Their small sizes are not completion evidence."
+}

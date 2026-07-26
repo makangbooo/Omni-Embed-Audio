@@ -329,9 +329,9 @@ GPU 计算、TTS 或真实 gate 训练。
 | ID | 资源与固定 revision | 许可证 | 最小下载 | 预留磁盘 | 保存目录 | 必要性 | 小替代 |
 |---|---|---|---:|---:|---|---|---|
 | D1 | `mteb/fiqa@5e59eeb...` | `unknown` | 48,616,245 B | 0.1 GB | `/home/jg525/datasets/oea/fiqa_mteb` | train/dev gate 数据与泄漏检查 | 已排除重复 TSV 和 README；corpus/queries/三 split qrels JSONL 全部保留 |
-| D2 | `openai/whisper-large-v3@06f233...` minimal safetensors | Apache-2.0 | 3,091,519,764 B | 3.5 GB | `/home/jg525/model_cache/asr/whisper-large-v3` | B1、1/4-best、不确定性、WER | `turbo` 更小但改变用户指定基线，不作为正式替代 |
-| D3 | `BAAI/bge-base-en-v1.5@a5beb1...` minimal safetensors | MIT | 438,900,399 B | 0.6 GB | `/home/jg525/model_cache/retrieval/bge-base-en-v1.5` | B1/U1 dense | small 版更小但改变强基线 |
-| D4 | `BAAI/bge-reranker-v2-m3@953dc6...` minimal safetensors | Apache-2.0 | 2,293,242,108 B | 2.6 GB | `/home/jg525/model_cache/rerank/bge-reranker-v2-m3` | B4–B7 和 Ours | 无同协议小替代；可先用 mock 完成 CPU 测试 |
+| D2 | `openai/whisper-large-v3@06f233...` minimal safetensors | Apache-2.0 | 3,091,519,764 B | 3.5 GB | `/home/jg525/models/whisper-large-v3` | B1、1/4-best、不确定性、WER | `turbo` 更小但改变用户指定基线，不作为正式替代 |
+| D3 | `BAAI/bge-base-en-v1.5@a5beb1...` minimal safetensors | MIT | 438,900,399 B | 0.6 GB | `/home/jg525/models/bge-base-en-v1.5` | B1/U1 dense | small 版更小但改变强基线 |
+| D4 | `BAAI/bge-reranker-v2-m3@953dc6...` minimal safetensors | Apache-2.0 | 2,293,242,108 B | 2.6 GB | `/home/jg525/models/bge-reranker-v2-m3` | B4–B7 和 Ours | 无同协议小替代；可先用 mock 完成 CPU 测试 |
 
 首批固定最小文件集合计 5,872,278,516 bytes（约 5.47 GiB），建议预留 7 GB。Nemo/SQuTR 不重复
 下载；独立 NQ snapshot 和 TTS/noise 资源均延后审批。

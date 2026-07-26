@@ -67,7 +67,7 @@ resource audit:
 ```bash
 cd /home/jg525/Omni-Embed-Audio
 conda activate oea-repro
-export MODEL_ROOT=/home/jg525/model_cache/oea
+export MODEL_ROOT=/home/jg525/models/oea
 
 # Read-only base/checkpoint snapshot audit for this exact variant:
 bash scripts/run_official_oea_model_resource_audit.sh oea_nemo3b

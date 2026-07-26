@@ -18,9 +18,11 @@
 | R-OEA4 | Qwen3B-Cl Clotho A2T | R@1/5/10 `27.2727/52.8230/66.6986` | `results/audits/qwen3b_cl_clotho_a2t_eval_20260721.json` | COMPLETE, not paper-reported |
 | R-OEA6-A100 | Qwen3B-Cl efficiency | controlled A100 result | `results/audits/qwen3b_clotho_a100_efficiency_20260721.json` | COMPLETE |
 | R-OEA6-4090 | Qwen3B-Cl efficiency | hardware-mismatched extension | `results/audits/qwen3b_clotho_rtx4090_efficiency_20260721.json` | COMPLETE |
-| C-ASRUR-RES | D1–D4 pinned manifests + resumable CPU wrapper | commit `6279b8265a3c90be92536eb96bcd98408bebfffa` | `configs/asr_uncertainty_reranking/resources/`、`scripts/run_asrur_resource_download.sh` | COMPLETE; no download executed |
+| C-ASRUR-RES | D1–D4 pinned manifests + resumable CPU wrapper | commit `6279b8265a3c90be92536eb96bcd98408bebfffa` | `configs/asr_uncertainty_reranking/resources/`、`scripts/run_asrur_resource_download.sh` | COMPLETE implementation; D1 later completed, old sequential D2–D4 run intentionally stopped |
 | C-ASRUR-CORE | normalization、proxy posterior、4-best aggregation、metrics、cache manifest | commit `8cc5984dc35a272934d434993006814855f39624` | `AudioRetrieval/asr_uncertainty_reranking/` | COMPLETE; 38 related CPU tests passed |
 | C-ASRUR-PIPE | B1–B7/QG/Ours/U1–U4/A1–A9 CPU 实验框架 | commit `8f28c5590810f3e430d3ce7591266ad7f8e38f21` | `AudioRetrieval/asr_uncertainty_reranking/`、`scripts/*asrur*`、`configs/asr_uncertainty_reranking/main_experiment.json` | COMPLETE; 58 ASRUR tests and 345 full-repository tests passed; no research result generated |
+| A-MODEL-MIGRATION | OEA 模型迁移与旧缓存清理 | run `model_cache_migration_v3_20260726_214834`；exit `0`；254 files 前后相同 | `results/audits/model_cache_migration_20260726.json` | COMPLETE; `/home/jg525/model_cache` removed |
+| C-ASRUR-MODEL-AUDIT | D2–D4 离线固定 revision/LFS/size/SHA256 验收器 | commit `aac088d68f9bc60871c48db90a2603144ca1b178` | `scripts/run_asrur_model_audit.sh` | COMPLETE; 尚未对远程下载结果执行 |
 
 ## 2. 已有远程数据
 
@@ -32,19 +34,19 @@
 | D-SQUTR-PROBE-CACHE-V1 | attempt-2 identity-only audio probe cache | commit `68aa615` bound；475 bytes；1 line；SHA256 `29b63e98...e6446` | `/home/jg525/datasets/oea/squtr/manifests/.squtr_audio_probe_cache_v1.jsonl` | PRESERVED_ATTEMPT_EVIDENCE |
 | D-SQUTR-PROBE-CACHE-V2 | resumable first/last-frame audio probe cache | marker/structure/protocol/root/Git-bound | `/home/jg525/datasets/oea/squtr/manifests/.squtr_audio_probe_cache_v2.jsonl` | NOT_CREATED; attempt 3 exited before validation |
 | D-CLOTHO-EVAL | Clotho v2.1 evaluation | prior DATA-02 validated | `/home/jg525/datasets/oea/clotho_v2.1` | COMPLETE evidence; live recheck before Phase 1 |
-| D-FIQA-MTEB | FiQA train/dev/test metadata | revision `5e59eeb...`; selected 48,616,245 B | `/home/jg525/datasets/oea/fiqa_mteb` | APPROVED_NOT_DOWNLOADED |
+| D-FIQA-MTEB | FiQA train/dev/test metadata | revision `5e59eeb...`; selected 48,616,245 B | `/home/jg525/datasets/oea/fiqa_mteb` | COMPLETE; run `asrur_d1_fiqa_download_20260726_200414`, exit `0/0` |
 | D-NQ-MTEB | NQ public snapshot | revision `b84726e...` | `/home/jg525/datasets/oea/nq_mteb` | DEFERRED; SQuTR copy may suffice |
 
 ## 3. 已有与计划模型
 
 | ID | 模型 | revision / primary file | 远程路径 | 状态 |
 |---|---|---|---|---|
-| M-NEMO-BASE | `nvidia/omni-embed-nemotron-3b` | `865db1bb...` | `/home/jg525/model_cache/oea/omni-embed-nemotron-3b` | historical remote LFS complete; live recheck pending |
-| M-OEA-NEMO-AC | `JudeJiwoo/OEA-Nemo3B-AC` | `8ed66aa...`; `step_400_best.pt` | `/home/jg525/model_cache/oea/OEA-Nemo3B-AC` | historical remote LFS complete |
-| M-OEA-NEMO-CL | `JudeJiwoo/OEA-Nemo3B-Cl` | `9588912...`; `step_450_best.pt` | `/home/jg525/model_cache/oea/OEA-Nemo3B-Cl` | historical remote LFS complete; live recheck pending |
-| M-WHISPER | `openai/whisper-large-v3` | `06f233fe...`; minimal safetensors 3,091,519,764 B | `/home/jg525/model_cache/asr/whisper-large-v3` | APPROVED_NOT_DOWNLOADED |
-| M-BGE-DENSE | `BAAI/bge-base-en-v1.5` | `a5beb1e3...`; minimal 438,900,399 B | `/home/jg525/model_cache/retrieval/bge-base-en-v1.5` | APPROVED_NOT_DOWNLOADED |
-| M-BGE-RERANK | `BAAI/bge-reranker-v2-m3` | `953dc6f6...`; minimal 2,293,242,108 B | `/home/jg525/model_cache/rerank/bge-reranker-v2-m3` | APPROVED_NOT_DOWNLOADED |
+| M-NEMO-BASE | `nvidia/omni-embed-nemotron-3b` | `865db1bb...` | `/home/jg525/models/oea/omni-embed-nemotron-3b` | migrated intact by file-count/byte invariants; live content recheck pending |
+| M-OEA-NEMO-AC | `JudeJiwoo/OEA-Nemo3B-AC` | `8ed66aa...`; `step_400_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-AC` | migrated intact by file-count/byte invariants |
+| M-OEA-NEMO-CL | `JudeJiwoo/OEA-Nemo3B-Cl` | `9588912...`; `step_450_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-Cl` | migrated intact by file-count/byte invariants; live content recheck pending |
+| M-WHISPER | `openai/whisper-large-v3` | `06f233fe...`; minimal safetensors 3,091,519,764 B | `/home/jg525/models/whisper-large-v3` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
+| M-BGE-DENSE | `BAAI/bge-base-en-v1.5` | `a5beb1e3...`; minimal 438,900,399 B | `/home/jg525/models/bge-base-en-v1.5` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
+| M-BGE-RERANK | `BAAI/bge-reranker-v2-m3` | `953dc6f6...`; minimal 2,293,242,108 B | `/home/jg525/models/bge-reranker-v2-m3` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
 | M-TTS | FiQA train/dev TTS model | not selected | not assigned | BLOCKED pending protocol/license approval |
 
 ## 4. 将生成的缓存

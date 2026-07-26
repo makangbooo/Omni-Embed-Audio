@@ -15,11 +15,12 @@
 | 0 | D1–D4 固定清单与 CPU 下载 wrapper | COMPLETED | `6279b82` | 未下载 | 无；与 SQuTR 内容校验无数据依赖 | 35 项相关测试通过；拉取最新分支后执行 |
 | 0 | CPU 核心算法与缓存契约 | COMPLETED | `8cc5984` | 未远程运行；本地 38 项相关测试通过 | 无 | 后续模型 runner 只能调用这些已测试定义 |
 | 0 | B1–B7、QG、Ours、U1–U4、A1–A9 CPU 主实验框架 | COMPLETED | `8f28c55` | 本地 345 项全仓测试通过；无下载、GPU、模型推理或真实训练 | 无；合成 smoke 明确禁止写入研究结果 | 远程拉取后执行 D1–D4 下载、DATA-13C 恢复和 FiQA 数据审计 |
-| 0 | B5/B6 主融合的 ASR 路由 | COMPLETED | 待本提交 | `[INFERRED][USER-CONFIRMED 2026-07-26]` 主路线固定为 4-best `proxy_posterior`；1-best 只作辅助诊断 | 无 | 正式结果不得根据 test/NQ 表现切换路线 |
+| 0 | B5/B6 主融合的 ASR 路由 | COMPLETED | `b9a81ef` | `[INFERRED][USER-CONFIRMED 2026-07-26]` 主路线固定为 4-best `proxy_posterior`；1-best 只作辅助诊断 | 无 | 正式结果不得根据 test/NQ 表现切换路线 |
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | 运行 FiQA/SQuTR 数据一致性审计前等待 DATA-13C final manifest |
-| 0 | D2–D4 Whisper/BGE 固定资源下载 | WAITING_USER | `a4c5c02` | 旧顺序 run 于 21:16 按用户要求 SIGTERM 停止，download/wrapper=`143/143`，相关 PID 全部消失；1,583,349,760-byte Whisper `.incomplete` 保留；旧 manifest 的 `running` 是未执行 finalizer 的陈旧状态 | 用户称三个并行下载已启动，但当前主机的 supplied patterns 未发现进程，尚缺各任务 PID/日志/目标目录 | 提供三个并行任务的进程、命令和日志路径；完成后按固定 manifest 校验 |
+| 0 | 模型存储迁移与旧缓存清理 | COMPLETED | `aac088d` | run=`model_cache_migration_v3_20260726_214834`；exit=`0`；OEA 254 files、apparent/allocated bytes 前后完全一致；旧 `/home/jg525/model_cache` 已按用户明确授权删除 | 无 | 后续统一使用 `/home/jg525/models`；历史审计中的旧路径保持原样 |
+| 0 | D2–D4 Whisper/BGE 固定资源下载 | RUNNING_REMOTE | `aac088d` | 旧顺序 run 已按用户要求以 `143/143` 停止；三个手工 `git clone` PID `24716/25828/26585` 均位于 `/home/jg525/models/*`，迁移时仍在运行；21:48 目录仅 `323/308/329 MiB`，不能视为权重完成 | 等待 clone/LFS 结束；尚未验证固定 revision、权重大小和 SHA256 | 下载结束后运行 `scripts/run_asrur_model_audit.sh` 严格离线验收 |
 | 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `a4c5c02` | 精确探针 old/new lock RC=`73/0`；本机无持有者，用户确认没有任何其他挂载 `/home/jg525` 的运行实例 | DPC 远端遗留锁租约；本项目不能安全自行释放 | 按 `dpc_lock_support_request.md` 联系平台；不得删除/绕过旧 lock |
-| 0/2 | DATA-13C lock owner provenance | COMPLETED | 待本提交 | wrapper 改为非截断打开 lock；成功取得后记录 hostname/PID/PPID/commit/run dir，失败时显示最后记录；4 项专项测试通过 | 该补丁不能解除当前由远端实体持有的旧锁 | 远端锁安全释放并拉取本补丁后再恢复 DATA-13C |
+| 0/2 | DATA-13C lock owner provenance | COMPLETED | `090abf8` | wrapper 改为非截断打开 lock；成功取得后记录 hostname/PID/PPID/commit/run dir，失败时显示最后记录；4 项专项测试通过 | 该补丁不能解除当前由远端实体持有的旧锁 | 远端锁安全释放并拉取本补丁后再恢复 DATA-13C |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | WAITING_USER | 待后续提交 | 历史 LFS 审计 complete，尚未做 2026-07-26 live recheck | 需要远程 CPU 执行；全哈希可能超过 30 分钟 | DATA-13B 后执行独立资源审计 |
 | 1 | Nemo inference-only checkpoint 与 model lock | TODO | N/A | 未执行 | 依赖 live resource audit | 生成小型锁并提交 |
 | 1 | Nemo 5/25 OEA embedding smoke | TODO | N/A | 计划 1×RTX 4090 24GB | 依赖 model lock 和精确 GPU 命令批准 | 先提交精确 wrapper/config；预计 12–18 GiB |
@@ -56,8 +57,10 @@
   `/proc/locks` 或开放 FD 匹配。因此同目录 `flock` 正常，旧锁由另一台共享
   存储服务器或 DPC 远端租约持有。不得删除或绕过 lock。
 - 当前未执行：任何 GPU 计算、TTS、模型推理或真实 gate 训练。D1 FiQA 已完成；
-  D2–D4 已在 CPU 服务器进入后台下载，但尚无完成证据。
-- 下一步：两条 CPU 工作并行执行：(1) 监控 D2–D4 固定资源下载，不得
-  重复启动；(2) SQuTR lock-owner/availability 只读审计。不得删除 lock。DATA-13C 成功且
+  OEA 模型已完整迁移到 `/home/jg525/models/oea`，D2–D4 正在
+  `/home/jg525/models` 下并行 clone，但尚无权重完成证据。
+- 下一步：两条 CPU 工作并行执行：(1) 监控 D2–D4 下载，不重复启动；结束后在
+  commit `aac088d` 上运行固定 revision/LFS/size/SHA256 离线验收；(2) SQuTR
+  lock-owner/availability 只读审计。不得删除 lock。DATA-13C 成功且
   D1 完成后运行 FiQA/SQuTR 一致性审计。G1 仍须等 Nemo 实时审计、model lock
   和精确 GPU 命令再次提交后才启动。

@@ -38,7 +38,7 @@
 | `tests/` | 根目录已有 `tests/` | 已存在 |
 | `results/` | `results/raw/`（Git 忽略）及 `results/audits/`、`results/tables/` | 已存在 |
 | `logs/` | 根目录 `logs/`，已被 `.gitignore` 排除 | 远程运行时创建 |
-| `cache/` | `/home/jg525/model_cache/` 与 `/home/jg525/datasets/oea/` | 使用仓库外共享存储 |
+| `cache/` | Phase 0 时为 `/home/jg525/model_cache/` 与 `/home/jg525/datasets/oea/` | 历史只读快照；2026-07-26 后模型根目录迁移为 `/home/jg525/models/` |
 
 最新文件规模复核：`AudioRetrieval/` 204 个文件、`configs/` 44 个文件、
 `data/` 17 个文件、`docs/` 23 个文件、`results/` 33 个文件、`scripts/` 189
