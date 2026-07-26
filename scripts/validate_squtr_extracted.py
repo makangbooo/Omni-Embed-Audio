@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import os
+import uuid
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
@@ -22,6 +23,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--structure-manifest", type=Path, required=True)
     parser.add_argument("--manifest-output", type=Path, required=True)
     parser.add_argument("--statistics-output", type=Path, required=True)
+    parser.add_argument("--probe-cache", type=Path)
+    parser.add_argument("--probe-cache-git-commit")
     parser.add_argument("--progress-every", type=int, default=1000)
     args = parser.parse_args()
     if args.progress_every <= 0:
@@ -46,6 +49,17 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: stream.read(8 * 1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def canonical_sha256(value: Any) -> str:
+    payload = json.dumps(
+        value,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def write_json(path: Path, value: dict[str, Any]) -> None:
@@ -244,6 +258,88 @@ def probe_audio(path: Path) -> dict[str, Any]:
         }
 
 
+def probe_cache_identity(
+    extract_root: Path,
+    structure: dict[str, Any],
+    producer_git_commit: str,
+) -> dict[str, Any]:
+    marker = extract_root / ".data13b_extraction_complete.json"
+    if marker.is_symlink() or not marker.is_file():
+        raise ValueError(f"missing/unsafe extraction completion marker: {marker}")
+    return {
+        "record_type": "header",
+        "schema_version": 1,
+        "extract_root": str(extract_root),
+        "extraction_completion_marker_sha256": sha256_file(marker),
+        "structure_sha256": canonical_sha256(structure),
+        "producer_git_commit": producer_git_commit,
+        "probe_protocol": (
+            "libsndfile metadata plus first and last frame finite check after "
+            "full ZIP member CRC"
+        ),
+    }
+
+
+def load_or_create_probe_cache(
+    path: Path,
+    identity: dict[str, Any],
+) -> tuple[dict[str, dict[str, Any]], Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    records: dict[str, dict[str, Any]] = {}
+    if path.exists():
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f"unsafe probe cache: {path}")
+        with path.open("r", encoding="utf-8") as stream:
+            for line_number, line in enumerate(stream, start=1):
+                if not line.strip():
+                    raise ValueError(f"blank probe-cache line: {path}:{line_number}")
+                try:
+                    value = json.loads(line, object_pairs_hook=strict_object)
+                except Exception as exc:
+                    raise ValueError(
+                        f"invalid probe-cache row: {path}:{line_number}"
+                    ) from exc
+                if line_number == 1:
+                    if value != identity:
+                        raise ValueError(
+                            f"probe-cache identity mismatch: {value!r} != {identity!r}"
+                        )
+                    continue
+                if not isinstance(value, dict) or value.get("record_type") != "audio_probe":
+                    raise ValueError(f"invalid probe-cache record: {path}:{line_number}")
+                relpath = value.get("audio_relpath")
+                if not isinstance(relpath, str) or not relpath:
+                    raise ValueError(
+                        f"invalid probe-cache audio_relpath: {path}:{line_number}"
+                    )
+                if relpath in records:
+                    raise ValueError(
+                        f"duplicate probe-cache audio_relpath {relpath!r}: {path}"
+                    )
+                if (
+                    isinstance(value.get("size_bytes"), bool)
+                    or not isinstance(value.get("size_bytes"), int)
+                    or isinstance(value.get("mtime_ns"), bool)
+                    or not isinstance(value.get("mtime_ns"), int)
+                    or not isinstance(value.get("decoded"), dict)
+                ):
+                    raise ValueError(f"invalid probe-cache fields: {path}:{line_number}")
+                records[relpath] = value
+        stream = path.open("a", encoding="utf-8", newline="\n")
+        return records, stream
+
+    with path.open("x", encoding="utf-8", newline="\n") as stream:
+        stream.write(json.dumps(identity, ensure_ascii=False) + "\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    return records, path.open("a", encoding="utf-8", newline="\n")
+
+
+def flush_probe_cache(stream: Any) -> None:
+    stream.flush()
+    os.fsync(stream.fileno())
+
+
 def finalize_manifest(candidate: Path, output: Path) -> tuple[str, str]:
     candidate_sha256 = sha256_file(candidate)
     if output.exists():
@@ -265,6 +361,8 @@ def validate_dataset(
     manifest_output: Path,
     progress_every: int,
     audio_probe: AudioProbe = probe_audio,
+    probe_cache: Path | None = None,
+    probe_cache_git_commit: str | None = None,
 ) -> tuple[dict[str, Any], str, str]:
     archive_root = str(structure["observed_archive_root"])
     dataset_root = extract_root / archive_root
@@ -273,7 +371,7 @@ def validate_dataset(
 
     manifest_output.parent.mkdir(parents=True, exist_ok=True)
     candidate = manifest_output.with_name(
-        f".{manifest_output.name}.candidate-{os.getpid()}"
+        f".{manifest_output.name}.candidate-{os.getpid()}-{uuid.uuid4().hex}"
     )
     if candidate.exists():
         raise ValueError(f"manifest candidate already exists: {candidate}")
@@ -283,6 +381,24 @@ def validate_dataset(
     sample_rates: Counter[int] = Counter()
     channels: Counter[int] = Counter()
     subset_reports: list[dict[str, Any]] = []
+    cached_probes: dict[str, dict[str, Any]] = {}
+    probe_cache_stream = None
+    probe_cache_hits = 0
+    probe_cache_misses = 0
+    if probe_cache is not None:
+        if not probe_cache_git_commit:
+            raise ValueError(
+                "probe_cache_git_commit is required when probe_cache is enabled"
+            )
+        cache_identity = probe_cache_identity(
+            extract_root,
+            structure,
+            probe_cache_git_commit,
+        )
+        cached_probes, probe_cache_stream = load_or_create_probe_cache(
+            probe_cache,
+            cache_identity,
+        )
     try:
         with candidate.open("x", encoding="utf-8", newline="\n") as manifest:
             for subset in structure["subsets"]:
@@ -369,7 +485,34 @@ def validate_dataset(
                         audio_path = audio_root / audio_name
                         if audio_path.is_symlink() or not audio_path.is_file():
                             raise ValueError(f"missing/unsafe audio file: {audio_path}")
-                        decoded = audio_probe(audio_path)
+                        audio_relpath = audio_path.relative_to(extract_root).as_posix()
+                        stat = audio_path.stat()
+                        cached_probe = cached_probes.get(audio_relpath)
+                        if cached_probe is not None:
+                            if (
+                                cached_probe["size_bytes"] != stat.st_size
+                                or cached_probe["mtime_ns"] != stat.st_mtime_ns
+                            ):
+                                raise ValueError(
+                                    f"probe-cache file identity mismatch: {audio_path}"
+                                )
+                            decoded = cached_probe["decoded"]
+                            probe_cache_hits += 1
+                        else:
+                            decoded = audio_probe(audio_path)
+                            probe_cache_misses += 1
+                            if probe_cache_stream is not None:
+                                cache_record = {
+                                    "record_type": "audio_probe",
+                                    "audio_relpath": audio_relpath,
+                                    "size_bytes": stat.st_size,
+                                    "mtime_ns": stat.st_mtime_ns,
+                                    "decoded": decoded,
+                                }
+                                probe_cache_stream.write(
+                                    json.dumps(cache_record, ensure_ascii=False) + "\n"
+                                )
+                                cached_probes[audio_relpath] = cache_record
                         total_audio += 1
                         total_duration += float(decoded["duration_seconds"])
                         sample_rates[int(decoded["sample_rate"])] += 1
@@ -392,9 +535,7 @@ def validate_dataset(
                                     "snr_db": expected_snr,
                                     "noise_id": noise_id,
                                     "audio_path": str(audio_path),
-                                    "audio_relpath": audio_path.relative_to(
-                                        extract_root
-                                    ).as_posix(),
+                                    "audio_relpath": audio_relpath,
                                     "caption": text,
                                     "original_query_text": queries[query_id],
                                     "query_text_exact_match": (
@@ -423,6 +564,8 @@ def validate_dataset(
                             + "\n"
                         )
                         if total_audio % progress_every == 0:
+                            if probe_cache_stream is not None:
+                                flush_probe_cache(probe_cache_stream)
                             print(
                                 f"[PROGRESS] validated_audio={total_audio}/"
                                 f"{structure['expected_audio_instances']}",
@@ -496,6 +639,8 @@ def validate_dataset(
                     }
                 )
 
+        if probe_cache_stream is not None:
+            flush_probe_cache(probe_cache_stream)
         expected_audio = int(structure["expected_audio_instances"])
         if total_audio != expected_audio:
             raise ValueError(
@@ -520,6 +665,14 @@ def validate_dataset(
                     "first and last frame decoded with libsndfile after every ZIP "
                     "member passed full CRC during extraction"
                 ),
+                "probe_cache": {
+                    "enabled": probe_cache is not None,
+                    "path": str(probe_cache) if probe_cache is not None else None,
+                    "hits": probe_cache_hits,
+                    "misses": probe_cache_misses,
+                    "records_after_run": len(cached_probes),
+                    "checkpoint_every_audio": progress_every,
+                },
                 "manifest_status": manifest_status,
                 "manifest_path": str(manifest_output),
                 "manifest_size_bytes": manifest_output.stat().st_size,
@@ -538,9 +691,14 @@ def validate_dataset(
             manifest_sha256,
         )
     except Exception:
+        if probe_cache_stream is not None:
+            flush_probe_cache(probe_cache_stream)
         if candidate.exists():
             print(f"[ERROR] manifest candidate preserved: {candidate}", flush=True)
         raise
+    finally:
+        if probe_cache_stream is not None:
+            probe_cache_stream.close()
 
 
 def main() -> int:
@@ -564,6 +722,12 @@ def main() -> int:
             structure,
             args.manifest_output.resolve(),
             args.progress_every,
+            probe_cache=(
+                args.probe_cache.expanduser().absolute()
+                if args.probe_cache is not None
+                else None
+            ),
+            probe_cache_git_commit=args.probe_cache_git_commit,
         )
         report.update(
             {

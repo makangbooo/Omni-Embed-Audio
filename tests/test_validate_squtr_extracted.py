@@ -96,6 +96,26 @@ def fake_probe(path: Path) -> dict:
     }
 
 
+def write_completion_marker(extract_root: Path) -> None:
+    marker = extract_root / ".data13b_extraction_complete.json"
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    marker.write_text(
+        json.dumps(
+            {
+                "archive_sha256": "a" * 64,
+                "archive_root": "source_data",
+                "expected_file_members": 7,
+                "expected_uncompressed_member_bytes": 123,
+                "file_members": 7,
+                "uncompressed_member_bytes": 123,
+                "full_member_crc_verified": True,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 class ValidateSqutrExtractedTest(unittest.TestCase):
     def test_schema_id_qrels_and_audio_sets_are_validated(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -180,6 +200,66 @@ class ValidateSqutrExtractedTest(unittest.TestCase):
                 64,
             )
             self.assertIn("preserve row", corpus_report["fully_empty_document_policy"])
+
+    def test_probe_cache_resumes_after_an_interrupted_audio_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            extract_root = root / "extracted"
+            write_extracted_fixture(extract_root)
+            write_completion_marker(extract_root)
+            probe_cache = root / "manifests/probes.jsonl"
+            calls: list[str] = []
+
+            def interrupted_probe(path: Path) -> dict:
+                calls.append(path.name)
+                if path.name == "noise_q1.wav":
+                    raise RuntimeError("simulated interruption")
+                return fake_probe(path)
+
+            with self.assertRaisesRegex(RuntimeError, "simulated interruption"):
+                validate_dataset(
+                    extract_root,
+                    structure_manifest(),
+                    root / "manifest.jsonl",
+                    1,
+                    audio_probe=interrupted_probe,
+                    probe_cache=probe_cache,
+                    probe_cache_git_commit="fixture-commit",
+                )
+            self.assertEqual(calls, ["q1.wav", "noise_q1.wav"])
+            self.assertTrue(probe_cache.is_file())
+
+            with self.assertRaisesRegex(ValueError, "identity mismatch"):
+                validate_dataset(
+                    extract_root,
+                    structure_manifest(),
+                    root / "manifest.jsonl",
+                    1,
+                    audio_probe=fake_probe,
+                    probe_cache=probe_cache,
+                    probe_cache_git_commit="different-commit",
+                )
+
+            resumed_calls: list[str] = []
+
+            def resumed_probe(path: Path) -> dict:
+                resumed_calls.append(path.name)
+                return fake_probe(path)
+
+            report, status, _ = validate_dataset(
+                extract_root,
+                structure_manifest(),
+                root / "manifest.jsonl",
+                1,
+                audio_probe=resumed_probe,
+                probe_cache=probe_cache,
+                probe_cache_git_commit="fixture-commit",
+            )
+            self.assertEqual(status, "created")
+            self.assertEqual(resumed_calls, ["noise_q1.wav"])
+            self.assertEqual(report["probe_cache"]["hits"], 1)
+            self.assertEqual(report["probe_cache"]["misses"], 1)
+            self.assertEqual(report["probe_cache"]["records_after_run"], 2)
 
     def test_unknown_corpus_reference_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
