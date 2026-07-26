@@ -13,7 +13,7 @@
 | 0 | Whisper/BGE/FiQA 首批下载批准 | COMPLETED | `6279b82` | 未下载 | 无；D1–D4 已获用户批准 | DATA-13C 内容门禁成功后由 CPU 服务器执行 |
 | 0 | D1–D4 固定清单与 CPU 下载 wrapper | COMPLETED | `6279b82` | 未下载 | 等待 DATA-13C 内容门禁 | 35 项相关测试通过；内容门禁成功后拉取执行 |
 | 0 | CPU 核心算法与缓存契约 | COMPLETED | `8cc5984` | 未远程运行；本地 38 项相关测试通过 | 无 | 后续模型 runner 只能调用这些已测试定义 |
-| 0/2 | SQuTR DATA-13B/13C 内容门禁 | RUNNING_REMOTE | `db7356c` | CPU host `bitahub-a20601801981030400524510` 正在运行 attempt 3；PID `11079`；run `logs/data13c_squtr_content_recovery_20260726_161849`；启动时三个退出码均为 `PENDING` | 无新增阻塞；等待 marker/qrels/audio 内容校验 | 只读监控 v2 cache 和三个退出码；全为 0 后提交 qrels/manifest/probe 小型证据 |
+| 0/2 | SQuTR DATA-13B/13C 内容门禁 | WAITING_USER | `db7356c` | attempt 3 `data13c_squtr_content_recovery_20260726_161849` 已结束；wrapper=`20`，reuse/validation 未启动，v2 cache 与 final manifest 均未生成 | 并发锁申请被拒绝；尚未识别当时或当前的锁持有者 | 在 CPU 服务器执行只读 lock-owner/availability 审计；不得删除 lock；确认无持有者后再提交恢复命令 |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | WAITING_USER | 待后续提交 | 历史 LFS 审计 complete，尚未做 2026-07-26 live recheck | 需要远程 CPU 执行；全哈希可能超过 30 分钟 | DATA-13B 后执行独立资源审计 |
 | 1 | Nemo inference-only checkpoint 与 model lock | TODO | N/A | 未执行 | 依赖 live resource audit | 生成小型锁并提交 |
 | 1 | Nemo 5/25 OEA embedding smoke | TODO | N/A | 计划 1×RTX 4090 24GB | 依赖 model lock 和精确 GPU 命令批准 | 先提交精确 wrapper/config；预计 12–18 GiB |
@@ -32,13 +32,18 @@
 ## 当前焦点
 
 - 当前阶段：Phase 0 协议、资源范围、下载基础设施和通用 CPU 核心模块均已完成。
+- 当前主实验：FiQA 四种 SQuTR 声学条件上的 OEA Top-100 + Whisper 4-best
+  proxy-posterior + BGE Cross-Encoder + ASR 不确定性感知候选级动态门控；
+  OEA-5/SQuTR 数据门禁与 Clotho 正确性检查只是前置条件，不是最终创新实验。
 - 已完成：OEA/SQuTR/环境/模型证据审计；audio-only no-prefix 主协议锁定；D1–D4 下载批准和固定清单；G1 固定为 1×RTX 4090 24GB 资源计划；query-local normalization、4-best proxy-posterior 聚合、不确定性特征、检索/Oracle/WER/噪声指标和严格缓存 manifest。
-- 最近远程结果：DATA-13C attempt 3 已在执行 commit `db7356c` 上启动，PID
-  `11079`，run `data13c_squtr_content_recovery_20260726_161849`。旧进程不存在，
-  工作树干净，归档、extraction marker 和 identity-only v1 cache 均存在；启动瞬间
-  三个退出码为 `PENDING`。
+- 最近远程结果：DATA-13C attempt 3 使用执行 commit `db7356c` 启动，但 PID
+  `11079` 已退出。run `data13c_squtr_content_recovery_20260726_161849` 的
+  wrapper exit code 为 `20`，stderr 报告另一个进程持有
+  `.data13c_content_recovery.lock`；reuse/validation exit 文件、v2 cache 和 final
+  manifest 均未生成。该失败已登记为小型审计证据。
 - 当前未执行：任何新下载、GPU 计算、TTS、模型或 gate 训练。
-- 下一步：只读监控 attempt 3；运行期间远程工作副本不 pull。v2 cache 应在进入
-  audio probe 后增长，reuse/validation/wrapper 三个退出码全为 0 后固化 qrels 哈希、
-  schema/manifest 统计，再启动已批准的 D1/D2–D4 CPU 下载。G1 仍须等 Nemo 实时
+- 下一步：先在 CPU 服务器做只读 lock-owner/availability 审计，不删除 lock、不
+  重启校验。确认没有活跃持有者后再生成新的 DATA-13C 恢复命令；只有
+  reuse/validation/wrapper 三个退出码全为 0 且 final manifest 存在，才固化 qrels
+  哈希、schema/manifest 统计并进入后续下载或 GPU 阶段。G1 仍须等 Nemo 实时
   审计、model lock 和精确 GPU 命令提交后才启动。

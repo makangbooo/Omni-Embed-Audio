@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "audit_id": "squtr_data13c_attempt3_lock_failure_20260726",
+  "recorded_at": "2026-07-26T16:41:51+08:00",
+  "status": "failed",
+  "evidence_source": "user-returned remote terminal output",
+  "host": "bitahub-a20601801981030400524510",
+  "execution": {
+    "git_commit": "db7356c7e68efd5ad7e21d1d27ee68981ee7d050",
+    "pid": 11079,
+    "run_directory": "/home/jg525/Omni-Embed-Audio/logs/data13c_squtr_content_recovery_20260726_161849",
+    "process_present_at_inspection": false,
+    "exit_codes": {
+      "extraction_reuse": null,
+      "validation": null,
+      "wrapper": 20
+    }
+  },
+  "failure": {
+    "stage": "exclusive_lock_acquisition",
+    "message": "[ERROR] Another DATA-13C recovery owns /home/jg525/datasets/oea/squtr/manifests/.data13c_content_recovery.lock",
+    "classification": "concurrency lock acquisition denied; lock owner not yet identified",
+    "lock_path": "/home/jg525/datasets/oea/squtr/manifests/.data13c_content_recovery.lock"
+  },
+  "observed_artifacts": {
+    "v1_probe_cache": {
+      "path": "/home/jg525/datasets/oea/squtr/manifests/.squtr_audio_probe_cache_v1.jsonl",
+      "exists": true,
+      "size_bytes": 475,
+      "line_count": 1
+    },
+    "v2_probe_cache": {
+      "path": "/home/jg525/datasets/oea/squtr/manifests/.squtr_audio_probe_cache_v2.jsonl",
+      "exists": false
+    },
+    "final_manifest": {
+      "path": "/home/jg525/datasets/oea/squtr/manifests/squtr_audio_query_manifest.jsonl",
+      "exists": false
+    },
+    "data_statistics": {
+      "path": "/home/jg525/Omni-Embed-Audio/logs/data13c_squtr_content_recovery_20260726_161849/data_statistics.json",
+      "status": "not_observed"
+    }
+  },
+  "interpretation": [
+    "Attempt 3 exited before extraction reuse and validation were entered.",
+    "The SQuTR content gate is not complete because no final audio query manifest was produced.",
+    "File existence alone does not identify a live flock owner and is not authorization to delete the lock file.",
+    "No SQuTR embedding, FiQA Phase 2 retrieval, GPU inference, or gate training is authorized from this attempt."
+  ],
+  "next_required_action": "Run a read-only lock-owner and lock-availability audit on the CPU server before deciding whether to resume DATA-13C."
+}

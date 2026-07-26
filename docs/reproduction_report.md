@@ -102,11 +102,22 @@ score distributions. It does not rewrite qrels or alter relevance. The
 identity-only v1 probe cache and failed candidate remain preserved; the next
 run uses a new v2 cache.
 
+The next recovery invocation,
+`data13c_squtr_content_recovery_20260726_161849`, did not reach extraction
+reuse or validation. Its wrapper exited with code `20` because the exclusive
+`flock` on `.data13c_content_recovery.lock` could not be acquired. The
+intended process was no longer present when inspected, no v2 probe cache or
+final manifest existed, and the lock owner had not yet been identified.
+The lock file must not be deleted: file presence is not proof of a live owner,
+and deleting it could split mutual exclusion across inodes. This failure is
+preserved in
+`results/audits/squtr_data13c_attempt3_lock_failure_20260726.json`.
+
 The dataset-agnostic evaluator consumes explicit query/document metadata and
 graded JSONL qrels, hashes frozen text embeddings and metadata before and
 after scoring, and writes deterministic rankings plus per-query evidence.
 OEA-5 remains `IN_PROGRESS`: candidate counts, actual qrels score
-distributions, and all 149,268 audio records must first pass DATA-13B on the
+distributions, and all 149,268 audio records must first pass DATA-13C on the
 remote CPU server. Only then may the official `OEA-Qwen3B (+Cl)` checkpoint
 enter a small zero-shot A2T GPU smoke test.
 

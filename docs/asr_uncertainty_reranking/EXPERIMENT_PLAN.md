@@ -22,6 +22,18 @@ audio
 第一阶段冻结 OEA、Whisper、BGE dense retriever 和 BGE reranker，只训练小型
 candidate-level gate。任何 OEA/Whisper/reranker 微调都不在当前授权范围。
 
+### 1.1 当前主实验与非主实验
+
+当前主实验是 FiQA 四种 SQuTR 声学条件上的 `B1`–`B7`、query-level gate 与
+candidate-level uncertainty gate 对照，主指标为 nDCG@10；NQ 只在 FiQA
+Go/No-Go 和用户 GPU 批准后做跨领域零样本验证。OEA-Nemo3B (+Cl) 的 Clotho
+复现、SQuTR 内容审计和 FiQA 一级召回 Go/No-Go 都是主实验的前置门禁或基线，
+不是本项目最终创新方法本身。
+
+暂停的 PathCell 实验、OEA 全论文复现以及与候选级动态门控无关的新数据集/模型
+不属于当前范围。已有 OEA 结果只作为 checkpoint/protocol/效率证据冻结复用，不
+计作本项目方法结果。
+
 ## 2. 数据与数据泄漏约束
 
 | 数据 | 用途 | 允许的监督 |

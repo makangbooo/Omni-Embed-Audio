@@ -1,6 +1,6 @@
 # ASR-Uncertainty Reranking：Phase 0 工作区审计
 
-审计日期：2026-07-26（Asia/Shanghai）
+审计日期：2026-07-26（Asia/Shanghai）；最新只读复核：2026-07-26 16:41
 
 本文件记录新项目
 “ASR-Uncertainty-Guided Reranking over OEA for Robust Spoken Query Retrieval”
@@ -23,7 +23,8 @@
 | 仓库根目录 | `C:\Users\jigaiii\Documents\Codex\2026-07-15\omni-embed-audio-leveraging-multimodal-llms-3\Omni-Embed-Audio` | `LOCAL_VERIFIED` |
 | 分支 | `repro/oea-full` | `LOCAL_VERIFIED` |
 | Phase 0 审计前 HEAD | `8d98c25636f4e34b7ee1c394a0894ea49d1eb46b` | `LOCAL_VERIFIED` |
-| 工作树 | 审计开始时干净 | `LOCAL_VERIFIED` |
+| 最新只读复核前 HEAD | `a851a2b40d607f5ca38722b93406b5d885484b18` | `LOCAL_VERIFIED` |
+| 工作树 | 最新复核开始时干净 | `LOCAL_VERIFIED` |
 | fork | `https://github.com/makangbooo/Omni-Embed-Audio.git` | `LOCAL_VERIFIED` |
 | upstream | `https://github.com/JudeJiwoo/Omni-Embed-Audio.git` | `LOCAL_VERIFIED` |
 
@@ -31,17 +32,17 @@
 
 | 新项目逻辑目录 | 复用位置 | Phase 0 状态 |
 |---|---|---|
-| `src/` | `AudioRetrieval/asr_uncertainty_reranking/` | 后续实现时创建 |
-| `configs/` | `configs/asr_uncertainty_reranking/` | 后续加入首个配置时创建 |
+| `src/` | `AudioRetrieval/asr_uncertainty_reranking/` | 已创建并包含 normalization、aggregation、metrics、cache manifest |
+| `configs/` | `configs/asr_uncertainty_reranking/` | 已创建固定资源清单；正式模型 runner 配置待 Phase 1/2 |
 | `scripts/` | 根目录已有 `scripts/` | 已存在 |
 | `tests/` | 根目录已有 `tests/` | 已存在 |
 | `results/` | `results/raw/`（Git 忽略）及 `results/audits/`、`results/tables/` | 已存在 |
 | `logs/` | 根目录 `logs/`，已被 `.gitignore` 排除 | 远程运行时创建 |
 | `cache/` | `/home/jg525/model_cache/` 与 `/home/jg525/datasets/oea/` | 使用仓库外共享存储 |
 
-文件规模审计：`AudioRetrieval/` 189 个文件、`configs/` 42 个文件、`data/` 17
-个文件、`docs/` 19 个文件、`results/` 30 个文件、`scripts/` 184 个文件、
-`tests/` 136 个文件。根目录没有已跟踪的 `cache/`、`logs/` 或 `src/`，这是既有
+最新文件规模复核：`AudioRetrieval/` 204 个文件、`configs/` 44 个文件、
+`data/` 17 个文件、`docs/` 23 个文件、`results/` 33 个文件、`scripts/` 189
+个文件、`tests/` 154 个文件。根目录没有已跟踪的 `cache/`、`logs/` 或 `src/`，这是既有
 隔离策略，不是资源缺失。
 
 ## 3. OEA、SQuTR 与评测代码
@@ -100,13 +101,15 @@ SQuTR 官方实现不能直接作为本项目最终 OEA/ASR 模块：
 | 解压后成员大小 | 已审计 | 28,422,366,590 bytes |
 | FiQA test | 归档中存在 | 648 queries × 4 声学条件 |
 | NQ test | 归档中存在 | 3,452 queries × 4 声学条件 |
-| 全量内容校验 | `PENDING_REMOTE` | DATA-13B，PID `8032`，运行目录 `logs/data13b_squtr_validation_20260726_141640` |
+| 全量内容校验 | `WAITING_USER` | extraction/CRC 已完成；DATA-13C attempt 3 因并发锁申请失败在校验前退出，final manifest 尚未生成 |
 
-DATA-13B 使用 commit `cd290997501483306fe13c8c2baca772ab6e2271`，正在
-`/home/jg525/datasets/oea/squtr/extracted` 安全解压，并计划生成
-`/home/jg525/datasets/oea/squtr/manifests/squtr_audio_query_manifest.jsonl`。
-在三个退出码、实际 schema、qrels 分布、候选数和全部 WAV 验证完成前，不生成
-SQuTR embedding。
+DATA-13B 已在 `/home/jg525/datasets/oea/squtr/extracted` 完成安全解压和全量
+CRC。后续两次内容校验分别暴露了官方空 corpus 行和字符串 qrels score，代码已按
+固定 SQuTR loader 语义做最小修复。第三次恢复在进入校验前因
+`.data13c_content_recovery.lock` 申请失败退出，wrapper code 为 `20`；v2 probe
+cache 与 `/home/jg525/datasets/oea/squtr/manifests/squtr_audio_query_manifest.jsonl`
+均未生成。在锁状态只读审计以及三个退出码、实际 schema、qrels 分布、候选数和
+全部 WAV 验证完成前，不生成 SQuTR embedding。
 
 ### 4.2 FiQA 与 NQ
 
@@ -159,7 +162,7 @@ repository inventory 和 LFS SHA256 为准，不把 README 的泛化描述当作
 | GPU | 1× NVIDIA GeForce MX450 |
 | 显存 | 2,048 MiB total、1,920 MiB free（审计时） |
 | Driver | 527.99 |
-| C: 可用空间 | 约 275.3 GiB |
+| C: 可用空间 | 约 275.2 GiB（最新复核） |
 
 本地 MX450 不用于本项目模型计算。系统 Python 缺少 `pytest` 和 NumPy；Phase 0
 没有为通过测试而安装依赖。使用 `unittest` 的轻量审计共发现 203 项，其中 190
@@ -223,10 +226,11 @@ repository inventory 和 LFS SHA256 为准，不把 README 的泛化描述当作
 
 ## 9. Phase 0 结论
 
-项目基础设施可复用，SQuTR 数据已接近内容门禁完成，Nemo base 与 +Cl checkpoint
-已有完整下载证据。当前可以安全继续 CPU 代码实现和协议测试，但：
+项目基础设施可复用，SQuTR 数据已完成归档和解压/CRC 门禁，但内容门禁因并发锁
+问题尚未完成；Nemo base 与 +Cl checkpoint 已有完整下载证据。当前可以安全继续
+CPU 代码实现和协议测试，但：
 
-- 不能开始 SQuTR embedding，直到 DATA-13B 成功；
+- 不能开始 SQuTR embedding，直到 DATA-13C 内容校验成功并生成 final manifest；
 - 不能开始正式 Phase 1 GPU，直到 Nemo 实时只读审计、inference-only model lock
   和 audio-prefix 协议确定；
 - 不能开始 Whisper/BGE 实验，直到下载获得用户批准；
