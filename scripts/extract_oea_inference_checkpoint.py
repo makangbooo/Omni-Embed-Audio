@@ -8,14 +8,19 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 import time
 import traceback
 from datetime import datetime, timezone
-from pathlib import Path, PosixPath
+from pathlib import Path
 from typing import Any
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from scripts.oea_checkpoint_safety import resolve_posix_path_safe_globals
 
 
 def parse_args() -> argparse.Namespace:
@@ -200,11 +205,18 @@ def main() -> int:
             torch.serialization.get_unsafe_globals_in_checkpoint(source)
         )
         report["source_unsafe_globals"] = unsafe_globals
-        if unsafe_globals != ["pathlib.PosixPath"]:
-            raise RuntimeError(f"unexpected source globals: {unsafe_globals}")
+        (
+            approved_globals,
+            unexpected_globals,
+            safe_global_objects,
+        ) = resolve_posix_path_safe_globals(unsafe_globals)
+        report["source_approved_safe_globals"] = approved_globals
+        report["source_unexpected_unsafe_globals"] = unexpected_globals
+        if unexpected_globals:
+            raise RuntimeError(f"unexpected source globals: {unexpected_globals}")
 
         load_started = time.monotonic()
-        with torch.serialization.safe_globals([PosixPath]):
+        with torch.serialization.safe_globals(safe_global_objects):
             state = torch.load(
                 source,
                 mmap=True,

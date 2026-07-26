@@ -7,14 +7,19 @@ import argparse
 import hashlib
 import json
 import subprocess
+import sys
 import time
 import traceback
 from datetime import datetime, timezone
-from pathlib import Path, PosixPath
+from pathlib import Path
 from typing import Any
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from scripts.oea_checkpoint_safety import resolve_posix_path_safe_globals
 
 
 def peak_rss_kib() -> int | None:
@@ -185,11 +190,12 @@ def main() -> int:
             )
         unsafe_globals = sorted(unsafe_globals_fn(checkpoint))
         report["unsafe_globals"] = unsafe_globals
-        approved_globals = {"pathlib.PosixPath": PosixPath}
-        unexpected_globals = sorted(set(unsafe_globals) - set(approved_globals))
-        report["approved_safe_globals"] = sorted(
-            set(unsafe_globals) & set(approved_globals)
-        )
+        (
+            approved_globals,
+            unexpected_globals,
+            safe_global_objects,
+        ) = resolve_posix_path_safe_globals(unsafe_globals)
+        report["approved_safe_globals"] = approved_globals
         report["unexpected_unsafe_globals"] = unexpected_globals
         if unexpected_globals:
             raise RuntimeError(
@@ -200,7 +206,6 @@ def main() -> int:
         from torch._subclasses.fake_tensor import FakeTensorMode
 
         load_started = time.monotonic()
-        safe_global_objects = [approved_globals[name] for name in unsafe_globals]
         with (
             torch.serialization.safe_globals(safe_global_objects),
             FakeTensorMode(),
