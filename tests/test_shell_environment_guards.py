@@ -353,6 +353,36 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertIn("gpu_preflight.json", qwen3b_uiq)
         self.assertNotIn("rm -rf", qwen3b_uiq)
 
+    def test_nemo_embedding_wrappers_are_lock_bound_and_smoke_gated(self) -> None:
+        smoke = (
+            REPOSITORY_ROOT
+            / "scripts/run_nemo3b_cl_clotho_lock_bound_smoke.sh"
+        ).read_text(encoding="utf-8")
+        formal = (
+            REPOSITORY_ROOT / "scripts/run_nemo3b_cl_clotho_embeddings.sh"
+        ).read_text(encoding="utf-8")
+
+        for source in (smoke, formal):
+            self.assertIn("results/model_locks/oea_nemo3b_cl.json", source)
+            self.assertIn("build_official_oea_eval_config.py", source)
+            self.assertIn("validate_single_bf16_gpu.py", source)
+            self.assertIn("gpu_preflight.json", source)
+            self.assertIn("HF_HUB_OFFLINE=1", source)
+            self.assertIn("TRANSFORMERS_OFFLINE=1", source)
+            self.assertNotIn("rm -rf", source)
+        self.assertIn("vanilla_clotho_5_manifest.jsonl", smoke)
+        self.assertIn("5 audio candidates and 25 caption queries", smoke)
+        self.assertIn(
+            "configs/eval/nemo3b_cl_clotho_lock_bound_smoke_embeddings.json",
+            smoke,
+        )
+        self.assertIn("SMOKE_METRICS", formal)
+        self.assertIn("verify_oea_smoke_gate.py", formal)
+        self.assertIn("smoke_gate.json", formal)
+        self.assertIn(
+            "configs/eval/nemo3b_cl_clotho_embeddings.json", formal
+        )
+
     def test_unified_reproduction_entry_is_plan_first_and_non_destructive(self) -> None:
         wrapper = (REPOSITORY_ROOT / "scripts/run_reproduction.sh").read_text(
             encoding="utf-8"

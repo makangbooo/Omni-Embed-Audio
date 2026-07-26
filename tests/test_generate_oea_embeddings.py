@@ -16,11 +16,73 @@ from scripts.generate_oea_embeddings import (
     load_verified_chunk,
     query_metadata,
     save_chunk,
+    tagged_value_or_default,
     write_text_once_or_verify,
 )
 
 
 class GenerateOEAEmbeddingsTest(unittest.TestCase):
+    def test_remote_code_is_explicit_for_nemo_and_false_by_default(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        nemo = load_config(
+            repository_root
+            / "configs/eval/nemo3b_cl_clotho_lock_bound_smoke_embeddings.json"
+        )
+        qwen = load_config(
+            repository_root
+            / "configs/eval/qwen3b_cl_clotho_lock_bound_smoke_embeddings.json"
+        )
+
+        self.assertIs(
+            tagged_value_or_default(
+                nemo, "model_config", "trust_remote_code", False
+            ),
+            True,
+        )
+        self.assertIs(
+            tagged_value_or_default(
+                qwen, "model_config", "trust_remote_code", False
+            ),
+            False,
+        )
+
+    def test_nemo_lock_bound_smoke_matches_full_clotho_protocol(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        smoke = load_config(
+            repository_root
+            / "configs/eval/nemo3b_cl_clotho_lock_bound_smoke_embeddings.json"
+        )
+        formal = load_config(
+            repository_root / "configs/eval/nemo3b_cl_clotho_embeddings.json"
+        )
+        rows = load_manifest(
+            repository_root
+            / "configs/eval/fixtures/vanilla_clotho_5_manifest.jsonl",
+            expected_examples=5,
+            caption_count=5,
+        )
+
+        self.assertEqual(smoke["official_variant_id"], "oea_nemo3b_cl")
+        self.assertEqual(smoke["model"], "OEA-Nemo3B (+Cl)")
+        self.assertEqual(smoke["expected_examples"], 5)
+        self.assertEqual(formal["expected_examples"], 1045)
+        self.assertEqual(len(rows), 5)
+        self.assertEqual(sum(len(row["captions"]) for row in rows), 25)
+        for field in (
+            "official_variant_id",
+            "model",
+            "base_model",
+            "checkpoint",
+            "model_config",
+            "audio_prompt_protocol",
+            "seed",
+            "caption_count_per_audio",
+            "audio_batch_size",
+            "text_batch_size",
+        ):
+            with self.subTest(field=field):
+                self.assertEqual(smoke[field], formal[field])
+
     def test_fixed_config_pins_resources_and_public_code_prompt_protocol(self) -> None:
         repository_root = Path(__file__).resolve().parents[1]
         config = load_config(

@@ -149,6 +149,15 @@ def tagged_value(config: Mapping[str, Any], section: str, key: str) -> Any:
     return value["value"]
 
 
+def tagged_value_or_default(
+    config: Mapping[str, Any], section: str, key: str, default: Any
+) -> Any:
+    values = config.get(section)
+    if not isinstance(values, Mapping) or key not in values:
+        return default
+    return tagged_value(config, section, key)
+
+
 def load_manifest(
     path: Path, expected_examples: int, caption_count: int
 ) -> list[dict[str, Any]]:
@@ -426,7 +435,15 @@ def load_model_bundle(config: Mapping[str, Any], model_root: Path, report: dict[
         repo_id=config["base_model"]["repo_id"],
         local_path=str(base_dir),
         device="cuda:0",
-        trust_remote_code=False,
+        # The NVIDIA Nemotron base declares a custom AutoModel through
+        # config.json:auto_map.  Formal Nemo runs may execute it only from the
+        # fully enumerated, checksum-verified local model directory bound by the
+        # committed model lock.  Existing Qwen protocols remain false by default.
+        trust_remote_code=bool(
+            tagged_value_or_default(
+                config, "model_config", "trust_remote_code", False
+            )
+        ),
         torch_dtype=tagged_value(config, "model_config", "torch_dtype"),
         passage_prefix=tagged_value(config, "model_config", "passage_prefix"),
         query_prefix=tagged_value(config, "model_config", "query_prefix"),

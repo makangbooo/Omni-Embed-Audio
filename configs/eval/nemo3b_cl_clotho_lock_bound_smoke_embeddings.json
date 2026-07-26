@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "official_variant_id": "oea_nemo3b_cl",
+  "experiment_prefix": "oea_nemo3b_clotho_lock_bound_smoke_seed42",
+  "model": "OEA-Nemo3B (+Cl)",
+  "dataset": "Clotho v2.1 bundled five-audio smoke fixture",
+  "purpose": "Validate the formal resumable generator, pinned local Nemotron custom code, and committed model-lock binding on 5 audio candidates and 25 caption queries before the full Clotho evaluation run.",
+  "seed": 42,
+  "expected_examples": 5,
+  "caption_count_per_audio": 5,
+  "audio_batch_size": 1,
+  "text_batch_size": 1,
+  "batch_size_source": "INFERRED: conservative single-item batches for the first RTX 4090 compatibility gate",
+  "audio_prompt_protocol": {
+    "runtime": {
+      "value": "audio-only chat message; passage_prefix parameter is not inserted",
+      "source": "CODE",
+      "note": "The paper states passage:, but public _build_audio_messages() explicitly ignores it. This run is a public-code protocol, not a strict paper-protocol claim."
+    }
+  },
+  "base_model": {
+    "repo_id": "nvidia/omni-embed-nemotron-3b",
+    "revision": "865db1bb57e369a85357cf114cbd6b3c5322d19d",
+    "local_subdir": "omni-embed-nemotron-3b",
+    "source": "CODE+AUDIT",
+    "files": {
+      "model-00001-of-00002.safetensors": {
+        "size_bytes": 4994841696,
+        "sha256": "ce5d2ff1be32177ae0bc173931f0335a21c5298837257ea1f6d853b222bdf48c"
+      },
+      "model-00002-of-00002.safetensors": {
+        "size_bytes": 4412249056,
+        "sha256": "dd03af73e3f2843978de3c867fd515e900fa0e9fd331d3f92529380f4e27a27c"
+      },
+      "modeling_nv_omni_embed.py": {
+        "size_bytes": 1869,
+        "sha256": "0ee3cc9c84f538a5e9ec1fd316ab09fb6ebdc0639d7fdcc95d2937f5a0d3279f"
+      }
+    }
+  },
+  "checkpoint": {
+    "repo_id": "JudeJiwoo/OEA-Nemo3B-Cl",
+    "revision": "9588912298afca0b11f5895b864ae28083f35022",
+    "local_subpath": "OEA-Nemo3B-Cl/step_450_best_inference_only.pt",
+    "size_bytes": 59072047,
+    "sha256": "2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+    "source": "DERIVED_FROM_CODE_CHECKPOINT"
+  },
+  "model_config": {
+    "query_prefix": {"value": "query:", "source": "PAPER+CODE"},
+    "passage_prefix": {
+      "value": "passage:",
+      "source": "PAPER+CODE_PARAMETER",
+      "note": "Public runtime accepts this parameter but does not insert it into audio-only messages."
+    },
+    "trust_remote_code": {
+      "value": true,
+      "source": "CODE+AUDIT",
+      "note": "Required by the pinned base config auto_map. Only checksum-verified code in the lock-bound local model directory is executed; network access is disabled."
+    },
+    "torch_dtype": {"value": "bfloat16", "source": "PAPER+CODE"},
+    "projection_dim": {"value": 512, "source": "PAPER+CODE"},
+    "projection_dropout": {"value": 0.1, "source": "PAPER+CODE"},
+    "lora_rank": {"value": 16, "source": "PAPER+CODE"},
+    "lora_alpha": {"value": 32, "source": "PAPER+CODE"},
+    "lora_dropout": {"value": 0.05, "source": "PAPER+CODE"},
+    "lora_targets": {
+      "value": ["q_proj", "k_proj", "v_proj", "o_proj", "qkv", "out_proj"],
+      "source": "CODE"
+    }
+  }
+}
