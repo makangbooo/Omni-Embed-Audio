@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "dataset": "SQuTR",
+  "official_code_repository": "https://github.com/ttoyekk1a/SQuTR-Spoken-Query-to-Text-Retrieval",
+  "official_code_revision": "cc3fb31fc0dc44fef3a44c569b344516bbaee79c",
+  "source_tags": {
+    "subsets": "[CODE] official README at the pinned code revision",
+    "conditions": "[CODE] official README at the pinned code revision",
+    "query_counts": "[PAPER][CODE] official paper and README",
+    "core_paths": "[CODE] official README and src/retrieval/omni_emb.py",
+    "query_metadata_location": "[MISSING] README documents files at subset root while the official runner joins query_file under audio_path; DATA-13A observes the archive instead of choosing one"
+  },
+  "conditions": [
+    {
+      "id": "clean",
+      "audio_directory": "audio_clean",
+      "documented_query_file": "queries_with_audio_clean.jsonl"
+    },
+    {
+      "id": "snr_20",
+      "audio_directory": "audio_noise_snr_20",
+      "documented_query_file": "queries_with_audio_noise_snr_20.jsonl"
+    },
+    {
+      "id": "snr_10",
+      "audio_directory": "audio_noise_snr_10",
+      "documented_query_file": "queries_with_audio_noise_snr_10.jsonl"
+    },
+    {
+      "id": "snr_0",
+      "audio_directory": "audio_noise_snr_0",
+      "documented_query_file": "queries_with_audio_noise_snr_0.jsonl"
+    }
+  ],
+  "core_relative_paths": [
+    "corpus.jsonl",
+    "queries.jsonl",
+    "qrels/test.jsonl"
+  ],
+  "subsets": [
+    {
+      "language": "en",
+      "name": "fiqa",
+      "relative_path": "en/fiqa",
+      "expected_unique_queries": 648
+    },
+    {
+      "language": "en",
+      "name": "hotpotqa",
+      "relative_path": "en/hotpotqa",
+      "expected_unique_queries": 7405
+    },
+    {
+      "language": "en",
+      "name": "nq",
+      "relative_path": "en/nq",
+      "expected_unique_queries": 3452
+    },
+    {
+      "language": "zh",
+      "name": "DuRetrieval",
+      "relative_path": "zh/DuRetrieval",
+      "expected_unique_queries": 2000
+    },
+    {
+      "language": "zh",
+      "name": "MedicalRetrieval",
+      "relative_path": "zh/MedicalRetrieval",
+      "expected_unique_queries": 1000
+    },
+    {
+      "language": "zh",
+      "name": "T2Retrieval",
+      "relative_path": "zh/T2Retrieval",
+      "expected_unique_queries": 22812
+    }
+  ],
+  "expected_unique_queries": 37317,
+  "expected_audio_instances": 149268
+}

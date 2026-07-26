@@ -49,6 +49,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_data07_audiocaps_v2_metadata_validation.sh",
             "download_data08_wavcaps_metadata.sh",
             "download_data12_squtr.sh",
+            "run_data13_squtr_archive_audit.sh",
             "run_data09_wavcaps_metadata_audit.sh",
             "run_data10_clotho_trainval_validation.sh",
             "run_model03_model04_audit.sh",
@@ -161,6 +162,20 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         )
         self.assertNotIn("unzip", source)
         self.assertNotIn("rm -rf", source)
+
+    def test_squtr_archive_audit_is_read_only_and_does_not_extract(self) -> None:
+        wrapper = (
+            REPOSITORY_ROOT / "scripts/run_data13_squtr_archive_audit.sh"
+        ).read_text(encoding="utf-8")
+        auditor = (
+            REPOSITORY_ROOT / "scripts/audit_squtr_archive.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
+        self.assertIn("configs/resources/data13_squtr_structure.json", wrapper)
+        self.assertIn("extraction_performed", auditor)
+        self.assertNotIn("extractall", auditor)
+        self.assertNotIn("unzip", wrapper)
+        self.assertNotIn("rm -rf", wrapper)
 
     def test_qwen3b_retrieval_suite_is_cpu_only_and_non_overwriting(self) -> None:
         source = (
