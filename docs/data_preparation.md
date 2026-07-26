@@ -30,3 +30,53 @@ The canonical generated manifest is stored outside Git at:
 `/home/jg525/datasets/oea/clotho_v2.1/manifests/clotho_evaluation_manifest.jsonl`
 
 Each row records the sample ID, absolute and relative audio path, five captions, split, duration, sample rate, channels, frames, format/subtype, existence/decode status, training inclusion status, filtering reason, and leakage-blocklist applicability. Evaluation samples are explicitly excluded from training; leakage blocklist status is `NOT_APPLICABLE_EVALUATION_SPLIT`, not an unsupported claim of no overlap.
+
+## SQuTR
+
+### DATA-12: immutable archive download
+
+- `[CODE]` The official `SLLMCommunity/SQuTR` dataset is pinned to Hugging Face
+  revision `2f1b041e2e98e0d28ed68fbcf22126ef247eb719`.
+- The only archive is exactly 21,069,841,248 bytes with SHA256
+  `8956bf938de3f9ce168a1e7daf2ff61b0b7fe603fa5c3d7dc6a4314617c6997c`.
+- The remote download completed with both wrapper and downloader exit code 0.
+  DATA-12 never extracts the archive.
+
+### DATA-13A: read-only ZIP audit
+
+The remote run `data13_squtr_archive_audit_20260726_135100` completed with exit
+code 0. It found 149,349 ZIP records: 149,310 files, 39 directories, 42 JSONL
+files, and 149,268 WAV files. The sum of uncompressed member sizes is
+28,422,366,590 bytes. All six official subsets and all four acoustic
+conditions match their expected query counts. No traversal, absolute path,
+encrypted member, link, special member, duplicate path, or case-insensitive
+collision was found.
+
+`[OBSERVED]` All `queries_with_audio_*.jsonl` files are at the subset root and
+all qrels are at `qrels/test.jsonl`. This resolves the public README/runner
+path discrepancy from the actual pinned archive rather than by choosing the
+more convenient code path.
+
+### DATA-13B: resumable extraction and content audit
+
+`scripts/run_data13b_squtr_validation.sh` is CPU-only and performs:
+
+1. A second exact archive size/SHA256 check.
+2. Safe streaming extraction with per-member CRC validation and atomic file
+   promotion.
+3. Exact reuse of valid existing files after an interruption; only
+   tool-owned `.data13b.part` files may be restarted.
+4. Refusal to overwrite any mismatched final file or traverse a symbolic-link
+   directory.
+5. Strict JSONL parsing, unique corpus/query IDs, qrels query/corpus closure,
+   and full query coverage.
+6. Exact four-condition audio filename/query-ID set equality, noisy-condition
+   SNR/noise metadata checks, and first/last-frame WAV decoding after the full
+   ZIP CRC pass.
+7. An evaluation-only manifest with duration, sample rate, channels, path,
+   original/normalized query text, condition, and audit fields.
+
+Query-text differences are reported rather than silently rewritten: the
+official benchmark documents a text-normalization stage, so exact equality
+with the original text query is not assumed. The formal OEA-5 protocol remains
+gated on a successful remote DATA-13B report.

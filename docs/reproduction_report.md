@@ -9,7 +9,7 @@ as reproduced experiments.
 | ID | Evaluation | Source | Status | Evidence |
 |---|---|---|---|---|
 | OEA-4 | Clotho A2T: 1,045 audio queries against a frozen bank of 5,225 captions | `[CODE]` public A2T runner; not paper-reported | COMPLETED | CPU suite exit 0; R@1/5/10 = 27.2727/52.8230/66.6986; audit JSON and remote artifact hashes fixed |
-| OEA-5 | Target-corpus OEA zero-shot A2T over a frozen text index | `[MISSING]` target corpus/protocol must be fixed before a formal run | IN_PROGRESS | Dataset-agnostic evaluator is tested; target-corpus configuration and formal run remain pending |
+| OEA-5 | SQuTR six-subset OEA zero-shot A2T over frozen text indexes | `[CODE]` official SQuTR dataset/retrieval schema plus explicit reproduction protocol | IN_PROGRESS | Immutable archive and DATA-13A structure audit complete; DATA-13B content audit and formal checkpoint run remain pending |
 | OEA-6 | Audio-query encoding latency, peak memory, and throughput | `[PAPER]` A100 reference plus separately labelled hardware runs | COMPLETED | A100 and RTX 4090 controlled benchmarks complete; strict Table 5/16 protocol remains blocked by unpublished definitions |
 
 ## OEA-4 protocol
@@ -46,20 +46,38 @@ not affect the formal suite: the suite independently verified the actual
 embedding-generation status and input hashes, finalized all required audit
 artifacts, emitted empty stderr, and returned exit code 0.
 
-## OEA-5 unresolved protocol decisions
+## OEA-5 data and protocol audit
 
-The phrase “target corpus” is not defined by OEA. Before generating a formal
-zero-shot result, the experiment must freeze the corpus name/version, query
-split, document unit, qrels semantics, document text construction, candidate
-count, and metric set. No dataset choice or qrels conversion may be inferred
-after observing results.
+The target corpus is now fixed to the immutable SQuTR release at Hugging Face
+revision `2f1b041e2e98e0d28ed68fbcf22126ef247eb719`. DATA-12 downloaded its
+single 21,069,841,248-byte archive and verified SHA256
+`8956bf938de3f9ce168a1e7daf2ff61b0b7fe603fa5c3d7dc6a4314617c6997c`.
+No embedding was generated during download.
 
-The dataset-agnostic evaluator is implemented, but that implementation is not
-counted as an experiment. It consumes explicit query/document metadata and
-graded JSONL qrels, hashes the frozen text embedding and metadata files before
-and after scoring, and writes deterministic top rankings plus per-query
-evidence. OEA-5 remains `IN_PROGRESS` until a fixed target-corpus configuration
-is committed and a formal official-checkpoint run produces final metrics.
+DATA-13A then completed a read-only audit at commit `e414d74`. It found
+149,349 ZIP records, including 149,268 WAV files and 42 JSONL files, with
+28,422,366,590 uncompressed member bytes. All six subsets and four acoustic
+conditions match their published counts; all path-safety checks are zero.
+The actual archive places audio-query metadata at each subset root and qrels
+at `qrels/test.jsonl`. The small audit evidence is fixed in
+`results/audits/squtr_data13a_archive_audit_20260726.json`.
+
+Commit `fa9322b` adds DATA-13B. It performs resumable non-overwriting
+extraction, full member CRC checks, strict JSONL schema validation,
+corpus/query/qrels ID closure, exact condition/audio-set checks, and WAV
+decode probes before creating the evaluation manifest. The public loader's
+document unit and construction are explicitly recorded as one corpus row,
+using `title + newline + text` when title is nonempty and `text` otherwise.
+Query-text mismatches are reported because SQuTR documents an upstream
+normalization step; no text is silently changed to improve results.
+
+The dataset-agnostic evaluator consumes explicit query/document metadata and
+graded JSONL qrels, hashes frozen text embeddings and metadata before and
+after scoring, and writes deterministic rankings plus per-query evidence.
+OEA-5 remains `IN_PROGRESS`: candidate counts, actual qrels score
+distributions, and all 149,268 audio records must first pass DATA-13B on the
+remote CPU server. Only then may the official `OEA-Qwen3B (+Cl)` checkpoint
+enter a small zero-shot A2T GPU smoke test.
 
 ## OEA-6 measurement boundary
 
