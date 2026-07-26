@@ -63,6 +63,7 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_qwen3b_ac_clotho_positive_uiq_embeddings.sh",
             "run_qwen3b_ac_clotho_positive_uiq_suite.sh",
             "run_official_checkpoint_preparation.sh",
+            "run_asrur_nemo_phase1_audit.sh",
             "run_qwen3b_clotho_embeddings.sh",
             "run_reproduction.sh",
         )

@@ -19,6 +19,15 @@ class RunOfficialOEAModelPipelineTest(unittest.TestCase):
         output = REPOSITORY_ROOT / "logs/test_pipeline/run"
         lock = REPOSITORY_ROOT / "results/model_locks/oea_qwen3b_cl.json"
         validate_paths("oea_qwen3b_cl", output.resolve(), lock.resolve())
+        portable_lock = (
+            output.parent / "oea_qwen3b_cl.portable_model_lock.json"
+        )
+        validate_paths(
+            "oea_qwen3b_cl",
+            output.resolve(),
+            portable_lock.resolve(),
+            portable_lock_evidence=True,
+        )
 
         invalid = (
             (REPOSITORY_ROOT / "outputs/run", lock),
@@ -88,12 +97,30 @@ class RunOfficialOEAModelPipelineTest(unittest.TestCase):
         self.assertLess(preparation_position, lock_position)
         self.assertIn("--verify-existing-derived", implementation)
         self.assertIn("--allow-registered-derived", implementation)
+        self.assertIn("--portable-lock-evidence", implementation)
         self.assertIn("--verify-existing-derived", wrapper)
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
         self.assertIn("requires a clean Git worktree", wrapper)
         self.assertIn("Refusing to overwrite", wrapper)
         for forbidden in ("rm -rf", "snapshot_download", "git reset"):
             self.assertNotIn(forbidden, implementation)
+            self.assertNotIn(forbidden, wrapper)
+
+    def test_asrur_nemo_wrapper_is_cpu_offline_and_uses_portable_evidence(
+        self,
+    ) -> None:
+        wrapper = (
+            REPOSITORY_ROOT / "scripts/run_asrur_nemo_phase1_audit.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn('VARIANT_ID="oea_nemo3b_cl"', wrapper)
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
+        self.assertIn('export HF_HUB_OFFLINE="1"', wrapper)
+        self.assertIn('export TRANSFORMERS_OFFLINE="1"', wrapper)
+        self.assertIn("--portable-lock-evidence", wrapper)
+        self.assertIn("--verify-existing-derived", wrapper)
+        self.assertIn("atomic extraction mode selected", wrapper)
+        self.assertNotIn("results/model_locks", wrapper)
+        for forbidden in ("rm -rf", "snapshot_download", "git reset"):
             self.assertNotIn(forbidden, wrapper)
 
 
