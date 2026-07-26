@@ -8,6 +8,8 @@ import hashlib
 import json
 import shutil
 import subprocess
+import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -113,31 +115,41 @@ def validate_specification(specification: dict[str, Any]) -> None:
 def curl_download(url: str, partial: Path, retries: int) -> None:
     if shutil.which("curl") is None:
         raise RuntimeError("curl is required for resumable HTTP downloads")
-    subprocess.run(
-        [
-            "curl",
-            "--location",
-            "--fail",
-            "--show-error",
-            "--continue-at",
-            "-",
-            "--retry",
-            str(retries),
-            "--retry-all-errors",
-            "--retry-delay",
-            "15",
-            "--connect-timeout",
-            "60",
-            "--speed-time",
-            "120",
-            "--speed-limit",
-            "1024",
-            "--output",
-            str(partial),
-            url,
-        ],
-        check=True,
-    )
+    command = [
+        "curl",
+        "--location",
+        "--fail",
+        "--show-error",
+        "--http1.1",
+        "--continue-at",
+        "-",
+        "--connect-timeout",
+        "60",
+        "--speed-time",
+        "120",
+        "--speed-limit",
+        "1024",
+        "--output",
+        str(partial),
+        url,
+    ]
+    for attempt in range(1, retries + 2):
+        size_before = partial.stat().st_size if partial.exists() else 0
+        completed = subprocess.run(command, check=False)
+        if completed.returncode == 0:
+            return
+        size_after = partial.stat().st_size if partial.exists() else 0
+        if attempt > retries:
+            raise subprocess.CalledProcessError(completed.returncode, command)
+        print(
+            "[WARN] curl attempt "
+            f"{attempt}/{retries + 1} failed with exit {completed.returncode}; "
+            f"preserving partial bytes {size_before} -> {size_after} and "
+            "resuming in 15 seconds",
+            file=sys.stderr,
+            flush=True,
+        )
+        time.sleep(15)
 
 
 def verify_asset_file(path: Path, asset: dict[str, Any]) -> dict[str, Any]:

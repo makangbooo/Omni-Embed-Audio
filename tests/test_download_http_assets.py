@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts.download_http_assets import (
     REPOSITORY_ROOT,
+    curl_download,
     ensure_external_data_root,
     hash_file,
     verify_asset_file,
@@ -16,6 +19,47 @@ from scripts.download_http_assets import (
 
 
 class DownloadHttpAssetsTest(unittest.TestCase):
+    def test_curl_retries_preserve_progress_and_force_http1(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            partial = Path(directory) / "source_data.zip.part"
+            commands: list[list[str]] = []
+
+            def fake_run(
+                command: list[str], *, check: bool
+            ) -> subprocess.CompletedProcess:
+                commands.append(command)
+                self.assertFalse(check)
+                with partial.open("ab") as stream:
+                    stream.write(b"first" if len(commands) == 1 else b"second")
+                return subprocess.CompletedProcess(
+                    command,
+                    returncode=92 if len(commands) == 1 else 0,
+                )
+
+            with (
+                patch(
+                    "scripts.download_http_assets.shutil.which",
+                    return_value="/usr/bin/curl",
+                ),
+                patch(
+                    "scripts.download_http_assets.subprocess.run",
+                    side_effect=fake_run,
+                ),
+                patch("scripts.download_http_assets.time.sleep") as sleep,
+            ):
+                curl_download(
+                    "https://example.invalid/source_data.zip",
+                    partial,
+                    retries=1,
+                )
+
+            self.assertEqual(partial.read_bytes(), b"firstsecond")
+            self.assertEqual(len(commands), 2)
+            self.assertIn("--http1.1", commands[0])
+            self.assertIn("--continue-at", commands[0])
+            self.assertNotIn("--retry", commands[0])
+            sleep.assert_called_once_with(15)
+
     def test_data_root_inside_repository_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "outside the Git repository"):
             ensure_external_data_root(REPOSITORY_ROOT / "datasets")
