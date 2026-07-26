@@ -21,7 +21,7 @@
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
 | 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | COMPLETED | `18e4c3b` | 固定 revision 的 3 个文件、9,466,844,378 bytes 全部通过逐文件内容审计；`step_350.pt` 提取为 59,069,203-byte inference-only 权重，SHA256 `b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101` | 无；原始 checkpoint 与派生权重均未提交到 Git | GPU 服务器拉取已提交的 5,262-byte 模型锁后运行独立锁绑定 smoke |
 | 2 官方权重 | OEA 模型存储迁移与旧缓存清理 | COMPLETED | `aac088d` | run=`model_cache_migration_v3_20260726_214834`；exit=`0`；254 files 与前后字节不变量一致；旧 `/home/jg525/model_cache` 已删除 | 无 | 所有运行脚本默认路径已切换到 `/home/jg525/models/oea` |
-| 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | IN_PROGRESS | `aac088d` | 资产已完整迁移至 `/home/jg525/models/oea`；此前已知 base/AC 完整，Cl 曾保留 partial | 内容级 live SHA256 复核尚未执行 | 在新路径运行只读完整性审计 |
+| 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | WAITING_USER | `953cb34` | 资产已完整迁移至 `/home/jg525/models/oea`；CPU-only/offline 三阶段 runner 已提交；此前已知 base/AC 完整，Cl 曾保留 partial | 内容级 live SHA256 复核尚未执行；全哈希可能超过 30 分钟 | 运行 `scripts/run_asrur_nemo_phase1_audit.sh` 并返回 portable lock evidence |
 | 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | IN_PROGRESS | `48c9b3c` | 已知 base 完整、AC 曾保留 partial、Cl 未有开始证据；最近检查的主容器无活动下载进程 | CAS 链路不稳定；跨实例状态未确认 | 后续单独核对全部目录与 manifest，再断点续传 |
 | 2 官方权重 | MODEL-03/04 只读完整性审计器 | COMPLETED | `f4309a7` | 远程尚未运行；本地实现及 105 项完整测试通过 | 无；工具完成不代表六个 asset 已完成 | DATA-04 保持为唯一用户步骤；随后在 CPU 侧运行审计并按 asset 决定续传 |
 | 2 官方权重 | 六变体按变体资源审计入口 | COMPLETED | `d2f066c` | 注册表驱动地只选择一个 base 与一个 checkpoint；Qwen3B AC 跨 MODEL-01/02 manifest 已覆盖；报告固定 scope/registry/逐文件 Git-LFS 身份，完整 172 项测试通过 | 尚未在远程对六个变体逐一运行；工具完成不代表资源完整 | DATA-04 后按已知下载状态选择变体，在 CPU 侧运行只读审计；超过 30 分钟的读取任务执行前单独汇报 |
@@ -86,6 +86,8 @@
   B1–B7/U1–U4、query/candidate gate、A1–A9 到 bootstrap/统一表格的 CPU
   流水线；58 项专项和 345 项全仓测试通过，没有产生真实实验数值。
 - 当前阻塞：主实验数据不再受 DPC 遗留租约阻塞。旧租约只影响全六子集 DATA-13C/OEA-5；DATA-13D 已以干净 commit 完成且所有门禁通过。
-- 下一步：两条 CPU 工作并行：(1) 对 D2–D4 下载结果运行固定 revision/LFS/size/SHA256 离线验收；(2) 对 Nemo base/+Cl 做当前缓存只读复核并生成 model lock。Phase 1 G1 使用 1×RTX 4090
-  24GB，但必须先完成 Nemo live audit/model lock，并另行提交精确命令、显存、
+- 下一步：两条 CPU 工作独立推进：(1) 对 D2–D4 下载结果运行固定
+  revision/LFS/size/SHA256 离线验收；(2) 拉取 `953cb34` 后运行 Nemo
+  base/+Cl 三阶段审计并返回 portable model lock evidence。本地 Codex 固化并提交
+  canonical lock 后，才给出 Phase 1 G1 的 1×RTX 4090 24GB 精确命令、显存、
   时长和输出目录。

@@ -211,6 +211,12 @@ softmax；不叠加未经消融的辅助 loss。
 5. 复现表 2 OEA-Nemo3B (+Cl)：
    R@1/5/10 = `21.57/47.16/60.36`。
 
+远程 CPU 节点首先运行 `scripts/run_asrur_nemo_phase1_audit.sh`。该 runner 将完整
+资源审计、checkpoint 准备和 portable model lock 写入被 Git 忽略的独立
+`logs/asrur_nemo_phase1_audit_<timestamp>/`；本地 Codex 验证返回证据后，才将
+小型 canonical lock 提交到 `results/model_locks/`。这样远程不会产生已跟踪修改，
+也不会出现本地与远程分别手改模型身份文件的情况。
+
 超过任一指标 2 个百分点时停止后续阶段，审计 checkpoint、prefix、pooling、
 normalization、方向和 caption positives。
 

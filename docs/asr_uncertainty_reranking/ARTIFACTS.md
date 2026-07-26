@@ -23,6 +23,7 @@
 | C-ASRUR-PIPE | B1–B7/QG/Ours/U1–U4/A1–A9 CPU 实验框架 | commit `8f28c5590810f3e430d3ce7591266ad7f8e38f21` | `AudioRetrieval/asr_uncertainty_reranking/`、`scripts/*asrur*`、`configs/asr_uncertainty_reranking/main_experiment.json` | COMPLETE; 58 ASRUR tests and 345 full-repository tests passed; no research result generated |
 | A-MODEL-MIGRATION | OEA 模型迁移与旧缓存清理 | run `model_cache_migration_v3_20260726_214834`；exit `0`；254 files 前后相同 | `results/audits/model_cache_migration_20260726.json` | COMPLETE; `/home/jg525/model_cache` removed |
 | C-ASRUR-MODEL-AUDIT | D2–D4 离线固定 revision/LFS/size/SHA256 验收器 | commit `aac088d68f9bc60871c48db90a2603144ca1b178` | `scripts/run_asrur_model_audit.sh` | COMPLETE; 尚未对远程下载结果执行 |
+| C-ASRUR-NEMO-AUDIT | Nemo Phase 1 CPU 三阶段审计与 portable lock runner | commit `953cb34` | `scripts/run_asrur_nemo_phase1_audit.sh`、`scripts/run_official_oea_model_pipeline.py` | COMPLETE implementation；CPU-only/offline；远程执行待用户操作 |
 
 ## 2. 已有远程数据
 
