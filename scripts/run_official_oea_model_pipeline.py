@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -152,6 +153,12 @@ def main() -> int:
         ),
         "model_root": str(model_root),
         "lock_output": lock_output.relative_to(REPOSITORY_ROOT).as_posix(),
+        "resource_metadata_policy": {
+            "operation": "fixed_revision_api_inventory_only",
+            "endpoint": os.environ.get("HF_ENDPOINT", "https://huggingface.co"),
+            "content_downloads": False,
+            "transformers_offline": os.environ.get("TRANSFORMERS_OFFLINE"),
+        },
         "lock_output_scope": (
             "ignored_remote_evidence"
             if args.portable_lock_evidence

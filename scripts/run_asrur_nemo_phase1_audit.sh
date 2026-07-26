@@ -56,15 +56,21 @@ CONDA_BASE="$(resolve_conda_base)"
 source "${CONDA_BASE}/etc/profile.d/conda.sh"
 conda activate "${ENV_NAME}"
 export CUDA_VISIBLE_DEVICES=""
-export HF_HUB_OFFLINE="1"
+# The resource-audit stage must query the immutable revision metadata in order
+# to reconstruct the complete expected file inventory. This is a small API
+# request only: audit_official_oea_variant_resources.py has no download path.
+unset HF_HUB_OFFLINE
 export TRANSFORMERS_OFFLINE="1"
+export HF_HUB_DISABLE_XET="1"
 
 exec > >(tee "${RUN_DIR}/stdout.log") 2> >(tee "${RUN_DIR}/stderr.log" >&2)
 echo "[INFO] Run directory: ${RUN_DIR}"
 echo "[INFO] Variant: ${VARIANT_ID}"
 echo "[INFO] Model root: ${MODEL_ROOT}"
 echo "[INFO] Portable lock evidence: ${PORTABLE_LOCK}"
-echo "[INFO] GPU and network disabled"
+echo "[INFO] GPU disabled"
+echo "[INFO] Network policy: fixed-revision Hugging Face metadata API only"
+echo "[INFO] Model downloads remain disabled; all content verification is local"
 echo "[INFO] No official source file will be modified or overwritten"
 
 ARGUMENTS=(
@@ -100,6 +106,8 @@ fi
 
 echo "===== PIPELINE MANIFEST ====="
 python -m json.tool "${PIPELINE_DIR}/pipeline_manifest.json" || true
+echo "===== MODEL RESOURCE AUDIT ====="
+python -m json.tool "${PIPELINE_DIR}/model_resource_audit.json" || true
 echo "===== PORTABLE MODEL LOCK ====="
 python -m json.tool "${PORTABLE_LOCK}" || true
 echo "===== HASHES ====="

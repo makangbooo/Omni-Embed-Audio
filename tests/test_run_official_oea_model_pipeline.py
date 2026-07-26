@@ -98,6 +98,8 @@ class RunOfficialOEAModelPipelineTest(unittest.TestCase):
         self.assertIn("--verify-existing-derived", implementation)
         self.assertIn("--allow-registered-derived", implementation)
         self.assertIn("--portable-lock-evidence", implementation)
+        self.assertIn("fixed_revision_api_inventory_only", implementation)
+        self.assertIn('"content_downloads": False', implementation)
         self.assertIn("--verify-existing-derived", wrapper)
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
         self.assertIn("requires a clean Git worktree", wrapper)
@@ -106,7 +108,7 @@ class RunOfficialOEAModelPipelineTest(unittest.TestCase):
             self.assertNotIn(forbidden, implementation)
             self.assertNotIn(forbidden, wrapper)
 
-    def test_asrur_nemo_wrapper_is_cpu_offline_and_uses_portable_evidence(
+    def test_asrur_nemo_wrapper_is_cpu_and_metadata_only_with_portable_evidence(
         self,
     ) -> None:
         wrapper = (
@@ -114,13 +116,26 @@ class RunOfficialOEAModelPipelineTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn('VARIANT_ID="oea_nemo3b_cl"', wrapper)
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
-        self.assertIn('export HF_HUB_OFFLINE="1"', wrapper)
+        self.assertIn("unset HF_HUB_OFFLINE", wrapper)
         self.assertIn('export TRANSFORMERS_OFFLINE="1"', wrapper)
+        self.assertIn(
+            "fixed-revision Hugging Face metadata API only",
+            wrapper,
+        )
+        self.assertIn(
+            'python -m json.tool "${PIPELINE_DIR}/model_resource_audit.json"',
+            wrapper,
+        )
         self.assertIn("--portable-lock-evidence", wrapper)
         self.assertIn("--verify-existing-derived", wrapper)
         self.assertIn("atomic extraction mode selected", wrapper)
         self.assertNotIn("results/model_locks", wrapper)
-        for forbidden in ("rm -rf", "snapshot_download", "git reset"):
+        for forbidden in (
+            "rm -rf",
+            "snapshot_download",
+            "hf_hub_download",
+            "git reset",
+        ):
             self.assertNotIn(forbidden, wrapper)
 
 
