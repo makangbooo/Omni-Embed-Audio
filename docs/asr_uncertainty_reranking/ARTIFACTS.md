@@ -1,5 +1,12 @@
 # ASR-Uncertainty Reranking 资产登记
 
+## ICASSP scope and real-model adapter milestone
+
+| Artifact | Identity | Path | Status |
+|---|---|---|---|
+| ICASSP required-experiment checklist | 28 experiment packages; OEA-only baseline scope; no synthetic result counted | `docs/asr_uncertainty_reranking/ICASSP_EXPERIMENT_CHECKLIST.md` | COMPLETE at code commit `207bcd0` |
+| Frozen local-model adapters | BGE dense CLS/L2, BGE v2-M3 CE, Whisper four-beam proxy score, explicit 16 kHz resampling | `AudioRetrieval/asr_uncertainty_reranking/model_adapters.py` | IMPLEMENTED_NOT_RUN; 371 full-repository tests passed; no model/GPU execution |
+
 最后更新：2026-07-27（D2–D4 首次严格离线验收）
 
 大型数据、权重、embedding、索引和日志不进入普通 Git。本表登记身份、路径、证据

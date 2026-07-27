@@ -1,5 +1,23 @@
 # ASR-Uncertainty Reranking 状态
 
+## 2026-07-27 ICASSP 范围纠正
+
+- 唯一主实验：冻结 OEA-Nemo3B(+Cl) Top-100 粗召回 + Whisper 4-best
+  proxy posterior + 冻结 BGE Cross-Encoder + ASR 不确定性感知候选级动态门控。
+- OEA 仅作为论文基线；不再把“完整复现 OEA 全部实验”列为本论文前置任务。
+- 必须完成的 OEA 基线与新增实验已逐项固化在
+  `docs/asr_uncertainty_reranking/ICASSP_EXPERIMENT_CHECKLIST.md`。
+- 当前真实实验完成度：`2/28 = 7.1%`；FiQA 主结果单元为 `0`。已完成的 CPU
+  框架和合成测试只计执行准备度，绝不计作研究结果。
+- 代码 commit `207bcd0` 已加入本地只读模型适配层：BGE CLS pooling/L2、
+  BGE v2-M3 单 logit Cross-Encoder、Whisper 4-beam token log-prob proxy、
+  16 kHz 显式重采样和 fail-closed 校验。未下载、未加载模型、未启动 GPU。
+- 验证：本地全仓 `371` 项 `unittest` 全部通过。
+- 当前阻塞：D2 Whisper `model.safetensors` 远程断点恢复与严格 SHA256 验收；
+  D3/D4 已完成。D2 完成后先执行独立 GPU 批准的 Phase-2 召回，不等待 TTS。
+- 下一步：完成真实缓存 producer、D2 canonical lock 与 Phase-2 dry-run，然后向
+  用户提交一次明确的 GPU 任务申请。
+
 最后更新：2026-07-27（D2 单文件断点恢复正在远程 CPU 运行）
 
 状态只使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、
