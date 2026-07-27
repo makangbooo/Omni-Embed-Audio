@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_terminal_output",
+  "recorded_at": "2026-07-27",
+  "execution": {
+    "git_commit": "1ff9fc06e16f45967965937d4c001e58661b2b6f",
+    "run_id": "asrur_phase2_frozen_retrieval_dry-run_20260727_172606",
+    "run_directory": "/home/jg525/Omni-Embed-Audio/logs/asrur_phase2_frozen_retrieval_dry-run_20260727_172606",
+    "run_exit_code": 0,
+    "wrapper_exit_code": 0,
+    "caller_exit_code": 0,
+    "stderr_empty": true,
+    "cpu_only": true,
+    "gpu_used": false,
+    "model_loaded": false,
+    "network_used": false
+  },
+  "steps": {
+    "resolve_oea": 0,
+    "resolve_vanilla": 0,
+    "oea_clean": 0,
+    "oea_snr_20": 0,
+    "oea_snr_10": 0,
+    "oea_snr_0": 0,
+    "vanilla_clean": 0,
+    "vanilla_snr_20": 0,
+    "vanilla_snr_10": 0,
+    "vanilla_snr_0": 0,
+    "bge_corpus": 0,
+    "bge_dev_none": 0,
+    "bge_dev_bge_retrieval": 0,
+    "whisper_clean": 0,
+    "whisper_snr_20": 0,
+    "whisper_snr_10": 0,
+    "whisper_snr_0": 0
+  },
+  "validated_protocol": {
+    "fiqa_document_count": 57638,
+    "fiqa_dev_query_count": 500,
+    "fiqa_test_query_count_per_condition": 648,
+    "acoustic_conditions": [
+      "clean",
+      "snr_20",
+      "snr_10",
+      "snr_0"
+    ],
+    "original_omni_embedding_dimension": 2048,
+    "whisper_nbest": 4,
+    "whisper_probability_mode": "proxy_posterior"
+  },
+  "input_artifacts": {
+    "phase2_config": {
+      "size_bytes": 5084,
+      "sha256": "8874ad4e7785b0489182aef3074750f9ca248b2526754cb58e2ab4e2fefc2381"
+    },
+    "fiqa_corpus": {
+      "size_bytes": 47027289,
+      "sha256": "a5e31bffdcbab9dbe0ff849faa170a6e71b60587ff3a99a4272584183e64d729"
+    },
+    "squtr_audio_query_manifest": {
+      "size_bytes": 15693052,
+      "sha256": "e5053d30623e5a8dd1fcf695660a0b3f8d85bd33cf5979c82b7263c2f8815e93"
+    }
+  },
+  "resolved_artifacts": {
+    "vanilla_nemotron_3b": {
+      "path": "/home/jg525/experiment_cache/asr_uncertainty/fiqa_phase2_1ff9fc06e16f/resolved_configs/vanilla_nemotron_3b.json",
+      "size_bytes": 6932,
+      "sha256": "263e8c86b992cb6ba946ce15116bd299711001a82e3c7f3694ab6ed13939c58a"
+    },
+    "oea_nemo3b_cl": {
+      "path": null,
+      "size_bytes": null,
+      "sha256": null,
+      "note": "The pasted terminal excerpt did not include the exact attempt-2 OEA resolved-config identity; no value was inferred."
+    }
+  },
+  "conclusion": {
+    "dry_run_gate": "passed",
+    "research_metrics_generated": false,
+    "next_gate": "separate approval for one RTX 4090 24GB Phase-2 execution"
+  }
+}

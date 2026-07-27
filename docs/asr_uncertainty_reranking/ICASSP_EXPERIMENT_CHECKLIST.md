@@ -23,8 +23,8 @@ Allowed statuses are `TODO`, `IN_PROGRESS`, `WAITING_USER`,
 | OEA-B0 | Lock OEA-Nemo3B(+Cl), its base model, prefix, pooling, projection, dimension, and normalization; run a real embedding smoke test | Prevents an invalid OEA baseline | COMPLETED | Canonical lock and RTX 4090 5-audio/25-text smoke; peak allocated 9.14 GiB |
 | OEA-B1 | Reproduce OEA-Nemo3B(+Cl) Clotho T2A R@1/5/10 | Numerical connection to the OEA paper | COMPLETED | Paper 21.57/47.16/60.36; reproduced all-caption 21.7225/47.1196/60.4402 |
 | OEA-B2 | Clotho audio-to-text direction sanity check using the selected Nemo checkpoint | Confirms the direction used by the new task before changing domains | COMPLETED | CPU suite `..._20260727_161133` completed at `7cfbfab`: 1,045 audio queries against 5,225 captions; R@1/5/10=`26.8900/51.3876/65.2632`; stderr empty; this is a `[CODE]` direction extension, not a paper-reported result |
-| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | BLOCKED | Resumable formal runner and exact Top-100 stage are complete; needs dry-run and separate GPU approval |
-| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | BLOCKED | Canonical vanilla lock and resumable formal runner are complete; needs Phase-2 dry-run and GPU gate |
+| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | WAITING_USER | Resumable formal runner, exact Top-100 stage and 17-step CPU dry-run are complete; needs separate GPU approval |
+| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | WAITING_USER | Canonical vanilla lock, resumable formal runner and CPU dry-run are complete; needs GPU allocation |
 | OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | BLOCKED | Evaluator now emits both direct and fixed-candidate oracle metrics; real OEA Top-100 is absent |
 | OEA-B6 | Selected Nemo OEA audio/text latency, throughput, and peak memory on the study GPU | Measures the cost inherited by the proposed system | BLOCKED | Run after correctness; hardware must be recorded and separately approved |
 
@@ -39,7 +39,7 @@ toward this checklist.
 
 | ID | Required result | Status | Evidence / blocker |
 |---|---|---|---|
-| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | BLOCKED | D2 Whisper strict acceptance is running; real model runner not yet executed |
+| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | WAITING_USER | D2–D4 strict acceptance and Phase-2 CPU dry-run passed; needs GPU execution |
 | ASR-E2 | B4: OEA Top-100 + 1-best cross-encoder | BLOCKED | Depends on frozen OEA candidates, Whisper, and CE score cache |
 | ASR-E3 | B5: fixed fusion using preregistered 4-best proxy-posterior ASR evidence | BLOCKED | Dev selection only; no test tuning |
 | ASR-E4 | B6: RRF using the same 4-best proxy-posterior ASR route | BLOCKED | Dev selection only; no test tuning |
@@ -73,7 +73,7 @@ toward this checklist.
 | P5 | D3 BGE-base-en-v1.5 | COMPLETED | Fixed revision passed strict local audit |
 | P6 | D4 BGE-reranker-v2-m3 | COMPLETED | Fixed revision passed strict local audit |
 | P7 | Dependency-light ranking/gating/statistics framework | COMPLETED | Synthetic tests only; no synthetic number is a research result |
-| P8 | Real BGE/Whisper/CE/OEA/Omni cache producers | COMPLETED | Resumable immutable caches; one shared document cache/model; strict FiQA qrels-ID and dev/test isolation; dev-only BGE template selection; both OEA and vanilla canonical locks; exact one-RTX-4090 end-to-end wrapper; exact rankings and candidate oracle; implementation tested but GPU execution is not authorized |
+| P8 | Real BGE/Whisper/CE/OEA/Omni cache producers | COMPLETED | Resumable immutable caches; one shared document cache/model; strict FiQA qrels-ID and dev/test isolation; dev-only BGE template selection; both OEA and vanilla canonical locks; exact one-RTX-4090 end-to-end wrapper; exact rankings and candidate oracle; 17/17-step CPU dry-run passed at `1ff9fc0`; GPU execution is not yet authorized |
 | P9 | FiQA train/dev TTS, speaker split, and noise construction | WAITING_USER | Deliberately postponed until Phase-2 Go/No-Go; requires a separate concrete proposal |
 
 ## D. Progress accounting
@@ -93,10 +93,9 @@ toward this checklist.
 
 The next critical path is:
 
-1. complete the Phase-2 CPU dry-run;
-2. request one Phase-2 GPU allocation;
-3. run OEA-B3/B4/B5 and ASR-E1/E10;
-4. apply the preregistered Go/No-Go without changing candidate generation;
-5. if Go, create the frozen CE/N-best caches and run Phase 3;
-6. separately approve the FiQA train/dev TTS/noise protocol before gate
+1. request one Phase-2 GPU allocation;
+2. run OEA-B3/B4/B5 and ASR-E1/E10;
+3. apply the preregistered Go/No-Go without changing candidate generation;
+4. if Go, create the frozen CE/N-best caches and run Phase 3;
+5. separately approve the FiQA train/dev TTS/noise protocol before gate
    training.

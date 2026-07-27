@@ -45,8 +45,9 @@
 | 2 OEA-5 Frozen index | SQuTR 六个官方子集上的 OEA zero-shot A2T | WAITING_USER | `f6f799d` | 六子集全局 DATA-13C 仍受旧 lock RC=`73` 阻塞；主实验所需 `en/fiqa`、`en/nq` 已有独立 DATA-13D 校验路径 | 全六子集结果仍需平台释放旧租约；不得删除旧 lock | 先完成 DATA-13D 的 16,400 条目标音频门禁；六子集 OEA-5 作为独立扩展继续等待平台 |
 | 2 ASR reranking 扩展 | 通用 CPU normalization、4-best proxy posterior、指标与缓存契约 | COMPLETED | `8cc5984` | 本地纯 CPU 38 项相关测试通过；无下载、GPU、推理或训练 | 无；模型适配和真实实验仍受各阶段门禁约束 | DATA-13B 后下载已批准的 FiQA/Whisper/BGE；模型 runner 复用此唯一公式实现 |
 | 2 ASR reranking 扩展 | B1–B7/QG/Ours/U1–U4/A1–A9 CPU 主实验流水线 | COMPLETED | `8f28c55` | 本地 58 项专项、345 项全仓测试通过；端到端仅合成缓存，无研究数值 | 模型 adapter 与真实缓存等待数据/模型和 GPU 阶段 | D1–D4 可在 CPU 下载；DATA-13C 成功后运行 FiQA/SQuTR 数据审计 |
-| 2 ASR reranking 扩展 | FiQA 真实模型缓存与 exact Top-100 runner | COMPLETED | `f9fc977` | BGE/Whisper/CE、OEA-Nemo、原始 Omni 可恢复 runner 已实现；四声学条件强制独立并与 FiQA qrels ID 对齐；FiQA dev/test query 由各自 qrels 精确隔离；四条件复用同一冻结文档缓存；两套 canonical model lock 与 1×RTX 4090 正式 wrapper 已实现；全仓 388 项测试通过 | 未产生真实 FiQA 结果；GPU 尚未通过单独门禁 | 重试 Phase-2 CPU dry-run，再申请单卡 GPU |
+| 2 ASR reranking 扩展 | FiQA 真实模型缓存与 exact Top-100 runner | COMPLETED | `1ff9fc0` | BGE/Whisper/CE、OEA-Nemo、原始 Omni 可恢复 runner 已实现；四声学条件强制独立并与 FiQA qrels ID 对齐；两套 canonical model lock 与 1×RTX 4090 正式 wrapper 已实现；全仓 388 项测试通过；Phase-2 CPU dry-run 17/17 步通过 | 未产生真实 FiQA 结果；GPU 尚未通过单独门禁 | 申请单卡 GPU |
 | 2 ASR reranking 扩展 | Phase-2 CPU dry-run attempt 1 | FAILED | `7a098dd` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_164746`；resolve OEA=`0`，resolve vanilla=`1`，wrapper=`1`；原始 `ModuleNotFoundError: scripts` 已固化 | vanilla config 直接脚本入口未引入仓库根目录；未加载模型或 GPU，不影响指标 | 最小补丁新增真实入口回归测试，全仓 388 项通过；拉取新 commit 后重试 |
+| 2 ASR reranking 扩展 | Phase-2 CPU dry-run attempt 2 | COMPLETED | `1ff9fc0` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_172606`；17/17 step、run、wrapper、caller 退出码全为 0；stderr 为空；CPU-only、无模型/GPU/网络 | 无 | 固化成功审计，随后申请 1×RTX 4090 24GB 正式执行 |
 | 2 ASR reranking 扩展 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`：5/5 files、download/wrapper exit=`0/0`、manifest=`complete`、目标目录约 47 MiB | 无；真实数据协议审计等待目标子集 manifest | DATA-13D 在同一 CPU run 中执行 FiQA split/count/hash/leakage 审计 |
 | 2 ASR reranking 扩展 | D2–D4 Whisper/BGE 固定资源下载 | COMPLETED | `6e55e2b` | D2 repair run=`asrur_d2_whisper_repair_20260727_134626`；strict/wrapper=`0/0`；Whisper 权重 3,087,130,976 B、SHA256=`a8e94b85...fd95`；D2–D4 selected bytes=`5,823,662,271/5,823,662,271`、errors 为空 | 无 | 后续全部严格离线加载；不重复下载 |
 | 2 OEA-6 RTX 4090 效率扩展 | OEA-Qwen3B-Cl 查询编码延迟、显存、吞吐与参数量 | COMPLETED | `a2c13da` | `...rtx4090_efficiency_20260721_211229`：clean worktree、exit 0；1,045 audio 均值/P50/P95=`295.515/287.715/423.286 ms`，5,225 text=`38.373/38.228/40.688 ms`；峰值 allocated/reserved=`9.307/10.115 GiB`；latencies/metrics SHA256 已固定 | `[INFERRED] hardware-mismatched`，不得据此判定 A100 论文延迟或显存是否复现；checkpoint LoRA+双 head 实测 14.71488M，对论文 16.2M 少 1.48512M，统计口径 `[MISSING]` | 小型审计证据已登记；该结果作为同 4090 SpeechXBT baseline，保留原始 latency 文件远程路径与哈希 |
@@ -92,8 +93,9 @@
   B1–B7/U1–U4、query/candidate gate、A1–A9 到 bootstrap/统一表格的 CPU
   流水线；58 项专项和 345 项全仓测试通过，没有产生真实实验数值。
 - 当前阻塞：主实验数据不再受 DPC 遗留租约阻塞。旧租约只影响全六子集 DATA-13C/OEA-5；DATA-13D 已以干净 commit 完成且所有门禁通过。
-- 下一步：等待 CPU 后台 D2 repair 完成 3,087,130,976-byte `model.safetensors`
-  的下载、大小/SHA256 校验和固定 revision/LFS/size/SHA256 严格离线验收。
-  D3/D4 已完成，不得重下或重复启动任务。
-  全部通过后生成 D2–D4 canonical model locks，再提交 Phase 2 FiQA 一级召回的
-  独立 GPU 审批说明。
+- 最近完成：D2–D4 严格离线验收、两套 Nemo canonical model lock 和 Phase-2
+  CPU dry-run attempt 2 均已通过；dry-run 的 17/17 step、run、wrapper、caller
+  退出码均为 0，stderr 为空，未加载模型或 GPU。
+- 下一步：提交 Phase 2 FiQA 四条件冻结一级召回的独立 1×RTX 4090 24GB
+  审批说明；批准后执行 OEA-B3/B4/B5 与 ASR-E1/E10，再按预注册条件做
+  Go/No-Go。

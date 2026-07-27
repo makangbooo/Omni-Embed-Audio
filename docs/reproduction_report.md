@@ -319,3 +319,14 @@ only for direct script execution, without changing protocol, pooling, model
 loading, scores, or metrics. A regression test now exercises the exact
 entrypoint mode, and all 388 repository tests pass. The failed attempt remains
 recorded in `results/audits/asrur_phase2_dry_run_import_failure_20260727.json`.
+
+After the minimal direct-entrypoint fix, Phase-2 CPU dry-run attempt 2
+completed at execution commit `1ff9fc06e16f45967965937d4c001e58661b2b6f`.
+All 17 planned steps exited zero; the run, wrapper, and caller exit codes were
+also zero, and stderr was empty. The dry-run validated the four-condition
+OEA/vanilla/Whisper plan, both BGE dev templates, the 57,638-document FiQA
+corpus, 500 dev queries, and 648 test audio queries per acoustic condition.
+It loaded no model, used no GPU or network, and produced no research metric.
+Compact evidence is stored in
+`results/audits/asrur_phase2_dry_run_success_20260727.json`. The remaining
+Phase-2 gate is a separately approved one-RTX-4090 formal execution.
