@@ -330,3 +330,21 @@ It loaded no model, used no GPU or network, and produced no research metric.
 Compact evidence is stored in
 `results/audits/asrur_phase2_dry_run_success_20260727.json`. The remaining
 Phase-2 gate is a separately approved one-RTX-4090 formal execution.
+
+Formal Phase-2 attempt 2 at execution commit
+`ee637721c1f7f6ef13f63addfe13c0b4d172f9f2` completed and published all four
+OEA embedding caches, all four vanilla-Nemotron caches, and the BGE
+corpus/two-dev-template caches, but then failed in `whisper_clean`. All 648
+records raised the same exception: the feature extractor emitted FP32
+`input_features` while the frozen Whisper model's first convolution had BF16
+weights and bias. This is a model-adapter dtype bug, not OOM or corrupt audio;
+no completion manifest or formal metric was produced. Repair commit
+`5835fab272ac0e28a081d5850cf420bbe2bfca18` casts only floating model inputs
+to the loaded model dtype, preserves mask dtypes, sets the score-return
+generation options coherently, fails closed if required beam scores are
+absent, and stops after eight consecutive failures. It also permits only
+schema/size/SHA256-verified read-only reuse of the 11 complete cache groups
+from the failed commit. The repair passes 407 repository tests; a one-record
+real RTX 4090 Whisper smoke remains required before attempt 3. Compact failure
+evidence is stored in
+`results/audits/asrur_phase2_whisper_dtype_failure_20260727.json`.
