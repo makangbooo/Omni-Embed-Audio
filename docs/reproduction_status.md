@@ -48,7 +48,7 @@
 | 2 ASR reranking 扩展 | FiQA 真实模型缓存与 exact Top-100 runner | COMPLETED | `1ff9fc0` | BGE/Whisper/CE、OEA-Nemo、原始 Omni 可恢复 runner 已实现；四声学条件强制独立并与 FiQA qrels ID 对齐；两套 canonical model lock 与 1×RTX 4090 正式 wrapper 已实现；全仓 388 项测试通过；Phase-2 CPU dry-run 17/17 步通过 | 未产生真实 FiQA 结果；GPU 尚未通过单独门禁 | 申请单卡 GPU |
 | 2 ASR reranking 扩展 | Phase-2 CPU dry-run attempt 1 | FAILED | `7a098dd` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_164746`；resolve OEA=`0`，resolve vanilla=`1`，wrapper=`1`；原始 `ModuleNotFoundError: scripts` 已固化 | vanilla config 直接脚本入口未引入仓库根目录；未加载模型或 GPU，不影响指标 | 最小补丁新增真实入口回归测试，全仓 388 项通过；拉取新 commit 后重试 |
 | 2 ASR reranking 扩展 | Phase-2 CPU dry-run attempt 2 | COMPLETED | `1ff9fc0` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_172606`；17/17 step、run、wrapper、caller 退出码全为 0；stderr 为空；CPU-only、无模型/GPU/网络 | 无 | 固化成功审计，随后申请 1×RTX 4090 24GB 正式执行 |
-| 2 ASR reranking 扩展 | Phase-2 FiQA 四条件冻结一级召回 | RUNNING_REMOTE | `c328dfd` | 用户确认 `run_phase2_gpu` 已在批准的 1×RTX 4090 24GB 后台执行；目标为 OEA-B3/B4/B5 与 ASR-E1/E10/E12 | 尚无最终退出码和真实指标，不能提前标记完成 | 完成后运行严格四条件审计和 Go/No-Go |
+| 2 ASR reranking 扩展 | Phase-2 FiQA 四条件冻结一级召回 attempt 1 | FAILED | `c328dfd` | run=`asrur_phase2_frozen_retrieval_execute_20260727_175132`；wrapper=`1`；OEA clean=`0`（57,638 documents + 648 audio），vanilla clean=`1`；无 completion manifest、无 condition metrics；原始证据保留 | 原始 Omni BF16 adapter 输出未通过旧的 `atol=1e-3` float32 L2 断言；不是 OOM、资源缺失或 revision 漂移 | 以独立 commit 加入 float32 cache-boundary L2 和 pre/post norm 审计，在新 cache root 重试 |
 | 2 ASR reranking 扩展 | Phase-2 结果与 Go/No-Go 自动审计 | COMPLETED | `10e872e` | method/query/path/scale/exit、四条件阈值和禁止改变候选生成方式的审计入口已实现；9 项相关测试通过 | 等待远程 metrics 输入 | 生成小型 audit JSON 并据此决定是否进入 Phase 3 |
 | 3 ASR reranking 扩展 | E2/E5/E6/E11 无 dev 选择的冻结 CE 接续 | COMPLETED | 本提交 | 已实现四条件共享 4-best×Top-100 CE 缓存、单独 Gold 单假设 CE、1-best CE/4-best equal/4-best max/Gold CE 的严格评测、断点恢复与 Phase-2 GO 门禁；Gold 不伪造 ASR 后验；28 项相关测试、Python compile 与 Bash 语法通过；未运行 GPU、未产生真实指标 | 真实执行依赖 Phase-2 汇总 GO 和单独 GPU 批准 | Phase-2 完成后先审计；仅在 GO 时申请下一阶段 1×RTX 4090 |
 | 2 ASR reranking 扩展 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`：5/5 files、download/wrapper exit=`0/0`、manifest=`complete`、目标目录约 47 MiB | 无；真实数据协议审计等待目标子集 manifest | DATA-13D 在同一 CPU run 中执行 FiQA split/count/hash/leakage 审计 |
@@ -96,9 +96,8 @@
   B1–B7/U1–U4、query/candidate gate、A1–A9 到 bootstrap/统一表格的 CPU
   流水线；58 项专项和 345 项全仓测试通过，没有产生真实实验数值。
 - 当前阻塞：主实验数据不再受 DPC 遗留租约阻塞。旧租约只影响全六子集 DATA-13C/OEA-5；DATA-13D 已以干净 commit 完成且所有门禁通过。
-- 最近完成：D2–D4 严格离线验收、两套 Nemo canonical model lock 和 Phase-2
-  CPU dry-run attempt 2 均已通过；dry-run 的 17/17 step、run、wrapper、caller
-  退出码均为 0，stderr 为空，未加载模型或 GPU。
-- 下一步：提交 Phase 2 FiQA 四条件冻结一级召回的独立 1×RTX 4090 24GB
-  审批说明；批准后执行 OEA-B3/B4/B5 与 ASR-E1/E10，再按预注册条件做
+- 最近完成：Phase-2 GPU attempt 1 的失败证据已保留；`oea_clean=0`，
+  `vanilla_clean=1`、`wrapper=1`，无 completion manifest 或正式指标。
+- 下一步：提交原始 Omni float32 cache-boundary L2 最小修复，以新 commit 和
+  新 cache/result root 在已批准的 Phase-2 范围内重试，再按预注册条件做
   Go/No-Go。

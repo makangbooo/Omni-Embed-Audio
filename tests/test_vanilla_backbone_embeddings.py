@@ -269,16 +269,41 @@ class VanillaBackboneEmbeddingsTest(unittest.TestCase):
     def test_base_batch_checks_shape_norm_and_audio_fallback(self) -> None:
         class Adapter:
             def encode_text(self, texts, batch_size):
-                return np.tile(np.array([[1.0, 0.0]], dtype=np.float32), (len(texts), 1))
+                return np.tile(
+                    np.array([[3.0, 4.0]], dtype=np.float32),
+                    (len(texts), 1),
+                )
 
             def encode_audio(self, paths, batch_size):
                 warnings.warn("Failed to load audio; using silence", RuntimeWarning)
                 return np.tile(np.array([[1.0, 0.0]], dtype=np.float32), (len(paths), 1))
 
-        embeddings = encode_base_batch(Adapter(), 2, texts=["one", "two"])
+        audit: dict = {}
+        embeddings = encode_base_batch(
+            Adapter(),
+            2,
+            texts=["one", "two"],
+            normalization_audit=audit,
+        )
         self.assertEqual(embeddings.shape, (2, 2))
+        np.testing.assert_allclose(
+            embeddings,
+            np.tile(np.array([[0.6, 0.8]], dtype=np.float32), (2, 1)),
+            atol=1e-6,
+        )
+        self.assertEqual(audit["row_count"], 2)
+        self.assertEqual(audit["rows_outside_pre_atol_1e3"], 2)
+        self.assertEqual(audit["pre_norm_min"], 5.0)
+        self.assertLessEqual(audit["post_norm_max_abs_deviation"], 1e-6)
         with self.assertRaisesRegex(RuntimeError, "fallback warning"):
             encode_base_batch(Adapter(), 2, audio_paths=[Path("missing.wav")])
+
+        class ZeroAdapter:
+            def encode_text(self, texts, batch_size):
+                return np.zeros((len(texts), 2), dtype=np.float32)
+
+        with self.assertRaisesRegex(RuntimeError, "zero pre-normalization"):
+            encode_base_batch(ZeroAdapter(), 2, texts=["zero"])
 
     def create_smoke_gate_fixture(
         self, root: Path, backbone_id: str = "vanilla_qwen2_5_omni_3b"

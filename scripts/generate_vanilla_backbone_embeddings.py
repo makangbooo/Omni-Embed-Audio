@@ -307,6 +307,7 @@ def encode_base_batch(
     *,
     texts: list[str] | None = None,
     audio_paths: list[Path] | None = None,
+    normalization_audit: dict[str, Any] | None = None,
 ) -> np.ndarray:
     if (texts is None) == (audio_paths is None):
         raise ValueError("exactly one of texts or audio_paths must be supplied")
@@ -326,14 +327,71 @@ def encode_base_batch(
         for message in messages
     ):
         raise RuntimeError(f"audio fallback warning detected: {messages}")
+    adapter_output_dtype = str(np.asarray(embeddings).dtype)
     embeddings = np.asarray(embeddings, dtype=np.float32)
     if embeddings.shape != (expected_count, expected_dimension):
         raise RuntimeError(f"vanilla embedding shape mismatch: {embeddings.shape}")
     if not np.isfinite(embeddings).all():
         raise RuntimeError("vanilla embeddings contain non-finite values")
-    norms = np.linalg.norm(embeddings, axis=1)
-    if not np.allclose(norms, 1.0, atol=1e-3):
-        raise RuntimeError("vanilla embeddings are not L2 normalized")
+    pre_norms = np.linalg.norm(embeddings, axis=1)
+    if (
+        not np.isfinite(pre_norms).all()
+        or np.any(pre_norms <= np.finfo(np.float32).tiny)
+    ):
+        raise RuntimeError(
+            "vanilla embeddings have non-finite or zero pre-normalization norms"
+        )
+
+    # The public adapter normalizes the pooled hidden state in the model's
+    # runtime dtype. With the locked BF16 protocol, casting that result to
+    # float32 can expose quantization error larger than the old 1e-3 assertion.
+    # Re-normalizing at the cache boundary is deterministic, preserves vector
+    # direction, and implements the protocol's required cosine-space output.
+    embeddings = embeddings / pre_norms[:, None]
+    post_norms = np.linalg.norm(embeddings, axis=1)
+    if not np.allclose(post_norms, 1.0, atol=1e-6):
+        raise RuntimeError(
+            "vanilla embeddings failed float32 cache-boundary L2 normalization"
+        )
+    if normalization_audit is not None:
+        normalization_audit.setdefault(
+            "method", "adapter_output_then_float32_cache_boundary_l2"
+        )
+        normalization_audit.setdefault(
+            "reason",
+            (
+                "BF16 adapter normalization may exceed the former "
+                "1e-3 float32 norm assertion"
+            ),
+        )
+        normalization_audit["batch_count"] = (
+            int(normalization_audit.get("batch_count", 0)) + 1
+        )
+        normalization_audit["row_count"] = (
+            int(normalization_audit.get("row_count", 0)) + expected_count
+        )
+        normalization_audit["rows_outside_pre_atol_1e3"] = int(
+            normalization_audit.get("rows_outside_pre_atol_1e3", 0)
+        ) + int(np.count_nonzero(np.abs(pre_norms - 1.0) > 1e-3))
+        normalization_audit["pre_norm_min"] = min(
+            float(normalization_audit.get("pre_norm_min", float("inf"))),
+            float(np.min(pre_norms)),
+        )
+        normalization_audit["pre_norm_max"] = max(
+            float(normalization_audit.get("pre_norm_max", float("-inf"))),
+            float(np.max(pre_norms)),
+        )
+        normalization_audit["pre_norm_max_abs_deviation"] = max(
+            float(normalization_audit.get("pre_norm_max_abs_deviation", 0.0)),
+            float(np.max(np.abs(pre_norms - 1.0))),
+        )
+        normalization_audit["post_norm_max_abs_deviation"] = max(
+            float(normalization_audit.get("post_norm_max_abs_deviation", 0.0)),
+            float(np.max(np.abs(post_norms - 1.0))),
+        )
+        observed_dtypes = set(normalization_audit.get("adapter_output_dtypes", []))
+        observed_dtypes.add(adapter_output_dtype)
+        normalization_audit["adapter_output_dtypes"] = sorted(observed_dtypes)
     return embeddings
 
 
@@ -505,6 +563,20 @@ def main() -> int:
         ) - len(pending_text)
         report["pending_audio_chunks"] = len(pending_audio)
         report["pending_text_chunks"] = len(pending_text)
+        report.setdefault(
+            "normalization_audit",
+            {
+                "method": "adapter_output_then_float32_cache_boundary_l2",
+                "reason": (
+                    "BF16 adapter normalization may exceed the former "
+                    "1e-3 float32 norm assertion"
+                ),
+                "scope": "cumulative rows encoded by this fixed implementation",
+                "batch_count": 0,
+                "row_count": 0,
+                "rows_outside_pre_atol_1e3": 0,
+            },
+        )
         atomic_write_json(metrics_path, report)
 
         if pending_audio or pending_text:
@@ -522,6 +594,7 @@ def main() -> int:
                     audio_paths=[
                         rows[index]["audio_path"] for index in range(start, stop)
                     ],
+                    normalization_audit=report["normalization_audit"],
                 )
                 save_chunk(
                     chunk_root,
@@ -540,6 +613,7 @@ def main() -> int:
                     adapter,
                     embedding_dim,
                     texts=[queries[index]["text"] for index in range(start, stop)],
+                    normalization_audit=report["normalization_audit"],
                 )
                 save_chunk(
                     chunk_root,

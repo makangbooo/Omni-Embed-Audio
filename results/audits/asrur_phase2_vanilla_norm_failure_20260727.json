@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "experiment": "ASRUR Phase-2 frozen retrieval attempt 1",
+  "execution_git_commit": "c328dfd519ad51f98c06b0cd9d91bf5e843b0d2b",
+  "host": "bitahub-a20615441289965568976002",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "run_directory": "/home/jg525/Omni-Embed-Audio/logs/asrur_phase2_frozen_retrieval_execute_20260727_175132",
+  "cache_root": "/home/jg525/experiment_cache/asr_uncertainty/fiqa_phase2_c328dfd519ad",
+  "result_root": "/home/jg525/Omni-Embed-Audio/results/raw/asrur_phase2_fiqa_c328dfd519ad",
+  "wrapper_exit_code": 1,
+  "completion_manifest_present": false,
+  "condition_metrics_present": [],
+  "completed_steps": {
+    "gpu_preflight": 0,
+    "d2_d4_strict_audit": 0,
+    "resolve_oea": 0,
+    "resolve_vanilla": 0,
+    "oea_clean": 0
+  },
+  "failed_step": {
+    "name": "vanilla_clean",
+    "exit_code": 1,
+    "exception": "RuntimeError: vanilla embeddings are not L2 normalized",
+    "source_file": "scripts/generate_vanilla_backbone_embeddings.py",
+    "source_function": "encode_base_batch"
+  },
+  "preserved_evidence": {
+    "oea_clean_cache_complete": true,
+    "oea_clean_documents": 57638,
+    "oea_clean_audio_queries": 648,
+    "failed_cache_and_logs_deleted": false
+  },
+  "root_cause_assessment": {
+    "status": "INFERRED_PENDING_RERUN_AUDIT",
+    "evidence": [
+      "The public OmniEmbedAdapter calls torch.nn.functional.normalize before returning embeddings.",
+      "The locked model runs in BF16, and the adapter normalizes before converting its output to float32.",
+      "The failed consumer converted the adapter output to float32 and then required all row norms to be within atol=1e-3 without applying the protocol-required cache-boundary normalization."
+    ],
+    "most_likely_cause": "BF16 normalization quantization exposed by a stricter float32 norm assertion at the cache boundary",
+    "not_observed": [
+      "CUDA out-of-memory",
+      "missing model files",
+      "model revision mismatch",
+      "audio decode failure"
+    ]
+  },
+  "repair_policy": {
+    "action": "Apply deterministic float32 row-wise L2 normalization at the vanilla cache boundary and record pre/post norm statistics.",
+    "direction_preserved": true,
+    "candidate_set_changed": false,
+    "qrels_changed": false,
+    "metric_definition_changed": false,
+    "impact_assessment": "Scalar row normalization preserves embedding direction and enforces the declared cosine-space protocol; the rerun audit will quantify the pre-normalization deviations."
+  }
+}

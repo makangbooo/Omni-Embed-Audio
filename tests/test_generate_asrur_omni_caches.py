@@ -27,6 +27,8 @@ class GenerateASRUROmniCachesTest(unittest.TestCase):
         self.assertIn('"audio_protocol": "audio_only_no_text_prefix"', text)
         self.assertIn('"text_protocol": "query_prefix"', text)
         self.assertIn('"normalization": "l2"', text)
+        self.assertIn('"normalization_runtime"', text)
+        self.assertIn("normalization_audit", text)
         self.assertIn("len(args.conditions) != 1", text)
         self.assertIn('"id": value.query_id', text)
         self.assertIn('"record_id": value.record_id', text)

@@ -195,6 +195,11 @@ def main() -> int:
         "audio_protocol": "audio_only_no_text_prefix",
         "text_protocol": "query_prefix",
         "normalization": "l2",
+        "normalization_runtime": (
+            "adapter_output_then_float32_cache_boundary_l2"
+            if args.mode == "original_omni"
+            else "oea_projection_float32_l2"
+        ),
     }
     ensure_identity(args.output_dir, identity)
     include_documents = args.content == "both"
@@ -273,6 +278,27 @@ def main() -> int:
     if args.mode == "original_omni":
         report["verified_model_files"] = verified_files
         report["embedding_dimension_source"] = dimension_source
+        report["normalization_audit"] = {
+            "method": "adapter_output_then_float32_cache_boundary_l2",
+            "reason": (
+                "BF16 adapter normalization may exceed the former "
+                "1e-3 float32 norm assertion"
+            ),
+            "scope": (
+                "rows encoded in this process; verified pre-existing chunks "
+                "are already post-normalized"
+            ),
+            "batch_count": 0,
+            "row_count": 0,
+            "rows_outside_pre_atol_1e3": 0,
+            "cached_document_rows_at_start": (
+                len(documents)
+                - sum(stop - start for start, stop in pending_documents)
+            ),
+            "cached_audio_rows_at_start": (
+                len(audio) - sum(stop - start for start, stop in pending_audio)
+            ),
+        }
     atomic_write_json(metrics_path, report)
 
     random.seed(42)
@@ -312,6 +338,7 @@ def main() -> int:
                 adapter,
                 embedding_dimension,
                 texts=texts,
+                normalization_audit=report["normalization_audit"],
             )
         save_embedding_chunk(document_chunks, start, stop, values)
         report["pending_document_chunks"] -= 1
@@ -334,6 +361,7 @@ def main() -> int:
                 adapter,
                 embedding_dimension,
                 audio_paths=paths,
+                normalization_audit=report["normalization_audit"],
             )
         save_embedding_chunk(audio_chunks, start, stop, values)
         report["pending_audio_chunks"] -= 1
@@ -417,6 +445,7 @@ def main() -> int:
             "model_binding": binding,
             "audio_protocol": "audio_only_no_text_prefix",
             "text_protocol": "query_prefix",
+            "normalization_runtime": identity["normalization_runtime"],
         },
     )
     write_cache_manifest_once(args.output_dir / "cache_manifest.json", manifest)
