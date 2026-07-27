@@ -73,6 +73,41 @@ class OEAQueryEncoderBenchmarkTest(unittest.TestCase):
         self.assertIn("qwen3b_cl_clotho_efficiency.json", a100_wrapper)
         self.assertNotIn("efficiency_rtx4090.json", a100_wrapper)
 
+    def test_nemo_rtx4090_efficiency_entrypoint_is_lock_bound(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        config = load_benchmark_config(
+            root / "configs/eval/nemo3b_cl_clotho_efficiency_rtx4090.json"
+        )
+        self.assertEqual(config["model"], "OEA-Nemo3B (+Cl)")
+        self.assertEqual(config["paper_model_label"], "OEA-Nemo3B")
+        self.assertEqual(
+            config["hardware"]["required_gpu_name"],
+            "NVIDIA GeForce RTX 4090",
+        )
+        self.assertEqual(
+            config["model_protocol_config"],
+            "configs/eval/nemo3b_cl_clotho_embeddings.json",
+        )
+        self.assertEqual(
+            config["model_lock"], "results/model_locks/oea_nemo3b_cl.json"
+        )
+        self.assertEqual(config["paper_values"]["audio_ms_per_clip"], 163.8)
+        self.assertEqual(config["paper_values"]["text_ms_per_query"], 2.3)
+        self.assertIn("+Cl", config["timing_protocol"]["paper_gap"])
+
+        wrapper = (
+            root / "scripts/run_nemo3b_cl_clotho_efficiency_rtx4090.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("nemo3b_cl_clotho_efficiency_rtx4090.json", wrapper)
+        self.assertIn("nemo3b_cl_clotho_embeddings.json", wrapper)
+        self.assertIn("oea_nemo3b_cl.json", wrapper)
+        self.assertIn("validate_single_bf16_gpu.py", wrapper)
+        self.assertIn("NVIDIA GeForce RTX 4090", wrapper)
+        self.assertIn("HF_HUB_OFFLINE=1", wrapper)
+        self.assertIn("HF_DATASETS_OFFLINE=1", wrapper)
+        self.assertIn('if [[ -e "${OUTPUT_DIR}" ]]', wrapper)
+        self.assertNotIn("rm -rf", wrapper)
+
     def test_latency_summary_is_population_statistic(self) -> None:
         summary = latency_summary([1.0, 2.0, 3.0, 4.0])
         self.assertEqual(summary["count"], 4)

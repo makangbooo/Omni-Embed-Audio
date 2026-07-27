@@ -33,6 +33,8 @@
 | R-OEA4 | Qwen3B-Cl Clotho A2T | R@1/5/10 `27.2727/52.8230/66.6986` | `results/audits/qwen3b_cl_clotho_a2t_eval_20260721.json` | COMPLETE, not paper-reported |
 | R-OEA6-A100 | Qwen3B-Cl efficiency | controlled A100 result | `results/audits/qwen3b_clotho_a100_efficiency_20260721.json` | COMPLETE |
 | R-OEA6-4090 | Qwen3B-Cl efficiency | hardware-mismatched extension | `results/audits/qwen3b_clotho_rtx4090_efficiency_20260721.json` | COMPLETE |
+| C-OEA-B6-NEMO-4090 | Selected Nemo3B-Cl efficiency protocol | immutable config | `configs/eval/nemo3b_cl_clotho_efficiency_rtx4090.json` | READY; execution requires separate GPU approval |
+| S-OEA-B6-NEMO-4090 | Selected Nemo3B-Cl efficiency wrapper | lock-bound, offline, non-overwriting runner | `scripts/run_nemo3b_cl_clotho_efficiency_rtx4090.sh` | READY; use an isolated checkout while Phase 2 is active |
 | C-ASRUR-RES | D1–D4 pinned manifests + resumable CPU wrapper | commit `6279b8265a3c90be92536eb96bcd98408bebfffa` | `configs/asr_uncertainty_reranking/resources/`、`scripts/run_asrur_resource_download.sh` | COMPLETE implementation; D1 later completed, old sequential D2–D4 run intentionally stopped |
 | C-ASRUR-CORE | normalization、proxy posterior、4-best aggregation、metrics、cache manifest | commit `8cc5984dc35a272934d434993006814855f39624` | `AudioRetrieval/asr_uncertainty_reranking/` | COMPLETE; 38 related CPU tests passed |
 | C-ASRUR-PIPE | B1–B7/QG/Ours/U1–U4/A1–A9 CPU 实验框架 | commit `8f28c5590810f3e430d3ce7591266ad7f8e38f21` | `AudioRetrieval/asr_uncertainty_reranking/`、`scripts/*asrur*`、`configs/asr_uncertainty_reranking/main_experiment.json` | COMPLETE; 58 ASRUR tests and 345 full-repository tests passed; no research result generated |

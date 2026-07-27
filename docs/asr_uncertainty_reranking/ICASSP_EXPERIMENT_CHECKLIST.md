@@ -26,7 +26,7 @@ Allowed statuses are `TODO`, `IN_PROGRESS`, `WAITING_USER`,
 | OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | RUNNING_REMOTE | User reports the approved one-RTX-4090 Phase-2 wrapper is running in the background |
 | OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | RUNNING_REMOTE | Runs sequentially inside the same approved Phase-2 wrapper |
 | OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | RUNNING_REMOTE | The same wrapper emits direct and fixed-candidate oracle metrics; completion awaits artifact audit |
-| OEA-B6 | Selected Nemo OEA audio/text latency, throughput, and peak memory on the study GPU | Measures the cost inherited by the proposed system | BLOCKED | Run after correctness; hardware must be recorded and separately approved |
+| OEA-B6 | Selected Nemo OEA audio/text latency, throughput, and peak memory on the study GPU | Measures the cost inherited by the proposed system | WAITING_USER | RTX 4090 lock-bound entrypoint is ready; requires a separate 1-GPU approval and an isolated checkout while Phase 2 is running |
 
 The following OEA-paper experiments are outside the ICASSP claim and will not
 consume compute unless the paper scope changes: all six OEA variants, all
