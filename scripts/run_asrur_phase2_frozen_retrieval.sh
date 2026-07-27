@@ -31,6 +31,7 @@ VANILLA_LOCK="${ROOT_DIR}/results/model_locks/vanilla_nemotron_3b.json"
 GIT_COMMIT="$(git rev-parse HEAD)"
 COMMIT_SHORT="${GIT_COMMIT:0:12}"
 CACHE_ROOT="${PHASE2_CACHE_ROOT:-/home/jg525/experiment_cache/asr_uncertainty/fiqa_phase2_${COMMIT_SHORT}}"
+REUSE_CACHE_ROOT="${PHASE2_REUSE_CACHE_ROOT:-}"
 RESULT_ROOT="${PHASE2_RESULT_ROOT:-${ROOT_DIR}/results/raw/asrur_phase2_fiqa_${COMMIT_SHORT}}"
 RUN_ID="asrur_phase2_frozen_retrieval_${MODE#--}_$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/${RUN_ID}"
@@ -78,6 +79,75 @@ run_step() {
   fi
 }
 
+record_reused_step() {
+  local name=$1
+  local source=$2
+  local destination=$3
+  local step_dir="${RUN_DIR}/steps/${name}"
+  mkdir -p "${step_dir}"
+  printf 'reuse %q %q\n' "${source}" "${destination}" > "${step_dir}/command.sh"
+  {
+    echo "[INFO] Reused immutable complete cache"
+    echo "source=${source}"
+    echo "destination=${destination}"
+    sha256sum "${source}/cache_manifest.json"
+  } | tee "${step_dir}/stdout.log"
+  : > "${step_dir}/stderr.log"
+  printf '0\n' > "${step_dir}/exit_code.txt"
+}
+
+reuse_complete_cache_dir() {
+  local source=$1
+  local destination=$2
+  if [[ "${MODE}" != "--execute" || -z "${REUSE_CACHE_ROOT}" ]]; then
+    return 0
+  fi
+  if [[ ! -f "${source}/cache_manifest.json" ]]; then
+    return 0
+  fi
+  if [[ -e "${destination}" || -L "${destination}" ]]; then
+    return 0
+  fi
+  python - "${source}/cache_manifest.json" <<'PY'
+import sys
+
+from AudioRetrieval.asr_uncertainty_reranking.cache_manifest import (
+    load_cache_manifest,
+    verify_file_records,
+)
+
+manifest_path = sys.argv[1]
+manifest = load_cache_manifest(manifest_path)
+mismatches = verify_file_records(manifest["outputs"])
+if mismatches:
+    raise RuntimeError(
+        "refusing cross-commit cache reuse:\n- " + "\n- ".join(mismatches)
+    )
+print(
+    f"[INFO] Verified {len(manifest['outputs'])} immutable outputs "
+    f"before cross-commit reuse: {manifest_path}"
+)
+PY
+  mkdir -p "$(dirname "${destination}")"
+  ln -s "${source}" "${destination}"
+  printf '{"source":"%s","destination":"%s","manifest_sha256":"%s"}\n' \
+    "${source}" \
+    "${destination}" \
+    "$(sha256sum "${source}/cache_manifest.json" | awk '{print $1}')" \
+    >> "${RUN_DIR}/reused_cache_dirs.jsonl"
+}
+
+run_cache_step() {
+  local name=$1
+  local output_dir=$2
+  shift 2
+  if [[ "${MODE}" == "--execute" && -f "${output_dir}/cache_manifest.json" ]]; then
+    record_reused_step "${name}" "$(readlink -f "${output_dir}")" "${output_dir}"
+    return 0
+  fi
+  run_step "${name}" "$@"
+}
+
 if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
   echo "[ERROR] Formal Phase-2 runner requires a clean Git worktree." >&2
   git status --short --untracked-files=all >&2
@@ -109,6 +179,7 @@ done
   printf 'git_status_short=\n'
   printf 'mode=%s\n' "${MODE}"
   printf 'cache_root=%s\n' "${CACHE_ROOT}"
+  printf 'reuse_cache_root=%s\n' "${REUSE_CACHE_ROOT}"
   printf 'result_root=%s\n' "${RESULT_ROOT}"
   printf 'text_batch_size=%s\n' "${TEXT_BATCH_SIZE}"
   printf 'audio_batch_size=%s\n' "${AUDIO_BATCH_SIZE}"
@@ -154,6 +225,32 @@ else
 fi
 
 mkdir -p "${RESOLVED_ROOT}" "${RESULT_ROOT}"
+if [[ -n "${REUSE_CACHE_ROOT}" ]]; then
+  if [[ "${REUSE_CACHE_ROOT}" != /* || ! -d "${REUSE_CACHE_ROOT}" ]]; then
+    echo "[ERROR] PHASE2_REUSE_CACHE_ROOT must be an existing absolute directory." >&2
+    exit 6
+  fi
+  if [[ "$(readlink -f "${REUSE_CACHE_ROOT}")" == "$(readlink -f "${CACHE_ROOT}")" ]]; then
+    echo "[ERROR] Reuse cache root and new cache root must differ." >&2
+    exit 6
+  fi
+  for condition in "${CONDITIONS[@]}"; do
+    reuse_complete_cache_dir \
+      "${REUSE_CACHE_ROOT}/oea/${condition}" \
+      "${CACHE_ROOT}/oea/${condition}"
+    reuse_complete_cache_dir \
+      "${REUSE_CACHE_ROOT}/vanilla/${condition}" \
+      "${CACHE_ROOT}/vanilla/${condition}"
+  done
+  reuse_complete_cache_dir \
+    "${REUSE_CACHE_ROOT}/bge/corpus" \
+    "${CACHE_ROOT}/bge/corpus"
+  for template in none bge_retrieval; do
+    reuse_complete_cache_dir \
+      "${REUSE_CACHE_ROOT}/bge/dev_${template}" \
+      "${CACHE_ROOT}/bge/dev_${template}"
+  done
+fi
 run_step resolve_oea \
   python scripts/build_official_oea_eval_config.py \
     --protocol-config "${OEA_PROTOCOL}" \
@@ -170,7 +267,7 @@ for condition in "${CONDITIONS[@]}"; do
   if [[ "${condition}" == "clean" ]]; then
     content="both"
   fi
-  run_step "oea_${condition}" \
+  run_cache_step "oea_${condition}" "${CACHE_ROOT}/oea/${condition}" \
     python scripts/generate_asrur_omni_caches.py \
       --mode oea \
       --main-config "${MAIN_CONFIG}" \
@@ -185,7 +282,7 @@ for condition in "${CONDITIONS[@]}"; do
       --content "${content}" \
       --output-dir "${CACHE_ROOT}/oea/${condition}" \
       "${DRY_ARGUMENTS[@]}"
-  run_step "vanilla_${condition}" \
+  run_cache_step "vanilla_${condition}" "${CACHE_ROOT}/vanilla/${condition}" \
     python scripts/generate_asrur_omni_caches.py \
       --mode original_omni \
       --main-config "${MAIN_CONFIG}" \
@@ -202,7 +299,7 @@ for condition in "${CONDITIONS[@]}"; do
       "${DRY_ARGUMENTS[@]}"
 done
 
-run_step bge_corpus \
+run_cache_step bge_corpus "${CACHE_ROOT}/bge/corpus" \
   python scripts/generate_asrur_frozen_caches.py bge \
     --config "${MAIN_CONFIG}" \
     --output-dir "${CACHE_ROOT}/bge/corpus" \
@@ -216,7 +313,7 @@ run_step bge_corpus \
     --batch-size "${BGE_BATCH_SIZE}" \
     "${DRY_ARGUMENTS[@]}"
 for template in none bge_retrieval; do
-  run_step "bge_dev_${template}" \
+  run_cache_step "bge_dev_${template}" "${CACHE_ROOT}/bge/dev_${template}" \
     python scripts/generate_asrur_frozen_caches.py bge \
       --config "${MAIN_CONFIG}" \
       --output-dir "${CACHE_ROOT}/bge/dev_${template}" \

@@ -7,6 +7,7 @@ model and never initializes CUDA.
 
 from __future__ import annotations
 
+import copy
 import math
 from dataclasses import dataclass
 from math import gcd
@@ -103,6 +104,34 @@ def whisper_valid_token_statistics(
     if any(not math.isfinite(value) for value in retained):
         raise ValueError("transition log probabilities must be finite")
     return float(sum(retained) / len(retained)), len(retained)
+
+
+def prepare_whisper_model_inputs(
+    processed: Mapping[str, Any],
+    *,
+    device: str,
+    floating_dtype: Any,
+) -> dict[str, Any]:
+    """Move Whisper inputs and match floating tensors to model precision.
+
+    Whisper feature extraction emits float32 log-mel values. A model loaded
+    directly in BF16 does not autocast its first convolution, so floating
+    inputs must explicitly match the frozen model dtype. Integer and boolean
+    tensors such as attention masks retain their original dtype.
+    """
+
+    result: dict[str, Any] = {}
+    for key, value in processed.items():
+        if key not in {"input_features", "attention_mask"}:
+            continue
+        move_arguments: dict[str, Any] = {
+            "device": device,
+            "non_blocking": True,
+        }
+        if value.is_floating_point():
+            move_arguments["dtype"] = floating_dtype
+        result[key] = value.to(**move_arguments)
+    return result
 
 
 @dataclass(frozen=True)
@@ -470,25 +499,38 @@ class WhisperNBestGenerator:
             sampling_rate=sample_rate,
             return_tensors="pt",
         )
-        model_inputs = {
-            key: value.to(self.device, non_blocking=True)
-            for key, value in processed.items()
-            if key in {"input_features", "attention_mask"}
-        }
+        model_inputs = prepare_whisper_model_inputs(
+            processed,
+            device=self.device,
+            floating_dtype=self._model.dtype,
+        )
         if "input_features" not in model_inputs:
             raise RuntimeError("Whisper processor did not return input_features")
+        generation_config = copy.deepcopy(self._model.generation_config)
+        generation_config.return_dict_in_generate = True
+        generation_config.output_scores = True
         with self._torch.inference_mode():
             outputs = self._model.generate(
                 **model_inputs,
+                generation_config=generation_config,
                 language=self.settings.language,
                 task=self.settings.task,
                 do_sample=False,
                 num_beams=self.settings.num_beams,
                 num_return_sequences=self.settings.num_return_sequences,
                 return_dict_in_generate=True,
-                output_scores=True,
                 return_timestamps=False,
             )
+            if (
+                not hasattr(outputs, "scores")
+                or outputs.scores is None
+                or not hasattr(outputs, "beam_indices")
+                or outputs.beam_indices is None
+            ):
+                raise RuntimeError(
+                    "Whisper generation did not expose beam scores required "
+                    "for the declared proxy-posterior protocol"
+                )
             transition = self._model.compute_transition_scores(
                 outputs.sequences,
                 outputs.scores,

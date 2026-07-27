@@ -59,6 +59,7 @@ from AudioRetrieval.asr_uncertainty_reranking.model_adapters import (  # noqa: E
 )
 
 BGE_QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: "
+MAX_CONSECUTIVE_WHISPER_FAILURES = 8
 
 
 def utc_now() -> str:
@@ -595,6 +596,7 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
     if pending:
         generator.load()
     failed = []
+    consecutive_failures = 0
     for index, record in pending:
         try:
             waveform = load_audio_mono(record.audio_path, target_sample_rate=16_000)
@@ -619,10 +621,19 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
                 ],
             }
             save_json_shard(args.output_dir, index, row)
+            consecutive_failures = 0
             print(f"[PROGRESS] Whisper {index + 1}/{len(records)}", flush=True)
         except Exception:
             failed.append(record.record_id)
+            consecutive_failures += 1
             record_failure(args.output_dir, index, record.record_id)
+            if consecutive_failures >= MAX_CONSECUTIVE_WHISPER_FAILURES:
+                raise RuntimeError(
+                    "Whisper aborted after "
+                    f"{consecutive_failures} consecutive failures; "
+                    "per-record tracebacks were preserved under "
+                    f"{args.output_dir / 'failures'}"
+                ) from None
     if failed:
         raise RuntimeError(f"{len(failed)} Whisper records failed; first={failed[:10]}")
     destination = finalize_jsonl(

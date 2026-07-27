@@ -34,6 +34,8 @@ class GenerateASRURFrozenCachesTest(unittest.TestCase):
         self.assertIn('"query_id": record.query_id', source)
         self.assertIn('"record_id": record.record_id', source)
         self.assertIn("--expected-hypotheses", source)
+        self.assertIn("MAX_CONSECUTIVE_WHISPER_FAILURES = 8", source)
+        self.assertIn("consecutive failures", source)
 
     def test_embedding_chunks_resume_and_consolidate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

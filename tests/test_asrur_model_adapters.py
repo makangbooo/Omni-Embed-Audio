@@ -14,12 +14,26 @@ from AudioRetrieval.asr_uncertainty_reranking.model_adapters import (
     build_whisper_hypotheses,
     l2_normalize_rows,
     model_identity_from_config,
+    prepare_whisper_model_inputs,
     scalar_logits,
     whisper_valid_token_statistics,
 )
 
 
 REVISION = "a" * 40
+
+
+class FakeTensor:
+    def __init__(self, *, floating: bool):
+        self.floating = floating
+        self.calls = []
+
+    def is_floating_point(self):
+        return self.floating
+
+    def to(self, **kwargs):
+        self.calls.append(kwargs)
+        return self
 
 
 class ASRURModelAdapterTest(unittest.TestCase):
@@ -55,6 +69,36 @@ class ASRURModelAdapterTest(unittest.TestCase):
         )
         self.assertAlmostEqual(average, -0.2)
         self.assertEqual(count, 2)
+
+    def test_whisper_inputs_match_model_dtype_without_casting_masks(self) -> None:
+        features = FakeTensor(floating=True)
+        attention_mask = FakeTensor(floating=False)
+        ignored = FakeTensor(floating=True)
+        result = prepare_whisper_model_inputs(
+            {
+                "input_features": features,
+                "attention_mask": attention_mask,
+                "input_values": ignored,
+            },
+            device="cuda:0",
+            floating_dtype="bfloat16",
+        )
+        self.assertEqual(set(result), {"input_features", "attention_mask"})
+        self.assertEqual(
+            features.calls,
+            [
+                {
+                    "device": "cuda:0",
+                    "non_blocking": True,
+                    "dtype": "bfloat16",
+                }
+            ],
+        )
+        self.assertEqual(
+            attention_mask.calls,
+            [{"device": "cuda:0", "non_blocking": True}],
+        )
+        self.assertEqual(ignored.calls, [])
 
     def test_whisper_hypothesis_builder_preserves_beam_order(self) -> None:
         hypotheses = build_whisper_hypotheses(
