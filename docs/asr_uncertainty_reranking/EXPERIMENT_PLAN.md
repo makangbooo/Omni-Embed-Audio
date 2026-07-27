@@ -401,3 +401,6 @@ inference、TTS、微调或上传。
    后台工具而中断、重启或丢弃缓存；
 6. Phase-2 的统一只读实时监控入口为
    `scripts/monitor_asrur_phase2.sh`，监控脚本不得修改缓存、发送信号或启动任务。
+7. 后续训练、评测和大规模缓存脚本必须记录整体及阶段的 start、finish、elapsed；
+   已知总样本数时尽量显示 `current/total`、百分比、近期吞吐和 ETA。ETA 必须标为
+   估计值，不得把异构阶段的局部百分比冒充整个实验百分比。

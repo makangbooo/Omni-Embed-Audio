@@ -31,7 +31,8 @@
   `ee63772`；尚无 completion manifest 或正式指标。
 - 用户已固定后续后台协议为 tmux-only；不再提供 `nohup` 启动命令。当前健康
   运行的 PID `6769` 不为切换工具而中断；新增只读实时监控入口
-  `scripts/monitor_asrur_phase2.sh`。
+  `scripts/monitor_asrur_phase2.sh`，显示 run/step elapsed、局部百分比、近期
+  吞吐和近似 step ETA。
 - Phase-3 无需 dev 选择的 E2/E5/E6/E11 接续 runner 已实现并通过 28 项相关测试；
   只在 Phase-2 四条件汇总为 `GO` 且另行获得 GPU 批准后执行。
 - 下一步：等待 Phase-2 attempt 2 完成；保留逐步缓存和失败证据，结束后立即

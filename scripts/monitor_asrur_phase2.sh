@@ -103,6 +103,19 @@ if [[ -f "${RUN_IDENTITY}" ]]; then
   )"
 fi
 
+format_duration() {
+  local total_seconds=$1
+  local days=$((total_seconds / 86400))
+  local hours=$(((total_seconds % 86400) / 3600))
+  local minutes=$(((total_seconds % 3600) / 60))
+  local seconds=$((total_seconds % 60))
+  if [[ "${days}" -gt 0 ]]; then
+    printf '%dd %02d:%02d:%02d' "${days}" "${hours}" "${minutes}" "${seconds}"
+  else
+    printf '%02d:%02d:%02d' "${hours}" "${minutes}" "${seconds}"
+  fi
+}
+
 latest_step_directory() {
   find "${RUN_DIR}/steps" \
     -mindepth 1 -maxdepth 1 -type d \
@@ -117,6 +130,12 @@ render_snapshot() {
   local wrapper_status="PENDING"
   local latest_step=""
   local progress_line=""
+  local now_epoch
+  local run_start_epoch
+  local run_end_epoch
+  local run_elapsed_seconds
+
+  now_epoch="$(date +%s)"
 
   if [[ "${FOLLOW}" -eq 1 && "${CLEAR_SCREEN}" -eq 1 && -t 1 ]]; then
     printf '\033[2J\033[H'
@@ -127,6 +146,30 @@ render_snapshot() {
   printf 'run_dir=%s\n' "${RUN_DIR}"
   printf 'result_root=%s\n' "${RESULT_ROOT:-UNKNOWN}"
   printf 'refresh_seconds=%s\n' "${INTERVAL_SECONDS}"
+  if [[ -f "${RUN_IDENTITY}" ]]; then
+    run_start_epoch="$(stat -c '%Y' "${RUN_IDENTITY}" 2>/dev/null || true)"
+    run_end_epoch="${now_epoch}"
+    if [[ -f "${RUN_DIR}/completion_manifest.json" ]]; then
+      run_end_epoch="$(
+        stat -c '%Y' "${RUN_DIR}/completion_manifest.json" 2>/dev/null \
+          || printf '%s' "${now_epoch}"
+      )"
+    elif [[ -f "${RUN_DIR}/wrapper_exit_code.txt" ]]; then
+      run_end_epoch="$(
+        stat -c '%Y' "${RUN_DIR}/wrapper_exit_code.txt" 2>/dev/null \
+          || printf '%s' "${now_epoch}"
+      )"
+    fi
+    if [[ "${run_start_epoch}" =~ ^[0-9]+$ && "${run_end_epoch}" =~ ^[0-9]+$ ]]; then
+      run_elapsed_seconds=$((run_end_epoch - run_start_epoch))
+      printf 'run_elapsed=%s\n' "$(format_duration "${run_elapsed_seconds}")"
+      printf 'run_elapsed_seconds=%s\n' "${run_elapsed_seconds}"
+    else
+      echo "run_elapsed=UNKNOWN"
+    fi
+  else
+    echo "run_elapsed=UNKNOWN"
+  fi
 
   echo
   echo "===== PROCESS ====="
@@ -180,17 +223,102 @@ render_snapshot() {
   echo
   echo "===== LATEST STEP ====="
   if [[ -n "${latest_step}" ]]; then
+    local step_start_epoch
+    local step_elapsed_seconds
+    local first_progress_line
+    local progress_label
+    local progress_current
+    local progress_total
+    local first_progress_label
+    local first_progress_current
+    local first_progress_total
+    local processed_delta
+    local progress_percent
+    local throughput
+    local eta_seconds
+
     printf 'latest_step=%s\n' "$(basename "${latest_step}")"
     if [[ -f "${latest_step}/command.sh" ]]; then
       printf 'command='
       tr '\n' ' ' < "${latest_step}/command.sh"
       echo
+      step_start_epoch="$(
+        stat -c '%Y' "${latest_step}/command.sh" 2>/dev/null || true
+      )"
+      if [[ "${step_start_epoch}" =~ ^[0-9]+$ ]]; then
+        step_elapsed_seconds=$((now_epoch - step_start_epoch))
+        printf 'step_elapsed=%s\n' "$(format_duration "${step_elapsed_seconds}")"
+        printf 'step_elapsed_seconds=%s\n' "${step_elapsed_seconds}"
+      else
+        step_elapsed_seconds=0
+        echo "step_elapsed=UNKNOWN"
+      fi
+    else
+      step_elapsed_seconds=0
+      echo "step_elapsed=UNKNOWN"
     fi
     progress_line="$(
       grep -h '^\[PROGRESS\]' "${latest_step}/stdout.log" 2>/dev/null \
         | tail -n 1
     )"
     printf 'latest_progress=%s\n' "${progress_line:-NONE}"
+    if [[ "${progress_line}" =~ ^\[PROGRESS\]\ ([^[:space:]]+)\ ([0-9]+)/([0-9]+)$ ]]; then
+      progress_label="${BASH_REMATCH[1]}"
+      progress_current="${BASH_REMATCH[2]}"
+      progress_total="${BASH_REMATCH[3]}"
+      progress_percent="$(
+        awk -v current="${progress_current}" -v total="${progress_total}" \
+          'BEGIN { printf "%.2f", (100.0 * current) / total }'
+      )"
+      printf 'progress_percent=%s%%\n' "${progress_percent}"
+
+      first_progress_line="$(
+        grep -h "^\[PROGRESS\] ${progress_label} " \
+          "${latest_step}/stdout.log" 2>/dev/null | head -n 1
+      )"
+      if [[ "${first_progress_line}" =~ ^\[PROGRESS\]\ ([^[:space:]]+)\ ([0-9]+)/([0-9]+)$ ]]; then
+        first_progress_label="${BASH_REMATCH[1]}"
+        first_progress_current="${BASH_REMATCH[2]}"
+        first_progress_total="${BASH_REMATCH[3]}"
+        processed_delta=$((progress_current - first_progress_current))
+        if [[
+          "${first_progress_label}" == "${progress_label}"
+          && "${first_progress_total}" -eq "${progress_total}"
+          && "${processed_delta}" -gt 0
+          && "${step_elapsed_seconds}" -gt 0
+        ]]; then
+          throughput="$(
+            awk -v processed="${processed_delta}" \
+              -v elapsed="${step_elapsed_seconds}" \
+              'BEGIN { printf "%.3f", processed / elapsed }'
+          )"
+          eta_seconds="$(
+            awk -v current="${progress_current}" \
+              -v total="${progress_total}" \
+              -v processed="${processed_delta}" \
+              -v elapsed="${step_elapsed_seconds}" \
+              'BEGIN {
+                rate = processed / elapsed
+                if (rate > 0) {
+                  printf "%d", (total - current) / rate
+                }
+              }'
+          )"
+          printf 'throughput=%s_%s_per_second\n' \
+            "${throughput}" "${progress_label}"
+          printf 'step_eta=%s\n' "$(format_duration "${eta_seconds}")"
+          printf 'step_eta_seconds=%s\n' "${eta_seconds}"
+          echo "eta_basis=approximate_from_first_logged_counter_and_step_wall_time"
+        else
+          echo "step_eta=COLLECTING"
+        fi
+      else
+        echo "step_eta=COLLECTING"
+      fi
+    else
+      echo "progress_percent=UNKNOWN"
+      echo "step_eta=UNKNOWN"
+    fi
     echo "----- stdout tail -----"
     tail -n 8 "${latest_step}/stdout.log" 2>/dev/null || true
     echo "----- stderr tail -----"

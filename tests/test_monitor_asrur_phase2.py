@@ -20,6 +20,12 @@ class MonitorAsrurPhase2Test(unittest.TestCase):
             "wrapper_exit_code.txt",
             "completion_manifest.json",
             "latest_progress=",
+            "run_elapsed=",
+            "step_elapsed=",
+            "progress_percent=",
+            "throughput=",
+            "step_eta=",
+            "eta_basis=approximate",
             "nvidia-smi",
             "Press Ctrl-C",
         ):
@@ -41,6 +47,8 @@ class MonitorAsrurPhase2Test(unittest.TestCase):
         self.assertIn("tmux new-session -d -s", plan)
         self.assertIn("禁止使用 `nohup`", plan)
         self.assertIn("中断、重启或丢弃缓存", plan)
+        self.assertIn("start、finish、elapsed", plan)
+        self.assertIn("吞吐和 ETA", plan)
 
 
 if __name__ == "__main__":
