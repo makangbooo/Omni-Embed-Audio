@@ -151,6 +151,17 @@ all mono. This is recorded as an observed dataset property. Every downstream
 OEA or Whisper cache must therefore bind and record explicit resampling rather
 than assume a single source sampling rate.
 
+The first strict offline D2--D4 model audit ran at execution commit `92746e5`
+in `asrur_d2_d4_model_audit_20260727_132612`. D3
+(`BAAI/bge-base-en-v1.5`) and D4 (`BAAI/bge-reranker-v2-m3`) passed their
+pinned Git revision, selected-file size, SHA256, and Git-LFS checks. D2
+(`openai/whisper-large-v3`) was at the correct pinned revision and its small
+files passed, but the 3,087,130,976-byte `model.safetensors` file was absent.
+The audit returned `1/1` without changing or deleting any model file. Phase 2
+therefore remains blocked on this single D2 file; D3 and D4 must not be
+downloaded again. Compact failure evidence is retained in
+`results/audits/asrur_d2_d4_model_audit_failure_20260727.json`.
+
 ## OEA-6 measurement boundary
 
 Existing full Clotho embedding runs record approximately 9.31 GiB allocated

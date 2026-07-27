@@ -1,6 +1,6 @@
 # ASR-Uncertainty Reranking 状态
 
-最后更新：2026-07-27（Nemo(+Cl) Clotho Table 2 T2A 完成）
+最后更新：2026-07-27（D2–D4 首次严格离线验收：D3/D4 完成，D2 缺单一权重文件）
 
 状态只使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、
 `COMPLETED`、`FAILED`、`BLOCKED`。
@@ -18,7 +18,7 @@
 | 0 | B5/B6 主融合的 ASR 路由 | COMPLETED | `b9a81ef` | `[INFERRED][USER-CONFIRMED 2026-07-26]` 主路线固定为 4-best `proxy_posterior`；1-best 只作辅助诊断 | 无 | 正式结果不得根据 test/NQ 表现切换路线 |
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | DATA-13D 生成目标 manifest 后在同一 run 执行一致性审计 |
 | 0 | 模型存储迁移与旧缓存清理 | COMPLETED | `aac088d` | run=`model_cache_migration_v3_20260726_214834`；exit=`0`；OEA 254 files、apparent/allocated bytes 前后完全一致；旧 `/home/jg525/model_cache` 已按用户明确授权删除 | 无 | 后续统一使用 `/home/jg525/models`；历史审计中的旧路径保持原样 |
-| 0 | D2–D4 Whisper/BGE 固定资源下载 | RUNNING_REMOTE | `aac088d` | 旧顺序 run 已按用户要求以 `143/143` 停止；三个手工 `git clone` PID `24716/25828/26585` 均位于 `/home/jg525/models/*`，迁移时仍在运行；21:48 目录仅 `323/308/329 MiB`，不能视为权重完成 | 等待 clone/LFS 结束；尚未验证固定 revision、权重大小和 SHA256 | 下载结束后运行 `scripts/run_asrur_model_audit.sh` 严格离线验收 |
+| 0 | D2–D4 Whisper/BGE 固定资源下载 | WAITING_USER | `92746e5` | strict-offline run=`asrur_d2_d4_model_audit_20260727_132612`，audit/wrapper=`1/1`；D3 `bge-base-en-v1.5` 与 D4 `bge-reranker-v2-m3` 的固定 revision、逐文件大小/SHA256、LFS 状态全部通过；D2 revision 正确但缺 `model.safetensors` | 仅 D2 缺 3,087,130,976-byte `model.safetensors`；审计未修改或删除模型 | 只补 D2 缺失文件，然后复跑同一严格离线验收；不得重下 D3/D4 |
 | 0/2 | SQuTR DATA-13B/13C 六子集内容门禁 | WAITING_USER | `a4c5c02` | 精确探针 old/new lock RC=`73/0`；本机无持有者，用户确认没有任何其他挂载 `/home/jg525` 的运行实例 | DPC 远端遗留锁租约；只阻塞全六子集扩展 | 按 `dpc_lock_support_request.md` 联系平台；不得删除/绕过旧 lock |
 | 0/2 | DATA-13C lock owner provenance | COMPLETED | `090abf8` | wrapper 改为非截断打开 lock；成功取得后记录 hostname/PID/PPID/commit/run dir，失败时显示最后记录；4 项专项测试通过 | 该补丁不能解除当前由远端实体持有的旧锁 | 远端锁安全释放并拉取本补丁后再恢复 DATA-13C |
 | 0/2 | DATA-13D FiQA/NQ 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；reuse/validation/FiQA audit/wrapper=`0/0/0/0`；16,400/16,400 音频、manifest/cache SHA256 已固定；FiQA violations 与 split leakage 均为空 | 无；源音频混合 24 kHz/16 kHz，后续 runner 必须显式重采样 | 固化审计 JSON；进入模型验收与 Phase 1/2 runner 门禁 |
@@ -58,11 +58,9 @@
   得到 old lock RC=`73`、同目录新 lock RC=`0`，本机仍无 DATA-13C 进程、
   `/proc/locks` 或开放 FD 匹配。因此同目录 `flock` 正常，旧锁由另一台共享
   存储服务器或 DPC 远端租约持有。不得删除或绕过 lock。
-- 当前未执行：任何 GPU 计算、TTS、模型推理或真实 gate 训练。D1 FiQA 已完成；
-  OEA 模型已完整迁移到 `/home/jg525/models/oea`，D2–D4 正在
-  `/home/jg525/models` 下并行 clone，但尚无权重完成证据。
-- 下一步：两条 CPU 工作可独立执行：(1) D2–D4 下载完成后运行固定
-  revision/LFS/size/SHA256 离线验收；(2) 拉取 `953cb34` 后运行 Nemo base/+Cl
-  实时只读复核、inference-only checkpoint 严格准备与 portable model lock。
-  DATA-13D 已完成，旧 DATA-13C lock 仅继续影响六子集扩展。portable evidence
-  返回并由本地 Codex 固化为 canonical model lock 后，才提交 G1 的精确 GPU 命令。
+- 当前未执行：TTS、Whisper/BGE 推理或真实 gate 训练。D1 FiQA、OEA Phase 1、
+  D3 和 D4 已完成；D2 的 Git revision 与 10 个小文件通过，但唯一大权重
+  `model.safetensors` 缺失。
+- 下一步：CPU 服务器只补 D2 的 3,087,130,976-byte 权重并复跑严格离线验收。
+  验收全通过后，先建立 D2–D4 canonical model locks 和 Phase 2 dry-run；
+  再单独申请 FiQA 一级召回所需 GPU，不复用 Phase 1 的 GPU 授权。
