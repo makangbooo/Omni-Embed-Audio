@@ -4,6 +4,8 @@ import copy
 import hashlib
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 import warnings
@@ -34,6 +36,23 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
 class VanillaBackboneEmbeddingsTest(unittest.TestCase):
+    def test_direct_entrypoint_resolves_repository_imports(self) -> None:
+        script = REPOSITORY_ROOT / "scripts/generate_vanilla_backbone_embeddings.py"
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            completed = subprocess.run(
+                [sys.executable, str(script), "--help"],
+                cwd=temporary_directory,
+                capture_output=True,
+                check=False,
+                text=True,
+            )
+        self.assertEqual(
+            completed.returncode,
+            0,
+            msg=f"stdout:\n{completed.stdout}\nstderr:\n{completed.stderr}",
+        )
+        self.assertIn("--config", completed.stdout)
+
     def protocol_path(
         self, backbone_id: str = "vanilla_qwen2_5_omni_3b"
     ) -> Path:

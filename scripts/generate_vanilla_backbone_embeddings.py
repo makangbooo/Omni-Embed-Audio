@@ -8,6 +8,7 @@ import json
 import os
 import random
 from pathlib import Path
+import sys
 import time
 import traceback
 import warnings
@@ -15,6 +16,10 @@ from typing import Any, Mapping
 
 import numpy as np
 
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if __package__ in {None, ""} and str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from scripts.build_official_oea_eval_config import validate_file_inventory
 from scripts.build_vanilla_backbone_eval_config import (
@@ -40,9 +45,6 @@ from scripts.generate_oea_embeddings import (
     verify_fixed_file,
     write_text_once_or_verify,
 )
-
-
-REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:

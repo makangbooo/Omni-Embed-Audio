@@ -24,7 +24,7 @@ Allowed statuses are `TODO`, `IN_PROGRESS`, `WAITING_USER`,
 | OEA-B1 | Reproduce OEA-Nemo3B(+Cl) Clotho T2A R@1/5/10 | Numerical connection to the OEA paper | COMPLETED | Paper 21.57/47.16/60.36; reproduced all-caption 21.7225/47.1196/60.4402 |
 | OEA-B2 | Clotho audio-to-text direction sanity check using the selected Nemo checkpoint | Confirms the direction used by the new task before changing domains | COMPLETED | CPU suite `..._20260727_161133` completed at `7cfbfab`: 1,045 audio queries against 5,225 captions; R@1/5/10=`26.8900/51.3876/65.2632`; stderr empty; this is a `[CODE]` direction extension, not a paper-reported result |
 | OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | FAILED | Attempt 1 completed the clean OEA cache but stopped before the remaining conditions when the later vanilla step failed; no metric is marked complete |
-| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | FAILED | Attempt 1 failed on the first vanilla clean batch because the BF16 adapter output did not satisfy the former 1e-3 float32 norm assertion; evidence is preserved and a cache-boundary L2 repair is pending rerun |
+| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | FAILED | Attempt 1 failed on the former BF16-to-float32 norm assertion. The repair smoke at `92d705f` then exposed a direct-entrypoint import bug before model loading, so the normalization repair remains pending a corrected smoke and rerun |
 | OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | BLOCKED | Attempt 1 produced no condition metrics; waits for the repaired Phase-2 rerun |
 | OEA-B6 | Selected Nemo OEA audio/text latency, throughput, and peak memory on the study GPU | Measures the cost inherited by the proposed system | WAITING_USER | RTX 4090 lock-bound entrypoint is ready; requires a separate 1-GPU approval and an isolated checkout while Phase 2 is running |
 
@@ -93,7 +93,7 @@ toward this checklist.
 
 The next critical path is:
 
-1. rerun Phase 2 after the audited vanilla cache-boundary L2 repair;
+1. rerun the corrected real-model normalization smoke, then rerun Phase 2 after the audited vanilla cache-boundary L2 repair;
 2. complete OEA-B3/B4/B5 and ASR-E1/E10/E12;
 3. apply the preregistered Go/No-Go without changing candidate generation;
 4. if Go, create the frozen CE/N-best caches and run Phase 3;

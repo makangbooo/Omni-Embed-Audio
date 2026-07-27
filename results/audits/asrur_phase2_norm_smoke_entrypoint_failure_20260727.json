@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "experiment": "ASRUR Phase-2 normalization repair smoke gate",
+  "execution_git_commit": "92d705f28528627ce22d333446365ce3443cfe13",
+  "host": "bitahub-a20615852222705664348817",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "gpu_preflight_passed": true,
+  "targeted_cpu_tests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "smoke_output_directory": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_nemotron_3b_clotho_smoke_seed42_normfix_20260727_190346",
+  "smoke_exit_code": 1,
+  "retry_launcher_exit_code": 14,
+  "phase2_launched": false,
+  "model_loaded": false,
+  "failed_step": {
+    "name": "vanilla normalization repair smoke direct entrypoint",
+    "exception": "ModuleNotFoundError: No module named 'scripts'",
+    "source_file": "scripts/generate_vanilla_backbone_embeddings.py",
+    "source_line": 19
+  },
+  "root_cause_assessment": {
+    "status": "CONFIRMED",
+    "cause": "The generator was executed by absolute file path from the repository, but its direct-script entrypoint imported the scripts namespace before adding the repository root to sys.path.",
+    "normalization_repair_exercised": false,
+    "not_observed": [
+      "CUDA out-of-memory",
+      "model loading failure",
+      "model revision mismatch",
+      "normalization assertion failure"
+    ]
+  },
+  "repair_policy": {
+    "action": "Insert the repository root before repository-local imports when the file is executed as a direct script, and cover that mode from an external working directory.",
+    "model_protocol_changed": false,
+    "candidate_set_changed": false,
+    "qrels_changed": false,
+    "metric_definition_changed": false,
+    "failed_artifacts_deleted": false
+  }
+}
