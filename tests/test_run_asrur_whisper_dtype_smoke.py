@@ -21,6 +21,15 @@ class RunASRURWhisperDtypeSmokeTest(unittest.TestCase):
         self.assertIn("exactly four hypotheses", source)
         self.assertIn("proxy_scores_finite", source)
         self.assertIn("elapsed_seconds.txt", source)
+        adapter_source = (
+            REPOSITORY_ROOT
+            / "AudioRetrieval/asr_uncertainty_reranking/model_adapters.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("GenerationMixin.generate.__get__", adapter_source)
+        self.assertNotIn("outputs = self._model.generate(", adapter_source)
+        self.assertIn("return_attention_mask=True", adapter_source)
+        self.assertIn("generation_config.forced_decoder_ids = None", adapter_source)
+        self.assertIn("decoder_input_ids=decoder_input_ids", adapter_source)
         self.assertNotIn("nohup", source)
         self.assertNotIn("rm -", source)
         self.assertNotIn("git reset", source)

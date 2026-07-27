@@ -36,6 +36,11 @@ class GenerateASRURFrozenCachesTest(unittest.TestCase):
         self.assertIn("--expected-hypotheses", source)
         self.assertIn("MAX_CONSECUTIVE_WHISPER_FAILURES = 8", source)
         self.assertIn("consecutive failures", source)
+        self.assertIn('"generation_entrypoint": "base_GenerationMixin_generate"', source)
+        self.assertIn(
+            '"decoder_prompt": "explicit_language_task_no_timestamps"',
+            source,
+        )
 
     def test_embedding_chunks_resume_and_consolidate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -134,6 +134,51 @@ def prepare_whisper_model_inputs(
     return result
 
 
+def whisper_decoder_prompt_tokens(
+    *,
+    processor: Any,
+    decoder_start_token_id: int | None,
+    language: str,
+    task: str,
+) -> tuple[int, ...]:
+    """Build an explicit, validated Whisper decoder prompt.
+
+    The Transformers 4.52.4 Whisper wrapper expands ``num_return_sequences``
+    before its internal beam search and later re-stacks scores while retaining
+    global beam indices. The formal four-best path consequently uses the base
+    ``GenerationMixin`` directly. Supplying decoder input IDs explicitly keeps
+    the language/task/no-timestamps protocol identical without relying on the
+    wrapper's mutable ``forced_decoder_ids`` handling.
+    """
+
+    if isinstance(decoder_start_token_id, bool) or not isinstance(
+        decoder_start_token_id, int
+    ):
+        raise ValueError("Whisper decoder_start_token_id must be an integer")
+    prompt = processor.get_decoder_prompt_ids(
+        language=language,
+        task=task,
+        no_timestamps=True,
+    )
+    if not isinstance(prompt, Sequence) or not prompt:
+        raise ValueError("Whisper processor returned an empty decoder prompt")
+    tokens = [decoder_start_token_id]
+    for expected_position, value in enumerate(prompt, start=1):
+        if (
+            not isinstance(value, Sequence)
+            or len(value) != 2
+            or value[0] != expected_position
+            or isinstance(value[1], bool)
+            or not isinstance(value[1], int)
+        ):
+            raise ValueError(
+                "Whisper decoder prompt must contain contiguous integer "
+                "(position, token_id) pairs"
+            )
+        tokens.append(int(value[1]))
+    return tuple(tokens)
+
+
 @dataclass(frozen=True)
 class FrozenModelIdentity:
     name: str
@@ -439,6 +484,7 @@ class WhisperNBestGenerator:
         self._torch = None
         self._processor = None
         self._model = None
+        self._base_generate = None
 
     def load(self) -> None:
         model_path = _nonempty_path(
@@ -448,6 +494,7 @@ class WhisperNBestGenerator:
         try:
             import torch
             from transformers import AutoProcessor, WhisperForConditionalGeneration
+            from transformers.generation import GenerationMixin
         except ImportError as exc:  # pragma: no cover - exercised on GPU host
             raise RuntimeError(
                 "torch and transformers are required for Whisper inference"
@@ -474,6 +521,7 @@ class WhisperNBestGenerator:
         self._torch = torch
         self._processor = processor
         self._model = model
+        self._base_generate = GenerationMixin.generate.__get__(model, type(model))
 
     def generate(
         self,
@@ -487,7 +535,12 @@ class WhisperNBestGenerator:
         logits, not calibrated ASR posterior probabilities.
         """
 
-        if self._model is None or self._processor is None or self._torch is None:
+        if (
+            self._model is None
+            or self._processor is None
+            or self._torch is None
+            or self._base_generate is None
+        ):
             raise RuntimeError("Whisper generator must be loaded before generate")
         if sample_rate != 16_000:
             raise ValueError("Whisper input must be explicitly resampled to 16 kHz")
@@ -498,6 +551,7 @@ class WhisperNBestGenerator:
             array,
             sampling_rate=sample_rate,
             return_tensors="pt",
+            return_attention_mask=True,
         )
         model_inputs = prepare_whisper_model_inputs(
             processed,
@@ -507,19 +561,28 @@ class WhisperNBestGenerator:
         if "input_features" not in model_inputs:
             raise RuntimeError("Whisper processor did not return input_features")
         generation_config = copy.deepcopy(self._model.generation_config)
+        decoder_prompt = whisper_decoder_prompt_tokens(
+            processor=self._processor,
+            decoder_start_token_id=generation_config.decoder_start_token_id,
+            language=self.settings.language,
+            task=self.settings.task,
+        )
+        generation_config.forced_decoder_ids = None
+        generation_config.do_sample = False
+        generation_config.num_beams = self.settings.num_beams
+        generation_config.num_return_sequences = self.settings.num_return_sequences
         generation_config.return_dict_in_generate = True
         generation_config.output_scores = True
+        decoder_input_ids = self._torch.tensor(
+            [decoder_prompt],
+            dtype=self._torch.long,
+            device=self.device,
+        )
         with self._torch.inference_mode():
-            outputs = self._model.generate(
+            outputs = self._base_generate(
                 **model_inputs,
                 generation_config=generation_config,
-                language=self.settings.language,
-                task=self.settings.task,
-                do_sample=False,
-                num_beams=self.settings.num_beams,
-                num_return_sequences=self.settings.num_return_sequences,
-                return_dict_in_generate=True,
-                return_timestamps=False,
+                decoder_input_ids=decoder_input_ids,
             )
             if (
                 not hasattr(outputs, "scores")

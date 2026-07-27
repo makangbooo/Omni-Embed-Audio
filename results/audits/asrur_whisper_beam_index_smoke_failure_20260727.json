@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "stage": "phase2_whisper_dtype_repair_smoke",
+  "attempt": 1,
+  "execution_git_commit": "6ef3c2ca221b76f70bbf5e23448e6f40b8b65896",
+  "host": "bitahub-a20618022373814272490966",
+  "gpu_count": 1,
+  "gpu_model": "NVIDIA GeForce RTX 4090",
+  "wrapper_exit_code": 1,
+  "selected_record_id": "en/fiqa:clean:4641",
+  "selected_audio_path": "/home/jg525/datasets/oea/squtr/extracted/source_data/en/fiqa/audio_clean/4641.wav",
+  "d2_d4_resource_audit_status": "complete",
+  "d2_d4_expected_selected_bytes": 5823662271,
+  "d2_d4_observed_selected_bytes": 5823662271,
+  "network_access_performed": false,
+  "dtype_mismatch_recurred": false,
+  "root_exception": "CUDA ScatterGatherKernel assertion: idx_dim >= 0 && idx_dim < index_size",
+  "outer_exception": "RuntimeError: 1 Whisper records failed; first=['en/fiqa:clean:4641']",
+  "root_cause": "Transformers 4.52.4 WhisperGenerationMixin expands num_return_sequences before beam search, splits and re-stacks score rows, but retains global beam indices. compute_transition_scores then gathers the compressed score tensor with out-of-range global indices.",
+  "evidence": [
+    "The prior FP32 input versus BF16 convolution exception did not recur, so the dtype repair reached beam decoding.",
+    "The CUDA assertion appeared only after Whisper began four-beam generation.",
+    "Transformers 4.52.4 generation_whisper.py expands input_features for num_return_sequences and sets the internal value to one.",
+    "The same wrapper indexes score tensors by global beam_indices while splitting outputs and later stacks those selected score rows.",
+    "The generic GenerationMixin transition-score path expects beam indices to address the uncompressed batch-by-beam score rows."
+  ],
+  "formal_metrics_present": false,
+  "completion_manifest_present": false,
+  "run_directory": null,
+  "run_directory_evidence_gap": "The user-provided terminal excerpt did not include RUN_DIR; the failed smoke artifacts remain on the remote host.",
+  "repair": {
+    "status": "implemented_locally",
+    "summary": [
+      "Keep the validated BF16 input alignment and add an explicit attention mask.",
+      "Build and validate an explicit English/transcribe/no-timestamps decoder prompt.",
+      "Bypass only WhisperGenerationMixin.generate and call the same frozen model through the base GenerationMixin beam search.",
+      "Retain four deterministic beams, four return sequences, output scores, transition log probabilities, and the proxy-posterior protocol.",
+      "Do not change the model, checkpoint, data, candidate set, or evaluation definition."
+    ],
+    "local_full_repository_tests_passed": 409
+  },
+  "next_action": "Commit and push the minimal beam-generation repair, then rerun the same one-record strict-offline RTX-4090 smoke before resuming Phase 2."
+}

@@ -580,6 +580,8 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
             "language": settings.language,
             "task": settings.task,
             "timestamps": False,
+            "generation_entrypoint": "base_GenerationMixin_generate",
+            "decoder_prompt": "explicit_language_task_no_timestamps",
             "posterior_status": "proxy_average_token_logprob_not_calibrated",
         },
     }

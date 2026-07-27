@@ -348,3 +348,19 @@ from the failed commit. The repair passes 407 repository tests; a one-record
 real RTX 4090 Whisper smoke remains required before attempt 3. Compact failure
 evidence is stored in
 `results/audits/asrur_phase2_whisper_dtype_failure_20260727.json`.
+
+The first one-record repair smoke at execution commit `6ef3c2c` confirmed that
+the input-dtype failure was removed and that all pinned D2--D4 resources passed
+strict local verification. It then exposed a second, independent compatibility
+failure in the Transformers 4.52.4 Whisper generation wrapper: the wrapper
+expands `num_return_sequences`, re-stacks beam score rows, and retains global
+beam indices, after which transition-score gathering indexes beyond the
+compressed tensor. CUDA consequently raised a `ScatterGatherKernel`
+out-of-bounds assertion for the selected record. The minimal repair keeps the
+same frozen checkpoint and four-best proxy-posterior protocol, constructs the
+English/transcribe/no-timestamps decoder prompt explicitly, and calls the
+model through the base `GenerationMixin` beam search. It does not change the
+data, candidate set, or evaluation. The repair passes 15 targeted and 409
+repository tests; a second one-record GPU smoke is required before Phase-2
+attempt 3. Compact evidence is stored in
+`results/audits/asrur_whisper_beam_index_smoke_failure_20260727.json`.

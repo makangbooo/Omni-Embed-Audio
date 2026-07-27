@@ -16,6 +16,7 @@ from AudioRetrieval.asr_uncertainty_reranking.model_adapters import (
     model_identity_from_config,
     prepare_whisper_model_inputs,
     scalar_logits,
+    whisper_decoder_prompt_tokens,
     whisper_valid_token_statistics,
 )
 
@@ -34,6 +35,16 @@ class FakeTensor:
     def to(self, **kwargs):
         self.calls.append(kwargs)
         return self
+
+
+class FakeWhisperProcessor:
+    def __init__(self, prompt):
+        self.prompt = prompt
+        self.calls = []
+
+    def get_decoder_prompt_ids(self, **kwargs):
+        self.calls.append(kwargs)
+        return self.prompt
 
 
 class ASRURModelAdapterTest(unittest.TestCase):
@@ -99,6 +110,42 @@ class ASRURModelAdapterTest(unittest.TestCase):
             [{"device": "cuda:0", "non_blocking": True}],
         )
         self.assertEqual(ignored.calls, [])
+
+    def test_whisper_decoder_prompt_is_explicit_and_fail_closed(self) -> None:
+        processor = FakeWhisperProcessor(
+            [(1, 50_259), (2, 50_360), (3, 50_364)]
+        )
+        result = whisper_decoder_prompt_tokens(
+            processor=processor,
+            decoder_start_token_id=50_258,
+            language="en",
+            task="transcribe",
+        )
+        self.assertEqual(result, (50_258, 50_259, 50_360, 50_364))
+        self.assertEqual(
+            processor.calls,
+            [
+                {
+                    "language": "en",
+                    "task": "transcribe",
+                    "no_timestamps": True,
+                }
+            ],
+        )
+        with self.assertRaisesRegex(ValueError, "contiguous"):
+            whisper_decoder_prompt_tokens(
+                processor=FakeWhisperProcessor([(2, 50_259)]),
+                decoder_start_token_id=50_258,
+                language="en",
+                task="transcribe",
+            )
+        with self.assertRaisesRegex(ValueError, "contiguous"):
+            whisper_decoder_prompt_tokens(
+                processor=FakeWhisperProcessor([(1, None)]),
+                decoder_start_token_id=50_258,
+                language="en",
+                task="transcribe",
+            )
 
     def test_whisper_hypothesis_builder_preserves_beam_order(self) -> None:
         hypotheses = build_whisper_hypotheses(
