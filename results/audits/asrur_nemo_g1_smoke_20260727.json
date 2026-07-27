@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "experiment_stage": "ASRUR Phase 1 G1 OEA-Nemo3B (+Cl) lock-bound embedding smoke",
+  "run_id": "oea_nemo3b_clotho_lock_bound_smoke_seed42_20260727_092654",
+  "remote_output_dir": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_lock_bound_smoke_seed42_20260727_092654",
+  "execution_git_commit": "1b23c50f1f399d5648e4fd2a9675bb4e16f47fde",
+  "wrapper_exit_code": 0,
+  "attempt_exit_code": 0,
+  "started_at": "2026-07-27T01:27:51.009126+00:00",
+  "finished_at": "2026-07-27T01:29:08.394975+00:00",
+  "strict_offline": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1"
+  },
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4090",
+    "driver_version": "580.76.05",
+    "torch": "2.7.1+cu126",
+    "compiled_cuda": "12.6",
+    "bf16_supported": true,
+    "total_memory_bytes": 25250627584,
+    "peak_allocated_bytes": 9816056320,
+    "peak_reserved_bytes": 10190061568
+  },
+  "model": {
+    "name": "OEA-Nemo3B (+Cl)",
+    "variant_id": "oea_nemo3b_cl",
+    "model_lock_sha256": "fd09e4d2b482aafdae7e297275c8106e10f82a6de99780d0ccfeb22b06bfc8c2",
+    "protocol_config_sha256": "8732119f084e6fdad60e66120889e5f7a3e603cd43c0df313de862539f065c81",
+    "checkpoint_sha256": "2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+    "unsafe_globals": [],
+    "lora_tensor_count": 544,
+    "missing_non_lora_base_keys": 1442,
+    "hidden_size": 2048,
+    "projection_dim": 512
+  },
+  "workload": {
+    "candidate_count": 5,
+    "query_count": 25,
+    "completed_audio_chunks": 5,
+    "completed_text_chunks": 25,
+    "pending_audio_chunks": 0,
+    "pending_text_chunks": 0,
+    "candidate_embedding_shape": [5, 512],
+    "query_embedding_shape": [25, 512]
+  },
+  "artifacts": {
+    "generation_metrics": {
+      "size_bytes": null,
+      "size_source": "not returned exactly; remote ls reported 8.4K",
+      "sha256": "f71d9aed5e8019adf18ee3810ad0f8271e1fd42c349b5dbf1a27b4a3ddb6f2a4"
+    },
+    "candidate_embeddings": {
+      "size_bytes": 10368,
+      "sha256": "891a201205b7f13f6ea055a4b7dd77d7ba4e210bf920c0947a770311176f9347"
+    },
+    "query_embeddings": {
+      "size_bytes": 51328,
+      "sha256": "91a016faf927b7fef0cab56bea16cb372a7547e7bfe28a97519d6e85dea11c34"
+    },
+    "candidate_metadata": {
+      "size_bytes": 804,
+      "sha256": "5dcce188f41515c198935b9a815c6dde326cd63f5a048e7fabd10dc05d1e0609"
+    },
+    "query_metadata": {
+      "size_bytes": 5409,
+      "sha256": "36f77fe2666423f503d1a374c356eca4e04bbb5bbe3e75ecf68f8c51a38bc01e"
+    }
+  },
+  "warnings": [
+    {
+      "category": "transformers_deprecation",
+      "message": "Video processor config is stored in preprocessor.json and will require a separate video_preprocessor.json in Transformers v5.",
+      "disposition": "preserved; do not mutate the checksum-locked model snapshot during reproduction"
+    },
+    {
+      "category": "transformers_config_compatibility",
+      "message": "Unrecognized keys in rope_scaling for rope_type=default: mrope_section.",
+      "disposition": "preserved as a non-fatal compatibility warning; validate retrieval metrics before drawing correctness conclusions"
+    }
+  ],
+  "conclusion": {
+    "smoke_gate_ready": true,
+    "full_clotho_embedding_authorized_by_smoke": true,
+    "paper_metric_reproduced": false,
+    "note": "This smoke proves resource, model-load, LoRA, projection, offline, and artifact contracts. It does not by itself reproduce the Clotho Table 2 recalls."
+  }
+}

@@ -1,6 +1,6 @@
 # ASR-Uncertainty Reranking 状态
 
-最后更新：2026-07-27（Nemo 5/25 锁绑定 GPU smoke 已就绪）
+最后更新：2026-07-27（Nemo 5/25 锁绑定 GPU smoke 完成）
 
 状态只使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、
 `COMPLETED`、`FAILED`、`BLOCKED`。
@@ -24,8 +24,8 @@
 | 0/2 | DATA-13D FiQA/NQ 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；reuse/validation/FiQA audit/wrapper=`0/0/0/0`；16,400/16,400 音频、manifest/cache SHA256 已固定；FiQA violations 与 split leakage 均为空 | 无；源音频混合 24 kHz/16 kHz，后续 runner 必须显式重采样 | 固化审计 JSON；进入模型验收与 Phase 1/2 runner 门禁 |
 | 1 | Nemo base/+Cl 当前缓存实时只读复核 | COMPLETED | `cd34cbc` | attempt 3 resource audit exit=`0`：base 22 files/9,423,120,401 B；+Cl 3 files/9,466,834,755 B；缺失/额外/incomplete/symlink/errors 均为空，源 checkpoint SHA256 与 LFS 一致 | 无 | 固定完成证据；不重复下载或更换 checkpoint |
 | 1 | Nemo inference-only checkpoint 与 model lock | COMPLETED | `58f80bb` | attempt 4 run=`asrur_nemo_phase1_audit_20260727_004107`：resource/preparation/lock 与 pipeline/wrapper 全部 exit=`0`；59,072,047-B derived SHA256 `2a5bee90...80c4`；canonical lock SHA256 `fd09e4d2...c8c2` | 无 | 锁定资源，进入锁绑定 GPU smoke 准备 |
-| 1 | Nemo 5/25 OEA embedding smoke | WAITING_USER | `ff73287` | 锁绑定 smoke/full config 与 wrapper 已提交；39 项相关 CPU 测试通过；GPU 尚未启动 | 需要用户切换到 1×RTX 4090 24GB 并执行 G1 smoke | 拉取最新分支；严格离线运行 5 音频/25 caption，返回 metrics、显存和完整日志 |
-| 1 | Nemo(+Cl) Clotho 表 2 T2A | TODO | N/A | 需要 1×GPU + CPU metrics | 依赖 smoke gate | 对照 21.57/47.16/60.36 |
+| 1 | Nemo 5/25 OEA embedding smoke | COMPLETED | `1b23c50` | RTX 4090 run=`oea_nemo3b_clotho_lock_bound_smoke_seed42_20260727_092654`；wrapper/attempt=`0/0`；严格离线；5×512/25×512；544 LoRA；pending=0；峰值 allocated/reserved=9.14/9.49 GiB | 无；两条 Transformers 兼容性警告已原样登记，不修改锁定模型 | 用同一 lock/protocol 进入全量 Clotho embedding |
+| 1 | Nemo(+Cl) Clotho 表 2 T2A | WAITING_USER | `ff73287` | 同锁全量 wrapper/config 已就绪；GPU 尚未启动 | 需要用户确认并继续使用 1×RTX 4090 执行 1,045 audio/5,225 caption 全量生成 | smoke gate 后运行全量 embedding，再切 CPU 计算并对照 21.57/47.16/60.36 |
 | 2 | FiQA corpus/qrels 协议与文档构造锁 | COMPLETED | `730e0fc` | corpus/train/dev/test=`57,638/5,500/500/648`；qrel pairs=`14,166/1,238/1,706`；四条件各 648；ID、规范化文本和 split leakage 检查全通过 | FiQA corpus 有 38 个官方空文档行，按固定 SQuTR loader 保留 | 后续索引不得过滤或合成这 38 行；缓存 manifest 绑定输入 SHA256 |
 | 2 | B1/B2/B3 四条件一级召回 | TODO | N/A | 需要 GPU | 依赖数据/模型下载和 Phase 1 | 报告 nDCG/MRR/Recall/Oracle |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |
