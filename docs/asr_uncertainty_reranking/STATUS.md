@@ -16,9 +16,10 @@
 - 验证：本地全仓 `388` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
 - Phase-2 dry-run attempt 2 已通过：17/17 个步骤、run、wrapper 和调用端退出码
   均为 0，stderr 为空；未加载模型、未使用 GPU、未产生研究指标。
-- 当前阻塞：FiQA Phase-2 正式冻结模型推理尚未获单独 GPU 批准。
-- 下一步：申请 1×RTX 4090 24GB，执行四噪声条件冻结一级召回与 Go/No-Go
-  所需候选召回/Oracle 指标。
+- 当前远程任务：用户已确认 `run_phase2_gpu` 在 1×RTX 4090 24GB 后台执行。
+  OEA-B3/B4/B5、ASR-E1/E10/E12 的完成状态仍以最终工件审计为准。
+- 下一步：后台完成后运行严格四条件 Go/No-Go 审计；任何条件不通过都返回
+  `NO_GO_REQUIRES_USER_DECISION`，不自动改变候选生成方式。
 
 最后更新：2026-07-27（Phase-2 CPU dry-run attempt 2 已通过）
 
@@ -51,9 +52,10 @@
 | 1 | Nemo(+Cl) Clotho 表 2 T2A | COMPLETED | `20533b1` | CPU suite=`oea_nemo3b_clotho_t2a_suite_seed42_20260727_125803`；suite/attempt/run=`0/0/0`；stderr 为空；all-caption=`21.7225/47.1196/60.4402`，seed0=`21.6268/46.7943/59.8086` | 严格论文 caption 选择仍 `[MISSING]`，因此两组 `[CODE] close` 分栏且 strict 观察保留 blocked；不得择优 | Phase 1 正确性门禁通过；D2–D4 验收完成后进入 Phase 2 FiQA 一级召回 |
 | 1 | Nemo(+Cl) Clotho A2T 方向检查 | COMPLETED | `7cfbfab` | CPU suite=`oea_nemo3b_clotho_a2t_suite_seed42_20260727_161133`；attempt=`0`、stderr 为空；1,045 audio→5,225 captions；R@1/5/10=`26.8900/51.3876/65.2632` | 无；这是 `[CODE]` 方向扩展，不是论文表格结果 | OEA-B2 完成；进入 FiQA frozen-index 方向 |
 | 2 | FiQA corpus/qrels 协议与文档构造锁 | COMPLETED | `730e0fc` | corpus/train/dev/test=`57,638/5,500/500/648`；qrel pairs=`14,166/1,238/1,706`；四条件各 648；ID、规范化文本和 split leakage 检查全通过 | FiQA corpus 有 38 个官方空文档行，按固定 SQuTR loader 保留 | 后续索引不得过滤或合成这 38 行；缓存 manifest 绑定输入 SHA256 |
-| 2 | B1/B2/B3 四条件一级召回 | WAITING_USER | `1ff9fc0` | 真实 runner 已实现并通过测试；每条件独立 648 query，统一 qrels ID；文档 embedding 跨条件复用且缓存契约强校验；两套 canonical model lock 与 CPU dry-run 均已完成 | 等待独立 GPU 批准和服务器切换 | 报告 nDCG/MRR/Recall/Oracle |
+| 2 | B1/B2/B3 四条件一级召回 | RUNNING_REMOTE | `c328dfd` | 用户确认 `run_phase2_gpu` 正在 1×RTX 4090 24GB 后台执行；每条件独立 648 query，统一 qrels ID | 等待真实工件和退出码，不能按启动状态标记完成 | 完成后审计 nDCG/MRR/Recall/Oracle |
 | 2 | Phase-2 CPU dry-run attempt 1 | FAILED | `7a098dd` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_164746`；resolve OEA=`0`，resolve vanilla=`1`，wrapper=`1`；`ModuleNotFoundError: scripts`；未加载模型/GPU | 直接脚本入口未把仓库根目录加入 `sys.path` | 拉取最小补丁后使用新 commit/cache root 重试；失败证据不删除 |
 | 2 | Phase-2 CPU dry-run attempt 2 | COMPLETED | `1ff9fc0` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_172606`；17/17 step exit=`0`，run/wrapper/caller=`0/0/0`，stderr 为空；CPU-only，未加载模型/GPU，未产生研究指标 | 无 | 请求 1×RTX 4090 24GB 正式执行 |
+| 2 | Phase-2 四条件结果与 Go/No-Go 审计 | COMPLETED | 待本提交 | 已实现 method/query/path/scale/exit 强校验、逐条件预注册门禁和保守汇总规则；9 项相关测试通过 | 等待远程 Phase-2 输入，因此目前没有决策 | 后台结束后生成独立 audit JSON |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |
 | 3 | 1-best CE、固定融合、RRF、Gold 上限 | BLOCKED | N/A | 未开始 | 依赖 Go | 复用唯一 OEA Top-100 |
 | 4 | 4-best、proxy posterior、不确定性实验 | BLOCKED | `8f28c55` | 缓存装配、聚合、特征、dev 选择、正式评测实现完成；模型推理未开始 | 依赖 Whisper 下载、Phase 3 缓存和 GPU 批准 | 补模型 adapter 后生成正式缓存 |

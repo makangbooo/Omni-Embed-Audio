@@ -23,9 +23,9 @@ Allowed statuses are `TODO`, `IN_PROGRESS`, `WAITING_USER`,
 | OEA-B0 | Lock OEA-Nemo3B(+Cl), its base model, prefix, pooling, projection, dimension, and normalization; run a real embedding smoke test | Prevents an invalid OEA baseline | COMPLETED | Canonical lock and RTX 4090 5-audio/25-text smoke; peak allocated 9.14 GiB |
 | OEA-B1 | Reproduce OEA-Nemo3B(+Cl) Clotho T2A R@1/5/10 | Numerical connection to the OEA paper | COMPLETED | Paper 21.57/47.16/60.36; reproduced all-caption 21.7225/47.1196/60.4402 |
 | OEA-B2 | Clotho audio-to-text direction sanity check using the selected Nemo checkpoint | Confirms the direction used by the new task before changing domains | COMPLETED | CPU suite `..._20260727_161133` completed at `7cfbfab`: 1,045 audio queries against 5,225 captions; R@1/5/10=`26.8900/51.3876/65.2632`; stderr empty; this is a `[CODE]` direction extension, not a paper-reported result |
-| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | WAITING_USER | Resumable formal runner, exact Top-100 stage and 17-step CPU dry-run are complete; needs separate GPU approval |
-| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | WAITING_USER | Canonical vanilla lock, resumable formal runner and CPU dry-run are complete; needs GPU allocation |
-| OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | BLOCKED | Evaluator now emits both direct and fixed-candidate oracle metrics; real OEA Top-100 is absent |
+| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | RUNNING_REMOTE | User reports the approved one-RTX-4090 Phase-2 wrapper is running in the background |
+| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | RUNNING_REMOTE | Runs sequentially inside the same approved Phase-2 wrapper |
+| OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | RUNNING_REMOTE | The same wrapper emits direct and fixed-candidate oracle metrics; completion awaits artifact audit |
 | OEA-B6 | Selected Nemo OEA audio/text latency, throughput, and peak memory on the study GPU | Measures the cost inherited by the proposed system | BLOCKED | Run after correctness; hardware must be recorded and separately approved |
 
 The following OEA-paper experiments are outside the ICASSP claim and will not
@@ -39,7 +39,7 @@ toward this checklist.
 
 | ID | Required result | Status | Evidence / blocker |
 |---|---|---|---|
-| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | WAITING_USER | D2–D4 strict acceptance and Phase-2 CPU dry-run passed; needs GPU execution |
+| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | RUNNING_REMOTE | Whisper 4-best cache and its 1-best BGE route are running in the approved Phase-2 wrapper |
 | ASR-E2 | B4: OEA Top-100 + 1-best cross-encoder | BLOCKED | Depends on frozen OEA candidates, Whisper, and CE score cache |
 | ASR-E3 | B5: fixed fusion using preregistered 4-best proxy-posterior ASR evidence | BLOCKED | Dev selection only; no test tuning |
 | ASR-E4 | B6: RRF using the same 4-best proxy-posterior ASR route | BLOCKED | Dev selection only; no test tuning |
@@ -48,9 +48,9 @@ toward this checklist.
 | ASR-E7 | B7c: 4-best proxy-posterior aggregation | BLOCKED | Needs Whisper N-best and CE cache |
 | ASR-E8 | Query-level uncertainty gate baseline | BLOCKED | Needs FiQA train/dev generated speech and frozen upstream caches |
 | ASR-E9 | Ours: candidate-level dynamic gate, three seeds | BLOCKED | Needs approved TTS/noise protocol and gate training |
-| ASR-E10 | U1: gold text query + BGE dense upper bound | BLOCKED | Formal dev-only instruction selection and test runner are complete; real BGE embedding cache not generated |
+| ASR-E10 | U1: gold text query + BGE dense upper bound | RUNNING_REMOTE | Generated and evaluated in the same Phase-2 wrapper; completion awaits audit |
 | ASR-E11 | U2: gold transcript + frozen cross-encoder upper bound | BLOCKED | Real CE cache not generated |
-| ASR-E12 | U3/U4: candidate oracle and candidate Recall@20/50/100 | BLOCKED | Code is wired into the dense evaluator; depends on real OEA Top-100 |
+| ASR-E12 | U3/U4: candidate oracle and candidate Recall@20/50/100 | RUNNING_REMOTE | Generated from the immutable OEA candidate set in Phase 2; completion awaits audit |
 | ASR-E13 | Main FiQA table: all required methods × four acoustic conditions | BLOCKED | Depends on ASR-E1 through ASR-E12 |
 | ASR-E14 | Three-seed gate mean, standard deviation, and 95% confidence interval | BLOCKED | Depends on ASR-E9 |
 | ASR-E15 | A1–A9 ablations | BLOCKED | Evaluation code is tested; real caches/results absent |

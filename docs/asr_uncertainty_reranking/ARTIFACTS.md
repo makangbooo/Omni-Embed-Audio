@@ -12,8 +12,9 @@
 | Phase-2 frozen-retrieval orchestrator | OEA/vanilla Omni/BGE/Whisper frozen inference, exact full-corpus rankings, dev-only BGE template selection, four-condition metrics and OEA candidate oracle | `scripts/run_asrur_phase2_frozen_retrieval.sh`, `scripts/select_asrur_bge_query_template.py` | IMPLEMENTED_NOT_RUN; `--execute` requires separate 1×RTX 4090 approval |
 | Phase-2 dry-run attempt 1 | CPU-only; OEA resolution passed, vanilla direct entrypoint import failed before model loading | `results/audits/asrur_phase2_dry_run_import_failure_20260727.json` | FAILED at execution `7a098dd`; original error preserved; minimal entrypoint fix passes 388 full tests |
 | Phase-2 dry-run attempt 2 | CPU-only end-to-end command/config/input validation; 17 planned steps | `results/audits/asrur_phase2_dry_run_success_20260727.json` | COMPLETE at execution `1ff9fc0`; 17/17 steps, run, wrapper and caller all exited 0; stderr empty; no model/GPU/network use |
+| Phase-2 result auditor | Strict four-condition method/query/path validation plus locked per-condition and conservative aggregate Go/No-Go | `scripts/audit_asrur_phase2_results.py`, `tests/test_audit_asrur_phase2_results.py` | IMPLEMENTED_AND_TESTED; does not change candidate generation and never converts a failed condition into automatic GO |
 
-最后更新：2026-07-27（Phase-2 CPU dry-run attempt 2）
+最后更新：2026-07-27（Phase-2 GPU execution running remotely）
 
 大型数据、权重、embedding、索引和日志不进入普通 Git。本表登记身份、路径、证据
 和使用限制。`historical remote evidence` 表示已有完成证据，但正式运行前仍要做
