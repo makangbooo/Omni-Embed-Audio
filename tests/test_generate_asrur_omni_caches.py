@@ -30,6 +30,8 @@ class GenerateASRUROmniCachesTest(unittest.TestCase):
         self.assertIn("len(args.conditions) != 1", text)
         self.assertIn('"id": value.query_id', text)
         self.assertIn('"record_id": value.record_id', text)
+        self.assertIn('choices=("both", "audio_only")', text)
+        self.assertIn("if include_documents", text)
 
 
 if __name__ == "__main__":

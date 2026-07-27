@@ -75,6 +75,15 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--text-batch-size", type=int, required=True)
     parser.add_argument("--audio-batch-size", type=int, required=True)
+    parser.add_argument(
+        "--content",
+        choices=("both", "audio_only"),
+        default="both",
+        help=(
+            "Encode documents and one acoustic condition, or encode only a "
+            "later condition while reusing the first run's document cache."
+        ),
+    )
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
@@ -182,21 +191,24 @@ def main() -> int:
         "embedding_dimension": embedding_dimension,
         "text_batch_size": args.text_batch_size,
         "audio_batch_size": args.audio_batch_size,
+        "content": args.content,
         "audio_protocol": "audio_only_no_text_prefix",
         "text_protocol": "query_prefix",
         "normalization": "l2",
     }
     ensure_identity(args.output_dir, identity)
+    include_documents = args.content == "both"
     document_ids_path = args.output_dir / "document_ids.jsonl"
     audio_ids_path = args.output_dir / "audio_ids.jsonl"
-    write_text_once_or_verify(
-        document_ids_path,
-        "".join(
-            json.dumps({"index": index, "id": value.document_id}, sort_keys=True)
-            + "\n"
-            for index, value in enumerate(documents)
-        ),
-    )
+    if include_documents:
+        write_text_once_or_verify(
+            document_ids_path,
+            "".join(
+                json.dumps({"index": index, "id": value.document_id}, sort_keys=True)
+                + "\n"
+                for index, value in enumerate(documents)
+            ),
+        )
     write_text_once_or_verify(
         audio_ids_path,
         "".join(
@@ -222,17 +234,21 @@ def main() -> int:
     audio_chunks = args.output_dir / "audio_chunks"
     document_chunks.mkdir(exist_ok=True)
     audio_chunks.mkdir(exist_ok=True)
-    pending_documents = [
-        (start, stop)
-        for start, stop in ranges(len(documents), args.text_batch_size)
-        if load_embedding_chunk(
-            document_chunks,
-            start,
-            stop,
-            embedding_dimension,
-        )
-        is None
-    ]
+    pending_documents = (
+        [
+            (start, stop)
+            for start, stop in ranges(len(documents), args.text_batch_size)
+            if load_embedding_chunk(
+                document_chunks,
+                start,
+                stop,
+                embedding_dimension,
+            )
+            is None
+        ]
+        if include_documents
+        else []
+    )
     pending_audio = [
         (start, stop)
         for start, stop in ranges(len(audio), args.audio_batch_size)
@@ -326,13 +342,14 @@ def main() -> int:
 
     document_embeddings = args.output_dir / "document_embeddings.npy"
     audio_embeddings = args.output_dir / "audio_embeddings.npy"
-    consolidate_embedding_chunks(
-        document_chunks,
-        total=len(documents),
-        batch_size=args.text_batch_size,
-        dimension=embedding_dimension,
-        destination=document_embeddings,
-    )
+    if include_documents:
+        consolidate_embedding_chunks(
+            document_chunks,
+            total=len(documents),
+            batch_size=args.text_batch_size,
+            dimension=embedding_dimension,
+            destination=document_embeddings,
+        )
     consolidate_embedding_chunks(
         audio_chunks,
         total=len(audio),
@@ -346,11 +363,16 @@ def main() -> int:
         report["peak_reserved_bytes"] = int(torch.cuda.max_memory_reserved(device))
     report["status"] = "complete"
     report["outputs"] = {
-        "document_embeddings": file_record(document_embeddings),
         "audio_embeddings": file_record(audio_embeddings),
-        "document_ids": file_record(document_ids_path),
         "audio_ids": file_record(audio_ids_path),
     }
+    if include_documents:
+        report["outputs"].update(
+            {
+                "document_embeddings": file_record(document_embeddings),
+                "document_ids": file_record(document_ids_path),
+            }
+        )
     atomic_write_json(metrics_path, report)
     manifest = build_cache_manifest(
         artifact_type=f"{args.mode}_fiqa_embeddings",
@@ -375,9 +397,15 @@ def main() -> int:
         command=sys.argv,
         git_commit=current_commit,
         outputs=[
-            file_record(document_ids_path),
+            *(
+                [
+                    file_record(document_ids_path),
+                    file_record(document_embeddings),
+                ]
+                if include_documents
+                else []
+            ),
             file_record(audio_ids_path),
-            file_record(document_embeddings),
             file_record(audio_embeddings),
             file_record(metrics_path),
         ],
@@ -385,6 +413,7 @@ def main() -> int:
             "mode": args.mode,
             "subset": args.subset,
             "conditions": list(args.conditions),
+            "content": args.content,
             "model_binding": binding,
             "audio_protocol": "audio_only_no_text_prefix",
             "text_protocol": "query_prefix",
