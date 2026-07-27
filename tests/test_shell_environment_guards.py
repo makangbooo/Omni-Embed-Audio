@@ -269,6 +269,21 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         )
         self.assertNotIn("rm -rf", nemo_source)
 
+        nemo_a2t_source = (
+            REPOSITORY_ROOT
+            / "scripts/run_nemo3b_cl_clotho_a2t_suite.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "configs/eval/nemo3b_cl_clotho_a2t_suite.json",
+            nemo_a2t_source,
+        )
+        self.assertIn(
+            "oea_nemo3b_clotho_a2t_suite_seed42",
+            nemo_a2t_source,
+        )
+        self.assertIn("run_qwen3b_clotho_retrieval_suite.sh", nemo_a2t_source)
+        self.assertNotIn("rm -rf", nemo_a2t_source)
+
     def test_positive_uiq_suite_is_cpu_only_and_non_overwriting(self) -> None:
         wrappers = (
             "run_qwen3b_clotho_positive_uiq_suite.sh",

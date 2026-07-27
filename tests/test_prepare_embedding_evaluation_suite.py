@@ -460,6 +460,30 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             config["expected_generation_protocol_sha256"],
         )
 
+    def test_nemo3b_cl_a2t_suite_is_multi_positive_and_lock_bound(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        config = load_suite_config(
+            repository_root / "configs/eval/nemo3b_cl_clotho_a2t_suite.json"
+        )
+        self.assertEqual(config["model"], "OEA-Nemo3B (+Cl)")
+        self.assertEqual(config["official_variant_id"], "oea_nemo3b_cl")
+        self.assertEqual(
+            config["official_model_lock_path"],
+            "results/model_locks/oea_nemo3b_cl.json",
+        )
+        self.assertEqual(len(config["protocols"]), 1)
+        protocol = config["protocols"][0]
+        self.assertEqual(protocol["task"], "a2t")
+        self.assertEqual(protocol["query_selection"], "all")
+        self.assertEqual(protocol["expected_evaluated_queries"], 1045)
+        self.assertIn("not paper-reported", protocol["paper_table"])
+        self.assertEqual(
+            file_identity(
+                repository_root / "configs/eval/nemo3b_cl_clotho_embeddings.json"
+            )["sha256"],
+            config["expected_generation_protocol_sha256"],
+        )
+
     def test_qwen3b_ac_suite_preserves_protocols_and_binds_its_own_lock(self) -> None:
         repository_root = Path(__file__).resolve().parents[1]
         clotho_tuned = load_suite_config(
