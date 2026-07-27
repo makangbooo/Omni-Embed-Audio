@@ -46,6 +46,13 @@ CONDA_BASE="$(resolve_conda_base)"
 source "${CONDA_BASE}/etc/profile.d/conda.sh"
 conda activate "${ENV_NAME}"
 export CUDA_VISIBLE_DEVICES=""
+# The auditor reads the immutable repository tree metadata but has no content
+# download path. Clear all Hub offline aliases so that this small metadata
+# request is not blocked by a parent shell.
+unset HF_HUB_OFFLINE
+unset TRANSFORMERS_OFFLINE
+unset HF_DATASETS_OFFLINE
+export HF_HUB_DISABLE_XET="1"
 
 exec > >(tee "${RUN_DIR}/stdout.log") 2> >(tee "${RUN_DIR}/stderr.log" >&2)
 echo "[INFO] Run directory: ${RUN_DIR}"
@@ -53,6 +60,7 @@ echo "[INFO] Backbone: ${BACKBONE_ID}"
 echo "[INFO] Model root: ${MODEL_ROOT}"
 echo "[INFO] Portable lock evidence: ${PORTABLE_LOCK}"
 echo "[INFO] GPU disabled"
+echo "[INFO] Network policy: fixed-revision Hugging Face metadata API only"
 echo "[INFO] No model or dataset download is performed"
 echo "[INFO] Existing model files are read and hashed but never modified"
 

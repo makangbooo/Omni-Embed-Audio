@@ -84,6 +84,8 @@ class RunVanillaBackboneModelPipelineTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("--portable-lock-evidence", asrur_wrapper)
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', asrur_wrapper)
+        self.assertIn("fixed-revision Hugging Face metadata API only", asrur_wrapper)
+        self.assertIn("unset HF_HUB_OFFLINE", asrur_wrapper)
         self.assertIn("No model or dataset download is performed", asrur_wrapper)
         for forbidden in ("rm -rf", "snapshot_download", "git reset"):
             self.assertNotIn(forbidden, implementation)
