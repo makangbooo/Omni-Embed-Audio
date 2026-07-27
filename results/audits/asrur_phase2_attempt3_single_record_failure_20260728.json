@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "stage": "phase2_frozen_retrieval_attempt3",
+  "execution_git_commit": "bc4450a2bb680313c3cee7085974d246a042d30c",
+  "host": "bitahub-a20618022373814272490966",
+  "gpu_count": 1,
+  "gpu_model": "NVIDIA GeForce RTX 4090",
+  "wrapper_exit_code": 1,
+  "completion_manifest_present": false,
+  "formal_metrics_present": false,
+  "completed_whisper_conditions": [
+    "clean",
+    "snr_20",
+    "snr_10"
+  ],
+  "failed_whisper_condition": "snr_0",
+  "failed_record": {
+    "record_id": "en/fiqa:snr_0:10639",
+    "query_id": "10639",
+    "manifest_index": 24,
+    "audio_path": "/home/jg525/datasets/oea/squtr/extracted/source_data/en/fiqa/audio_noise_snr_0/noise_snr0_10639.wav",
+    "duration_seconds": 3.64,
+    "sample_rate": 16000,
+    "channels": 1,
+    "frames": 58240,
+    "format": "WAV",
+    "subtype": "PCM_16",
+    "noise_id": "demand_PCAFETER_ch11",
+    "original_query_text": "Short term parking of a large inheritance?",
+    "file_exists": true,
+    "decode_ok": true
+  },
+  "snr_0_cache": {
+    "path": "/home/jg525/experiment_cache/asr_uncertainty/fiqa_phase2_bc4450a2bb68/whisper/snr_0",
+    "expected_records": 648,
+    "completed_shards": 647,
+    "failure_records": 1,
+    "preserved_for_resume": true
+  },
+  "failure": {
+    "exception_type": "WhisperGenerationStageError",
+    "failure_stage": "nbest_artifact_validation",
+    "root_exception": "ValueError: transition log probabilities must be finite",
+    "outer_exception": "Whisper stage=nbest_artifact_validation failed: ValueError: transition log probabilities must be finite",
+    "failure_file": "/home/jg525/experiment_cache/asr_uncertainty/fiqa_phase2_bc4450a2bb68/whisper/snr_0/failures/00000024_1785171687586799041.json"
+  },
+  "known_facts": [
+    "The audio member exists, is decoded successfully, and has the expected 16 kHz mono PCM metadata.",
+    "Four-beam generation completed before the N-best artifact validation failure.",
+    "At least one retained non-special generated token had a non-finite teacher-forced conditional log-probability.",
+    "The failure affected one of 648 snr_0 records; the other 647 immutable shards were preserved.",
+    "No GPU process remained after the wrapper exited."
+  ],
+  "not_yet_established": [
+    "Whether the non-finite value is specific to batched four-hypothesis BF16 scoring.",
+    "Whether scoring one hypothesis at a time in BF16 is finite.",
+    "Whether the exact BF16-generated sequences score finitely after upcasting the frozen weights and inputs to float32.",
+    "Which generated token and hypothesis contains the non-finite value."
+  ],
+  "repair_policy": "Do not filter, clamp, replace, or silently fall back from the non-finite score. Run an isolated diagnostic on the exact record before selecting a repair.",
+  "next_action": "Compare batched BF16, per-hypothesis BF16, and exact-sequence float32-upcast teacher-forced scores in an isolated non-mutating GPU diagnostic."
+}

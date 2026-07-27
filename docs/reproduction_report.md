@@ -391,3 +391,16 @@ Phase-2 attempt 3 to reuse the 11 checksummed complete OEA, vanilla-Nemotron,
 and BGE cache groups from attempt 2 while generating new four-condition
 Whisper caches. Compact evidence is stored in
 `results/audits/asrur_whisper_teacher_forced_smoke_success_20260728.json`.
+
+Phase-2 attempt 3 subsequently completed the clean, 20 dB, and 10 dB Whisper
+caches and 647 of 648 zero-dB shards. The only failed record was
+`en/fiqa:snr_0:10639`. Its 3.64-second, 16 kHz mono PCM audio exists and is
+decodable; four-beam generation completed, but N-best validation found a
+non-finite teacher-forced conditional log-probability for at least one
+retained non-special token. The wrapper failed closed, preserved every
+completed shard, released the GPU, and emitted no completion manifest or
+formal metric. The implementation does not filter, clamp, or replace the
+score. An isolated diagnostic now compares batched BF16, per-hypothesis BF16,
+and FP32-upcast scoring of the exact same BF16-generated beam sequences before
+a repair is selected. Compact failure evidence is stored in
+`results/audits/asrur_phase2_attempt3_single_record_failure_20260728.json`.
