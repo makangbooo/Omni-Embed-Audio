@@ -45,7 +45,7 @@
 | 2 ASR reranking 扩展 | 通用 CPU normalization、4-best proxy posterior、指标与缓存契约 | COMPLETED | `8cc5984` | 本地纯 CPU 38 项相关测试通过；无下载、GPU、推理或训练 | 无；模型适配和真实实验仍受各阶段门禁约束 | DATA-13B 后下载已批准的 FiQA/Whisper/BGE；模型 runner 复用此唯一公式实现 |
 | 2 ASR reranking 扩展 | B1–B7/QG/Ours/U1–U4/A1–A9 CPU 主实验流水线 | COMPLETED | `8f28c55` | 本地 58 项专项、345 项全仓测试通过；端到端仅合成缓存，无研究数值 | 模型 adapter 与真实缓存等待数据/模型和 GPU 阶段 | D1–D4 可在 CPU 下载；DATA-13C 成功后运行 FiQA/SQuTR 数据审计 |
 | 2 ASR reranking 扩展 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`：5/5 files、download/wrapper exit=`0/0`、manifest=`complete`、目标目录约 47 MiB | 无；真实数据协议审计等待目标子集 manifest | DATA-13D 在同一 CPU run 中执行 FiQA split/count/hash/leakage 审计 |
-| 2 ASR reranking 扩展 | D2–D4 Whisper/BGE 固定资源下载 | WAITING_USER | `92746e5` | strict-offline run=`asrur_d2_d4_model_audit_20260727_132612`，audit/wrapper=`1/1`；D3/D4 的固定 revision、逐文件大小/SHA256 与 LFS 状态全部通过；D2 revision 正确但缺 `model.safetensors` | 仅 D2 缺 3,087,130,976-byte 权重文件；审计未修改或删除任何模型 | 只补 D2 缺失文件并复跑同一严格离线验收；不重下 D3/D4 |
+| 2 ASR reranking 扩展 | D2–D4 Whisper/BGE 固定资源下载 | RUNNING_REMOTE | `6e55e2b` | D3/D4 已严格通过；D2 repair run=`asrur_d2_whisper_repair_20260727_134626`，PID `4940`，CPU-only，启动成功并使用 `.part` 断点续传；13:48 约 92.9 MiB/2.944 GiB，自动 strict audit 尚未开始 | 仅等待 D2 的 3,087,130,976-byte 权重下载、SHA256 校验与自动验收 | 不重复启动；结束后收集 repair/audit 两级退出码与最终 SHA256 |
 | 2 OEA-6 RTX 4090 效率扩展 | OEA-Qwen3B-Cl 查询编码延迟、显存、吞吐与参数量 | COMPLETED | `a2c13da` | `...rtx4090_efficiency_20260721_211229`：clean worktree、exit 0；1,045 audio 均值/P50/P95=`295.515/287.715/423.286 ms`，5,225 text=`38.373/38.228/40.688 ms`；峰值 allocated/reserved=`9.307/10.115 GiB`；latencies/metrics SHA256 已固定 | `[INFERRED] hardware-mismatched`，不得据此判定 A100 论文延迟或显存是否复现；checkpoint LoRA+双 head 实测 14.71488M，对论文 16.2M 少 1.48512M，统计口径 `[MISSING]` | 小型审计证据已登记；该结果作为同 4090 SpeechXBT baseline，保留原始 latency 文件远程路径与哈希 |
 | 2 OEA-6 A100 论文同硬件对照 | OEA-Qwen3B-Cl 查询编码延迟、显存与吞吐 | COMPLETED | `9f62e20` | `...a100_efficiency_20260721_214156`：严格 A100-SXM4-80GB 门禁、clean worktree、precheck/run/attempt exit 均为 0；1,045 audio 均值/P50/P95=`273.207/267.578/381.090 ms`，5,225 text=`46.638/45.318/52.117 ms`；峰值 allocated/reserved=`9.307/10.115 GiB`；三项工件 SHA256 已固定 | `[MISSING]` 论文未公开计时边界、显存统计和参数计数口径，且未明确效率行使用 Base 或 +Cl checkpoint；因此控制实验完成，但 Tables 5/16 的八个严格论文观察继续标为 `blocked` | 登记小型 A100 审计证据和严格 blocked 观察；与 RTX 4090 结果分栏，下一步等待 OEA-5 目标语料协议 |
 | 2 指标 | Canonical T2A/T2T/UIQ embedding evaluator | COMPLETED | `43158ae` | 确定性 ID 检索、caption 多正例/排除 self、显式 query 子集、完整排名和严格输入校验已实现；相关 15 项测试通过 | 论文未公开 T2T caption 选择与 tie 口径；已在协议文档标为 `[MISSING]` | 接入 checkpoint embedding 生成器 |
@@ -89,7 +89,8 @@
   B1–B7/U1–U4、query/candidate gate、A1–A9 到 bootstrap/统一表格的 CPU
   流水线；58 项专项和 345 项全仓测试通过，没有产生真实实验数值。
 - 当前阻塞：主实验数据不再受 DPC 遗留租约阻塞。旧租约只影响全六子集 DATA-13C/OEA-5；DATA-13D 已以干净 commit 完成且所有门禁通过。
-- 下一步：在 CPU 服务器只补 D2 的 3,087,130,976-byte `model.safetensors`，
-  然后复跑固定 revision/LFS/size/SHA256 严格离线验收。D3/D4 已完成，不得重下。
+- 下一步：等待 CPU 后台 D2 repair 完成 3,087,130,976-byte `model.safetensors`
+  的下载、大小/SHA256 校验和固定 revision/LFS/size/SHA256 严格离线验收。
+  D3/D4 已完成，不得重下或重复启动任务。
   全部通过后生成 D2–D4 canonical model locks，再提交 Phase 2 FiQA 一级召回的
   独立 GPU 审批说明。
