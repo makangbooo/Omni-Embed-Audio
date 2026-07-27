@@ -32,6 +32,7 @@ GIT_COMMIT="$(git rev-parse HEAD)"
 COMMIT_SHORT="${GIT_COMMIT:0:12}"
 CACHE_ROOT="${PHASE2_CACHE_ROOT:-/home/jg525/experiment_cache/asr_uncertainty/fiqa_phase2_${COMMIT_SHORT}}"
 REUSE_CACHE_ROOT="${PHASE2_REUSE_CACHE_ROOT:-}"
+REQUIRED_REUSE_COUNT="${PHASE2_REQUIRED_REUSE_COUNT:-0}"
 RESULT_ROOT="${PHASE2_RESULT_ROOT:-${ROOT_DIR}/results/raw/asrur_phase2_fiqa_${COMMIT_SHORT}}"
 RUN_ID="asrur_phase2_frozen_retrieval_${MODE#--}_$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/${RUN_ID}"
@@ -99,13 +100,20 @@ record_reused_step() {
 reuse_complete_cache_dir() {
   local source=$1
   local destination=$2
+  local destination_already_linked=0
   if [[ "${MODE}" != "--execute" || -z "${REUSE_CACHE_ROOT}" ]]; then
     return 0
   fi
   if [[ ! -f "${source}/cache_manifest.json" ]]; then
     return 0
   fi
-  if [[ -e "${destination}" || -L "${destination}" ]]; then
+  if [[ -L "${destination}" ]]; then
+    if [[ "$(readlink -f "${destination}")" != "$(readlink -f "${source}")" ]]; then
+      echo "[ERROR] Existing reuse link targets a different cache: ${destination}" >&2
+      return 7
+    fi
+    destination_already_linked=1
+  elif [[ -e "${destination}" ]]; then
     return 0
   fi
   python - "${source}/cache_manifest.json" <<'PY'
@@ -128,8 +136,10 @@ print(
     f"before cross-commit reuse: {manifest_path}"
 )
 PY
-  mkdir -p "$(dirname "${destination}")"
-  ln -s "${source}" "${destination}"
+  if [[ "${destination_already_linked}" -eq 0 ]]; then
+    mkdir -p "$(dirname "${destination}")"
+    ln -s "${source}" "${destination}"
+  fi
   printf '{"source":"%s","destination":"%s","manifest_sha256":"%s"}\n' \
     "${source}" \
     "${destination}" \
@@ -148,6 +158,10 @@ run_cache_step() {
   run_step "${name}" "$@"
 }
 
+if [[ ! "${REQUIRED_REUSE_COUNT}" =~ ^[0-9]+$ ]]; then
+  echo "[ERROR] PHASE2_REQUIRED_REUSE_COUNT must be a non-negative integer." >&2
+  exit 3
+fi
 if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
   echo "[ERROR] Formal Phase-2 runner requires a clean Git worktree." >&2
   git status --short --untracked-files=all >&2
@@ -180,6 +194,7 @@ done
   printf 'mode=%s\n' "${MODE}"
   printf 'cache_root=%s\n' "${CACHE_ROOT}"
   printf 'reuse_cache_root=%s\n' "${REUSE_CACHE_ROOT}"
+  printf 'required_reuse_count=%s\n' "${REQUIRED_REUSE_COUNT}"
   printf 'result_root=%s\n' "${RESULT_ROOT}"
   printf 'text_batch_size=%s\n' "${TEXT_BATCH_SIZE}"
   printf 'audio_batch_size=%s\n' "${AUDIO_BATCH_SIZE}"
@@ -250,6 +265,23 @@ if [[ -n "${REUSE_CACHE_ROOT}" ]]; then
       "${REUSE_CACHE_ROOT}/bge/dev_${template}" \
       "${CACHE_ROOT}/bge/dev_${template}"
   done
+  ACTUAL_REUSE_COUNT=0
+  if [[ -f "${RUN_DIR}/reused_cache_dirs.jsonl" ]]; then
+    ACTUAL_REUSE_COUNT="$(wc -l < "${RUN_DIR}/reused_cache_dirs.jsonl")"
+    ACTUAL_REUSE_COUNT="${ACTUAL_REUSE_COUNT//[[:space:]]/}"
+  fi
+  {
+    printf 'required_reuse_count=%s\n' "${REQUIRED_REUSE_COUNT}"
+    printf 'actual_reuse_count=%s\n' "${ACTUAL_REUSE_COUNT}"
+  } | tee "${RUN_DIR}/reuse_summary.txt"
+  if [[ "${REQUIRED_REUSE_COUNT}" -gt 0 ]] \
+    && [[ "${ACTUAL_REUSE_COUNT}" -ne "${REQUIRED_REUSE_COUNT}" ]]; then
+    echo "[ERROR] Required ${REQUIRED_REUSE_COUNT} immutable cache reuses; observed ${ACTUAL_REUSE_COUNT}." >&2
+    exit 6
+  fi
+elif [[ "${REQUIRED_REUSE_COUNT}" -gt 0 ]]; then
+  echo "[ERROR] PHASE2_REQUIRED_REUSE_COUNT requires PHASE2_REUSE_CACHE_ROOT." >&2
+  exit 6
 fi
 run_step resolve_oea \
   python scripts/build_official_oea_eval_config.py \

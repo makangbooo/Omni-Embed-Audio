@@ -26,12 +26,23 @@ class RunASRURPhase2FrozenRetrievalTest(unittest.TestCase):
         self.assertIn("TRANSFORMERS_OFFLINE=1", source)
         self.assertIn("HF_DATASETS_OFFLINE=1", source)
         self.assertIn("PHASE2_REUSE_CACHE_ROOT", source)
+        self.assertIn("PHASE2_REQUIRED_REUSE_COUNT", source)
         self.assertIn("reuse_complete_cache_dir", source)
         self.assertIn("run_cache_step", source)
         self.assertIn("reused_cache_dirs.jsonl", source)
         self.assertIn('ln -s "${source}" "${destination}"', source)
         self.assertIn("verify_file_records", source)
         self.assertIn("refusing cross-commit cache reuse", source)
+        self.assertIn("reuse_summary.txt", source)
+        self.assertIn(
+            "Required ${REQUIRED_REUSE_COUNT} immutable cache reuses",
+            source,
+        )
+        self.assertIn("destination_already_linked=1", source)
+        self.assertIn(
+            'readlink -f "${destination}")" != "$(readlink -f "${source}")',
+            source,
+        )
         self.assertNotIn("rm -", source)
         self.assertNotIn("git reset", source)
         self.assertNotIn("git clean", source)
