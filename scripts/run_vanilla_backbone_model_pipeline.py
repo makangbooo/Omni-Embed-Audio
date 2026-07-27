@@ -31,6 +31,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--lock-output", type=Path, required=True)
+    parser.add_argument("--portable-lock-evidence", action="store_true")
     return parser.parse_args()
 
 
@@ -45,12 +46,20 @@ def git_output(*arguments: str) -> str:
     return completed.stdout.strip()
 
 
-def validate_paths(backbone_id: str, output_dir: Path, lock_output: Path) -> None:
+def validate_paths(
+    backbone_id: str,
+    output_dir: Path,
+    lock_output: Path,
+    *,
+    portable_lock_evidence: bool = False,
+) -> None:
     logs_root = (REPOSITORY_ROOT / "logs").resolve()
     if not output_dir.is_relative_to(logs_root) or output_dir == logs_root:
         raise ValueError("pipeline output directory must be a child of repository logs/")
     expected = (
-        REPOSITORY_ROOT / "results/model_locks" / f"{backbone_id}.json"
+        output_dir.parent / f"{backbone_id}.portable_model_lock.json"
+        if portable_lock_evidence
+        else REPOSITORY_ROOT / "results/model_locks" / f"{backbone_id}.json"
     ).resolve()
     if lock_output != expected:
         raise ValueError(f"lock output must use the canonical backbone path: {expected}")
@@ -88,7 +97,12 @@ def main() -> int:
     output_dir = args.output_dir.resolve()
     lock_output = args.lock_output.resolve()
     plan = resolve_backbone_audit_plan(args.backbone, registry)
-    validate_paths(args.backbone, output_dir, lock_output)
+    validate_paths(
+        args.backbone,
+        output_dir,
+        lock_output,
+        portable_lock_evidence=args.portable_lock_evidence,
+    )
     if output_dir.exists():
         raise FileExistsError(f"refusing to reuse pipeline output: {output_dir}")
     if lock_output.exists():
@@ -112,6 +126,11 @@ def main() -> int:
         "backbone_plan": plan,
         "model_root": str(model_root),
         "lock_output": lock_output.relative_to(REPOSITORY_ROOT).as_posix(),
+        "lock_output_scope": (
+            "ignored_remote_evidence"
+            if args.portable_lock_evidence
+            else "canonical_repository_artifact"
+        ),
         "stages": {},
     }
     atomic_write_json(report_path, report)
@@ -133,20 +152,23 @@ def main() -> int:
             report=report,
             report_path=report_path,
         )
+        lock_command = [
+            sys.executable,
+            str(REPOSITORY_ROOT / "scripts/build_vanilla_backbone_lock.py"),
+            "--registry",
+            str(registry),
+            "--backbone",
+            args.backbone,
+            "--model-resource-audit",
+            str(audit_path),
+            "--output",
+            str(lock_output),
+        ]
+        if args.portable_lock_evidence:
+            lock_command.append("--portable-lock-evidence")
         run_stage(
             name="model_lock",
-            command=[
-                sys.executable,
-                str(REPOSITORY_ROOT / "scripts/build_vanilla_backbone_lock.py"),
-                "--registry",
-                str(registry),
-                "--backbone",
-                args.backbone,
-                "--model-resource-audit",
-                str(audit_path),
-                "--output",
-                str(lock_output),
-            ],
+            command=lock_command,
             report=report,
             report_path=report_path,
         )

@@ -8,7 +8,10 @@ import tempfile
 import unittest
 
 from scripts.audit_vanilla_backbone_resources import resolve_backbone_audit_plan
-from scripts.build_vanilla_backbone_lock import build_vanilla_lock
+from scripts.build_vanilla_backbone_lock import (
+    build_vanilla_lock,
+    validate_output_path,
+)
 from scripts.vanilla_backbone_registry import (
     DEFAULT_REGISTRY,
     EXPECTED_BACKBONE_IDS,
@@ -169,6 +172,25 @@ class VanillaBackboneModelLockTest(unittest.TestCase):
     def test_unknown_backbone_is_rejected_before_audit(self) -> None:
         with self.assertRaisesRegex(ValueError, "unknown backbone"):
             resolve_backbone_audit_plan("vanilla_unknown")
+
+    def test_portable_output_is_scoped_below_logs(self) -> None:
+        output = (
+            Path(__file__).resolve().parents[1]
+            / "logs"
+            / "run"
+            / "vanilla_nemotron_3b.portable_model_lock.json"
+        ).resolve()
+        validate_output_path(
+            output,
+            backbone_id="vanilla_nemotron_3b",
+            portable_lock_evidence=True,
+        )
+        with self.assertRaises(ValueError):
+            validate_output_path(
+                output.with_name("wrong.json"),
+                backbone_id="vanilla_nemotron_3b",
+                portable_lock_evidence=True,
+            )
 
 
 if __name__ == "__main__":

@@ -34,7 +34,36 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     parser.add_argument("--model-resource-audit", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--portable-lock-evidence",
+        action="store_true",
+        help="Write validated evidence below logs/ instead of the canonical tracked path.",
+    )
     return parser.parse_args()
+
+
+def validate_output_path(
+    output: Path,
+    *,
+    backbone_id: str,
+    portable_lock_evidence: bool,
+) -> None:
+    if portable_lock_evidence:
+        logs_root = (REPOSITORY_ROOT / "logs").resolve()
+        if (
+            not output.is_relative_to(logs_root)
+            or output == logs_root
+            or output.name != f"{backbone_id}.portable_model_lock.json"
+        ):
+            raise ValueError(
+                "portable vanilla lock must use its exact backbone filename below logs/"
+            )
+        return
+    expected = (
+        REPOSITORY_ROOT / "results/model_locks" / f"{backbone_id}.json"
+    ).resolve()
+    if output != expected:
+        raise ValueError(f"lock output must use the canonical backbone path: {expected}")
 
 
 def validate_scope(
@@ -128,11 +157,11 @@ def build_vanilla_lock(
 def main() -> int:
     args = parse_args()
     output = args.output.resolve()
-    expected = (
-        REPOSITORY_ROOT / "results/model_locks" / f"{args.backbone}.json"
-    ).resolve()
-    if output != expected:
-        raise ValueError(f"lock output must use the canonical backbone path: {expected}")
+    validate_output_path(
+        output,
+        backbone_id=args.backbone,
+        portable_lock_evidence=args.portable_lock_evidence,
+    )
     if output.exists():
         raise FileExistsError(f"refusing to overwrite existing model lock: {output}")
     if git_output("status", "--short"):
