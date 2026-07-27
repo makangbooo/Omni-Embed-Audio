@@ -404,3 +404,24 @@ score. An isolated diagnostic now compares batched BF16, per-hypothesis BF16,
 and FP32-upcast scoring of the exact same BF16-generated beam sequences before
 a repair is selected. Compact failure evidence is stored in
 `results/audits/asrur_phase2_attempt3_single_record_failure_20260728.json`.
+
+The isolated retry at execution commit `c294730` completed in 33 seconds on
+one RTX 4090. For the same `en/fiqa:snr_0:10639` record, all four beam sequence
+scores were finite, and every retained non-special token score was finite in
+BF16 batched, BF16 per-hypothesis, and FP32-upcast exact-sequence scoring.
+Peak allocated GPU memory was 6,448,808,960 bytes. The attempt-3 failure is
+therefore not a stable property of the audio or one fixed scoring path. The
+evidence is consistent with a transient same-protocol low-precision numerical
+failure, but it does not identify a lower-level CUDA kernel root cause.
+
+The recovery policy remains fail-closed. Complete caches are reused only
+after their immutable outputs verify. Partial reuse validates every shard
+against the expected query, condition, audio path, four-hypothesis schema, and
+finite scores, and records the exact source Git commit and per-file hashes.
+Only explicitly classified non-finite Whisper failures may be retried, at
+most three times, without changing the model, dtype, decoding, scoring, or
+input. Every failed attempt is retained, and only the first strict finite
+same-protocol result may become a shard. Filtering, clamping, replacing a
+score, or silently switching to FP32 is prohibited. Success evidence is
+stored in
+`results/audits/asrur_whisper_numeric_diagnostic_success_20260728.json`.

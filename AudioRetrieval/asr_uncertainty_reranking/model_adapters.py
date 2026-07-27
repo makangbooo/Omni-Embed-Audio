@@ -8,6 +8,7 @@ model and never initializes CUDA.
 from __future__ import annotations
 
 import copy
+import gc
 import math
 from dataclasses import dataclass
 from math import gcd
@@ -633,6 +634,28 @@ class WhisperNBestGenerator:
         self._processor = processor
         self._model = model
         self._base_generate = GenerationMixin.generate.__get__(model, type(model))
+
+    def unload(self) -> None:
+        """Release a loaded frozen model before an audited fresh retry."""
+
+        torch_module = self._torch
+        self._base_generate = None
+        self._model = None
+        self._processor = None
+        self._torch = None
+        gc.collect()
+        if (
+            torch_module is not None
+            and self.device.startswith("cuda")
+            and torch_module.cuda.is_available()
+        ):
+            torch_module.cuda.empty_cache()
+
+    def reload(self) -> None:
+        """Reload identical pinned local weights without changing protocol."""
+
+        self.unload()
+        self.load()
 
     def generate(
         self,

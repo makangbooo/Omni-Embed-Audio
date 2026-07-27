@@ -52,14 +52,26 @@ from AudioRetrieval.asr_uncertainty_reranking.model_adapters import (  # noqa: E
     BgeDenseEncoder,
     BgeDenseSettings,
     BgeRerankerSettings,
+    WhisperGenerationStageError,
     WhisperNBestGenerator,
     WhisperSettings,
     load_audio_mono,
     model_identity_from_config,
 )
+from AudioRetrieval.asr_uncertainty_reranking.schema import (  # noqa: E402
+    NBestHypothesis,
+)
 
 BGE_QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: "
 MAX_CONSECUTIVE_WHISPER_FAILURES = 8
+MAX_WHISPER_RECORD_ATTEMPTS = 3
+RETRYABLE_WHISPER_NUMERIC_STAGES = frozenset(
+    {
+        "four_beam_output_validation",
+        "teacher_forced_conditional_logprob",
+        "nbest_artifact_validation",
+    }
+)
 
 
 def utc_now() -> str:
@@ -144,6 +156,19 @@ def json_text(value: object) -> str:
         )
         + "\n"
     )
+
+
+def strict_json_object(path: Path) -> dict[str, Any]:
+    def reject_constant(value: str) -> None:
+        raise ValueError(f"non-standard JSON numeric constant {value!r}")
+
+    value = json.loads(
+        path.read_text(encoding="utf-8"),
+        parse_constant=reject_constant,
+    )
+    if not isinstance(value, dict):
+        raise TypeError(f"JSON artifact is not an object: {path}")
+    return value
 
 
 def write_text_once_or_verify(path: Path, content: str) -> None:
@@ -276,12 +301,16 @@ def record_failure(
     identifier: str,
     *,
     exception: BaseException | None = None,
-) -> None:
+    attempt: int | None = None,
+    max_attempts: int | None = None,
+    will_retry: bool = False,
+) -> Path:
     failure_dir = output_dir / "failures"
     failure_dir.mkdir(exist_ok=True)
     failure_stage = getattr(exception, "stage", None)
+    destination = failure_dir / f"{index:08d}_{time.time_ns()}.json"
     atomic_write_json(
-        failure_dir / f"{index:08d}_{time.time_ns()}.json",
+        destination,
         {
             "schema_version": 1,
             "index": index,
@@ -291,9 +320,13 @@ def record_failure(
                 None if exception is None else type(exception).__name__
             ),
             "failure_stage": failure_stage,
+            "attempt": attempt,
+            "max_attempts": max_attempts,
+            "will_retry": will_retry,
             "error": traceback.format_exc(),
         },
     )
+    return destination
 
 
 def shard_path(output_dir: Path, index: int) -> Path:
@@ -303,6 +336,224 @@ def shard_path(output_dir: Path, index: int) -> Path:
 def save_json_shard(output_dir: Path, index: int, row: Mapping[str, Any]) -> None:
     path = shard_path(output_dir, index)
     write_text_once_or_verify(path, json_text(dict(row)))
+
+
+def validate_whisper_shard(
+    path: Path,
+    *,
+    index: int,
+    record: Any,
+    expected_hypotheses: int,
+) -> dict[str, Any]:
+    row = strict_json_object(path)
+    expected_keys = {
+        "query_id",
+        "record_id",
+        "source_query_id",
+        "condition",
+        "audio_path",
+        "no_speech_probability",
+        "no_speech_probability_status",
+        "hypotheses",
+    }
+    if set(row) != expected_keys:
+        raise RuntimeError(
+            f"Whisper shard {index} fields differ: "
+            f"{sorted(set(row) ^ expected_keys)}"
+        )
+    expected_identity = {
+        "query_id": record.query_id,
+        "record_id": record.record_id,
+        "source_query_id": record.query_id,
+        "condition": record.condition,
+        "audio_path": record.audio_path,
+        "no_speech_probability": None,
+        "no_speech_probability_status": (
+            "not_reliably_exposed_by_generation_api"
+        ),
+    }
+    observed_identity = {
+        key: row.get(key)
+        for key in expected_identity
+    }
+    if observed_identity != expected_identity:
+        raise RuntimeError(f"Whisper shard {index} record identity differs")
+    raw_hypotheses = row.get("hypotheses")
+    if (
+        not isinstance(raw_hypotheses, list)
+        or len(raw_hypotheses) != expected_hypotheses
+    ):
+        raise RuntimeError(
+            f"Whisper shard {index} must contain "
+            f"{expected_hypotheses} hypotheses"
+        )
+    hypotheses = []
+    for raw in raw_hypotheses:
+        if not isinstance(raw, dict):
+            raise TypeError(f"Whisper shard {index} hypothesis is not an object")
+        if set(raw) != {
+            "rank",
+            "text",
+            "sequence_score",
+            "average_token_logprob",
+            "valid_token_count",
+        }:
+            raise RuntimeError(f"Whisper shard {index} hypothesis fields differ")
+        hypotheses.append(
+            NBestHypothesis(
+                rank=raw["rank"],
+                text=raw["text"],
+                sequence_score=raw["sequence_score"],
+                average_token_logprob=raw["average_token_logprob"],
+                valid_token_count=raw["valid_token_count"],
+            )
+        )
+    if tuple(value.rank for value in hypotheses) != tuple(
+        range(1, expected_hypotheses + 1)
+    ):
+        raise RuntimeError(f"Whisper shard {index} ranks are not contiguous")
+    if any(value.sequence_score is None for value in hypotheses):
+        raise RuntimeError(f"Whisper shard {index} sequence score is absent")
+    sequence_scores = [
+        float(value.sequence_score)
+        for value in hypotheses
+        if value.sequence_score is not None
+    ]
+    if sequence_scores != sorted(sequence_scores, reverse=True):
+        raise RuntimeError(
+            f"Whisper shard {index} is not ordered by beam sequence score"
+        )
+    return row
+
+
+def whisper_numeric_failure_is_retryable(exception: BaseException) -> bool:
+    if not isinstance(exception, WhisperGenerationStageError):
+        return False
+    if exception.stage not in RETRYABLE_WHISPER_NUMERIC_STAGES:
+        return False
+    message = str(exception).casefold()
+    return "non-finite" in message or "must be finite" in message
+
+
+def whisper_resume_identity_compatible(
+    source: Mapping[str, Any],
+    destination: Mapping[str, Any],
+    *,
+    expected_source_git_commit: str,
+) -> None:
+    source_value = dict(source)
+    destination_value = dict(destination)
+    observed_source_commit = source_value.pop("git_commit", None)
+    destination_commit = destination_value.pop("git_commit", None)
+    if observed_source_commit != expected_source_git_commit:
+        raise RuntimeError(
+            "Whisper partial resume source commit differs: "
+            f"{observed_source_commit!r}"
+        )
+    if not isinstance(destination_commit, str) or not destination_commit:
+        raise RuntimeError("Whisper destination Git commit is absent")
+    source_retry = source_value.pop("record_retry", None)
+    destination_retry = destination_value.pop("record_retry", None)
+    if source_retry is not None:
+        raise RuntimeError(
+            "Whisper partial resume source unexpectedly has a retry policy"
+        )
+    if not isinstance(destination_retry, Mapping):
+        raise RuntimeError("Whisper destination retry policy is absent")
+    if source_value != destination_value:
+        differing = sorted(
+            key
+            for key in set(source_value) | set(destination_value)
+            if source_value.get(key) != destination_value.get(key)
+        )
+        raise RuntimeError(
+            "Whisper partial resume identity differs outside the audited "
+            f"Git/retry fields: {differing}"
+        )
+
+
+def import_whisper_resume_shards(
+    *,
+    source_dir: Path,
+    destination_dir: Path,
+    records: Sequence[Any],
+    expected_hypotheses: int,
+    expected_source_git_commit: str,
+    destination_identity: Mapping[str, Any],
+) -> Path:
+    source_dir = source_dir.resolve()
+    destination_dir = destination_dir.resolve()
+    if source_dir == destination_dir:
+        raise RuntimeError("Whisper partial resume source and destination match")
+    if not source_dir.is_dir():
+        raise FileNotFoundError(f"Whisper partial resume source is absent: {source_dir}")
+    if (source_dir / "cache_manifest.json").exists():
+        raise RuntimeError(
+            "Whisper partial resume source is already complete; "
+            "reuse its immutable cache instead"
+        )
+    source_identity_path = source_dir / "run_identity.json"
+    if not source_identity_path.is_file():
+        raise FileNotFoundError(
+            f"Whisper partial resume identity is absent: {source_identity_path}"
+        )
+    source_identity = strict_json_object(source_identity_path)
+    whisper_resume_identity_compatible(
+        source_identity,
+        destination_identity,
+        expected_source_git_commit=expected_source_git_commit,
+    )
+    source_shards = source_dir / "shards"
+    imported = []
+    for path in sorted(source_shards.glob("*.json")):
+        try:
+            index = int(path.stem)
+        except ValueError as exc:
+            raise RuntimeError(f"invalid Whisper shard filename: {path}") from exc
+        if index < 0 or index >= len(records):
+            raise RuntimeError(f"Whisper resume shard index is out of range: {index}")
+        validate_whisper_shard(
+            path,
+            index=index,
+            record=records[index],
+            expected_hypotheses=expected_hypotheses,
+        )
+        destination = shard_path(destination_dir, index)
+        write_text_once_or_verify(
+            destination,
+            path.read_text(encoding="utf-8"),
+        )
+        imported.append(
+            {
+                "index": index,
+                "source": file_record(path),
+                "destination": file_record(destination),
+            }
+        )
+    if not imported:
+        raise RuntimeError("Whisper partial resume source contains no valid shards")
+    failures = [
+        file_record(path)
+        for path in sorted((source_dir / "failures").glob("*.json"))
+    ]
+    provenance = {
+        "schema_version": 1,
+        "status": "complete",
+        "policy": (
+            "exact validated shard copy; generation/scoring protocol unchanged"
+        ),
+        "source_output_dir": str(source_dir),
+        "destination_output_dir": str(destination_dir),
+        "source_run_identity": file_record(source_identity_path),
+        "source_git_commit": expected_source_git_commit,
+        "destination_git_commit": destination_identity["git_commit"],
+        "imported_shard_count": len(imported),
+        "imported_shards": imported,
+        "source_failure_records": failures,
+    }
+    provenance_path = destination_dir / "partial_resume_provenance.json"
+    write_text_once_or_verify(provenance_path, json_text(provenance))
+    return provenance_path
 
 
 def finalize_jsonl(
@@ -555,6 +806,17 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
         raise ValueError(
             "formal Whisper caches must contain exactly one acoustic condition"
         )
+    if (
+        args.resume_shards_from is None
+        and args.resume_source_git_commit is not None
+    ) or (
+        args.resume_shards_from is not None
+        and args.resume_source_git_commit is None
+    ):
+        raise ValueError(
+            "--resume-shards-from and --resume-source-git-commit "
+            "must be supplied together"
+        )
     identity = model_identity_from_config(config, "asr")
     records = selected_audio_records(
         args.input,
@@ -599,8 +861,39 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
             "beam_transition_scores_used": False,
             "posterior_status": "proxy_average_token_logprob_not_calibrated",
         },
+        "record_retry": {
+            "max_attempts": args.max_record_attempts,
+            "eligible_failures": (
+                "WhisperGenerationStageError in an approved numeric stage "
+                "whose message explicitly reports non-finite values"
+            ),
+            "selection_policy": (
+                "first strict finite result; no filtering, clamping, "
+                "score replacement, or protocol change"
+            ),
+            "retry_isolation": "fresh reload of identical pinned local weights",
+        },
     }
     ensure_identity(args.output_dir, run_identity)
+    resume_provenance = None
+    if args.resume_shards_from is not None:
+        resume_provenance = import_whisper_resume_shards(
+            source_dir=args.resume_shards_from,
+            destination_dir=args.output_dir,
+            records=records,
+            expected_hypotheses=settings.num_return_sequences,
+            expected_source_git_commit=args.resume_source_git_commit,
+            destination_identity=run_identity,
+        )
+    for index, record in enumerate(records):
+        path = shard_path(args.output_dir, index)
+        if path.is_file():
+            validate_whisper_shard(
+                path,
+                index=index,
+                record=record,
+                expected_hypotheses=settings.num_return_sequences,
+            )
     if args.dry_run:
         print(json.dumps({**run_identity, "status": "dry_run_complete"}, indent=2))
         return 0
@@ -615,47 +908,107 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
     failed = []
     consecutive_failures = 0
     for index, record in pending:
-        try:
-            waveform = load_audio_mono(record.audio_path, target_sample_rate=16_000)
-            hypotheses = generator.generate(waveform, sample_rate=16_000)
-            row = {
-                "query_id": record.query_id,
-                "record_id": record.record_id,
-                "source_query_id": record.query_id,
-                "condition": record.condition,
-                "audio_path": record.audio_path,
-                "no_speech_probability": None,
-                "no_speech_probability_status": "not_reliably_exposed_by_generation_api",
-                "hypotheses": [
-                    {
-                        "rank": value.rank,
-                        "text": value.text,
-                        "sequence_score": value.sequence_score,
-                        "average_token_logprob": value.average_token_logprob,
-                        "valid_token_count": value.valid_token_count,
-                    }
-                    for value in hypotheses
-                ],
-            }
-            save_json_shard(args.output_dir, index, row)
-            consecutive_failures = 0
-            print(f"[PROGRESS] Whisper {index + 1}/{len(records)}", flush=True)
-        except Exception as exc:
-            failed.append(record.record_id)
-            consecutive_failures += 1
-            record_failure(
-                args.output_dir,
-                index,
-                record.record_id,
-                exception=exc,
-            )
-            if consecutive_failures >= MAX_CONSECUTIVE_WHISPER_FAILURES:
-                raise RuntimeError(
-                    "Whisper aborted after "
-                    f"{consecutive_failures} consecutive failures; "
-                    "per-record tracebacks were preserved under "
-                    f"{args.output_dir / 'failures'}"
-                ) from None
+        failure_records = []
+        recovered_attempt = None
+        for attempt in range(1, args.max_record_attempts + 1):
+            try:
+                if attempt > 1:
+                    generator.reload()
+                waveform = load_audio_mono(
+                    record.audio_path,
+                    target_sample_rate=16_000,
+                )
+                hypotheses = generator.generate(waveform, sample_rate=16_000)
+                row = {
+                    "query_id": record.query_id,
+                    "record_id": record.record_id,
+                    "source_query_id": record.query_id,
+                    "condition": record.condition,
+                    "audio_path": record.audio_path,
+                    "no_speech_probability": None,
+                    "no_speech_probability_status": (
+                        "not_reliably_exposed_by_generation_api"
+                    ),
+                    "hypotheses": [
+                        {
+                            "rank": value.rank,
+                            "text": value.text,
+                            "sequence_score": value.sequence_score,
+                            "average_token_logprob": value.average_token_logprob,
+                            "valid_token_count": value.valid_token_count,
+                        }
+                        for value in hypotheses
+                    ],
+                }
+                save_json_shard(args.output_dir, index, row)
+                validate_whisper_shard(
+                    shard_path(args.output_dir, index),
+                    index=index,
+                    record=record,
+                    expected_hypotheses=settings.num_return_sequences,
+                )
+                recovered_attempt = attempt
+                consecutive_failures = 0
+                print(
+                    f"[PROGRESS] Whisper {index + 1}/{len(records)} "
+                    f"attempt={attempt}",
+                    flush=True,
+                )
+                break
+            except Exception as exc:
+                retryable = whisper_numeric_failure_is_retryable(exc)
+                will_retry = (
+                    retryable and attempt < args.max_record_attempts
+                )
+                failure_path = record_failure(
+                    args.output_dir,
+                    index,
+                    record.record_id,
+                    exception=exc,
+                    attempt=attempt,
+                    max_attempts=args.max_record_attempts,
+                    will_retry=will_retry,
+                )
+                failure_records.append(file_record(failure_path))
+                if will_retry:
+                    print(
+                        "[WARN] Retrying strict same-protocol Whisper record "
+                        f"{record.record_id} after audited numeric failure "
+                        f"attempt {attempt}/{args.max_record_attempts}",
+                        flush=True,
+                    )
+                    continue
+                failed.append(record.record_id)
+                consecutive_failures += 1
+                if consecutive_failures >= MAX_CONSECUTIVE_WHISPER_FAILURES:
+                    raise RuntimeError(
+                        "Whisper aborted after "
+                        f"{consecutive_failures} consecutive failures; "
+                        "per-record tracebacks were preserved under "
+                        f"{args.output_dir / 'failures'}"
+                    ) from None
+                break
+        if recovered_attempt is not None and recovered_attempt > 1:
+            recovery_path = args.output_dir / "numeric_retry_recoveries.jsonl"
+            with recovery_path.open("a", encoding="utf-8", newline="\n") as stream:
+                stream.write(
+                    json.dumps(
+                        {
+                            "schema_version": 1,
+                            "record_id": record.record_id,
+                            "index": index,
+                            "successful_attempt": recovered_attempt,
+                            "failed_attempt_records": failure_records,
+                            "protocol_changed": False,
+                        },
+                        ensure_ascii=False,
+                        allow_nan=False,
+                        sort_keys=True,
+                    )
+                    + "\n"
+                )
+                stream.flush()
+                os.fsync(stream.fileno())
     if failed:
         raise RuntimeError(f"{len(failed)} Whisper records failed; first={failed[:10]}")
     destination = finalize_jsonl(
@@ -663,9 +1016,15 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
         count=len(records),
         destination_name="nbest.jsonl",
     )
+    manifest_inputs = [args.config, args.input]
+    if resume_provenance is not None:
+        manifest_inputs.append(resume_provenance)
+    retry_recovery_path = args.output_dir / "numeric_retry_recoveries.jsonl"
+    if retry_recovery_path.is_file():
+        manifest_inputs.append(retry_recovery_path)
     manifest = model_manifest(
         artifact_type="whisper_nbest",
-        input_paths=[args.config, args.input],
+        input_paths=manifest_inputs,
         output_paths=[destination],
         dataset=args.dataset,
         split=args.split,
@@ -683,6 +1042,8 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
             "conditions": list(args.conditions),
             "decode": run_identity["decode"],
             "target_sample_rate": 16_000,
+            "record_retry": run_identity["record_retry"],
+            "partial_resume_performed": resume_provenance is not None,
         },
     )
     write_cache_manifest_once(args.output_dir / "cache_manifest.json", manifest)
@@ -909,6 +1270,28 @@ def parse_args() -> argparse.Namespace:
         choices=("clean", "snr_20", "snr_10", "snr_0"),
         required=True,
     )
+    whisper.add_argument(
+        "--max-record-attempts",
+        type=int,
+        choices=tuple(range(1, MAX_WHISPER_RECORD_ATTEMPTS + 1)),
+        default=1,
+        help=(
+            "Bounded retries only for explicitly classified transient "
+            "non-finite Whisper failures; every failed attempt is preserved."
+        ),
+    )
+    whisper.add_argument(
+        "--resume-shards-from",
+        type=Path,
+        help=(
+            "Import strict validated shards from an incomplete prior cache. "
+            "Requires --resume-source-git-commit."
+        ),
+    )
+    whisper.add_argument(
+        "--resume-source-git-commit",
+        help="Exact producer commit required for --resume-shards-from.",
+    )
 
     ce = subparsers.add_parser("ce")
     add_common_model_arguments(ce)
@@ -953,6 +1336,8 @@ def main() -> int:
         return run_bge(args, config)
     if args.stage == "whisper":
         args.input = args.input.resolve()
+        if args.resume_shards_from is not None:
+            args.resume_shards_from = args.resume_shards_from.resolve()
         return run_whisper(args, config)
     if args.stage == "ce":
         args.candidates = args.candidates.resolve()

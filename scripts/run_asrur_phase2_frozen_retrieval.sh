@@ -43,6 +43,9 @@ CONDITIONS=(clean snr_20 snr_10 snr_0)
 TEXT_BATCH_SIZE="${ASRUR_OEA_TEXT_BATCH_SIZE:-4}"
 AUDIO_BATCH_SIZE="${ASRUR_OEA_AUDIO_BATCH_SIZE:-1}"
 BGE_BATCH_SIZE="${ASRUR_BGE_BATCH_SIZE:-64}"
+WHISPER_MAX_RECORD_ATTEMPTS="${ASRUR_WHISPER_MAX_RECORD_ATTEMPTS:-1}"
+WHISPER_RESUME_SOURCE_ROOT="${PHASE2_WHISPER_RESUME_SOURCE_ROOT:-}"
+WHISPER_RESUME_SOURCE_GIT_COMMIT="${PHASE2_WHISPER_RESUME_SOURCE_GIT_COMMIT:-}"
 
 if [[ -e "${RUN_DIR}" ]]; then
   echo "[ERROR] Refusing to reuse run directory: ${RUN_DIR}" >&2
@@ -162,6 +165,24 @@ if [[ ! "${REQUIRED_REUSE_COUNT}" =~ ^[0-9]+$ ]]; then
   echo "[ERROR] PHASE2_REQUIRED_REUSE_COUNT must be a non-negative integer." >&2
   exit 3
 fi
+if [[ ! "${WHISPER_MAX_RECORD_ATTEMPTS}" =~ ^[1-3]$ ]]; then
+  echo "[ERROR] ASRUR_WHISPER_MAX_RECORD_ATTEMPTS must be 1, 2, or 3." >&2
+  exit 3
+fi
+if [[ -n "${WHISPER_RESUME_SOURCE_ROOT}" || -n "${WHISPER_RESUME_SOURCE_GIT_COMMIT}" ]]; then
+  if [[ -z "${WHISPER_RESUME_SOURCE_ROOT}" || -z "${WHISPER_RESUME_SOURCE_GIT_COMMIT}" ]]; then
+    echo "[ERROR] Whisper resume source root and Git commit must be supplied together." >&2
+    exit 3
+  fi
+  if [[ "${WHISPER_RESUME_SOURCE_ROOT}" != /* || ! -d "${WHISPER_RESUME_SOURCE_ROOT}" ]]; then
+    echo "[ERROR] PHASE2_WHISPER_RESUME_SOURCE_ROOT must be an existing absolute directory." >&2
+    exit 3
+  fi
+  if [[ ! "${WHISPER_RESUME_SOURCE_GIT_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "[ERROR] PHASE2_WHISPER_RESUME_SOURCE_GIT_COMMIT must be a full lowercase commit." >&2
+    exit 3
+  fi
+fi
 if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
   echo "[ERROR] Formal Phase-2 runner requires a clean Git worktree." >&2
   git status --short --untracked-files=all >&2
@@ -199,6 +220,9 @@ done
   printf 'text_batch_size=%s\n' "${TEXT_BATCH_SIZE}"
   printf 'audio_batch_size=%s\n' "${AUDIO_BATCH_SIZE}"
   printf 'bge_batch_size=%s\n' "${BGE_BATCH_SIZE}"
+  printf 'whisper_max_record_attempts=%s\n' "${WHISPER_MAX_RECORD_ATTEMPTS}"
+  printf 'whisper_resume_source_root=%s\n' "${WHISPER_RESUME_SOURCE_ROOT}"
+  printf 'whisper_resume_source_git_commit=%s\n' "${WHISPER_RESUME_SOURCE_GIT_COMMIT}"
 } > "${RUN_DIR}/run_identity.txt"
 git rev-parse HEAD > "${RUN_DIR}/git_commit.txt"
 git status --short --untracked-files=all > "${RUN_DIR}/git_status.txt"
@@ -256,6 +280,9 @@ if [[ -n "${REUSE_CACHE_ROOT}" ]]; then
     reuse_complete_cache_dir \
       "${REUSE_CACHE_ROOT}/vanilla/${condition}" \
       "${CACHE_ROOT}/vanilla/${condition}"
+    reuse_complete_cache_dir \
+      "${REUSE_CACHE_ROOT}/whisper/${condition}" \
+      "${CACHE_ROOT}/whisper/${condition}"
   done
   reuse_complete_cache_dir \
     "${REUSE_CACHE_ROOT}/bge/corpus" \
@@ -361,7 +388,17 @@ for template in none bge_retrieval; do
       "${DRY_ARGUMENTS[@]}"
 done
 for condition in "${CONDITIONS[@]}"; do
-  run_step "whisper_${condition}" \
+  WHISPER_RESUME_ARGUMENTS=()
+  if [[ -n "${WHISPER_RESUME_SOURCE_ROOT}" ]]; then
+    WHISPER_SOURCE_DIR="${WHISPER_RESUME_SOURCE_ROOT}/whisper/${condition}"
+    if [[ -d "${WHISPER_SOURCE_DIR}" && ! -f "${WHISPER_SOURCE_DIR}/cache_manifest.json" ]]; then
+      WHISPER_RESUME_ARGUMENTS=(
+        --resume-shards-from "${WHISPER_SOURCE_DIR}"
+        --resume-source-git-commit "${WHISPER_RESUME_SOURCE_GIT_COMMIT}"
+      )
+    fi
+  fi
+  run_cache_step "whisper_${condition}" "${CACHE_ROOT}/whisper/${condition}" \
     python scripts/generate_asrur_frozen_caches.py whisper \
       --config "${MAIN_CONFIG}" \
       --output-dir "${CACHE_ROOT}/whisper/${condition}" \
@@ -372,6 +409,8 @@ for condition in "${CONDITIONS[@]}"; do
       --input "${SQuTR_MANIFEST}" \
       --subset fiqa \
       --conditions "${condition}" \
+      --max-record-attempts "${WHISPER_MAX_RECORD_ATTEMPTS}" \
+      "${WHISPER_RESUME_ARGUMENTS[@]}" \
       "${DRY_ARGUMENTS[@]}"
 done
 

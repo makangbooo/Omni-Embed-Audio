@@ -49,6 +49,22 @@ class FakeWhisperProcessor:
         return self.prompt
 
 
+class FakeCuda:
+    def __init__(self):
+        self.empty_cache_calls = 0
+
+    def is_available(self):
+        return True
+
+    def empty_cache(self):
+        self.empty_cache_calls += 1
+
+
+class FakeUnloadTorchModule:
+    def __init__(self):
+        self.cuda = FakeCuda()
+
+
 class FakeNumericTensor:
     def __init__(self, values):
         self.values = np.asarray(values)
@@ -346,11 +362,22 @@ class ASRURModelAdapterTest(unittest.TestCase):
             )
             generator = WhisperNBestGenerator(
                 WhisperSettings(identity=identity),
-                device="cpu",
+                device="cuda:0",
                 dtype="float32",
             )
             with self.assertRaisesRegex(RuntimeError, "loaded"):
                 generator.generate(np.ones(16_000, dtype=np.float32))
+            fake_torch = FakeUnloadTorchModule()
+            generator._torch = fake_torch
+            generator._processor = object()
+            generator._model = object()
+            generator._base_generate = object()
+            generator.unload()
+            self.assertIsNone(generator._torch)
+            self.assertIsNone(generator._processor)
+            self.assertIsNone(generator._model)
+            self.assertIsNone(generator._base_generate)
+            self.assertEqual(fake_torch.cuda.empty_cache_calls, 1)
             with self.assertRaisesRegex(ValueError, "cannot exceed"):
                 WhisperSettings(
                     identity=identity,

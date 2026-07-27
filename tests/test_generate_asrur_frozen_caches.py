@@ -2,17 +2,25 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
+from AudioRetrieval.asr_uncertainty_reranking.model_adapters import (
+    WhisperGenerationStageError,
+)
 from scripts.generate_asrur_frozen_caches import (
     consolidate_embedding_chunks,
     finalize_jsonl,
+    import_whisper_resume_shards,
     load_bge_inputs,
     load_embedding_chunk,
     load_id_file,
     save_embedding_chunk,
     save_json_shard,
+    strict_json_object,
+    validate_whisper_shard,
+    whisper_numeric_failure_is_retryable,
 )
 
 
@@ -47,6 +55,10 @@ class GenerateASRURFrozenCachesTest(unittest.TestCase):
         )
         self.assertIn('"beam_transition_scores_used": False', source)
         self.assertIn('"failure_stage": failure_stage', source)
+        self.assertIn("--max-record-attempts", source)
+        self.assertIn("--resume-shards-from", source)
+        self.assertIn("partial_resume_provenance.json", source)
+        self.assertIn("numeric_retry_recoveries.jsonl", source)
 
     def test_embedding_chunks_resume_and_consolidate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -142,6 +154,157 @@ class GenerateASRURFrozenCachesTest(unittest.TestCase):
             write_jsonl(path, [{"id": "a"}, {"id": "a"}])
             with self.assertRaisesRegex(ValueError, "unique"):
                 load_id_file(path, field="id")
+
+    def test_numeric_retry_is_limited_to_explicit_whisper_failures(self) -> None:
+        self.assertTrue(
+            whisper_numeric_failure_is_retryable(
+                WhisperGenerationStageError(
+                    "nbest_artifact_validation",
+                    "ValueError: transition log probabilities must be finite",
+                )
+            )
+        )
+        self.assertTrue(
+            whisper_numeric_failure_is_retryable(
+                WhisperGenerationStageError(
+                    "four_beam_output_validation",
+                    "beam sequence scores contain non-finite values",
+                )
+            )
+        )
+        self.assertFalse(
+            whisper_numeric_failure_is_retryable(
+                WhisperGenerationStageError(
+                    "four_beam_generation",
+                    "CUDA out of memory",
+                )
+            )
+        )
+        self.assertFalse(
+            whisper_numeric_failure_is_retryable(
+                ValueError("transition log probabilities must be finite")
+            )
+        )
+
+    def test_strict_json_rejects_nan(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "value.json"
+            path.write_text('{"value": NaN}\n', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "non-standard"):
+                strict_json_object(path)
+
+    def test_partial_whisper_resume_validates_and_copies_exact_shards(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            destination = root / "destination"
+            (source / "shards").mkdir(parents=True)
+            (source / "failures").mkdir()
+            destination.mkdir()
+            records = [
+                SimpleNamespace(
+                    query_id="q1",
+                    record_id="en/fiqa:snr_0:q1",
+                    condition="snr_0",
+                    audio_path="/audio/q1.wav",
+                ),
+                SimpleNamespace(
+                    query_id="q2",
+                    record_id="en/fiqa:snr_0:q2",
+                    condition="snr_0",
+                    audio_path="/audio/q2.wav",
+                ),
+            ]
+            source_identity = {
+                "schema_version": 1,
+                "stage": "whisper",
+                "git_commit": "a" * 40,
+                "config": {"sha256": "config"},
+                "input": {"sha256": "input"},
+                "subset": "fiqa",
+                "conditions": ["snr_0"],
+                "model": {"name": "whisper"},
+                "device": "cuda:0",
+                "dtype": "bfloat16",
+                "row_count": 2,
+                "decode": {"num_beams": 4},
+            }
+            destination_identity = {
+                **source_identity,
+                "git_commit": "b" * 40,
+                "record_retry": {
+                    "max_attempts": 3,
+                    "eligible_failures": "numeric",
+                    "selection_policy": "first strict finite result",
+                },
+            }
+            (source / "run_identity.json").write_text(
+                json.dumps(source_identity, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            row = {
+                "query_id": "q1",
+                "record_id": "en/fiqa:snr_0:q1",
+                "source_query_id": "q1",
+                "condition": "snr_0",
+                "audio_path": "/audio/q1.wav",
+                "no_speech_probability": None,
+                "no_speech_probability_status": (
+                    "not_reliably_exposed_by_generation_api"
+                ),
+                "hypotheses": [
+                    {
+                        "rank": rank,
+                        "text": f"text {rank}",
+                        "sequence_score": -float(rank),
+                        "average_token_logprob": -0.1 * rank,
+                        "valid_token_count": rank,
+                    }
+                    for rank in range(1, 5)
+                ],
+            }
+            save_json_shard(source, 0, row)
+            (source / "failures" / "failure.json").write_text(
+                '{"status":"failed"}\n',
+                encoding="utf-8",
+            )
+
+            provenance = import_whisper_resume_shards(
+                source_dir=source,
+                destination_dir=destination,
+                records=records,
+                expected_hypotheses=4,
+                expected_source_git_commit="a" * 40,
+                destination_identity=destination_identity,
+            )
+
+            self.assertTrue(provenance.is_file())
+            self.assertEqual(
+                strict_json_object(provenance)["imported_shard_count"],
+                1,
+            )
+            copied = destination / "shards" / "00000000.json"
+            self.assertEqual(
+                copied.read_text(encoding="utf-8"),
+                (source / "shards" / "00000000.json").read_text(
+                    encoding="utf-8"
+                ),
+            )
+            validate_whisper_shard(
+                copied,
+                index=0,
+                record=records[0],
+                expected_hypotheses=4,
+            )
+            second = import_whisper_resume_shards(
+                source_dir=source,
+                destination_dir=destination,
+                records=records,
+                expected_hypotheses=4,
+                expected_source_git_commit="a" * 40,
+                destination_identity=destination_identity,
+            )
+            self.assertEqual(second, provenance)
 
 
 if __name__ == "__main__":
