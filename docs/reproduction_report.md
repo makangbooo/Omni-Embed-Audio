@@ -235,3 +235,37 @@ materials do not provide the training-time counting procedure or identify the
 checkpoint variant used for the efficiency row, so no missing component is
 invented. Complete A100 evidence is retained in
 `results/audits/qwen3b_clotho_a100_efficiency_20260721.json`.
+
+## ASRUR Phase 1: OEA-Nemo3B (+Cl) Clotho T2A
+
+The Phase 1 correctness check used the pinned
+`JudeJiwoo/OEA-Nemo3B-Cl` revision
+`9588912298afca0b11f5895b864ae28083f35022`, its checksum-verified
+59,072,047-byte inference-only checkpoint, and the canonical model-lock SHA256
+`fd09e4d2...c8c2`. A strict-offline RTX 4090 run generated all 1,045 audio
+embeddings and 5,225 caption embeddings with no pending chunks. The resulting
+arrays have shapes 1,045×512 and 5,225×512; peak allocated/reserved memory was
+9.39/10.48 GiB. The generation run and its two non-fatal Transformers
+compatibility warnings are recorded in
+`results/audits/asrur_nemo_g1_full_embeddings_20260727.json`.
+
+The subsequent CPU-only retrieval suite completed with empty stderr and zero
+suite, attempt, and outer return codes. PAPER reports Clotho T2A R@1/5/10 of
+21.57/47.16/60.36 for OEA-Nemo3B (+Cl). The two protocols declared before
+evaluation produced:
+
+| Protocol | Queries | R@1 | R@5 | R@10 | Maximum absolute delta |
+|---|---:|---:|---:|---:|---:|
+| `[CODE]` default joint, all captions | 5,225 | 21.7225 | 47.1196 | 60.4402 | 0.1525 pp |
+| `[CODE]` T2A-only, seed0 one caption | 1,045 | 21.6268 | 46.7943 | 59.8086 | 0.5514 pp |
+
+Both predeclared public-code protocols are within one percentage point on every
+reported recall and therefore pass the Phase 1 numerical correctness gate. The
+paper does not disclose which caption-selection protocol produced its row, so
+neither observed protocol is selected post hoc as the strict paper protocol.
+The six numeric observations are recorded as `close`; the three strict-paper
+observations remain `blocked`. The public runtime also omits the audio
+`passage:` prefix stated by PAPER, and this conflict remains explicit. Complete
+small evidence is in
+`results/audits/asrur_nemo_clotho_t2a_20260727.json`; large rankings remain in
+the remote suite directory.

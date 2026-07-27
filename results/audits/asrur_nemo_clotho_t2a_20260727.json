@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_run_compact_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "The pasted output begins inside suite_metrics.json, but retains the complete retrieval-summary CSV, all four suite artifact hashes, attempt and suite exit codes, empty stderr section, final clean Git status, and run identity. No required metric or terminal-state field is missing; large rankings and raw logs remain at the recorded remote path."
+  },
+  "git_commit": "20533b1e99bfaa5a187b0eaba64d4317d4f6e185",
+  "model": "OEA-Nemo3B (+Cl)",
+  "training_variant": "AudioCaps + Clotho",
+  "dataset": "Clotho v2.1 evaluation",
+  "seed": 42,
+  "model_lock": {
+    "path": "results/model_locks/oea_nemo3b_cl.json",
+    "size_bytes": 5932,
+    "sha256": "fd09e4d2b482aafdae7e297275c8106e10f82a6de99780d0ccfeb22b06bfc8c2"
+  },
+  "embedding_protocol": {
+    "path": "configs/eval/nemo3b_cl_clotho_embeddings.json",
+    "size_bytes": 3042,
+    "sha256": "8c7d1c3de25ea08cfc0bcc5ad1e964d89582df3eec344e13567c093693b4db64"
+  },
+  "embedding_run": {
+    "run_id": "oea_nemo3b_clotho_embeddings_seed42_20260727_094554",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_embeddings_seed42_20260727_094554",
+    "audit_path": "results/audits/asrur_nemo_g1_full_embeddings_20260727.json"
+  },
+  "retrieval_suite": {
+    "suite_id": "oea_nemo3b_clotho_t2a_suite_seed42_20260727_125803",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_t2a_suite_seed42_20260727_125803",
+    "status": "complete",
+    "suite_exit_code": 0,
+    "attempt_exit_code": 0,
+    "run_return_code": 0,
+    "stderr_empty": true,
+    "binding_type": "official_oea",
+    "protocol_count": 2,
+    "artifacts": {
+      "suite_metrics.json": {
+        "size_bytes": null,
+        "size_source": "not returned exactly; remote ls reported 20K",
+        "sha256": "c6121e7c670fa7a1608ba1621a2acfacf0623fa32879e541cf0d0f377179bde0"
+      },
+      "retrieval_summary.csv": {
+        "size_bytes": 1122,
+        "sha256": "6a1920659524658b9ad82760a838264bf1af71ee771263f1ea9de4618cc4fed8"
+      },
+      "suite_identity.json": {
+        "size_bytes": null,
+        "size_source": "not returned exactly; remote ls reported 4.9K",
+        "sha256": "8736fdbcb0424e4789fa3cfed1738e7c3cb023de50d9b02affc99c6eca98dde7"
+      },
+      "suite_plan.json": {
+        "size_bytes": null,
+        "size_source": "not returned exactly; remote ls reported 1.8K",
+        "sha256": "3970a233861fa78850099a201b2d9e227444d977023d9dc0989abc32472571fb"
+      }
+    },
+    "protocols": {
+      "t2a_public_code_default_joint_all_captions": {
+        "task": "t2a",
+        "protocol_source": "CODE",
+        "query_selection": "all",
+        "evaluated_queries": 5225,
+        "metrics": {
+          "R@1": 21.72248803827751,
+          "R@5": 47.119617224880386,
+          "R@10": 60.44019138755981,
+          "MRR": 0.3420444266875371,
+          "DCG": 0.47325263623310465
+        }
+      },
+      "t2a_public_code_t2a_only_seed0": {
+        "task": "t2a",
+        "protocol_source": "CODE",
+        "query_selection": "public_code_seed0_one_per_clip",
+        "query_selection_seed": 0,
+        "evaluated_queries": 1045,
+        "metrics": {
+          "R@1": 21.626794258373206,
+          "R@5": 46.79425837320574,
+          "R@10": 59.80861244019139,
+          "MRR": 0.3413725409477876,
+          "DCG": 0.4726709317744266
+        }
+      }
+    }
+  },
+  "paper_values": {
+    "source": "PAPER",
+    "table_2_clotho_t2a": {
+      "R@1": 21.57,
+      "R@5": 47.16,
+      "R@10": 60.36
+    }
+  },
+  "comparison": {
+    "t2a_public_code_default_joint_all_captions": {
+      "absolute_delta_percentage_points": {
+        "R@1": 0.15248803827751,
+        "R@5": 0.040382775119614,
+        "R@10": 0.08019138755981
+      },
+      "maximum_absolute_delta_percentage_points": 0.15248803827751,
+      "status": "close"
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "absolute_delta_percentage_points": {
+        "R@1": 0.056794258373206,
+        "R@5": 0.36574162679426,
+        "R@10": 0.55138755980861
+      },
+      "maximum_absolute_delta_percentage_points": 0.55138755980861,
+      "status": "close"
+    }
+  },
+  "paper_protocol_limitation": {
+    "status": "MISSING",
+    "note": "The paper does not identify whether one or all five Clotho captions are used as T2A queries. Both protocols were declared before the run and both remain reported. Closeness to the paper values is not used to select a strict-paper result after evaluation."
+  },
+  "conclusion": {
+    "phase_1_correctness_gate": "passed",
+    "core_numerical_result": "reproduced_close_under_both_predeclared_public_code_protocols",
+    "strict_paper_protocol_status": "blocked",
+    "reason": "caption-query selection is not disclosed"
+  }
+}

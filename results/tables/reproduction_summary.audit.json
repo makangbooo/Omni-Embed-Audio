@@ -7,8 +7,8 @@
   "inputs": {
     "observations": {
       "path": "results/observations/reproduction_observations.jsonl",
-      "sha256": "9d986e46558ab69ad1883e005a765e9a2cbcd2f64c9af64ff36ff2c867201e66",
-      "size_bytes": 58979
+      "sha256": "7a30ff7c2ad44300982cd19b0d8181594753317a3bdef11679677677997af380",
+      "size_bytes": 66660
     },
     "paper_registry": {
       "path": "configs/results/paper_reported_metrics.jsonl",
@@ -16,20 +16,20 @@
       "size_bytes": 386143
     }
   },
-  "observation_count": 68,
+  "observation_count": 77,
   "output": {
     "path": "results/tables/reproduction_summary.csv",
-    "sha256": "b527e74720c6521a1f4ea14cc5a9bc6a0739c8b84ac741fe7416fdd085c552f1",
-    "size_bytes": 37737
+    "sha256": "715b6c819bb157dc0387888bfef08bc54eedb1a933e8046ecd91e2c2ecd5572b",
+    "size_bytes": 42740
   },
   "paper_metric_count": 910,
   "schema_version": 1,
   "status": "complete",
   "status_counts": {
-    "blocked": 20,
-    "close": 48
+    "blocked": 23,
+    "close": 54
   },
-  "summary_row_count": 68,
+  "summary_row_count": 77,
   "unit_counts": {
     "count": 6,
     "gigabytes": 12,
@@ -40,7 +40,7 @@
     "score_1_to_5": 36,
     "score_standard_deviation": 18
   },
-  "unobserved_paper_metric_count": 866,
+  "unobserved_paper_metric_count": 863,
   "unobserved_paper_metric_ids": [
     "table11_laion_clap_three_dataset_mean_t2a_r1",
     "table11_laion_clap_three_dataset_mean_t2a_r10",
@@ -612,9 +612,6 @@
     "table2_oea_nemo3b_cl_audiocaps_t2a_r1",
     "table2_oea_nemo3b_cl_audiocaps_t2a_r10",
     "table2_oea_nemo3b_cl_audiocaps_t2a_r5",
-    "table2_oea_nemo3b_cl_clotho_t2a_r1",
-    "table2_oea_nemo3b_cl_clotho_t2a_r10",
-    "table2_oea_nemo3b_cl_clotho_t2a_r5",
     "table2_oea_nemo3b_cl_mecat_t2a_r1",
     "table2_oea_nemo3b_cl_mecat_t2a_r10",
     "table2_oea_nemo3b_cl_mecat_t2a_r5",

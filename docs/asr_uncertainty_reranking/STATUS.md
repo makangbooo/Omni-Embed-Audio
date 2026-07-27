@@ -1,6 +1,6 @@
 # ASR-Uncertainty Reranking 状态
 
-最后更新：2026-07-27（Nemo 全量 Clotho embedding 完成；T2A CPU 套件待执行）
+最后更新：2026-07-27（Nemo(+Cl) Clotho Table 2 T2A 完成）
 
 状态只使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、
 `COMPLETED`、`FAILED`、`BLOCKED`。
@@ -26,7 +26,7 @@
 | 1 | Nemo inference-only checkpoint 与 model lock | COMPLETED | `58f80bb` | attempt 4 run=`asrur_nemo_phase1_audit_20260727_004107`：resource/preparation/lock 与 pipeline/wrapper 全部 exit=`0`；59,072,047-B derived SHA256 `2a5bee90...80c4`；canonical lock SHA256 `fd09e4d2...c8c2` | 无 | 锁定资源，进入锁绑定 GPU smoke 准备 |
 | 1 | Nemo 5/25 OEA embedding smoke | COMPLETED | `1b23c50` | RTX 4090 run=`oea_nemo3b_clotho_lock_bound_smoke_seed42_20260727_092654`；wrapper/attempt=`0/0`；严格离线；5×512/25×512；544 LoRA；pending=0；峰值 allocated/reserved=9.14/9.49 GiB | 无；两条 Transformers 兼容性警告已原样登记，不修改锁定模型 | 已授权并完成同锁全量 Clotho embedding |
 | 1 | Nemo(+Cl) Clotho 全量 embedding | COMPLETED | `4d2341d` | RTX 4090 run=`oea_nemo3b_clotho_embeddings_seed42_20260727_094554`；wrapper/attempt=`0/0`；严格离线；1,045×512 audio、5,225×512 text；pending=0；峰值 allocated/reserved=9.39/10.48 GiB；五个最终工件 SHA256 已固定 | 无；兼容性警告保留，不修改锁定 snapshot | 在 CPU 侧复用固定 embedding，不再加载模型 |
-| 1 | Nemo(+Cl) Clotho 表 2 T2A | WAITING_USER | `64647a0` | 两种公开代码支持的 caption 选择口径已配置：全 5 caption（5,225 query）与 seed0 单 caption（1,045 query）；CPU-only、无下载 | 论文没有公开 caption 选择，不能按接近论文值择优 | 切换到 CPU 服务器运行双协议套件，并分别对照 21.57/47.16/60.36 |
+| 1 | Nemo(+Cl) Clotho 表 2 T2A | COMPLETED | `20533b1` | CPU suite=`oea_nemo3b_clotho_t2a_suite_seed42_20260727_125803`；suite/attempt/run=`0/0/0`；stderr 为空；all-caption=`21.7225/47.1196/60.4402`，seed0=`21.6268/46.7943/59.8086` | 严格论文 caption 选择仍 `[MISSING]`，因此两组 `[CODE] close` 分栏且 strict 观察保留 blocked；不得择优 | Phase 1 正确性门禁通过；D2–D4 验收完成后进入 Phase 2 FiQA 一级召回 |
 | 2 | FiQA corpus/qrels 协议与文档构造锁 | COMPLETED | `730e0fc` | corpus/train/dev/test=`57,638/5,500/500/648`；qrel pairs=`14,166/1,238/1,706`；四条件各 648；ID、规范化文本和 split leakage 检查全通过 | FiQA corpus 有 38 个官方空文档行，按固定 SQuTR loader 保留 | 后续索引不得过滤或合成这 38 行；缓存 manifest 绑定输入 SHA256 |
 | 2 | B1/B2/B3 四条件一级召回 | TODO | N/A | 需要 GPU | 依赖数据/模型下载和 Phase 1 | 报告 nDCG/MRR/Recall/Oracle |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |

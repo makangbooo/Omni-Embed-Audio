@@ -32,6 +32,7 @@
 | C-ASRUR-NEMO-G1 | Nemo3B-Cl Clotho 锁绑定 5/25 smoke、同锁全量生成与 CPU T2A 套件 | generator commit `ff73287`；suite commit `64647a0`；T2A 套件绑定同一 model lock 与生成协议 SHA256 | `configs/eval/nemo3b_cl_clotho_*`、`scripts/run_nemo3b_cl_clotho_*` | COMPLETE implementation；Nemo 本地 custom model code 由完整模型锁逐文件约束 |
 | R-ASRUR-NEMO-G1-SMOKE | Nemo3B-Cl Clotho 锁绑定 5/25 GPU smoke | execution `1b23c50`；run `..._20260727_092654`；RTX 4090；exit `0/0` | `results/audits/asrur_nemo_g1_smoke_20260727.json`；大型原始工件保留远程 run 目录 | COMPLETE；5×512/25×512、544 LoRA、严格离线、峰值 9.14/9.49 GiB；不是论文 Recall 结果 |
 | R-ASRUR-NEMO-G1-FULL | Nemo3B-Cl Clotho 全量 embedding | execution `4d2341d`；run `..._20260727_094554`；RTX 4090；exit `0/0` | `results/audits/asrur_nemo_g1_full_embeddings_20260727.json`；大型 embedding/chunks 保留远程 run 目录 | COMPLETE；1,045×512 audio、5,225×512 text、严格离线、峰值 9.39/10.48 GiB；Recall 尚待 CPU 套件 |
+| R-ASRUR-NEMO-G1-T2A | Nemo3B-Cl Clotho Table 2 T2A | execution `20533b1`；suite `..._20260727_125803`；CPU；suite/attempt/run=`0/0/0` | `results/audits/asrur_nemo_clotho_t2a_20260727.json`；suite metrics SHA256 `c6121e7c...bde0`；CSV SHA256 `6a192065...ed8` | COMPLETE；all-caption 最大绝对差 0.152488 pp，seed0 最大差 0.551388 pp；两组均为 `[CODE] close`，严格论文 caption 口径仍 blocked |
 
 ## 2. 已有远程数据
 
