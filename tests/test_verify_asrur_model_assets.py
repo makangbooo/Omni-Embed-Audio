@@ -118,6 +118,28 @@ class VerifyASRURModelAssetsTest(unittest.TestCase):
                 offenders.append(path.name)
         self.assertEqual(offenders, [])
 
+    def test_d2_repair_is_single_file_resumable_and_non_overwriting(self) -> None:
+        text = (
+            REPOSITORY_ROOT / "scripts" / "run_asrur_d2_whisper_repair.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn('export CUDA_VISIBLE_DEVICES=""', text)
+        self.assertIn('MODEL_DIR="${MODELS_ROOT}/whisper-large-v3"', text)
+        self.assertIn('REVISION="06f233fe06e710322aca913c1bc4249a0d71fce1"', text)
+        self.assertIn('EXPECTED_SIZE="3087130976"', text)
+        self.assertIn(
+            'EXPECTED_SHA256="a8e94b85976e5864ba3e9525c7e6c83'
+            'b2a1eca42d4b797a0c7c24d778e40fd95"',
+            text,
+        )
+        self.assertIn('"${FINAL_FILE}.part"', text)
+        self.assertIn("--continue-at -", text)
+        self.assertIn("--http1.1", text)
+        self.assertIn("refusing to overwrite it", text)
+        self.assertIn("bash scripts/run_asrur_model_audit.sh", text)
+        self.assertNotIn("bge-base-en-v1.5", text)
+        self.assertNotIn("bge-reranker-v2-m3", text)
+        self.assertNotIn("rm -", text)
+
 
 if __name__ == "__main__":
     unittest.main()
