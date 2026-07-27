@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "suite_prefix": "oea_nemo3b_clotho_t2a_suite_seed42",
+  "model": "OEA-Nemo3B (+Cl)",
+  "dataset": "Clotho v2.1 evaluation",
+  "embedding_seed": 42,
+  "expected_candidate_count": 1045,
+  "expected_query_count": 5225,
+  "expected_embedding_dim": 512,
+  "expected_captions_per_clip": 5,
+  "expected_generation_protocol_sha256": "8c7d1c3de25ea08cfc0bcc5ad1e964d89582df3eec344e13567c093693b4db64",
+  "official_variant_id": "oea_nemo3b_cl",
+  "official_model_lock_path": "results/model_locks/oea_nemo3b_cl.json",
+  "minimum_generator_commit": "ff73287c9765352edefbe92082ad5b91a1951575",
+  "checkpoint": {
+    "repo_id": "JudeJiwoo/OEA-Nemo3B-Cl",
+    "revision": "9588912298afca0b11f5895b864ae28083f35022",
+    "local_subpath": "OEA-Nemo3B-Cl/step_450_best_inference_only.pt",
+    "size_bytes": 59072047,
+    "sha256": "2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+    "source": "DERIVED_FROM_CODE_CHECKPOINT"
+  },
+  "embedding_protocol": {
+    "audio": "public-code audio-only chat message without passage: insertion",
+    "text": "query: prefix",
+    "source": "CODE",
+    "paper_conflict": "PAPER states passage: for audio; this suite does not hide that conflict"
+  },
+  "paper_reference": {
+    "paper_table": "Table 2",
+    "task": "T2A",
+    "reported_metrics": {
+      "R@1": 21.57,
+      "R@5": 47.16,
+      "R@10": 60.36
+    },
+    "caption_selection": "MISSING",
+    "comparison_policy": "report both public-code protocols; never select a protocol by closeness to the paper values"
+  },
+  "protocols": [
+    {
+      "protocol_id": "t2a_public_code_default_joint_all_captions",
+      "task": "t2a",
+      "paper_table": "Table 2",
+      "query_selection": "all",
+      "protocol_label": "public-code-default-joint-all-captions",
+      "protocol_source": "CODE",
+      "expected_evaluated_queries": 5225,
+      "note": "eval_core default joint task set includes A2T, so T2A evaluates all five captions per clip"
+    },
+    {
+      "protocol_id": "t2a_public_code_t2a_only_seed0",
+      "task": "t2a",
+      "paper_table": "Table 2",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "protocol_label": "public-code-t2a-only-seed0-one-caption",
+      "protocol_source": "CODE",
+      "expected_evaluated_queries": 1045,
+      "note": "eval_core samples one caption per clip when text_to_audio is requested without audio_to_text"
+    }
+  ]
+}

@@ -429,6 +429,37 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             config["expected_generation_protocol_sha256"],
         )
 
+    def test_nemo3b_cl_t2a_suite_binds_lock_and_both_code_protocols(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        config = load_suite_config(
+            repository_root / "configs/eval/nemo3b_cl_clotho_t2a_suite.json"
+        )
+        self.assertEqual(config["model"], "OEA-Nemo3B (+Cl)")
+        self.assertEqual(config["official_variant_id"], "oea_nemo3b_cl")
+        self.assertEqual(
+            config["official_model_lock_path"],
+            "results/model_locks/oea_nemo3b_cl.json",
+        )
+        self.assertEqual(len(config["protocols"]), 2)
+        self.assertTrue(
+            all(protocol["task"] == "t2a" for protocol in config["protocols"])
+        )
+        self.assertEqual(
+            {protocol["expected_evaluated_queries"] for protocol in config["protocols"]},
+            {1045, 5225},
+        )
+        self.assertEqual(
+            config["paper_reference"]["reported_metrics"],
+            {"R@1": 21.57, "R@5": 47.16, "R@10": 60.36},
+        )
+        self.assertEqual(config["paper_reference"]["caption_selection"], "MISSING")
+        self.assertEqual(
+            file_identity(
+                repository_root / "configs/eval/nemo3b_cl_clotho_embeddings.json"
+            )["sha256"],
+            config["expected_generation_protocol_sha256"],
+        )
+
     def test_qwen3b_ac_suite_preserves_protocols_and_binds_its_own_lock(self) -> None:
         repository_root = Path(__file__).resolve().parents[1]
         clotho_tuned = load_suite_config(
