@@ -41,6 +41,12 @@ class GenerateASRURFrozenCachesTest(unittest.TestCase):
             '"decoder_prompt": "explicit_language_task_no_timestamps"',
             source,
         )
+        self.assertIn(
+            '"teacher_forced_conditional_logprob_float32_cross_entropy"',
+            source,
+        )
+        self.assertIn('"beam_transition_scores_used": False', source)
+        self.assertIn('"failure_stage": failure_stage', source)
 
     def test_embedding_chunks_resume_and_consolidate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

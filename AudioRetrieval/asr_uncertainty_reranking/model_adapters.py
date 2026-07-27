@@ -179,6 +179,117 @@ def whisper_decoder_prompt_tokens(
     return tuple(tokens)
 
 
+class WhisperGenerationStageError(RuntimeError):
+    """Preserve the exact failing stage of the frozen Whisper pipeline."""
+
+    def __init__(self, stage: str, message: str):
+        if not isinstance(stage, str) or not stage:
+            raise ValueError("Whisper failure stage must be non-empty")
+        super().__init__(f"Whisper stage={stage} failed: {message}")
+        self.stage = stage
+
+
+def whisper_teacher_forced_generated_logprobs(
+    *,
+    torch_module: Any,
+    model: Any,
+    model_inputs: Mapping[str, Any],
+    sequences: Any,
+    prompt_length: int,
+) -> tuple[Any, Any]:
+    """Score generated suffixes without generation-time beam bookkeeping.
+
+    Transformers generation transition scores include logits-processor state
+    and beam ancestry. Whisper's custom multi-return wrapper and the generic
+    beam implementation have produced incompatible ancestry/score tensors in
+    the pinned 4.52.4 environment. After bypassing that wrapper, the audited
+    real-model smoke still returned a non-finite transition score for a
+    retained non-special token. Its processor-specific origin is unknown, so
+    this protocol does not filter, clamp, or interpret that value.
+
+    The ASR uncertainty proxy therefore uses frozen-model, teacher-forced
+    conditional log probabilities for the exact generated token sequences.
+    Prompt tokens are excluded, logits are normalized in float32, and the
+    caller still retains the beam search ``sequence_score`` separately. This
+    is a reproducible proxy likelihood, not a calibrated ASR posterior.
+    """
+
+    if isinstance(prompt_length, bool) or not isinstance(prompt_length, int):
+        raise ValueError("Whisper prompt_length must be an integer")
+    if prompt_length <= 0:
+        raise ValueError("Whisper prompt_length must be positive")
+    if getattr(sequences, "ndim", None) != 2 or int(sequences.shape[0]) <= 0:
+        raise ValueError("Whisper sequences must be a non-empty rank-2 tensor")
+    if int(sequences.shape[1]) <= prompt_length:
+        raise ValueError("Whisper returned no tokens after the decoder prompt")
+    input_features = model_inputs.get("input_features")
+    if input_features is None:
+        raise ValueError("Whisper model inputs do not contain input_features")
+
+    encoder_arguments: dict[str, Any] = {
+        "input_features": input_features,
+        "return_dict": True,
+    }
+    if model_inputs.get("attention_mask") is not None:
+        encoder_arguments["attention_mask"] = model_inputs["attention_mask"]
+    encoder_outputs = model.get_encoder()(**encoder_arguments)
+    encoder_hidden = getattr(encoder_outputs, "last_hidden_state", None)
+    if encoder_hidden is None or getattr(encoder_hidden, "ndim", None) != 3:
+        raise ValueError("Whisper encoder did not return rank-3 hidden states")
+
+    sequence_count = int(sequences.shape[0])
+    if int(encoder_hidden.shape[0]) != 1:
+        raise ValueError(
+            "formal Whisper scoring expects exactly one encoded audio query"
+        )
+    expanded_encoder_hidden = encoder_hidden.repeat_interleave(
+        sequence_count,
+        dim=0,
+    )
+    decoder_input_ids = sequences[:, :-1]
+    target_token_ids = sequences[:, 1:]
+    scoring_outputs = model(
+        encoder_outputs=(expanded_encoder_hidden,),
+        decoder_input_ids=decoder_input_ids,
+        use_cache=False,
+        return_dict=True,
+    )
+    logits = getattr(scoring_outputs, "logits", None)
+    expected_logits_prefix = (
+        sequence_count,
+        int(decoder_input_ids.shape[1]),
+    )
+    if (
+        logits is None
+        or getattr(logits, "ndim", None) != 3
+        or tuple(int(value) for value in logits.shape[:2])
+        != expected_logits_prefix
+    ):
+        observed = (
+            None
+            if logits is None
+            else tuple(int(value) for value in logits.shape)
+        )
+        raise ValueError(
+            "unexpected Whisper teacher-forced logits shape "
+            f"{observed}; expected prefix {expected_logits_prefix}"
+        )
+
+    token_negative_log_likelihood = torch_module.nn.functional.cross_entropy(
+        logits.float().transpose(1, 2),
+        target_token_ids,
+        reduction="none",
+    )
+    token_logprobs = -token_negative_log_likelihood
+    generated_token_ids = sequences[:, prompt_length:]
+    generated_logprobs = token_logprobs[:, prompt_length - 1 :]
+    if generated_token_ids.shape != generated_logprobs.shape:
+        raise ValueError(
+            "Whisper teacher-forced token/log-probability alignment mismatch"
+        )
+    return generated_token_ids, generated_logprobs
+
+
 @dataclass(frozen=True)
 class FrozenModelIdentity:
     name: str
@@ -579,66 +690,109 @@ class WhisperNBestGenerator:
             device=self.device,
         )
         with self._torch.inference_mode():
-            outputs = self._base_generate(
-                **model_inputs,
-                generation_config=generation_config,
-                decoder_input_ids=decoder_input_ids,
-            )
-            if (
-                not hasattr(outputs, "scores")
-                or outputs.scores is None
-                or not hasattr(outputs, "beam_indices")
-                or outputs.beam_indices is None
-            ):
-                raise RuntimeError(
-                    "Whisper generation did not expose beam scores required "
-                    "for the declared proxy-posterior protocol"
+            try:
+                outputs = self._base_generate(
+                    **model_inputs,
+                    generation_config=generation_config,
+                    decoder_input_ids=decoder_input_ids,
                 )
-            transition = self._model.compute_transition_scores(
-                outputs.sequences,
-                outputs.scores,
-                outputs.beam_indices,
-                normalize_logits=True,
+            except Exception as exc:
+                raise WhisperGenerationStageError(
+                    "four_beam_generation",
+                    f"{type(exc).__name__}: {exc}",
+                ) from exc
+        if (
+            getattr(outputs, "sequences", None) is None
+            or outputs.sequences.ndim != 2
+            or int(outputs.sequences.shape[0])
+            != self.settings.num_return_sequences
+        ):
+            observed = getattr(getattr(outputs, "sequences", None), "shape", None)
+            raise WhisperGenerationStageError(
+                "four_beam_output_validation",
+                "unexpected sequence shape "
+                f"{None if observed is None else tuple(observed)}",
             )
-        if transition.ndim != 2 or transition.shape[0] != self.settings.num_return_sequences:
-            raise ValueError(
-                f"unexpected Whisper transition-score shape {tuple(transition.shape)}"
+        if int(outputs.sequences.shape[1]) <= len(decoder_prompt):
+            raise WhisperGenerationStageError(
+                "four_beam_output_validation",
+                "no token was generated after the explicit decoder prompt",
             )
-        step_count = int(transition.shape[1])
-        if step_count <= 0 or outputs.sequences.shape[1] < step_count:
-            raise ValueError("Whisper returned no generated transition scores")
-        suffix_tokens = outputs.sequences[:, -step_count:]
+        expected_prompt = decoder_input_ids.expand(
+            self.settings.num_return_sequences,
+            -1,
+        )
+        if not self._torch.equal(
+            outputs.sequences[:, : len(decoder_prompt)],
+            expected_prompt,
+        ):
+            raise WhisperGenerationStageError(
+                "four_beam_output_validation",
+                "generated sequences do not preserve the explicit decoder prompt",
+            )
         decoded = self._processor.batch_decode(
             outputs.sequences,
             skip_special_tokens=True,
         )
         raw_sequence_scores = getattr(outputs, "sequences_scores", None)
-        sequence_scores = (
-            None
-            if raw_sequence_scores is None
-            else raw_sequence_scores.float().cpu().tolist()
-        )
+        if (
+            raw_sequence_scores is None
+            or raw_sequence_scores.ndim != 1
+            or int(raw_sequence_scores.shape[0])
+            != self.settings.num_return_sequences
+        ):
+            raise WhisperGenerationStageError(
+                "four_beam_output_validation",
+                "beam sequence scores are absent or have the wrong shape",
+            )
+        sequence_scores = raw_sequence_scores.float().cpu().tolist()
+        if any(not math.isfinite(float(value)) for value in sequence_scores):
+            raise WhisperGenerationStageError(
+                "four_beam_output_validation",
+                "beam sequence scores contain non-finite values",
+            )
+        sequences = outputs.sequences
+        del outputs
+        try:
+            with self._torch.inference_mode():
+                suffix_tokens, token_logprobs = (
+                    whisper_teacher_forced_generated_logprobs(
+                        torch_module=self._torch,
+                        model=self._model,
+                        model_inputs=model_inputs,
+                        sequences=sequences,
+                        prompt_length=len(decoder_prompt),
+                    )
+                )
+        except Exception as exc:
+            if isinstance(exc, WhisperGenerationStageError):
+                raise
+            raise WhisperGenerationStageError(
+                "teacher_forced_conditional_logprob",
+                f"{type(exc).__name__}: {exc}",
+            ) from exc
         rows = list(
             zip(
                 decoded,
                 suffix_tokens.cpu().tolist(),
-                transition.float().cpu().tolist(),
-                sequence_scores
-                if sequence_scores is not None
-                else [None] * len(decoded),
+                token_logprobs.float().cpu().tolist(),
+                sequence_scores,
             )
         )
-        if sequence_scores is not None:
-            rows.sort(key=lambda row: float(row[3]), reverse=True)
-        return build_whisper_hypotheses(
-            decoded_texts=[row[0] for row in rows],
-            generated_token_ids=[row[1] for row in rows],
-            transition_logprobs=[row[2] for row in rows],
-            sequence_scores=(
-                None if sequence_scores is None else [float(row[3]) for row in rows]
-            ),
-            ignored_token_ids=self._processor.tokenizer.all_special_ids,
-        )
+        rows.sort(key=lambda row: float(row[3]), reverse=True)
+        try:
+            return build_whisper_hypotheses(
+                decoded_texts=[row[0] for row in rows],
+                generated_token_ids=[row[1] for row in rows],
+                transition_logprobs=[row[2] for row in rows],
+                sequence_scores=[float(row[3]) for row in rows],
+                ignored_token_ids=self._processor.tokenizer.all_special_ids,
+            )
+        except Exception as exc:
+            raise WhisperGenerationStageError(
+                "nbest_artifact_validation",
+                f"{type(exc).__name__}: {exc}",
+            ) from exc
 
 
 def model_identity_from_config(config: Mapping[str, Any], key: str) -> FrozenModelIdentity:

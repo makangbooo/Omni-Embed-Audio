@@ -119,3 +119,9 @@
 - B5/B6 主融合路由已实现为可锁配置；`[INFERRED][USER-CONFIRMED
   2026-07-26]` 正式主路线固定为 4-best `proxy_posterior`，1-best 只保留为
   辅助诊断。不得在看到 FiQA test 或 NQ 结果后切换该路线。
+- Whisper proxy 的实现口径已进一步锁定：4-best 候选仍来自冻结 beam search，
+  beam `sequence_score` 作为排序证据单独保存；用于 proxy posterior 的
+  `average_token_logprob` 来自对 exact generated sequence 的冻结
+  teacher-forced float32 cross-entropy，不使用 generation transition scores，
+  不宣称是校准的 ASR posterior。失败 attempt 2 证据：
+  `results/audits/asrur_whisper_transition_score_smoke_failure_20260727.json`。

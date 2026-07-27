@@ -364,3 +364,17 @@ data, candidate set, or evaluation. The repair passes 15 targeted and 409
 repository tests; a second one-record GPU smoke is required before Phase-2
 attempt 3. Compact evidence is stored in
 `results/audits/asrur_whisper_beam_index_smoke_failure_20260727.json`.
+
+The second one-record smoke at execution commit `ef3a77a` completed the base
+four-beam generation path, confirming that neither the dtype mismatch nor the
+beam-index CUDA gather failure recurred. It then failed closed because a
+generation transition score aligned with a retained, non-special token was
+non-finite. No N-best artifact or metric was emitted. The implementation does
+not discard or clamp that value. Instead, the same frozen model now scores the
+exact four generated sequences with a teacher-forced forward pass and
+float32 cross entropy, excluding prompt and special tokens. Beam
+`sequence_score` remains separate; the resulting average token log
+probability remains explicitly an uncalibrated proxy. This scoring method is
+part of the immutable cache identity, and per-record failures now carry an
+exact stage. Compact evidence is stored in
+`results/audits/asrur_whisper_transition_score_smoke_failure_20260727.json`.

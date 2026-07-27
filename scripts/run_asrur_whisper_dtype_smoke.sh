@@ -40,6 +40,14 @@ trap record_exit EXIT
 
 exec > >(tee "${RUN_DIR}/stdout.log") 2> >(tee "${RUN_DIR}/stderr.log" >&2)
 
+mark_stage() {
+  local stage="$1"
+  printf '%s\n' "${stage}" > "${RUN_DIR}/current_stage.txt"
+  printf '%s\t%s\n' "$(date -Is)" "${stage}" >> "${RUN_DIR}/stage_timeline.tsv"
+  echo "[STAGE] ${stage}"
+}
+
+mark_stage preflight
 if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
   echo "[ERROR] Formal smoke requires a clean Git worktree." >&2
   git status --short --untracked-files=all >&2
@@ -78,11 +86,13 @@ fi
 nvidia-smi --query-gpu=index,uuid,name,memory.total,driver_version \
   --format=csv > "${RUN_DIR}/gpu_info.txt"
 
+mark_stage strict_model_asset_audit
 python scripts/verify_asrur_model_assets.py \
   --manifest "${MODEL_RESOURCE_MANIFEST}" \
   --model-root "${MODELS_ROOT}" \
   --output "${RUN_DIR}/d2_d4_model_audit.json"
 
+mark_stage select_one_fiqa_clean_record
 python - "${SOURCE_MANIFEST}" "${SMOKE_INPUT}" <<'PY'
 import json
 import sys
@@ -118,6 +128,7 @@ print(f"[INFO] Selected smoke record {selected['record_id']}")
 print(f"[INFO] Audio path {audio_path}")
 PY
 
+mark_stage four_beam_generation_and_teacher_forced_scoring
 python scripts/generate_asrur_frozen_caches.py whisper \
   --config "${MAIN_CONFIG}" \
   --output-dir "${SMOKE_CACHE}" \
@@ -129,7 +140,11 @@ python scripts/generate_asrur_frozen_caches.py whisper \
   --subset fiqa \
   --conditions clean
 
-python - "${SMOKE_CACHE}/nbest.jsonl" "${RUN_DIR}/smoke_audit.json" <<'PY'
+mark_stage nbest_artifact_validation
+python - \
+  "${SMOKE_CACHE}/nbest.jsonl" \
+  "${SMOKE_CACHE}/run_identity.json" \
+  "${RUN_DIR}/smoke_audit.json" <<'PY'
 import hashlib
 import json
 import math
@@ -138,10 +153,20 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 source = Path(sys.argv[1])
-destination = Path(sys.argv[2])
+identity_path = Path(sys.argv[2])
+destination = Path(sys.argv[3])
 rows = [json.loads(line) for line in source.read_text(encoding="utf-8").splitlines()]
+identity = json.loads(identity_path.read_text(encoding="utf-8"))
 if len(rows) != 1:
     raise RuntimeError(f"expected one Whisper row, got {len(rows)}")
+decode = identity.get("decode", {})
+expected_score_method = (
+    "teacher_forced_conditional_logprob_float32_cross_entropy"
+)
+if decode.get("token_score_method") != expected_score_method:
+    raise RuntimeError("Whisper cache identity has the wrong token-score method")
+if decode.get("beam_transition_scores_used") is not False:
+    raise RuntimeError("Whisper cache identity did not disable beam transition scores")
 hypotheses = rows[0].get("hypotheses")
 if not isinstance(hypotheses, list) or len(hypotheses) != 4:
     raise RuntimeError("Whisper smoke did not produce exactly four hypotheses")
@@ -151,6 +176,12 @@ for index, value in enumerate(hypotheses):
     score = value.get("average_token_logprob")
     if not isinstance(score, (int, float)) or not math.isfinite(score):
         raise RuntimeError(f"hypothesis {index} has invalid proxy score")
+    sequence_score = value.get("sequence_score")
+    if (
+        not isinstance(sequence_score, (int, float))
+        or not math.isfinite(sequence_score)
+    ):
+        raise RuntimeError(f"hypothesis {index} has invalid beam sequence score")
     if not isinstance(value.get("valid_token_count"), int) or value["valid_token_count"] <= 0:
         raise RuntimeError(f"hypothesis {index} has no valid generated token")
 payload = {
@@ -160,6 +191,9 @@ payload = {
     "record_id": rows[0]["record_id"],
     "hypothesis_count": 4,
     "proxy_scores_finite": True,
+    "beam_sequence_scores_finite": True,
+    "token_score_method": expected_score_method,
+    "beam_transition_scores_used": False,
     "nbest_path": str(source.resolve()),
     "nbest_size_bytes": source.stat().st_size,
     "nbest_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
@@ -171,6 +205,7 @@ destination.write_text(
 print(json.dumps(payload, indent=2, sort_keys=True))
 PY
 
+mark_stage complete
 nvidia-smi > "${RUN_DIR}/gpu_final.txt"
 echo "[INFO] Whisper dtype repair smoke completed"
 echo "[INFO] Run directory: ${RUN_DIR}"

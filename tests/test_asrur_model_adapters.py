@@ -8,6 +8,7 @@ from AudioRetrieval.asr_uncertainty_reranking.model_adapters import (
     BgeDenseEncoder,
     BgeDenseSettings,
     FrozenModelIdentity,
+    WhisperGenerationStageError,
     WhisperNBestGenerator,
     WhisperSettings,
     batched,
@@ -17,6 +18,7 @@ from AudioRetrieval.asr_uncertainty_reranking.model_adapters import (
     prepare_whisper_model_inputs,
     scalar_logits,
     whisper_decoder_prompt_tokens,
+    whisper_teacher_forced_generated_logprobs,
     whisper_valid_token_statistics,
 )
 
@@ -45,6 +47,88 @@ class FakeWhisperProcessor:
     def get_decoder_prompt_ids(self, **kwargs):
         self.calls.append(kwargs)
         return self.prompt
+
+
+class FakeNumericTensor:
+    def __init__(self, values):
+        self.values = np.asarray(values)
+
+    @property
+    def ndim(self):
+        return self.values.ndim
+
+    @property
+    def shape(self):
+        return self.values.shape
+
+    def __getitem__(self, key):
+        return FakeNumericTensor(self.values[key])
+
+    def __neg__(self):
+        return FakeNumericTensor(-self.values)
+
+    def float(self):
+        return self
+
+    def transpose(self, left, right):
+        return FakeNumericTensor(np.swapaxes(self.values, left, right))
+
+    def repeat_interleave(self, repeats, *, dim):
+        return FakeNumericTensor(np.repeat(self.values, repeats, axis=dim))
+
+
+class FakeTeacherForcedModel:
+    def __init__(self):
+        self.encoder_arguments = None
+        self.scoring_arguments = None
+
+    def get_encoder(self):
+        def encode(**kwargs):
+            self.encoder_arguments = kwargs
+            return type(
+                "EncoderOutput",
+                (),
+                {
+                    "last_hidden_state": FakeNumericTensor(
+                        np.zeros((1, 3, 2), dtype=np.float32)
+                    )
+                },
+            )()
+
+        return encode
+
+    def __call__(self, **kwargs):
+        self.scoring_arguments = kwargs
+        decoder = kwargs["decoder_input_ids"]
+        batch, length = decoder.shape
+        return type(
+            "ScoringOutput",
+            (),
+            {
+                "logits": FakeNumericTensor(
+                    np.zeros((batch, length, 20), dtype=np.float32)
+                )
+            },
+        )()
+
+
+class FakeTorchModule:
+    class nn:
+        class functional:
+            @staticmethod
+            def cross_entropy(logits, targets, *, reduction):
+                if reduction != "none":
+                    raise AssertionError(reduction)
+                if logits.shape != (2, 20, 6):
+                    raise AssertionError(logits.shape)
+                if targets.shape != (2, 6):
+                    raise AssertionError(targets.shape)
+                return FakeNumericTensor(
+                    [
+                        [0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
+                        [1.1, 1.2, 1.3, 1.4, 1.5, 1.6],
+                    ]
+                )
 
 
 class ASRURModelAdapterTest(unittest.TestCase):
@@ -146,6 +230,80 @@ class ASRURModelAdapterTest(unittest.TestCase):
                 language="en",
                 task="transcribe",
             )
+
+    def test_whisper_runtime_failure_preserves_exact_stage(self) -> None:
+        failure = WhisperGenerationStageError(
+            "teacher_forced_conditional_logprob",
+            "non-finite score",
+        )
+        self.assertEqual(
+            failure.stage,
+            "teacher_forced_conditional_logprob",
+        )
+        self.assertIn(
+            "stage=teacher_forced_conditional_logprob",
+            str(failure),
+        )
+
+    def test_teacher_forced_helper_declares_frozen_score_protocol(self) -> None:
+        self.assertIn(
+            "teacher_forced",
+            whisper_teacher_forced_generated_logprobs.__name__,
+        )
+        self.assertIn(
+            "not a calibrated ASR posterior",
+            whisper_teacher_forced_generated_logprobs.__doc__,
+        )
+
+    def test_teacher_forced_scores_align_only_generated_suffix(self) -> None:
+        model = FakeTeacherForcedModel()
+        sequences = FakeNumericTensor(
+            [
+                [1, 2, 3, 10, 11, 12, 13],
+                [1, 2, 3, 14, 15, 16, 17],
+            ]
+        )
+        tokens, logprobs = whisper_teacher_forced_generated_logprobs(
+            torch_module=FakeTorchModule,
+            model=model,
+            model_inputs={
+                "input_features": FakeNumericTensor(
+                    np.zeros((1, 80, 30), dtype=np.float32)
+                ),
+                "attention_mask": FakeNumericTensor(
+                    np.ones((1, 30), dtype=np.int64)
+                ),
+            },
+            sequences=sequences,
+            prompt_length=3,
+        )
+        np.testing.assert_array_equal(
+            tokens.values,
+            np.asarray(
+                [
+                    [10, 11, 12, 13],
+                    [14, 15, 16, 17],
+                ]
+            ),
+        )
+        np.testing.assert_allclose(
+            logprobs.values,
+            np.asarray(
+                [
+                    [-0.3, -0.4, -0.5, -0.6],
+                    [-1.3, -1.4, -1.5, -1.6],
+                ]
+            ),
+        )
+        self.assertEqual(
+            model.encoder_arguments["input_features"].shape,
+            (1, 80, 30),
+        )
+        self.assertEqual(
+            model.scoring_arguments["encoder_outputs"][0].shape,
+            (2, 3, 2),
+        )
+        self.assertFalse(model.scoring_arguments["use_cache"])
 
     def test_whisper_hypothesis_builder_preserves_beam_order(self) -> None:
         hypotheses = build_whisper_hypotheses(

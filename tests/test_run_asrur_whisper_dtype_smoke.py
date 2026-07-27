@@ -20,6 +20,16 @@ class RunASRURWhisperDtypeSmokeTest(unittest.TestCase):
         self.assertIn("expected one Whisper row", source)
         self.assertIn("exactly four hypotheses", source)
         self.assertIn("proxy_scores_finite", source)
+        self.assertIn("beam_sequence_scores_finite", source)
+        self.assertIn("stage_timeline.tsv", source)
+        self.assertIn(
+            "four_beam_generation_and_teacher_forced_scoring",
+            source,
+        )
+        self.assertIn(
+            "teacher_forced_conditional_logprob_float32_cross_entropy",
+            source,
+        )
         self.assertIn("elapsed_seconds.txt", source)
         adapter_source = (
             REPOSITORY_ROOT
@@ -30,6 +40,12 @@ class RunASRURWhisperDtypeSmokeTest(unittest.TestCase):
         self.assertIn("return_attention_mask=True", adapter_source)
         self.assertIn("generation_config.forced_decoder_ids = None", adapter_source)
         self.assertIn("decoder_input_ids=decoder_input_ids", adapter_source)
+        self.assertIn(
+            "whisper_teacher_forced_generated_logprobs",
+            adapter_source,
+        )
+        self.assertIn("torch_module.nn.functional.cross_entropy", adapter_source)
+        self.assertNotIn("compute_transition_scores(", adapter_source)
         self.assertNotIn("nohup", source)
         self.assertNotIn("rm -", source)
         self.assertNotIn("git reset", source)

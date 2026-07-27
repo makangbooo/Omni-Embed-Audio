@@ -270,9 +270,16 @@ def consolidate_embedding_chunks(
     temporary.replace(destination)
 
 
-def record_failure(output_dir: Path, index: int, identifier: str) -> None:
+def record_failure(
+    output_dir: Path,
+    index: int,
+    identifier: str,
+    *,
+    exception: BaseException | None = None,
+) -> None:
     failure_dir = output_dir / "failures"
     failure_dir.mkdir(exist_ok=True)
+    failure_stage = getattr(exception, "stage", None)
     atomic_write_json(
         failure_dir / f"{index:08d}_{time.time_ns()}.json",
         {
@@ -280,6 +287,10 @@ def record_failure(output_dir: Path, index: int, identifier: str) -> None:
             "index": index,
             "identifier": identifier,
             "created_at": utc_now(),
+            "exception_type": (
+                None if exception is None else type(exception).__name__
+            ),
+            "failure_stage": failure_stage,
             "error": traceback.format_exc(),
         },
     )
@@ -582,6 +593,10 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
             "timestamps": False,
             "generation_entrypoint": "base_GenerationMixin_generate",
             "decoder_prompt": "explicit_language_task_no_timestamps",
+            "token_score_method": (
+                "teacher_forced_conditional_logprob_float32_cross_entropy"
+            ),
+            "beam_transition_scores_used": False,
             "posterior_status": "proxy_average_token_logprob_not_calibrated",
         },
     }
@@ -625,10 +640,15 @@ def run_whisper(args: argparse.Namespace, config: dict[str, Any]) -> int:
             save_json_shard(args.output_dir, index, row)
             consecutive_failures = 0
             print(f"[PROGRESS] Whisper {index + 1}/{len(records)}", flush=True)
-        except Exception:
+        except Exception as exc:
             failed.append(record.record_id)
             consecutive_failures += 1
-            record_failure(args.output_dir, index, record.record_id)
+            record_failure(
+                args.output_dir,
+                index,
+                record.record_id,
+                exception=exc,
+            )
             if consecutive_failures >= MAX_CONSECUTIVE_WHISPER_FAILURES:
                 raise RuntimeError(
                     "Whisper aborted after "
@@ -744,9 +764,14 @@ def run_ce(args: argparse.Namespace, config: dict[str, Any]) -> int:
                 },
             )
             print(f"[PROGRESS] CE {index + 1}/{len(query_ids)}", flush=True)
-        except Exception:
+        except Exception as exc:
             failed.append(query_id)
-            record_failure(args.output_dir, index, query_id)
+            record_failure(
+                args.output_dir,
+                index,
+                query_id,
+                exception=exc,
+            )
     if failed:
         raise RuntimeError(f"{len(failed)} CE queries failed; first={failed[:10]}")
     destination = finalize_jsonl(
