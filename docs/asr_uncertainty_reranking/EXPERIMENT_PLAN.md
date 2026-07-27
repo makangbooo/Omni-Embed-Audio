@@ -386,3 +386,18 @@ inference、TTS、微调或上传。
 6. `[INFERRED][USER-CONFIRMED 2026-07-26]` B5/B6 主融合固定使用 4-best
    proxy-posterior 分数，以便 A3 只比较融合策略；1-best 融合只保留为辅助
    诊断。该选择已在任何正式 FiQA dev/test 或 NQ 结果产生前锁定。
+
+## 11. 后台执行与实时监控协议
+
+用户于 2026-07-27 固定以下执行策略：
+
+1. 后续所有需要脱离当前终端的后台实验统一使用 `tmux`，禁止使用 `nohup`；
+2. 标准启动形式为
+   `tmux new-session -d -s <session> "cd <repo> && bash <wrapper> <args>"`；
+3. 启动后必须用 `tmux ls` 和 `tmux capture-pane -p -S -100 -t <session>`
+   验证会话与初始日志，交互查看使用 `tmux attach -t <session>`；
+4. 从 tmux 界面安全脱离使用 `Ctrl-b` 后按 `d`，不得用关闭模型进程的方式脱离；
+5. 当前已经由旧方式启动且健康运行的 Phase-2 PID `6769` 继续完成，不得为切换
+   后台工具而中断、重启或丢弃缓存；
+6. Phase-2 的统一只读实时监控入口为
+   `scripts/monitor_asrur_phase2.sh`，监控脚本不得修改缓存、发送信号或启动任务。
