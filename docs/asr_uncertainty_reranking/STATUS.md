@@ -13,9 +13,12 @@
   BGE/Whisper/CE、OEA-Nemo 与原始 Omni 的可恢复真实缓存生成器及 Phase-2
   工作量预检。四个声学条件强制独立缓存，并统一使用 FiQA qrels query ID。
   Gold transcript CE 上限允许单假设，但正式 Whisper 路径固定为 4-best。
-- 验证：本地全仓 `387` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
-- 当前阻塞：Phase-2 dry-run 尚未在远程执行；FiQA GPU 推理尚未获单独批准。
-- 下一步：执行 Phase-2 CPU dry-run，然后向用户提交一次明确的 GPU 任务申请。
+- 验证：本地全仓 `388` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
+- 当前阻塞：Phase-2 dry-run attempt 1 在 vanilla config 直接入口处失败；最小
+  import-path 补丁及真实入口测试已经完成，等待远程拉取后重试。FiQA GPU 推理
+  尚未获单独批准。
+- 下一步：执行 Phase-2 CPU dry-run attempt 2，然后向用户提交一次明确的 GPU
+  任务申请。
 
 最后更新：2026-07-27（D2 单文件断点恢复正在远程 CPU 运行）
 
@@ -32,7 +35,7 @@
 | 0 | D1–D4 固定清单与 CPU 下载 wrapper | COMPLETED | `6279b82` | 未下载 | 无；与 SQuTR 内容校验无数据依赖 | 35 项相关测试通过；拉取最新分支后执行 |
 | 0 | CPU 核心算法与缓存契约 | COMPLETED | `8cc5984` | 未远程运行；本地 38 项相关测试通过 | 无 | 后续模型 runner 只能调用这些已测试定义 |
 | 0 | B1–B7、QG、Ours、U1–U4、A1–A9 CPU 主实验框架 | COMPLETED | `8f28c55` | 本地 345 项全仓测试通过；无下载、GPU、模型推理或真实训练 | 无；合成 smoke 明确禁止写入研究结果 | 远程拉取后执行 D1–D4 下载、DATA-13C 恢复和 FiQA 数据审计 |
-| 0/2 | FiQA 真实模型缓存 producer 与 Phase-2 预检 | COMPLETED | `f9fc977` | BGE dense、Whisper 4-best、BGE CE、OEA-Nemo、原始 Omni 与 exact Top-100 均支持断点恢复和不可变 manifest；FiQA dev/test 由 qrels ID 精确隔离；四条件只生成一次冻结文档缓存；1×RTX 4090 正式 wrapper 已实现；全仓 387 项测试通过；未运行 GPU | D2 尚在下载；原始 Omni canonical lock 尚待 CPU 生成 | 完成 vanilla lock、Nemo A2T CPU 套件与 dry-run；D2 验收后单独申请 GPU |
+| 0/2 | FiQA 真实模型缓存 producer 与 Phase-2 预检 | COMPLETED | `f9fc977` | BGE dense、Whisper 4-best、BGE CE、OEA-Nemo、原始 Omni 与 exact Top-100 均支持断点恢复和不可变 manifest；FiQA dev/test 由 qrels ID 精确隔离；四条件只生成一次冻结文档缓存；D2–D4 与两套 canonical lock 已完成；全仓 388 项测试通过；未运行 GPU | dry-run attempt 1 的直接入口 bug 已修复，待远程重试 | attempt 2 成功后单独申请 GPU |
 | 0/2 | 原始 Omni-Embed-Nemotron 模型锁 | COMPLETED | `7cfbfab` | run=`asrur_vanilla_nemo_phase2_audit_20260727_161133`；pipeline/wrapper=`0/0`；6,416-B portable 与 canonical lock SHA256 均为 `eb62da75...cc1c`；CPU-only、未下载、未运行 GPU | 无 | Phase-2 dry-run 使用 `results/model_locks/vanilla_nemotron_3b.json` |
 | 0 | B5/B6 主融合的 ASR 路由 | COMPLETED | `b9a81ef` | `[INFERRED][USER-CONFIRMED 2026-07-26]` 主路线固定为 4-best `proxy_posterior`；1-best 只作辅助诊断 | 无 | 正式结果不得根据 test/NQ 表现切换路线 |
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | DATA-13D 生成目标 manifest 后在同一 run 执行一致性审计 |
@@ -49,6 +52,7 @@
 | 1 | Nemo(+Cl) Clotho A2T 方向检查 | COMPLETED | `7cfbfab` | CPU suite=`oea_nemo3b_clotho_a2t_suite_seed42_20260727_161133`；attempt=`0`、stderr 为空；1,045 audio→5,225 captions；R@1/5/10=`26.8900/51.3876/65.2632` | 无；这是 `[CODE]` 方向扩展，不是论文表格结果 | OEA-B2 完成；进入 FiQA frozen-index 方向 |
 | 2 | FiQA corpus/qrels 协议与文档构造锁 | COMPLETED | `730e0fc` | corpus/train/dev/test=`57,638/5,500/500/648`；qrel pairs=`14,166/1,238/1,706`；四条件各 648；ID、规范化文本和 split leakage 检查全通过 | FiQA corpus 有 38 个官方空文档行，按固定 SQuTR loader 保留 | 后续索引不得过滤或合成这 38 行；缓存 manifest 绑定输入 SHA256 |
 | 2 | B1/B2/B3 四条件一级召回 | BLOCKED | `f9fc977` | 真实 runner 已实现并通过测试；每条件独立 648 query，统一 qrels ID；文档 embedding 跨条件复用且缓存契约强校验；两套 canonical model lock 已完成 | dry-run 与独立 GPU 批准 | 报告 nDCG/MRR/Recall/Oracle |
+| 2 | Phase-2 CPU dry-run attempt 1 | FAILED | `7a098dd` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_164746`；resolve OEA=`0`，resolve vanilla=`1`，wrapper=`1`；`ModuleNotFoundError: scripts`；未加载模型/GPU | 直接脚本入口未把仓库根目录加入 `sys.path` | 拉取最小补丁后使用新 commit/cache root 重试；失败证据不删除 |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |
 | 3 | 1-best CE、固定融合、RRF、Gold 上限 | BLOCKED | N/A | 未开始 | 依赖 Go | 复用唯一 OEA Top-100 |
 | 4 | 4-best、proxy posterior、不确定性实验 | BLOCKED | `8f28c55` | 缓存装配、聚合、特征、dev 选择、正式评测实现完成；模型推理未开始 | 依赖 Whisper 下载、Phase 3 缓存和 GPU 批准 | 补模型 adapter 后生成正式缓存 |

@@ -7,8 +7,14 @@ import argparse
 import copy
 import json
 from pathlib import Path
+import sys
 from typing import Any, Mapping
 
+
+if __package__ in {None, ""}:
+    repository_root_for_import = Path(__file__).resolve().parents[1]
+    if str(repository_root_for_import) not in sys.path:
+        sys.path.insert(0, str(repository_root_for_import))
 
 from scripts.build_official_oea_eval_config import (
     REPOSITORY_ROOT,

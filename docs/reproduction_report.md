@@ -309,3 +309,13 @@ lock are byte-for-byte identical: 6,416 bytes with SHA256
 `eb62da7579d2f5b7ccd774e15d518d3ed50f4d502753b3fc4a7f51187b96cc1c`.
 The lock intentionally claims only the immutable base snapshot and public-code
 pooling/prompt protocol; it is not itself a reproduced retrieval result.
+
+Phase-2 CPU dry-run attempt 1 stopped after OEA config resolution because the
+vanilla config builder's direct script entrypoint could not import the
+repository-level `scripts` package. The exact error was
+`ModuleNotFoundError: No module named 'scripts'`. No model was loaded and no
+metric was calculated. The minimal fix adds the repository root to `sys.path`
+only for direct script execution, without changing protocol, pooling, model
+loading, scores, or metrics. A regression test now exercises the exact
+entrypoint mode, and all 388 repository tests pass. The failed attempt remains
+recorded in `results/audits/asrur_phase2_dry_run_import_failure_20260727.json`.

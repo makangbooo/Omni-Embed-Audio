@@ -10,6 +10,7 @@
 | Portable vanilla-Nemotron lock audit | exact local base snapshot audit and untracked portable lock evidence | `scripts/run_asrur_vanilla_nemo_phase2_audit.sh`; compact audit `results/audits/asrur_vanilla_nemo_portable_lock_20260727.json` | COMPLETE at execution `7cfbfab`; pipeline/wrapper=`0/0`; portable and canonical SHA256 both `eb62da75...cc1c` |
 | Nemo Clotho A2T direction suite | 1,045 audio queries against 5,225 frozen caption candidates; five matching captions are multi-positive qrels | `results/audits/asrur_nemo_clotho_a2t_20260727.json` | COMPLETE at execution `7cfbfab`; R@1/5/10=`26.8900/51.3876/65.2632`; CPU-only; not paper-reported |
 | Phase-2 frozen-retrieval orchestrator | OEA/vanilla Omni/BGE/Whisper frozen inference, exact full-corpus rankings, dev-only BGE template selection, four-condition metrics and OEA candidate oracle | `scripts/run_asrur_phase2_frozen_retrieval.sh`, `scripts/select_asrur_bge_query_template.py` | IMPLEMENTED_NOT_RUN; `--execute` requires separate 1×RTX 4090 approval |
+| Phase-2 dry-run attempt 1 | CPU-only; OEA resolution passed, vanilla direct entrypoint import failed before model loading | `results/audits/asrur_phase2_dry_run_import_failure_20260727.json` | FAILED at execution `7a098dd`; original error preserved; minimal entrypoint fix passes 388 full tests |
 
 最后更新：2026-07-27（D2–D4 首次严格离线验收）
 
