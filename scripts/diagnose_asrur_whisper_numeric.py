@@ -88,6 +88,8 @@ def summarize_token_scores(
     ):
         if len(hypothesis_tokens) != len(hypothesis_scores):
             raise ValueError("diagnostic token and score lengths differ")
+        sequence_score = float(sequence_score)
+        sequence_score_class = numeric_class(sequence_score)
         rows: list[dict[str, Any]] = []
         valid_values: list[float] = []
         nonfinite_valid = 0
@@ -120,7 +122,12 @@ def summarize_token_scores(
             {
                 "rank": hypothesis_index,
                 "decoded_text": str(decoded_text),
-                "sequence_score": float(sequence_score),
+                "sequence_score_class": sequence_score_class,
+                "sequence_score": (
+                    sequence_score
+                    if sequence_score_class == "finite"
+                    else None
+                ),
                 "generated_token_count": len(hypothesis_tokens),
                 "valid_token_count": len(valid_values) + nonfinite_valid,
                 "finite_valid_token_count": len(valid_values),

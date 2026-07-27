@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "stage": "whisper_single_record_numeric_diagnostic",
+  "execution_git_commit": "a7735e4092e91121eda7e9b969f9008ce6771653",
+  "record_id": "en/fiqa:snr_0:10639",
+  "model_resource_audit": {
+    "resource_id": "ASRUR-D2-D4",
+    "status": "complete",
+    "network_access_performed": false,
+    "observed_selected_bytes": 5823662271,
+    "verified_expected_bytes": 5823662271,
+    "errors": []
+  },
+  "failure": {
+    "exception_type": "ValueError",
+    "message": "Out of range float values are not JSON compliant: nan",
+    "stage": "strict_json_serialization",
+    "source": "scripts/diagnose_asrur_whisper_numeric.py",
+    "line": 413
+  },
+  "root_cause": "The diagnostic correctly represented non-finite token log-probabilities as null plus a numeric class, but still wrote the raw beam sequence_score float. At least one sequence_score was NaN, so json.dumps(..., allow_nan=False) correctly rejected the payload.",
+  "known_facts": [
+    "The strict local D2-D4 asset audit completed before the failure.",
+    "The diagnostic reached final payload serialization, so BF16 generation and all three requested teacher-forced scoring calls returned.",
+    "No numeric_diagnostic.json was committed atomically because serialization failed before the temporary output was replaced.",
+    "The failure did not mutate any Phase-2 cache and did not compute research metrics."
+  ],
+  "repair": {
+    "policy": "Preserve strict RFC-compliant JSON and preserve the non-finite classification; never emit, clamp, or replace NaN with a fabricated finite score.",
+    "representation": {
+      "sequence_score": null,
+      "sequence_score_class": "nan"
+    },
+    "scope": "Serialization only; model, data, generation, scoring, candidate sets, and existing caches remain unchanged."
+  },
+  "next_action": "Rerun only the same isolated single-record diagnostic after the serialization regression test passes."
+}

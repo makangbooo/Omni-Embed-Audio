@@ -1,3 +1,4 @@
+import json
 import math
 import unittest
 
@@ -54,6 +55,32 @@ class DiagnoseASRURWhisperNumericTest(unittest.TestCase):
             value["hypotheses"][0]["finite_valid_average_logprob"],
             -0.2,
         )
+
+    def test_summary_strictly_serializes_nonfinite_sequence_scores(self) -> None:
+        value = summarize_token_scores(
+            method="test",
+            token_ids=[[10], [11], [12]],
+            logprobs=[[-0.1], [-0.2], [-0.3]],
+            decoded_texts=["nan", "positive", "negative"],
+            sequence_scores=[math.nan, math.inf, -math.inf],
+            tokenizer=FakeTokenizer(),
+            ignored_token_ids=[],
+        )
+
+        hypotheses = value["hypotheses"]
+        self.assertIsNone(hypotheses[0]["sequence_score"])
+        self.assertEqual(hypotheses[0]["sequence_score_class"], "nan")
+        self.assertIsNone(hypotheses[1]["sequence_score"])
+        self.assertEqual(
+            hypotheses[1]["sequence_score_class"],
+            "positive_infinity",
+        )
+        self.assertIsNone(hypotheses[2]["sequence_score"])
+        self.assertEqual(
+            hypotheses[2]["sequence_score_class"],
+            "negative_infinity",
+        )
+        json.dumps(value, allow_nan=False)
 
 
 if __name__ == "__main__":
