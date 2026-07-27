@@ -157,10 +157,20 @@ in `asrur_d2_d4_model_audit_20260727_132612`. D3
 pinned Git revision, selected-file size, SHA256, and Git-LFS checks. D2
 (`openai/whisper-large-v3`) was at the correct pinned revision and its small
 files passed, but the 3,087,130,976-byte `model.safetensors` file was absent.
-The audit returned `1/1` without changing or deleting any model file. Phase 2
-therefore remains blocked on this single D2 file; D3 and D4 must not be
-downloaded again. Compact failure evidence is retained in
+The audit returned `1/1` without changing or deleting any model file. At that
+time, Phase 2 remained blocked on this single D2 file; D3 and D4 did not need
+to be downloaded again. Compact failure evidence is retained in
 `results/audits/asrur_d2_d4_model_audit_failure_20260727.json`.
+
+The D2 repair subsequently completed in
+`asrur_d2_whisper_repair_20260727_134626`. The repaired
+`model.safetensors` is exactly 3,087,130,976 bytes with SHA256
+`a8e94b85976e5864ba3e9525c7e6c83b2a1eca42d4b797a0c7c24d778e40fd95`.
+The automatic strict offline D2--D4 audit and outer wrapper both returned zero,
+with 5,823,662,271 expected and observed selected bytes and no reported errors.
+This successful state supersedes the earlier failed attempt while preserving
+the failure evidence. The compact success record is
+`results/audits/asrur_d2_d4_model_audit_success_20260727.json`.
 
 ## OEA-6 measurement boundary
 
@@ -280,3 +290,15 @@ observations remain `blocked`. The public runtime also omits the audio
 small evidence is in
 `results/audits/asrur_nemo_clotho_t2a_20260727.json`; large rankings remain in
 the remote suite directory.
+
+## ASRUR Phase 1 direction gate: OEA-Nemo3B (+Cl) Clotho A2T
+
+The same immutable Nemo embedding run was reused on CPU for the direction
+required by the proposed spoken-query task: 1,045 audio queries were ranked
+against 5,225 frozen caption candidates, with all five captions belonging to
+the matching clip treated as positives. The run completed with empty stderr
+and produced R@1/5/10 of 26.88995/51.38756/65.26316, MRR of 0.38762, and DCG
+of 0.51023. This passes the direction sanity gate, but it is explicitly a
+`[CODE]` extension rather than a paper-table reproduction. Compact evidence is
+stored in `results/audits/asrur_nemo_clotho_a2t_20260727.json`; full rankings
+remain in the recorded remote suite directory.

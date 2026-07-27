@@ -7,8 +7,8 @@
 | ICASSP required-experiment checklist | 28 experiment packages; OEA-only baseline scope; no synthetic result counted | `docs/asr_uncertainty_reranking/ICASSP_EXPERIMENT_CHECKLIST.md` | COMPLETE at code commit `207bcd0` |
 | Frozen local-model adapters | BGE dense CLS/L2, BGE v2-M3 CE, Whisper four-beam proxy score, explicit 16 kHz resampling | `AudioRetrieval/asr_uncertainty_reranking/model_adapters.py` | IMPLEMENTED_NOT_RUN; 371 full-repository tests passed; no model/GPU execution |
 | Resumable real-cache producers | BGE dense/CE, Whisper 4-best, OEA-Nemo, original Omni, exact Top-100; per-condition FiQA-qrels ID contract | `scripts/generate_asrur_frozen_caches.py`, `scripts/generate_asrur_omni_caches.py`, `scripts/plan_asrur_phase2.py` | IMPLEMENTED_NOT_RUN at `dd44bc4`; 381 full-repository tests passed; no model/GPU execution |
-| Portable vanilla-Nemotron lock audit | exact local base snapshot audit and untracked portable lock evidence | `scripts/run_asrur_vanilla_nemo_phase2_audit.sh` | IMPLEMENTED_NOT_RUN at `92d6218`; CPU-only, no download, no model load |
-| Nemo Clotho A2T direction suite | 1,045 audio queries against 5,225 frozen caption candidates; five matching captions are multi-positive qrels | `configs/eval/nemo3b_cl_clotho_a2t_suite.json`, `scripts/run_nemo3b_cl_clotho_a2t_suite.sh` | IMPLEMENTED_NOT_RUN; reuses the completed lock-bound Nemo embedding directory, CPU-only |
+| Portable vanilla-Nemotron lock audit | exact local base snapshot audit and untracked portable lock evidence | `scripts/run_asrur_vanilla_nemo_phase2_audit.sh`; compact audit `results/audits/asrur_vanilla_nemo_portable_lock_20260727.json` | COMPLETE at execution `7cfbfab`; pipeline/wrapper=`0/0`; portable SHA256 `eb62da75...cc1c`; canonical lock awaits byte-for-byte JSON transfer |
+| Nemo Clotho A2T direction suite | 1,045 audio queries against 5,225 frozen caption candidates; five matching captions are multi-positive qrels | `results/audits/asrur_nemo_clotho_a2t_20260727.json` | COMPLETE at execution `7cfbfab`; R@1/5/10=`26.8900/51.3876/65.2632`; CPU-only; not paper-reported |
 | Phase-2 frozen-retrieval orchestrator | OEA/vanilla Omni/BGE/Whisper frozen inference, exact full-corpus rankings, dev-only BGE template selection, four-condition metrics and OEA candidate oracle | `scripts/run_asrur_phase2_frozen_retrieval.sh`, `scripts/select_asrur_bge_query_template.py` | IMPLEMENTED_NOT_RUN; `--execute` requires separate 1×RTX 4090 approval |
 
 最后更新：2026-07-27（D2–D4 首次严格离线验收）
@@ -35,6 +35,7 @@
 | A-MODEL-MIGRATION | OEA 模型迁移与旧缓存清理 | run `model_cache_migration_v3_20260726_214834`；exit `0`；254 files 前后相同 | `results/audits/model_cache_migration_20260726.json` | COMPLETE; `/home/jg525/model_cache` removed |
 | C-ASRUR-MODEL-AUDIT | D2–D4 离线固定 revision/LFS/size/SHA256 验收器 | commit `aac088d68f9bc60871c48db90a2603144ca1b178` | `scripts/run_asrur_model_audit.sh` | COMPLETE；已执行首次远程验收 |
 | F-ASRUR-D2-D4-AUDIT1 | D2–D4 首次严格离线验收 | execution `92746e5`；run `asrur_d2_d4_model_audit_20260727_132612`；audit/wrapper=`1/1` | `results/audits/asrur_d2_d4_model_audit_failure_20260727.json` | FAILED；D3/D4 complete，D2 仅缺 3,087,130,976-byte `model.safetensors`；未修改/删除模型 |
+| A-ASRUR-D2-D4-AUDIT2 | D2 修复与 D2–D4 严格离线验收 | run `asrur_d2_whisper_repair_20260727_134626`；strict/wrapper=`0/0`；selected bytes=`5,823,662,271/5,823,662,271` | `results/audits/asrur_d2_d4_model_audit_success_20260727.json` | COMPLETE；Whisper 权重 3,087,130,976 B、SHA256 `a8e94b85...fd95`；D3/D4 不重复下载 |
 | C-ASRUR-NEMO-AUDIT | Nemo Phase 1 CPU 三阶段审计与 portable lock runner | initial `953cb34`；metadata fixes `86107ca`/`6760f7f`；safe-global fix `7bd4765` | `scripts/run_asrur_nemo_phase1_audit.sh`、`scripts/run_official_oea_model_pipeline.py` | COMPLETE implementation；CPU-only；固定 revision metadata API only、无模型下载；attempt 4 待用户操作 |
 | F-ASRUR-NEMO-METADATA | Nemo Phase 1 attempt 1 metadata-policy failure | execution `d3ba9f1`；run `asrur_nemo_phase1_audit_20260726_232452`；exit `1/1` | `results/audits/asrur_nemo_phase1_metadata_policy_failure_20260726.json` | FAILED；实现协议冲突，不是模型损坏；由 `86107ca` 修复 |
 | F-ASRUR-NEMO-TRANSITIVE-OFFLINE | Nemo Phase 1 attempt 2 legacy offline-alias failure | execution `5bba16c`；run `asrur_nemo_phase1_audit_20260726_235146`；exit `1/1` | `results/audits/asrur_nemo_phase1_transitive_offline_failure_20260727.json` | FAILED；`TRANSFORMERS_OFFLINE` 被 Hub 0.36.0 视为离线别名；由 `6760f7f` 修复 |
@@ -45,6 +46,7 @@
 | R-ASRUR-NEMO-G1-SMOKE | Nemo3B-Cl Clotho 锁绑定 5/25 GPU smoke | execution `1b23c50`；run `..._20260727_092654`；RTX 4090；exit `0/0` | `results/audits/asrur_nemo_g1_smoke_20260727.json`；大型原始工件保留远程 run 目录 | COMPLETE；5×512/25×512、544 LoRA、严格离线、峰值 9.14/9.49 GiB；不是论文 Recall 结果 |
 | R-ASRUR-NEMO-G1-FULL | Nemo3B-Cl Clotho 全量 embedding | execution `4d2341d`；run `..._20260727_094554`；RTX 4090；exit `0/0` | `results/audits/asrur_nemo_g1_full_embeddings_20260727.json`；大型 embedding/chunks 保留远程 run 目录 | COMPLETE；1,045×512 audio、5,225×512 text、严格离线、峰值 9.39/10.48 GiB；Recall 尚待 CPU 套件 |
 | R-ASRUR-NEMO-G1-T2A | Nemo3B-Cl Clotho Table 2 T2A | execution `20533b1`；suite `..._20260727_125803`；CPU；suite/attempt/run=`0/0/0` | `results/audits/asrur_nemo_clotho_t2a_20260727.json`；suite metrics SHA256 `c6121e7c...bde0`；CSV SHA256 `6a192065...ed8` | COMPLETE；all-caption 最大绝对差 0.152488 pp，seed0 最大差 0.551388 pp；两组均为 `[CODE] close`，严格论文 caption 口径仍 blocked |
+| R-ASRUR-NEMO-G1-A2T | Nemo3B-Cl Clotho A2T direction gate | execution `7cfbfab`；suite `..._20260727_161133`；CPU；attempt=`0`、stderr 为空 | `results/audits/asrur_nemo_clotho_a2t_20260727.json`；suite metrics SHA256 `c54994a9...cc60`；CSV SHA256 `37a73e11...8e5` | COMPLETE；1,045 audio→5,225 captions；R@1/5/10=`26.8900/51.3876/65.2632`；`[CODE]` extension, not paper-reported |
 
 ## 2. 已有远程数据
 
@@ -69,9 +71,9 @@
 | M-NEMO-BASE | `nvidia/omni-embed-nemotron-3b` | `865db1bb...` | `/home/jg525/models/oea/omni-embed-nemotron-3b` | LIVE_CONTENT_VERIFIED；22 files / 9,423,120,401 B，attempt 3 |
 | M-OEA-NEMO-AC | `JudeJiwoo/OEA-Nemo3B-AC` | `8ed66aa...`; `step_400_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-AC` | migrated intact by file-count/byte invariants |
 | M-OEA-NEMO-CL | `JudeJiwoo/OEA-Nemo3B-Cl` | `9588912...`; `step_450_best.pt` | `/home/jg525/models/oea/OEA-Nemo3B-Cl` | LIVE_CONTENT_VERIFIED；3 files / 9,466,834,755 B；source SHA256 `c9013285...a96d`；59,072,047-B derived SHA256 `2a5bee90...80c4` |
-| M-WHISPER | `openai/whisper-large-v3` | `06f233fe...`; minimal safetensors 3,091,519,764 B | `/home/jg525/models/whisper-large-v3` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
-| M-BGE-DENSE | `BAAI/bge-base-en-v1.5` | `a5beb1e3...`; minimal 438,900,399 B | `/home/jg525/models/bge-base-en-v1.5` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
-| M-BGE-RERANK | `BAAI/bge-reranker-v2-m3` | `953dc6f6...`; minimal 2,293,242,108 B | `/home/jg525/models/bge-reranker-v2-m3` | MANUAL_GIT_CLONE_RUNNING; strict audit pending |
+| M-WHISPER | `openai/whisper-large-v3` | `06f233fe...`; weight 3,087,130,976 B；SHA256 `a8e94b85...fd95` | `/home/jg525/models/whisper-large-v3` | COMPLETE；strict offline audit passed |
+| M-BGE-DENSE | `BAAI/bge-base-en-v1.5` | `a5beb1e3...`; selected snapshot bound by the D2–D4 manifest | `/home/jg525/models/bge-base-en-v1.5` | COMPLETE；strict offline audit passed |
+| M-BGE-RERANK | `BAAI/bge-reranker-v2-m3` | `953dc6f6...`; selected snapshot bound by the D2–D4 manifest | `/home/jg525/models/bge-reranker-v2-m3` | COMPLETE；strict offline audit passed |
 | M-TTS | FiQA train/dev TTS model | not selected | not assigned | BLOCKED pending protocol/license approval |
 
 ## 4. 将生成的缓存

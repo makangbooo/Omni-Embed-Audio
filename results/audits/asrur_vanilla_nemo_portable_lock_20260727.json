@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_terminal_output",
+  "git_commit": "7cfbfabfeb8191d5a78e009ea728f75ea0c1d5b5",
+  "backbone_id": "vanilla_nemotron_3b",
+  "model": "nvidia/omni-embed-nemotron-3b",
+  "revision": "865db1bb57e369a85357cf114cbd6b3c5322d19d",
+  "execution": {
+    "run_id": "asrur_vanilla_nemo_phase2_audit_20260727_161133",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/logs/asrur_vanilla_nemo_phase2_audit_20260727_161133",
+    "pipeline_exit_code": 0,
+    "wrapper_exit_code": 0,
+    "gpu_used": false,
+    "model_download_performed": false
+  },
+  "portable_lock": {
+    "remote_path": "/home/jg525/Omni-Embed-Audio/logs/asrur_vanilla_nemo_phase2_audit_20260727_161133/vanilla_nemotron_3b.portable_model_lock.json",
+    "size_bytes": null,
+    "size_source": "remote ls reported 6.3K; exact byte count not returned",
+    "sha256": "eb62da7579d2f5b7ccd774e15d518d3ed50f4d502753b3fc4a7f51187b96cc1c"
+  },
+  "resource_audit": {
+    "remote_path": "/home/jg525/Omni-Embed-Audio/logs/asrur_vanilla_nemo_phase2_audit_20260727_161133/pipeline/model_resource_audit.json",
+    "size_bytes": 19058,
+    "sha256": "7149222bc59f607f63d12220e6976695b863bc7ba599b92a5ca93c03e2c5fa0c"
+  },
+  "conclusion": {
+    "portable_lock_gate": "passed",
+    "canonical_lock_status": "waiting_for_exact_portable_json_transfer",
+    "note": "The canonical tracked lock will be committed only after byte-for-byte transfer and SHA256 revalidation of the 6.3K remote portable JSON."
+  }
+}

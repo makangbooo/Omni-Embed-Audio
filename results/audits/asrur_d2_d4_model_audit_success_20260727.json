@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_terminal_output",
+  "execution": {
+    "repair_run_id": "asrur_d2_whisper_repair_20260727_134626",
+    "repair_run_path": "/home/jg525/Omni-Embed-Audio/logs/asrur_d2_whisper_repair_20260727_134626",
+    "strict_audit_exit_code": 0,
+    "wrapper_exit_code": 0,
+    "gpu_used": false,
+    "network_used_for_strict_audit": false
+  },
+  "resources": {
+    "manifest": "configs/asr_uncertainty_reranking/resources/models.json",
+    "resource_id": "ASRUR-D2-D4",
+    "model_root": "/home/jg525/models",
+    "expected_selected_bytes": 5823662271,
+    "observed_selected_bytes": 5823662271,
+    "verified_expected_bytes": 5823662271,
+    "errors": []
+  },
+  "d2": {
+    "model": "openai/whisper-large-v3",
+    "revision": "06f233fe06e710322aca913c1bc4249a0d71fce1",
+    "path": "/home/jg525/models/whisper-large-v3",
+    "weight": {
+      "path": "/home/jg525/models/whisper-large-v3/model.safetensors",
+      "size_bytes": 3087130976,
+      "sha256": "a8e94b85976e5864ba3e9525c7e6c83b2a1eca42d4b797a0c7c24d778e40fd95"
+    },
+    "status": "complete"
+  },
+  "d3": {
+    "model": "BAAI/bge-base-en-v1.5",
+    "status": "complete"
+  },
+  "d4": {
+    "model": "BAAI/bge-reranker-v2-m3",
+    "status": "complete"
+  },
+  "conclusion": {
+    "d2_d4_gate": "passed",
+    "remaining_model_download_blocker": null,
+    "note": "The successful strict audit supersedes the earlier failed audit as current resource state; the failure artifact remains preserved as attempt evidence."
+  }
+}

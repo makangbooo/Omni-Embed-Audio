@@ -7,17 +7,17 @@
 - OEA 仅作为论文基线；不再把“完整复现 OEA 全部实验”列为本论文前置任务。
 - 必须完成的 OEA 基线与新增实验已逐项固化在
   `docs/asr_uncertainty_reranking/ICASSP_EXPERIMENT_CHECKLIST.md`。
-- 当前真实实验完成度：`2/28 = 7.1%`；FiQA 主结果单元为 `0`。已完成的 CPU
+- 当前真实实验完成度：`3/28 = 10.7%`；FiQA 主结果单元为 `0`。已完成的 CPU
   框架和合成测试只计执行准备度，绝不计作研究结果。
 - 代码 commit `207bcd0` 已加入本地只读模型适配层；commit `f9fc977` 已加入
   BGE/Whisper/CE、OEA-Nemo 与原始 Omni 的可恢复真实缓存生成器及 Phase-2
   工作量预检。四个声学条件强制独立缓存，并统一使用 FiQA qrels query ID。
   Gold transcript CE 上限允许单假设，但正式 Whisper 路径固定为 4-best。
 - 验证：本地全仓 `387` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
-- 当前阻塞：D2 Whisper `model.safetensors` 远程断点恢复与严格 SHA256 验收；
-  D3/D4 已完成。D2 完成后先执行独立 GPU 批准的 Phase-2 召回，不等待 TTS。
-- 下一步：D2 严格验收完成后执行 canonical lock 与 Phase-2 dry-run，然后向
-  用户提交一次明确的 GPU 任务申请。
+- 当前阻塞：vanilla-Nemotron portable lock 已在远程成功生成，但必须逐字传回
+  并通过 SHA256 后才能提交 canonical lock；FiQA GPU 推理尚未获单独批准。
+- 下一步：提交 canonical lock、执行 Phase-2 dry-run，然后向用户提交一次明确
+  的 GPU 任务申请。
 
 最后更新：2026-07-27（D2 单文件断点恢复正在远程 CPU 运行）
 
@@ -35,11 +35,11 @@
 | 0 | CPU 核心算法与缓存契约 | COMPLETED | `8cc5984` | 未远程运行；本地 38 项相关测试通过 | 无 | 后续模型 runner 只能调用这些已测试定义 |
 | 0 | B1–B7、QG、Ours、U1–U4、A1–A9 CPU 主实验框架 | COMPLETED | `8f28c55` | 本地 345 项全仓测试通过；无下载、GPU、模型推理或真实训练 | 无；合成 smoke 明确禁止写入研究结果 | 远程拉取后执行 D1–D4 下载、DATA-13C 恢复和 FiQA 数据审计 |
 | 0/2 | FiQA 真实模型缓存 producer 与 Phase-2 预检 | COMPLETED | `f9fc977` | BGE dense、Whisper 4-best、BGE CE、OEA-Nemo、原始 Omni 与 exact Top-100 均支持断点恢复和不可变 manifest；FiQA dev/test 由 qrels ID 精确隔离；四条件只生成一次冻结文档缓存；1×RTX 4090 正式 wrapper 已实现；全仓 387 项测试通过；未运行 GPU | D2 尚在下载；原始 Omni canonical lock 尚待 CPU 生成 | 完成 vanilla lock、Nemo A2T CPU 套件与 dry-run；D2 验收后单独申请 GPU |
-| 0/2 | 原始 Omni-Embed-Nemotron 便携式模型锁审计 | COMPLETED | `92d6218` | CPU-only、只读哈希、输出到 ignored logs，远程工作树保持干净；未下载、未运行 GPU | 尚未在远程执行 | 与 D2 下载并行生成 portable lock，返回小型 JSON |
+| 0/2 | 原始 Omni-Embed-Nemotron 便携式模型锁审计 | COMPLETED | `7cfbfab` | run=`asrur_vanilla_nemo_phase2_audit_20260727_161133`；pipeline/wrapper=`0/0`；portable lock SHA256=`eb62da75...cc1c`；CPU-only、未下载、未运行 GPU | canonical lock 尚缺远程 6.3K JSON 的逐字传输 | 获取完整 JSON，校验 SHA256 后提交 `results/model_locks/vanilla_nemotron_3b.json` |
 | 0 | B5/B6 主融合的 ASR 路由 | COMPLETED | `b9a81ef` | `[INFERRED][USER-CONFIRMED 2026-07-26]` 主路线固定为 4-best `proxy_posterior`；1-best 只作辅助诊断 | 无 | 正式结果不得根据 test/NQ 表现切换路线 |
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | DATA-13D 生成目标 manifest 后在同一 run 执行一致性审计 |
 | 0 | 模型存储迁移与旧缓存清理 | COMPLETED | `aac088d` | run=`model_cache_migration_v3_20260726_214834`；exit=`0`；OEA 254 files、apparent/allocated bytes 前后完全一致；旧 `/home/jg525/model_cache` 已按用户明确授权删除 | 无 | 后续统一使用 `/home/jg525/models`；历史审计中的旧路径保持原样 |
-| 0 | D2–D4 Whisper/BGE 固定资源下载 | RUNNING_REMOTE | `6e55e2b` | D3/D4 已严格通过；D2 repair run=`asrur_d2_whisper_repair_20260727_134626`，PID `4940`，CPU-only，启动成功且使用 `.part` 断点续传；13:48 约 92.9 MiB/2.944 GiB，strict audit 尚未开始 | 仅等待 D2 的 3,087,130,976-byte `model.safetensors` 下载、SHA256 校验与自动全量验收 | 不重复启动；任务退出后收集 repair/audit 两级退出码与最终 SHA256 |
+| 0 | D2–D4 Whisper/BGE 固定资源下载 | COMPLETED | `6e55e2b` | D2 repair run=`asrur_d2_whisper_repair_20260727_134626`；strict/wrapper=`0/0`；Whisper 权重 3,087,130,976 B、SHA256=`a8e94b85...fd95`；D2–D4 selected bytes=`5,823,662,271/5,823,662,271`，errors 为空 | 无 | 资源门禁通过；后续严格离线加载 |
 | 0/2 | SQuTR DATA-13B/13C 六子集内容门禁 | WAITING_USER | `a4c5c02` | 精确探针 old/new lock RC=`73/0`；本机无持有者，用户确认没有任何其他挂载 `/home/jg525` 的运行实例 | DPC 远端遗留锁租约；只阻塞全六子集扩展 | 按 `dpc_lock_support_request.md` 联系平台；不得删除/绕过旧 lock |
 | 0/2 | DATA-13C lock owner provenance | COMPLETED | `090abf8` | wrapper 改为非截断打开 lock；成功取得后记录 hostname/PID/PPID/commit/run dir，失败时显示最后记录；4 项专项测试通过 | 该补丁不能解除当前由远端实体持有的旧锁 | 远端锁安全释放并拉取本补丁后再恢复 DATA-13C |
 | 0/2 | DATA-13D FiQA/NQ 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；reuse/validation/FiQA audit/wrapper=`0/0/0/0`；16,400/16,400 音频、manifest/cache SHA256 已固定；FiQA violations 与 split leakage 均为空 | 无；源音频混合 24 kHz/16 kHz，后续 runner 必须显式重采样 | 固化审计 JSON；进入模型验收与 Phase 1/2 runner 门禁 |
@@ -48,8 +48,9 @@
 | 1 | Nemo 5/25 OEA embedding smoke | COMPLETED | `1b23c50` | RTX 4090 run=`oea_nemo3b_clotho_lock_bound_smoke_seed42_20260727_092654`；wrapper/attempt=`0/0`；严格离线；5×512/25×512；544 LoRA；pending=0；峰值 allocated/reserved=9.14/9.49 GiB | 无；两条 Transformers 兼容性警告已原样登记，不修改锁定模型 | 已授权并完成同锁全量 Clotho embedding |
 | 1 | Nemo(+Cl) Clotho 全量 embedding | COMPLETED | `4d2341d` | RTX 4090 run=`oea_nemo3b_clotho_embeddings_seed42_20260727_094554`；wrapper/attempt=`0/0`；严格离线；1,045×512 audio、5,225×512 text；pending=0；峰值 allocated/reserved=9.39/10.48 GiB；五个最终工件 SHA256 已固定 | 无；兼容性警告保留，不修改锁定 snapshot | 在 CPU 侧复用固定 embedding，不再加载模型 |
 | 1 | Nemo(+Cl) Clotho 表 2 T2A | COMPLETED | `20533b1` | CPU suite=`oea_nemo3b_clotho_t2a_suite_seed42_20260727_125803`；suite/attempt/run=`0/0/0`；stderr 为空；all-caption=`21.7225/47.1196/60.4402`，seed0=`21.6268/46.7943/59.8086` | 严格论文 caption 选择仍 `[MISSING]`，因此两组 `[CODE] close` 分栏且 strict 观察保留 blocked；不得择优 | Phase 1 正确性门禁通过；D2–D4 验收完成后进入 Phase 2 FiQA 一级召回 |
+| 1 | Nemo(+Cl) Clotho A2T 方向检查 | COMPLETED | `7cfbfab` | CPU suite=`oea_nemo3b_clotho_a2t_suite_seed42_20260727_161133`；attempt=`0`、stderr 为空；1,045 audio→5,225 captions；R@1/5/10=`26.8900/51.3876/65.2632` | 无；这是 `[CODE]` 方向扩展，不是论文表格结果 | OEA-B2 完成；进入 FiQA frozen-index 方向 |
 | 2 | FiQA corpus/qrels 协议与文档构造锁 | COMPLETED | `730e0fc` | corpus/train/dev/test=`57,638/5,500/500/648`；qrel pairs=`14,166/1,238/1,706`；四条件各 648；ID、规范化文本和 split leakage 检查全通过 | FiQA corpus 有 38 个官方空文档行，按固定 SQuTR loader 保留 | 后续索引不得过滤或合成这 38 行；缓存 manifest 绑定输入 SHA256 |
-| 2 | B1/B2/B3 四条件一级召回 | BLOCKED | `f9fc977` | 真实 runner 已实现并通过测试；每条件独立 648 query，统一 qrels ID；文档 embedding 跨条件复用且缓存契约强校验 | D2 严格验收、原始 Omni lock、dry-run 与独立 GPU 批准 | 报告 nDCG/MRR/Recall/Oracle |
+| 2 | B1/B2/B3 四条件一级召回 | BLOCKED | `f9fc977` | 真实 runner 已实现并通过测试；每条件独立 648 query，统一 qrels ID；文档 embedding 跨条件复用且缓存契约强校验 | 原始 Omni canonical lock、dry-run 与独立 GPU 批准 | 报告 nDCG/MRR/Recall/Oracle |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |
 | 3 | 1-best CE、固定融合、RRF、Gold 上限 | BLOCKED | N/A | 未开始 | 依赖 Go | 复用唯一 OEA Top-100 |
 | 4 | 4-best、proxy posterior、不确定性实验 | BLOCKED | `8f28c55` | 缓存装配、聚合、特征、dev 选择、正式评测实现完成；模型推理未开始 | 依赖 Whisper 下载、Phase 3 缓存和 GPU 批准 | 补模型 adapter 后生成正式缓存 |
