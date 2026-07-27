@@ -9,13 +9,14 @@
   `docs/asr_uncertainty_reranking/ICASSP_EXPERIMENT_CHECKLIST.md`。
 - 当前真实实验完成度：`2/28 = 7.1%`；FiQA 主结果单元为 `0`。已完成的 CPU
   框架和合成测试只计执行准备度，绝不计作研究结果。
-- 代码 commit `207bcd0` 已加入本地只读模型适配层：BGE CLS pooling/L2、
-  BGE v2-M3 单 logit Cross-Encoder、Whisper 4-beam token log-prob proxy、
-  16 kHz 显式重采样和 fail-closed 校验。未下载、未加载模型、未启动 GPU。
-- 验证：本地全仓 `371` 项 `unittest` 全部通过。
+- 代码 commit `207bcd0` 已加入本地只读模型适配层；commit `dd44bc4` 已加入
+  BGE/Whisper/CE、OEA-Nemo 与原始 Omni 的可恢复真实缓存生成器及 Phase-2
+  工作量预检。四个声学条件强制独立缓存，并统一使用 FiQA qrels query ID。
+  Gold transcript CE 上限允许单假设，但正式 Whisper 路径固定为 4-best。
+- 验证：本地全仓 `380` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
 - 当前阻塞：D2 Whisper `model.safetensors` 远程断点恢复与严格 SHA256 验收；
   D3/D4 已完成。D2 完成后先执行独立 GPU 批准的 Phase-2 召回，不等待 TTS。
-- 下一步：完成真实缓存 producer、D2 canonical lock 与 Phase-2 dry-run，然后向
+- 下一步：D2 严格验收完成后执行 canonical lock 与 Phase-2 dry-run，然后向
   用户提交一次明确的 GPU 任务申请。
 
 最后更新：2026-07-27（D2 单文件断点恢复正在远程 CPU 运行）
@@ -33,6 +34,7 @@
 | 0 | D1–D4 固定清单与 CPU 下载 wrapper | COMPLETED | `6279b82` | 未下载 | 无；与 SQuTR 内容校验无数据依赖 | 35 项相关测试通过；拉取最新分支后执行 |
 | 0 | CPU 核心算法与缓存契约 | COMPLETED | `8cc5984` | 未远程运行；本地 38 项相关测试通过 | 无 | 后续模型 runner 只能调用这些已测试定义 |
 | 0 | B1–B7、QG、Ours、U1–U4、A1–A9 CPU 主实验框架 | COMPLETED | `8f28c55` | 本地 345 项全仓测试通过；无下载、GPU、模型推理或真实训练 | 无；合成 smoke 明确禁止写入研究结果 | 远程拉取后执行 D1–D4 下载、DATA-13C 恢复和 FiQA 数据审计 |
+| 0/2 | FiQA 真实模型缓存 producer 与 Phase-2 预检 | COMPLETED | `dd44bc4` | BGE dense、Whisper 4-best、BGE CE、OEA-Nemo、原始 Omni 与 exact Top-100 均支持断点恢复和不可变 manifest；全仓 380 项测试通过；未运行 GPU | D2 尚在下载；原始 Omni canonical lock 尚待 CPU 生成 | D2 验收后做 dry-run；随后单独申请 GPU |
 | 0 | B5/B6 主融合的 ASR 路由 | COMPLETED | `b9a81ef` | `[INFERRED][USER-CONFIRMED 2026-07-26]` 主路线固定为 4-best `proxy_posterior`；1-best 只作辅助诊断 | 无 | 正式结果不得根据 test/NQ 表现切换路线 |
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | DATA-13D 生成目标 manifest 后在同一 run 执行一致性审计 |
 | 0 | 模型存储迁移与旧缓存清理 | COMPLETED | `aac088d` | run=`model_cache_migration_v3_20260726_214834`；exit=`0`；OEA 254 files、apparent/allocated bytes 前后完全一致；旧 `/home/jg525/model_cache` 已按用户明确授权删除 | 无 | 后续统一使用 `/home/jg525/models`；历史审计中的旧路径保持原样 |
@@ -46,7 +48,7 @@
 | 1 | Nemo(+Cl) Clotho 全量 embedding | COMPLETED | `4d2341d` | RTX 4090 run=`oea_nemo3b_clotho_embeddings_seed42_20260727_094554`；wrapper/attempt=`0/0`；严格离线；1,045×512 audio、5,225×512 text；pending=0；峰值 allocated/reserved=9.39/10.48 GiB；五个最终工件 SHA256 已固定 | 无；兼容性警告保留，不修改锁定 snapshot | 在 CPU 侧复用固定 embedding，不再加载模型 |
 | 1 | Nemo(+Cl) Clotho 表 2 T2A | COMPLETED | `20533b1` | CPU suite=`oea_nemo3b_clotho_t2a_suite_seed42_20260727_125803`；suite/attempt/run=`0/0/0`；stderr 为空；all-caption=`21.7225/47.1196/60.4402`，seed0=`21.6268/46.7943/59.8086` | 严格论文 caption 选择仍 `[MISSING]`，因此两组 `[CODE] close` 分栏且 strict 观察保留 blocked；不得择优 | Phase 1 正确性门禁通过；D2–D4 验收完成后进入 Phase 2 FiQA 一级召回 |
 | 2 | FiQA corpus/qrels 协议与文档构造锁 | COMPLETED | `730e0fc` | corpus/train/dev/test=`57,638/5,500/500/648`；qrel pairs=`14,166/1,238/1,706`；四条件各 648；ID、规范化文本和 split leakage 检查全通过 | FiQA corpus 有 38 个官方空文档行，按固定 SQuTR loader 保留 | 后续索引不得过滤或合成这 38 行；缓存 manifest 绑定输入 SHA256 |
-| 2 | B1/B2/B3 四条件一级召回 | TODO | N/A | 需要 GPU | 依赖数据/模型下载和 Phase 1 | 报告 nDCG/MRR/Recall/Oracle |
+| 2 | B1/B2/B3 四条件一级召回 | BLOCKED | `dd44bc4` | 真实 runner 已实现并通过测试；每条件独立 648 query，统一 qrels ID | D2 严格验收、原始 Omni lock 与独立 GPU 批准 | 报告 nDCG/MRR/Recall/Oracle |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |
 | 3 | 1-best CE、固定融合、RRF、Gold 上限 | BLOCKED | N/A | 未开始 | 依赖 Go | 复用唯一 OEA Top-100 |
 | 4 | 4-best、proxy posterior、不确定性实验 | BLOCKED | `8f28c55` | 缓存装配、聚合、特征、dev 选择、正式评测实现完成；模型推理未开始 | 依赖 Whisper 下载、Phase 3 缓存和 GPU 批准 | 补模型 adapter 后生成正式缓存 |

@@ -23,8 +23,8 @@ Allowed statuses are `TODO`, `IN_PROGRESS`, `WAITING_USER`,
 | OEA-B0 | Lock OEA-Nemo3B(+Cl), its base model, prefix, pooling, projection, dimension, and normalization; run a real embedding smoke test | Prevents an invalid OEA baseline | COMPLETED | Canonical lock and RTX 4090 5-audio/25-text smoke; peak allocated 9.14 GiB |
 | OEA-B1 | Reproduce OEA-Nemo3B(+Cl) Clotho T2A R@1/5/10 | Numerical connection to the OEA paper | COMPLETED | Paper 21.57/47.16/60.36; reproduced all-caption 21.7225/47.1196/60.4402 |
 | OEA-B2 | Clotho audio-to-text direction sanity check using the selected Nemo checkpoint | Confirms the direction used by the new task before changing domains | TODO | Existing Clotho A2T result is Qwen3B, not the selected Nemo baseline |
-| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | BLOCKED | Needs Phase-2 GPU run after real runner completion and separate GPU approval |
-| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | BLOCKED | Same Phase-2 GPU gate as OEA-B3 |
+| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | BLOCKED | Real resumable runner is complete; needs model-config dry-run and separate GPU approval |
+| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | BLOCKED | Real resumable runner is complete; needs canonical vanilla lock and the Phase-2 GPU gate |
 | OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | BLOCKED | Depends on OEA-B3 candidates |
 | OEA-B6 | Selected Nemo OEA audio/text latency, throughput, and peak memory on the study GPU | Measures the cost inherited by the proposed system | BLOCKED | Run after correctness; hardware must be recorded and separately approved |
 
@@ -73,7 +73,7 @@ toward this checklist.
 | P5 | D3 BGE-base-en-v1.5 | COMPLETED | Fixed revision passed strict local audit |
 | P6 | D4 BGE-reranker-v2-m3 | COMPLETED | Fixed revision passed strict local audit |
 | P7 | Dependency-light ranking/gating/statistics framework | COMPLETED | Synthetic tests only; no synthetic number is a research result |
-| P8 | Real BGE/Whisper/CE cache producers | IN_PROGRESS | CPU-side implementation and tests in progress; GPU execution is not authorized |
+| P8 | Real BGE/Whisper/CE/OEA/Omni cache producers | COMPLETED | Commit `dd44bc4`; resumable immutable caches, four independent acoustic-condition runs, FiQA qrels-ID alignment, and 380 full-repository tests; GPU execution is not authorized |
 | P9 | FiQA train/dev TTS, speaker split, and noise construction | WAITING_USER | Deliberately postponed until Phase-2 Go/No-Go; requires a separate concrete proposal |
 
 ## D. Progress accounting
@@ -83,10 +83,10 @@ toward this checklist.
 - Completed experiment packages: **2/28 = 7.1%**.
 - Completed main FiQA result cells: **0**. Code readiness must not be reported
   as an experimental result.
-- Prerequisites completed: **7/10**; one is running, one is in progress, and
-  one awaits a later user decision.
-- A transparent project-level estimate is **29%**:
-  preparation is weighted 30% and approximately 85% complete; real experiments
+- Prerequisites completed: **8/10**; one is running and one awaits a later
+  user decision.
+- A transparent project-level estimate is **30%**:
+  preparation is weighted 30% and approximately 90% complete; real experiments
   are weighted 60% and approximately 5% complete; final analysis/reporting is
   weighted 10% and 0% complete. This estimate is planning metadata, not a
   scientific result.
@@ -94,7 +94,7 @@ toward this checklist.
 The next critical path is:
 
 1. finish and strictly accept D2;
-2. finish/test real local-model cache producers;
+2. build the vanilla-Nemotron canonical lock and complete Phase-2 dry-runs;
 3. request one Phase-2 GPU allocation;
 4. run OEA-B2/B3/B4/B5 and ASR-E1/E10;
 5. apply the preregistered Go/No-Go without changing candidate generation;
