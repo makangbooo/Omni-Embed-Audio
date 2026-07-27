@@ -16,9 +16,14 @@
   },
   "portable_lock": {
     "remote_path": "/home/jg525/Omni-Embed-Audio/logs/asrur_vanilla_nemo_phase2_audit_20260727_161133/vanilla_nemotron_3b.portable_model_lock.json",
-    "size_bytes": null,
-    "size_source": "remote ls reported 6.3K; exact byte count not returned",
+    "size_bytes": 6416,
     "sha256": "eb62da7579d2f5b7ccd774e15d518d3ed50f4d502753b3fc4a7f51187b96cc1c"
+  },
+  "canonical_lock": {
+    "path": "results/model_locks/vanilla_nemotron_3b.json",
+    "size_bytes": 6416,
+    "sha256": "eb62da7579d2f5b7ccd774e15d518d3ed50f4d502753b3fc4a7f51187b96cc1c",
+    "transfer_verification": "base64 decoded bytes match the remote portable lock byte-for-byte"
   },
   "resource_audit": {
     "remote_path": "/home/jg525/Omni-Embed-Audio/logs/asrur_vanilla_nemo_phase2_audit_20260727_161133/pipeline/model_resource_audit.json",
@@ -27,7 +32,7 @@
   },
   "conclusion": {
     "portable_lock_gate": "passed",
-    "canonical_lock_status": "waiting_for_exact_portable_json_transfer",
-    "note": "The canonical tracked lock will be committed only after byte-for-byte transfer and SHA256 revalidation of the 6.3K remote portable JSON."
+    "canonical_lock_status": "complete",
+    "note": "The tracked canonical lock is byte-for-byte identical to the remote portable evidence."
   }
 }

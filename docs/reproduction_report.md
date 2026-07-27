@@ -302,3 +302,10 @@ of 0.51023. This passes the direction sanity gate, but it is explicitly a
 `[CODE]` extension rather than a paper-table reproduction. Compact evidence is
 stored in `results/audits/asrur_nemo_clotho_a2t_20260727.json`; full rankings
 remain in the recorded remote suite directory.
+
+The original `nvidia/omni-embed-nemotron-3b` snapshot was independently
+audited on CPU before Phase 2. Its remote portable lock and tracked canonical
+lock are byte-for-byte identical: 6,416 bytes with SHA256
+`eb62da7579d2f5b7ccd774e15d518d3ed50f4d502753b3fc4a7f51187b96cc1c`.
+The lock intentionally claims only the immutable base snapshot and public-code
+pooling/prompt protocol; it is not itself a reproduced retrieval result.
