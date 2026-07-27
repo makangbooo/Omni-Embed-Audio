@@ -13,15 +13,17 @@
   BGE/Whisper/CE、OEA-Nemo 与原始 Omni 的可恢复真实缓存生成器及 Phase-2
   工作量预检。四个声学条件强制独立缓存，并统一使用 FiQA qrels query ID。
   Gold transcript CE 上限允许单假设，但正式 Whisper 路径固定为 4-best。
-- 验证：本地全仓 `388` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
+- 验证：本地全仓 `402` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
 - Phase-2 dry-run attempt 2 已通过：17/17 个步骤、run、wrapper 和调用端退出码
   均为 0，stderr 为空；未加载模型、未使用 GPU、未产生研究指标。
 - 当前远程任务：用户已确认 `run_phase2_gpu` 在 1×RTX 4090 24GB 后台执行。
   OEA-B3/B4/B5、ASR-E1/E10/E12 的完成状态仍以最终工件审计为准。
+- Phase-3 无需 dev 选择的 E2/E5/E6/E11 接续 runner 已实现并通过 28 项相关测试；
+  只在 Phase-2 四条件汇总为 `GO` 且另行获得 GPU 批准后执行。
 - 下一步：后台完成后运行严格四条件 Go/No-Go 审计；任何条件不通过都返回
   `NO_GO_REQUIRES_USER_DECISION`，不自动改变候选生成方式。
 
-最后更新：2026-07-27（Phase-2 CPU dry-run attempt 2 已通过）
+最后更新：2026-07-27（Phase-2 GPU 后台运行；Phase-3 无调参接续已就绪）
 
 状态只使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、
 `COMPLETED`、`FAILED`、`BLOCKED`。
@@ -55,9 +57,10 @@
 | 2 | B1/B2/B3 四条件一级召回 | RUNNING_REMOTE | `c328dfd` | 用户确认 `run_phase2_gpu` 正在 1×RTX 4090 24GB 后台执行；每条件独立 648 query，统一 qrels ID | 等待真实工件和退出码，不能按启动状态标记完成 | 完成后审计 nDCG/MRR/Recall/Oracle |
 | 2 | Phase-2 CPU dry-run attempt 1 | FAILED | `7a098dd` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_164746`；resolve OEA=`0`，resolve vanilla=`1`，wrapper=`1`；`ModuleNotFoundError: scripts`；未加载模型/GPU | 直接脚本入口未把仓库根目录加入 `sys.path` | 拉取最小补丁后使用新 commit/cache root 重试；失败证据不删除 |
 | 2 | Phase-2 CPU dry-run attempt 2 | COMPLETED | `1ff9fc0` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_172606`；17/17 step exit=`0`，run/wrapper/caller=`0/0/0`，stderr 为空；CPU-only，未加载模型/GPU，未产生研究指标 | 无 | 请求 1×RTX 4090 24GB 正式执行 |
-| 2 | Phase-2 四条件结果与 Go/No-Go 审计 | COMPLETED | 待本提交 | 已实现 method/query/path/scale/exit 强校验、逐条件预注册门禁和保守汇总规则；9 项相关测试通过 | 等待远程 Phase-2 输入，因此目前没有决策 | 后台结束后生成独立 audit JSON |
+| 2 | Phase-2 四条件结果与 Go/No-Go 审计 | COMPLETED | `10e872e` | 已实现 method/query/path/scale/exit 强校验、逐条件预注册门禁和保守汇总规则；9 项相关测试通过 | 等待远程 Phase-2 输入，因此目前没有决策 | 后台结束后生成独立 audit JSON |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |
-| 3 | 1-best CE、固定融合、RRF、Gold 上限 | BLOCKED | N/A | 未开始 | 依赖 Go | 复用唯一 OEA Top-100 |
+| 3 | E2/E5/E6/E11：1-best CE、4-best equal/max、Gold CE | BLOCKED | 本提交 | 四条件共享冻结 4×100 CE 矩阵、单独 Gold 单假设 CE、严格无 test 调参评测和断点恢复 runner 已实现；28 项相关测试、Python compile 与 Bash 语法通过 | 依赖 Phase-2 汇总 GO 和新的 GPU 批准 | 复用唯一 OEA Top-100，不重新召回；Gold 不伪造 ASR 后验 |
+| 3 | E3/E4/E7：固定融合、RRF、proxy posterior | BLOCKED | `8f28c55` | CPU 聚合与 dev 选择已有测试实现；尚无真实 CE 缓存或 dev 选择结果 | 必须使用 FiQA dev 选择 | 不得用 FiQA test qrels 选择超参数 |
 | 4 | 4-best、proxy posterior、不确定性实验 | BLOCKED | `8f28c55` | 缓存装配、聚合、特征、dev 选择、正式评测实现完成；模型推理未开始 | 依赖 Whisper 下载、Phase 3 缓存和 GPU 批准 | 补模型 adapter 后生成正式缓存 |
 | 4 | FiQA train/dev TTS/speaker/noise 协议 | BLOCKED | N/A | 未下载/合成 | TTS、许可证、speaker/noise 隔离未批准 | 单独提交具体计划和预算 |
 | 4 | Query/candidate gate 训练 | BLOCKED | `8f28c55` | 三 seed、小 MLP、multi-positive listwise、zero-positive 审计已实现；仅合成测试 | 依赖 TTS 协议和用户真实训练批准 | 只训练小 gate；上游模型保持冻结 |

@@ -40,16 +40,16 @@ toward this checklist.
 | ID | Required result | Status | Evidence / blocker |
 |---|---|---|---|
 | ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | RUNNING_REMOTE | Whisper 4-best cache and its 1-best BGE route are running in the approved Phase-2 wrapper |
-| ASR-E2 | B4: OEA Top-100 + 1-best cross-encoder | BLOCKED | Depends on frozen OEA candidates, Whisper, and CE score cache |
+| ASR-E2 | B4: OEA Top-100 + 1-best cross-encoder | BLOCKED | Formal no-test-selection evaluator and resumable four-condition runner are tested; execution waits for Phase-2 aggregate GO and separate GPU approval |
 | ASR-E3 | B5: fixed fusion using preregistered 4-best proxy-posterior ASR evidence | BLOCKED | Dev selection only; no test tuning |
 | ASR-E4 | B6: RRF using the same 4-best proxy-posterior ASR route | BLOCKED | Dev selection only; no test tuning |
-| ASR-E5 | B7a: 4-best equal aggregation | BLOCKED | Needs Whisper N-best and CE cache |
-| ASR-E6 | B7b: 4-best maximum aggregation | BLOCKED | Needs Whisper N-best and CE cache |
+| ASR-E5 | B7a: 4-best equal aggregation | BLOCKED | Shares the tested four-hypothesis CE cache with E2; execution waits for Phase-2 aggregate GO and separate GPU approval |
+| ASR-E6 | B7b: 4-best maximum aggregation | BLOCKED | Shares the tested four-hypothesis CE cache with E2; execution waits for Phase-2 aggregate GO and separate GPU approval |
 | ASR-E7 | B7c: 4-best proxy-posterior aggregation | BLOCKED | Needs Whisper N-best and CE cache |
 | ASR-E8 | Query-level uncertainty gate baseline | BLOCKED | Needs FiQA train/dev generated speech and frozen upstream caches |
 | ASR-E9 | Ours: candidate-level dynamic gate, three seeds | BLOCKED | Needs approved TTS/noise protocol and gate training |
 | ASR-E10 | U1: gold text query + BGE dense upper bound | RUNNING_REMOTE | Generated and evaluated in the same Phase-2 wrapper; completion awaits audit |
-| ASR-E11 | U2: gold transcript + frozen cross-encoder upper bound | BLOCKED | Real CE cache not generated |
+| ASR-E11 | U2: gold transcript + frozen cross-encoder upper bound | BLOCKED | Strict one-hypothesis Gold artifact and same-candidate CE/evaluator are tested without fabricating an ASR posterior; execution waits for Phase-2 aggregate GO and separate GPU approval |
 | ASR-E12 | U3/U4: candidate oracle and candidate Recall@20/50/100 | RUNNING_REMOTE | Generated from the immutable OEA candidate set in Phase 2; completion awaits audit |
 | ASR-E13 | Main FiQA table: all required methods × four acoustic conditions | BLOCKED | Depends on ASR-E1 through ASR-E12 |
 | ASR-E14 | Three-seed gate mean, standard deviation, and 95% confidence interval | BLOCKED | Depends on ASR-E9 |
