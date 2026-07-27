@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "experiment": "ASRUR Phase-2 normalization repair smoke gate",
+  "execution_git_commit": "ee637721c1f7f6ef13f63addfe13c0b4d172f9f2",
+  "host": "bitahub-a20615852222705664348817",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4090",
+    "memory_total_mib": 24564,
+    "driver_version": "580.76.05",
+    "torch_version": "2.7.1+cu126",
+    "cuda_version": "12.6",
+    "bf16_supported": true
+  },
+  "targeted_cpu_tests": {
+    "passed": 17,
+    "failed": 0,
+    "duration_seconds": 1.23
+  },
+  "run_id": "vanilla_nemotron_3b_clotho_smoke_seed42_entryfix_20260727_192903",
+  "output_directory": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_nemotron_3b_clotho_smoke_seed42_entryfix_20260727_192903",
+  "metrics_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_nemotron_3b_clotho_smoke_seed42_entryfix_20260727_192903/generation_metrics.json",
+  "smoke_exit_code": 0,
+  "dataset": "Bundled five-sample Clotho smoke fixture",
+  "candidate_embedding_shape": [
+    5,
+    2048
+  ],
+  "query_embedding_shape": [
+    25,
+    2048
+  ],
+  "normalization_audit": {
+    "method": "adapter_output_then_float32_cache_boundary_l2",
+    "batch_count": 30,
+    "row_count": 30,
+    "rows_outside_pre_atol_1e3": 17,
+    "pre_norm_min": 0.9974114894866943,
+    "pre_norm_max": 1.0027647018432617,
+    "pre_norm_max_abs_deviation": 0.0027647018432617188,
+    "post_norm_max_abs_deviation": 1.1920928955078125e-07,
+    "adapter_output_dtypes": [
+      "float32"
+    ]
+  },
+  "model_load": {
+    "hidden_size": 2048,
+    "parameter_count": 4703464448,
+    "projection_head_loaded": false,
+    "lora_loaded": false,
+    "oea_checkpoint_loaded": false
+  },
+  "gpu_peak_allocated_bytes": 9757201408,
+  "gpu_peak_reserved_bytes": 10139729920,
+  "warnings_preserved": [
+    "Deprecated video processor configuration filename warning",
+    "Unrecognized mrope_section key warning",
+    "Unclosed sentence-transformers chat-template file warning"
+  ],
+  "repair_assessment": {
+    "status": "VALIDATED",
+    "finding": "The former 1e-3 assertion would reject 17 of 30 real smoke rows. Deterministic float32 cache-boundary L2 normalization reduced the maximum row-norm deviation from 0.0027647018432617188 to 1.1920928955078125e-07.",
+    "embedding_direction_changed": false,
+    "candidate_set_changed": false,
+    "qrels_changed": false,
+    "metric_definition_changed": false
+  },
+  "phase2_launch": {
+    "status_at_observation": "running",
+    "pid": 6769,
+    "run_directory": "/home/jg525/Omni-Embed-Audio/logs/asrur_phase2_frozen_retrieval_execute_20260727_193044",
+    "launch_log": "/home/jg525/Omni-Embed-Audio/logs/asrur_phase2_gpu_launch_20260727_193044.log",
+    "cache_root": "/home/jg525/experiment_cache/asr_uncertainty/fiqa_phase2_ee637721c1f7",
+    "result_root": "/home/jg525/Omni-Embed-Audio/results/raw/asrur_phase2_fiqa_ee637721c1f7",
+    "launcher_exit_code": 0
+  }
+}

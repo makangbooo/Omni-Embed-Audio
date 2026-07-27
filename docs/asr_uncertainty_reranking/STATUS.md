@@ -22,12 +22,19 @@
 - commit `92d705f` 的重试前 normalization smoke 未进入模型加载：16 项 CPU
   测试与 RTX 4090 预检通过，但生成器直接入口因仓库根目录未先加入
   `sys.path` 而 exit=`1`，因此 Phase-2 没有启动，归一化修复尚未被真实模型验证。
+- commit `ee63772` 的修复后 smoke 已通过：5 条音频、25 条文本、17 项 CPU
+  测试均成功。30 行中有 17 行原始范数偏差超过 `1e-3`，最大偏差
+  `0.0027647`；float32 cache-boundary L2 后最大偏差为 `1.19e-7`，因此
+  attempt 1 根因和最小修复均获真实模型验证。
+- Phase-2 attempt 2 已在同一 RTX 4090 后台运行：PID=`6769`，
+  run=`asrur_phase2_frozen_retrieval_execute_20260727_193044`，执行 commit
+  `ee63772`；尚无 completion manifest 或正式指标。
 - Phase-3 无需 dev 选择的 E2/E5/E6/E11 接续 runner 已实现并通过 28 项相关测试；
   只在 Phase-2 四条件汇总为 `GO` 且另行获得 GPU 批准后执行。
-- 下一步：拉取直接入口最小补丁，先重新运行真实 normalization smoke；仅在
-  smoke 通过后，才以新 cache/result root 重试 Phase-2 并运行严格 Go/No-Go。
+- 下一步：等待 Phase-2 attempt 2 完成；保留逐步缓存和失败证据，结束后立即
+  运行四条件完整性及预注册 Go/No-Go 审计。
 
-最后更新：2026-07-27（Phase-2 normalization smoke 暴露直接入口导入缺陷；Phase-2 未启动）
+最后更新：2026-07-27（normalization smoke 通过；Phase-2 attempt 2 正在 RTX 4090 后台运行）
 
 状态只使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、
 `COMPLETED`、`FAILED`、`BLOCKED`。
@@ -62,6 +69,8 @@
 | 2 | Phase-2 CPU dry-run attempt 1 | FAILED | `7a098dd` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_164746`；resolve OEA=`0`，resolve vanilla=`1`，wrapper=`1`；`ModuleNotFoundError: scripts`；未加载模型/GPU | 直接脚本入口未把仓库根目录加入 `sys.path` | 拉取最小补丁后使用新 commit/cache root 重试；失败证据不删除 |
 | 2 | Phase-2 CPU dry-run attempt 2 | COMPLETED | `1ff9fc0` | run=`asrur_phase2_frozen_retrieval_dry-run_20260727_172606`；17/17 step exit=`0`，run/wrapper/caller=`0/0/0`，stderr 为空；CPU-only，未加载模型/GPU，未产生研究指标 | 无 | 请求 1×RTX 4090 24GB 正式执行 |
 | 2 | Phase-2 normalization repair smoke attempt 1 | FAILED | `92d705f` | host=`bitahub-a20615852222705664348817`；16 项 CPU 测试与 RTX 4090/BF16 预检通过；smoke/retry=`1/14`；`ModuleNotFoundError: scripts`；未加载模型，Phase-2 未启动 | 生成器作为绝对路径直接执行时，仓库根目录未在 repository-local imports 前加入 `sys.path` | 拉取最小入口补丁；先重跑 smoke，成功后才启动 Phase-2 |
+| 2 | Phase-2 normalization repair smoke attempt 2 | COMPLETED | `ee63772` | 17 项 CPU 测试通过；5×2048 audio、25×2048 text；smoke=`0`；pre 最大范数偏差 `0.0027647`，30 行中 17 行超过旧阈值；post 最大偏差 `1.19e-7`；峰值 allocated/reserved=`9,757,201,408/10,139,729,920` B | 无；三条非阻塞兼容性/资源警告原样保留 | 以同一 commit 启动 Phase-2 |
+| 2 | B1/B2/B3 四条件一级召回 attempt 2 | RUNNING_REMOTE | `ee63772` | RTX 4090；PID=`6769`；run=`asrur_phase2_frozen_retrieval_execute_20260727_193044`；cache=`fiqa_phase2_ee637721c1f7`；result=`asrur_phase2_fiqa_ee637721c1f7` | 当前无已知阻塞；尚无 completion manifest 或正式指标 | 等待后台完成，不重复启动、不在运行服务器中途 pull；完成后做严格 Go/No-Go |
 | 2 | Phase-2 四条件结果与 Go/No-Go 审计 | COMPLETED | `10e872e` | 已实现 method/query/path/scale/exit 强校验、逐条件预注册门禁和保守汇总规则；9 项相关测试通过 | 等待远程 Phase-2 输入，因此目前没有决策 | 后台结束后生成独立 audit JSON |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |
 | 3 | E2/E5/E6/E11：1-best CE、4-best equal/max、Gold CE | BLOCKED | 本提交 | 四条件共享冻结 4×100 CE 矩阵、单独 Gold 单假设 CE、严格无 test 调参评测和断点恢复 runner 已实现；28 项相关测试、Python compile 与 Bash 语法通过 | 依赖 Phase-2 汇总 GO 和新的 GPU 批准 | 复用唯一 OEA Top-100，不重新召回；Gold 不伪造 ASR 后验 |
