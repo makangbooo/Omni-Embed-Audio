@@ -73,7 +73,7 @@ toward this checklist.
 | P5 | D3 BGE-base-en-v1.5 | COMPLETED | Fixed revision passed strict local audit |
 | P6 | D4 BGE-reranker-v2-m3 | COMPLETED | Fixed revision passed strict local audit |
 | P7 | Dependency-light ranking/gating/statistics framework | COMPLETED | Synthetic tests only; no synthetic number is a research result |
-| P8 | Real BGE/Whisper/CE/OEA/Omni cache producers | COMPLETED | Commit `dd44bc4`; resumable immutable caches, four independent acoustic-condition runs, FiQA qrels-ID alignment, and 380 full-repository tests; GPU execution is not authorized |
+| P8 | Real BGE/Whisper/CE/OEA/Omni cache producers | COMPLETED | Commits `dd44bc4`/`92d6218`; resumable immutable caches, four independent acoustic-condition runs, FiQA qrels-ID alignment, portable vanilla lock audit, and 381 full-repository tests; GPU execution is not authorized |
 | P9 | FiQA train/dev TTS, speaker split, and noise construction | WAITING_USER | Deliberately postponed until Phase-2 Go/No-Go; requires a separate concrete proposal |
 
 ## D. Progress accounting

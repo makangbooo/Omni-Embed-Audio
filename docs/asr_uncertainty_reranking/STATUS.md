@@ -13,7 +13,7 @@
   BGE/Whisper/CE、OEA-Nemo 与原始 Omni 的可恢复真实缓存生成器及 Phase-2
   工作量预检。四个声学条件强制独立缓存，并统一使用 FiQA qrels query ID。
   Gold transcript CE 上限允许单假设，但正式 Whisper 路径固定为 4-best。
-- 验证：本地全仓 `380` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
+- 验证：本地全仓 `381` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
 - 当前阻塞：D2 Whisper `model.safetensors` 远程断点恢复与严格 SHA256 验收；
   D3/D4 已完成。D2 完成后先执行独立 GPU 批准的 Phase-2 召回，不等待 TTS。
 - 下一步：D2 严格验收完成后执行 canonical lock 与 Phase-2 dry-run，然后向
@@ -34,7 +34,8 @@
 | 0 | D1–D4 固定清单与 CPU 下载 wrapper | COMPLETED | `6279b82` | 未下载 | 无；与 SQuTR 内容校验无数据依赖 | 35 项相关测试通过；拉取最新分支后执行 |
 | 0 | CPU 核心算法与缓存契约 | COMPLETED | `8cc5984` | 未远程运行；本地 38 项相关测试通过 | 无 | 后续模型 runner 只能调用这些已测试定义 |
 | 0 | B1–B7、QG、Ours、U1–U4、A1–A9 CPU 主实验框架 | COMPLETED | `8f28c55` | 本地 345 项全仓测试通过；无下载、GPU、模型推理或真实训练 | 无；合成 smoke 明确禁止写入研究结果 | 远程拉取后执行 D1–D4 下载、DATA-13C 恢复和 FiQA 数据审计 |
-| 0/2 | FiQA 真实模型缓存 producer 与 Phase-2 预检 | COMPLETED | `dd44bc4` | BGE dense、Whisper 4-best、BGE CE、OEA-Nemo、原始 Omni 与 exact Top-100 均支持断点恢复和不可变 manifest；全仓 380 项测试通过；未运行 GPU | D2 尚在下载；原始 Omni canonical lock 尚待 CPU 生成 | D2 验收后做 dry-run；随后单独申请 GPU |
+| 0/2 | FiQA 真实模型缓存 producer 与 Phase-2 预检 | COMPLETED | `dd44bc4` | BGE dense、Whisper 4-best、BGE CE、OEA-Nemo、原始 Omni 与 exact Top-100 均支持断点恢复和不可变 manifest；全仓 381 项测试通过；未运行 GPU | D2 尚在下载；原始 Omni canonical lock 尚待 CPU 生成 | D2 验收后做 dry-run；随后单独申请 GPU |
+| 0/2 | 原始 Omni-Embed-Nemotron 便携式模型锁审计 | COMPLETED | `92d6218` | CPU-only、只读哈希、输出到 ignored logs，远程工作树保持干净；未下载、未运行 GPU | 尚未在远程执行 | 与 D2 下载并行生成 portable lock，返回小型 JSON |
 | 0 | B5/B6 主融合的 ASR 路由 | COMPLETED | `b9a81ef` | `[INFERRED][USER-CONFIRMED 2026-07-26]` 主路线固定为 4-best `proxy_posterior`；1-best 只作辅助诊断 | 无 | 正式结果不得根据 test/NQ 表现切换路线 |
 | 0 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`；download/wrapper exit=`0/0`，manifest=`complete`，5/5 selected files 完成，目标目录约 47 MiB | 无 | DATA-13D 生成目标 manifest 后在同一 run 执行一致性审计 |
 | 0 | 模型存储迁移与旧缓存清理 | COMPLETED | `aac088d` | run=`model_cache_migration_v3_20260726_214834`；exit=`0`；OEA 254 files、apparent/allocated bytes 前后完全一致；旧 `/home/jg525/model_cache` 已按用户明确授权删除 | 无 | 后续统一使用 `/home/jg525/models`；历史审计中的旧路径保持原样 |
