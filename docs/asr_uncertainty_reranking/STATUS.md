@@ -33,6 +33,9 @@
 - commit `5835fab` 已加入 Whisper 浮点输入 dtype 对齐、生成分数 fail-closed、
   连续 8 次失败快速中止，以及完成缓存经 schema/size/SHA256 验证后的跨 commit
   只读复用。全仓 407 项测试和 24 项定向测试通过。
+- 单条真实模型门禁已固化为 `scripts/run_asrur_whisper_dtype_smoke.sh`：严格离线，
+  只处理首条 FiQA clean 音频并要求恰好 4 个有限 proxy-score 假设；Bash 语法与
+  更新后的全仓 408 项测试通过，尚未执行 GPU。
 - 用户已固定后续后台协议为 tmux-only；不再提供 `nohup` 启动命令。当前健康
   运行的 PID `6769` 不为切换工具而中断；新增只读实时监控入口
   `scripts/monitor_asrur_phase2.sh`，显示 run/step elapsed、局部百分比、近期
