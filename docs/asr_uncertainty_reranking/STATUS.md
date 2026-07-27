@@ -51,16 +51,21 @@
   对完全相同的四条生成序列做冻结 teacher-forced 前向，以 float32 cross-entropy
   计算实际文本 token 的条件 log-probability。该方法仍明确标记为未校准 proxy；
   缓存身份记录计分方法并禁用 transition-score 复用，失败 JSON 记录精确 stage。
+- commit `54d0e72` 的第三次单条 smoke 已通过：同一 `en/fiqa:clean:4641`
+  记录生成恰好 4 个假设，beam sequence score 与 teacher-forced proxy score
+  全部有限，generation transition score 未使用；strict/wrapper=`0/0`，
+  elapsed=`48s`，stderr 与 failure evidence 均为空。成功审计位于
+  `results/audits/asrur_whisper_teacher_forced_smoke_success_20260728.json`。
 - 用户已固定后续后台协议为 tmux-only；不再提供 `nohup` 启动命令。当前健康
   运行的 PID `6769` 不为切换工具而中断；新增只读实时监控入口
   `scripts/monitor_asrur_phase2.sh`，显示 run/step elapsed、局部百分比、近期
   吞吐和近似 step ETA。
 - Phase-3 无需 dev 选择的 E2/E5/E6/E11 接续 runner 已实现并通过 28 项相关测试；
   只在 Phase-2 四条件汇总为 `GO` 且另行获得 GPU 批准后执行。
-- 下一步：等待用户在 1×RTX 4090 上运行第三次且最后一次单条 Whisper 修复 smoke；通过后
-  用 tmux 和新的 cache root 复用 attempt 2 的 11 组完整缓存，再继续四条件任务。
+- 下一步：在用户已批准的 1×RTX 4090 上，用 tmux 和新的 cache/result root
+  启动 Phase-2 attempt 3；启动时逐组校验并只读复用 attempt 2 的 11 组完整缓存。
 
-最后更新：2026-07-27（dtype/beam-index 均已越过；transition score 非有限失败已审计，改用 teacher-forced proxy，等待单条 GPU 门禁）
+最后更新：2026-07-28（teacher-forced 4-best proxy 单条 GPU 门禁通过；等待 tmux 启动 Phase-2 attempt 3）
 
 状态只使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、
 `COMPLETED`、`FAILED`、`BLOCKED`。
@@ -99,7 +104,7 @@
 | 2 | B1/B2/B3 四条件一级召回 attempt 2 | FAILED | `ee63772` | run=`asrur_phase2_frozen_retrieval_execute_20260727_193044`；OEA/vanilla 四条件与 BGE corpus/dev 的 11 组 cache manifest 完整；`whisper_clean` 648/648 失败；wrapper=`1`；GPU 已释放；无正式指标 | FP32 `input_features` 与 BF16 Whisper conv bias dtype 不一致；不是 OOM 或坏样本 | 修复 commit `5835fab`；保留旧证据并通过校验后只读复用完整缓存 |
 | 2 | Phase-2 Whisper dtype repair smoke attempt 1 | FAILED | `6ef3c2c` | host=`bitahub-a20618022373814272490966`；D2–D4 strict audit complete；单条 `en/fiqa:clean:4641`；原 dtype 异常未复现；smoke=`1`；无正式指标 | Transformers 4.52.4 Whisper wrapper 压缩 score rows 后仍使用全局 beam indices，CUDA transition-score gather 越界 | 失败审计已固化；保留同模型/协议，改用 base `GenerationMixin` 四束搜索 |
 | 2 | Phase-2 Whisper base-generation repair smoke attempt 2 | FAILED | `ef3a77a` | run=`asrur_whisper_dtype_smoke_20260727_234354`；同一记录；elapsed=`53s`；base 四束生成完成；dtype 与 beam gather 错误未复现；wrapper=`1`；无正式指标 | 有效非 special token 的 generation transition score 含非有限值；不允许过滤后冒充概率 | 失败证据已固化；移除对 generation transition score 的依赖 |
-| 2 | Phase-2 Whisper teacher-forced proxy repair smoke | WAITING_USER | 本提交 | 同一冻结模型与 4-best；beam sequence score 独立保留；exact generated sequences 由 teacher-forced float32 cross-entropy 计分；缓存身份与失败 stage 均锁定；全仓 412 项测试通过 | 等待 1×RTX 4090 单条真实推理 | 仅 smoke 成功后启动 attempt 3；旧失败与 11 组完整缓存不覆盖 |
+| 2 | Phase-2 Whisper teacher-forced proxy repair smoke | COMPLETED | `54d0e72` | run=`asrur_whisper_dtype_smoke_20260728_001309`；同一记录恰好 4 个假设；beam sequence/proxy score 均有限；transition score 未使用；wrapper=`0`；elapsed=`48s`；stderr/failure 为空 | 无；这是正确性门禁，不是研究指标 | 用新的 cache/result root 启动 attempt 3；旧失败与 11 组完整缓存不覆盖 |
 | 2 | Phase-2 四条件结果与 Go/No-Go 审计 | COMPLETED | `10e872e` | 已实现 method/query/path/scale/exit 强校验、逐条件预注册门禁和保守汇总规则；9 项相关测试通过 | 等待远程 Phase-2 输入，因此目前没有决策 | 后台结束后生成独立 audit JSON |
 | 2 | Go/No-Go 审查 | BLOCKED | N/A | 未开始 | 依赖完整 Phase 2 结果 | 未达标不擅自改双路召回 |
 | 3 | E2/E5/E6/E11：1-best CE、4-best equal/max、Gold CE | BLOCKED | 本提交 | 四条件共享冻结 4×100 CE 矩阵、单独 Gold 单假设 CE、严格无 test 调参评测和断点恢复 runner 已实现；28 项相关测试、Python compile 与 Bash 语法通过 | 依赖 Phase-2 汇总 GO 和新的 GPU 批准 | 复用唯一 OEA Top-100，不重新召回；Gold 不伪造 ASR 后验 |

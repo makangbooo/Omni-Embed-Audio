@@ -378,3 +378,16 @@ probability remains explicitly an uncalibrated proxy. This scoring method is
 part of the immutable cache identity, and per-record failures now carry an
 exact stage. Compact evidence is stored in
 `results/audits/asrur_whisper_transition_score_smoke_failure_20260727.json`.
+
+The third one-record smoke at execution commit `54d0e72` passed the complete
+strict-offline gate in 48 seconds. The same `en/fiqa:clean:4641` record yielded
+exactly four hypotheses; all four beam sequence scores and teacher-forced
+proxy scores were finite, and generation transition scores were not used.
+The wrapper exited zero, stderr was empty, and no failure artifact was
+produced. The 923-byte N-best artifact has SHA256
+`fe42d5fd20a49185dc32ba52cd5332cbc6be3eee42ad32c733aed24970bb5385`.
+This is a correctness gate rather than a research metric. It authorizes
+Phase-2 attempt 3 to reuse the 11 checksummed complete OEA, vanilla-Nemotron,
+and BGE cache groups from attempt 2 while generating new four-condition
+Whisper caches. Compact evidence is stored in
+`results/audits/asrur_whisper_teacher_forced_smoke_success_20260728.json`.

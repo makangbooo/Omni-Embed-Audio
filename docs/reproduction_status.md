@@ -54,7 +54,7 @@
 | 2 ASR reranking 扩展 | Phase-2 FiQA 四条件冻结一级召回 attempt 2 | FAILED | `ee63772` | run=`asrur_phase2_frozen_retrieval_execute_20260727_193044`；OEA/vanilla 四条件与 BGE corpus/dev 共 11 组完整缓存；`whisper_clean` 648/648 失败；wrapper=`1`；GPU 已释放；无 completion manifest/正式指标 | Whisper processor 的 FP32 log-mel 输入未对齐 BF16 模型首层卷积；不是 OOM 或坏音频 | 失败审计已固化；repair `5835fab` 以 SHA256 验证方式跨 commit 只读复用完整缓存 |
 | 2 ASR reranking 扩展 | Phase-2 Whisper dtype repair smoke attempt 1 | FAILED | `6ef3c2c` | host=`bitahub-a20618022373814272490966`；D2–D4 完整；`en/fiqa:clean:4641`；原 dtype 异常未复现；smoke=`1`；无正式指标 | Transformers 4.52.4 Whisper wrapper 重组 scores 后未重映射全局 beam indices，CUDA gather 越界 | 失败审计已固化；不改模型和协议，使用 base `GenerationMixin` |
 | 2 ASR reranking 扩展 | Phase-2 Whisper base-generation repair smoke attempt 2 | FAILED | `ef3a77a` | run=`asrur_whisper_dtype_smoke_20260727_234354`；elapsed=`53s`；base 4-beam/4-return 完成；dtype 与 beam-index 异常未复现；wrapper=`1`；无正式指标 | retained non-special token 的 generation transition score 非有限，严格 proxy 校验拒绝写出 | 审计证据已固化；不 clamp/filter，改用 exact-sequence teacher-forced 条件 log-probability |
-| 2 ASR reranking 扩展 | Phase-2 Whisper teacher-forced proxy repair smoke | WAITING_USER | 本提交 | 同一冻结 checkpoint/音频/4-best；beam sequence score 独立保存；proxy 改为 teacher-forced float32 cross-entropy；缓存身份与 failure stage 已锁定；全仓 412 项测试通过 | 等待 1×RTX 4090 单条真实 Whisper 推理 | 成功后在 tmux 中启动 attempt 3 并校验只读复用旧 11 组完整缓存 |
+| 2 ASR reranking 扩展 | Phase-2 Whisper teacher-forced proxy repair smoke | COMPLETED | `54d0e72` | run=`asrur_whisper_dtype_smoke_20260728_001309`；恰好 4 个假设；beam sequence/proxy score 均有限；transition score 未使用；wrapper=`0`；elapsed=`48s`；stderr/failure 为空 | 无；这是正确性门禁，不是正式研究指标 | 在 tmux 中启动 attempt 3 并校验只读复用旧 11 组完整缓存 |
 | 2 ASR reranking 扩展 | 后台执行与 Phase-2 实时监控协议 | COMPLETED | 本提交 | 后续后台任务统一使用 tmux，禁止 nohup；实时监控脚本支持 follow/once、GPU、step、run/step elapsed、局部百分比、吞吐、近似 ETA、metrics 和 completion；当前 PID `6769` 保持运行 | 无 | 后续每个 GPU/CPU 长任务均给出 tmux session 名、启动、attach、detach 和 capture 命令，并尽可能记录耗时/ETA |
 | 2 ASR reranking 扩展 | Phase-2 结果与 Go/No-Go 自动审计 | COMPLETED | `10e872e` | method/query/path/scale/exit、四条件阈值和禁止改变候选生成方式的审计入口已实现；9 项相关测试通过 | 等待远程 metrics 输入 | 生成小型 audit JSON 并据此决定是否进入 Phase 3 |
 | 3 ASR reranking 扩展 | E2/E5/E6/E11 无 dev 选择的冻结 CE 接续 | COMPLETED | 本提交 | 已实现四条件共享 4-best×Top-100 CE 缓存、单独 Gold 单假设 CE、1-best CE/4-best equal/4-best max/Gold CE 的严格评测、断点恢复与 Phase-2 GO 门禁；Gold 不伪造 ASR 后验；28 项相关测试、Python compile 与 Bash 语法通过；未运行 GPU、未产生真实指标 | 真实执行依赖 Phase-2 汇总 GO 和单独 GPU 批准 | Phase-2 完成后先审计；仅在 GO 时申请下一阶段 1×RTX 4090 |
@@ -104,8 +104,8 @@
   流水线；58 项专项和 345 项全仓测试通过，没有产生真实实验数值。
 - 当前阻塞：主实验数据不再受 DPC 遗留租约阻塞。旧租约只影响全六子集 DATA-13C/OEA-5；DATA-13D 已以干净 commit 完成且所有门禁通过。
 - 最近完成：Phase-2 attempt 2 的 11 组 OEA/vanilla/BGE 缓存已完整保留；
-  两次单条 Whisper smoke 分别定位并越过 wrapper beam-index 问题、定位
-  generation transition score 非有限问题。尚无 completion manifest 或正式指标。
-- 下一步：以 teacher-forced proxy 运行最后一次单条 4090 smoke；仅成功后使用
-  tmux、新 cache/result root 和 SHA256 校验，只读复用旧 11 组完整缓存，再按
-  预注册条件完成 Phase-2 与 Go/No-Go。
+  第三次单条 Whisper smoke 使用 teacher-forced proxy 通过，4 个假设的 beam
+  sequence/proxy score 均有限，transition score 未使用。尚无 completion manifest
+  或正式指标。
+- 下一步：使用 tmux、新 cache/result root 和 SHA256 校验，只读复用旧 11 组
+  完整缓存，再按预注册条件完成 Phase-2 与 Go/No-Go。
