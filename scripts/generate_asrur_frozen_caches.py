@@ -28,6 +28,7 @@ if str(REPOSITORY_ROOT) not in sys.path:
 from AudioRetrieval.asr_uncertainty_reranking.artifacts import (  # noqa: E402
     load_frozen_candidates,
     load_nbest,
+    load_unbounded_qrels,
 )
 from AudioRetrieval.asr_uncertainty_reranking.cache_manifest import (  # noqa: E402
     build_cache_manifest,
@@ -370,17 +371,28 @@ def load_bge_inputs(
     path: Path,
     *,
     input_kind: str,
+    query_ids: set[str] | None = None,
 ) -> tuple[list[str], list[str]]:
     if input_kind == "corpus":
+        if query_ids is not None:
+            raise ValueError("corpus input must not receive query IDs")
         values = list(load_corpus(path).values())
         return (
             [value.document_id for value in values],
             [value.constructed_text for value in values],
         )
     if input_kind == "queries":
-        values = list(load_text_queries(path).values())
+        if query_ids is None:
+            raise ValueError("query input requires an explicit qrels-derived ID set")
+        all_values = load_text_queries(path)
+        missing = sorted(query_ids - set(all_values))
+        if missing:
+            raise ValueError(f"qrels query IDs are absent from query input: {missing[:20]}")
+        values = [all_values[query_id] for query_id in sorted(query_ids)]
         return [value.query_id for value in values], [value.text for value in values]
     if input_kind == "nbest1":
+        if query_ids is not None:
+            raise ValueError("N-best input must not receive query IDs")
         values = list(load_nbest(path).values())
         return (
             [value.query_id for value in values],
@@ -392,7 +404,20 @@ def load_bge_inputs(
 def run_bge(args: argparse.Namespace, config: dict[str, Any]) -> int:
     formal_execution_guard(device=args.device, dry_run=args.dry_run)
     identity = model_identity_from_config(config, "dense")
-    ids, texts = load_bge_inputs(args.input, input_kind=args.input_kind)
+    query_qrels = getattr(args, "query_qrels", None)
+    if args.input_kind == "queries":
+        if query_qrels is None:
+            raise ValueError("BGE query encoding requires --query-qrels")
+        qrels = load_unbounded_qrels(query_qrels)
+        ids, texts = load_bge_inputs(
+            args.input,
+            input_kind=args.input_kind,
+            query_ids=set(qrels),
+        )
+    else:
+        if query_qrels is not None:
+            raise ValueError("--query-qrels is valid only for query input")
+        ids, texts = load_bge_inputs(args.input, input_kind=args.input_kind)
     if args.input_kind == "corpus" and args.query_template != "none":
         raise ValueError("BGE corpus documents must not receive a query instruction")
     if args.query_template == "bge_retrieval":
@@ -411,6 +436,7 @@ def run_bge(args: argparse.Namespace, config: dict[str, Any]) -> int:
         "git_commit": git_output("rev-parse", "HEAD"),
         "config": file_record(args.config),
         "input": file_record(args.input),
+        "query_qrels": file_record(query_qrels) if query_qrels is not None else None,
         "input_kind": args.input_kind,
         "query_template": args.query_template,
         "model": {
@@ -464,7 +490,11 @@ def run_bge(args: argparse.Namespace, config: dict[str, Any]) -> int:
     )
     manifest = model_manifest(
         artifact_type="bge_dense_embeddings",
-        input_paths=[args.config, args.input],
+        input_paths=[
+            args.config,
+            args.input,
+            *([query_qrels] if query_qrels is not None else []),
+        ],
         output_paths=[args.output_dir / "ids.jsonl", destination],
         dataset=args.dataset,
         split=args.split,
@@ -821,6 +851,14 @@ def parse_args() -> argparse.Namespace:
         choices=("none", "bge_retrieval"),
         required=True,
     )
+    bge.add_argument(
+        "--query-qrels",
+        type=Path,
+        help=(
+            "Required for query input. The qrels query IDs define the exact "
+            "train/dev/test subset and prevent split mixing."
+        ),
+    )
     bge.add_argument("--batch-size", type=int, required=True)
 
     whisper = subparsers.add_parser("whisper")
@@ -872,6 +910,8 @@ def main() -> int:
             raise ValueError("batch_size must be positive")
     if args.stage == "bge":
         args.input = args.input.resolve()
+        if args.query_qrels is not None:
+            args.query_qrels = args.query_qrels.resolve()
         return run_bge(args, config)
     if args.stage == "whisper":
         args.input = args.input.resolve()

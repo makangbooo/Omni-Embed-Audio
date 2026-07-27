@@ -8,6 +8,8 @@
 | Frozen local-model adapters | BGE dense CLS/L2, BGE v2-M3 CE, Whisper four-beam proxy score, explicit 16 kHz resampling | `AudioRetrieval/asr_uncertainty_reranking/model_adapters.py` | IMPLEMENTED_NOT_RUN; 371 full-repository tests passed; no model/GPU execution |
 | Resumable real-cache producers | BGE dense/CE, Whisper 4-best, OEA-Nemo, original Omni, exact Top-100; per-condition FiQA-qrels ID contract | `scripts/generate_asrur_frozen_caches.py`, `scripts/generate_asrur_omni_caches.py`, `scripts/plan_asrur_phase2.py` | IMPLEMENTED_NOT_RUN at `dd44bc4`; 381 full-repository tests passed; no model/GPU execution |
 | Portable vanilla-Nemotron lock audit | exact local base snapshot audit and untracked portable lock evidence | `scripts/run_asrur_vanilla_nemo_phase2_audit.sh` | IMPLEMENTED_NOT_RUN at `92d6218`; CPU-only, no download, no model load |
+| Nemo Clotho A2T direction suite | 1,045 audio queries against 5,225 frozen caption candidates; five matching captions are multi-positive qrels | `configs/eval/nemo3b_cl_clotho_a2t_suite.json`, `scripts/run_nemo3b_cl_clotho_a2t_suite.sh` | IMPLEMENTED_NOT_RUN; reuses the completed lock-bound Nemo embedding directory, CPU-only |
+| Phase-2 frozen-retrieval orchestrator | OEA/vanilla Omni/BGE/Whisper frozen inference, exact full-corpus rankings, dev-only BGE template selection, four-condition metrics and OEA candidate oracle | `scripts/run_asrur_phase2_frozen_retrieval.sh`, `scripts/select_asrur_bge_query_template.py` | IMPLEMENTED_NOT_RUN; `--execute` requires separate 1×RTX 4090 approval |
 
 最后更新：2026-07-27（D2–D4 首次严格离线验收）
 

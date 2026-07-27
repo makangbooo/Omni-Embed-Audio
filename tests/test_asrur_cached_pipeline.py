@@ -214,6 +214,11 @@ class CachedPipelineTest(unittest.TestCase):
                 set(dense_metrics["evaluations"]),
                 {"B2_original_omni", "B3_oea"},
             )
+            self.assertIsNotNone(dense_metrics["oea_candidate_oracle"])
+            self.assertEqual(
+                dense_metrics["oea_candidate_oracle"]["num_queries"],
+                2,
+            )
 
             gate_dir = root / "gates"
             self.run_script(

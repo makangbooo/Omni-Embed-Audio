@@ -23,6 +23,7 @@ from AudioRetrieval.asr_uncertainty_reranking.candidates import (  # noqa: E402
     rank_scores,
 )
 from AudioRetrieval.asr_uncertainty_reranking.metrics import (  # noqa: E402
+    evaluate_candidate_oracle,
     evaluate_rankings,
 )
 
@@ -88,6 +89,7 @@ if __name__ == "__main__":
     qrels = load_unbounded_qrels(args.qrels)
     evaluations = {}
     rankings = {}
+    candidates = {}
     for method, path in sorted(ranking_paths.items()):
         records = load_frozen_candidates(path)
         if set(records) != set(qrels):
@@ -97,11 +99,21 @@ if __name__ == "__main__":
             for query_id, record in records.items()
         }
         rankings[method] = method_rankings
+        candidates[method] = {
+            query_id: record.candidate_ids
+            for query_id, record in records.items()
+        }
         evaluations[method] = evaluate_rankings(method_rankings, qrels)
+    oea_candidate_oracle = (
+        evaluate_candidate_oracle(candidates["B3_oea"], qrels)
+        if "B3_oea" in candidates
+        else None
+    )
     result = {
         "schema_version": 1,
         "scale": "fraction",
         "evaluations": evaluations,
+        "oea_candidate_oracle": oea_candidate_oracle,
         "rankings": rankings,
         "provenance": {
             "created_at": datetime.now(timezone.utc).isoformat(),

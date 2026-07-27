@@ -94,6 +94,33 @@ class GenerateASRURFrozenCachesTest(unittest.TestCase):
             self.assertEqual(ids, ["d1", "d2"])
             self.assertEqual(texts, ["Title\nBody", ""])
 
+    def test_bge_query_inputs_require_and_apply_qrels_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "queries.jsonl"
+            write_jsonl(
+                path,
+                [
+                    {"_id": "test-b", "text": "B"},
+                    {"_id": "train-a", "text": "leak"},
+                    {"_id": "test-a", "text": "A"},
+                ],
+            )
+            with self.assertRaisesRegex(ValueError, "qrels-derived"):
+                load_bge_inputs(path, input_kind="queries")
+            ids, texts = load_bge_inputs(
+                path,
+                input_kind="queries",
+                query_ids={"test-a", "test-b"},
+            )
+            self.assertEqual(ids, ["test-a", "test-b"])
+            self.assertEqual(texts, ["A", "B"])
+            with self.assertRaisesRegex(ValueError, "absent"):
+                load_bge_inputs(
+                    path,
+                    input_kind="queries",
+                    query_ids={"missing"},
+                )
+
     def test_id_loader_is_strict(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ids.jsonl"

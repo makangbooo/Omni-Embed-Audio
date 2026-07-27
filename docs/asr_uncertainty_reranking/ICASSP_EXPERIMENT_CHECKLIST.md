@@ -22,10 +22,10 @@ Allowed statuses are `TODO`, `IN_PROGRESS`, `WAITING_USER`,
 |---|---|---|---|---|
 | OEA-B0 | Lock OEA-Nemo3B(+Cl), its base model, prefix, pooling, projection, dimension, and normalization; run a real embedding smoke test | Prevents an invalid OEA baseline | COMPLETED | Canonical lock and RTX 4090 5-audio/25-text smoke; peak allocated 9.14 GiB |
 | OEA-B1 | Reproduce OEA-Nemo3B(+Cl) Clotho T2A R@1/5/10 | Numerical connection to the OEA paper | COMPLETED | Paper 21.57/47.16/60.36; reproduced all-caption 21.7225/47.1196/60.4402 |
-| OEA-B2 | Clotho audio-to-text direction sanity check using the selected Nemo checkpoint | Confirms the direction used by the new task before changing domains | TODO | Existing Clotho A2T result is Qwen3B, not the selected Nemo baseline |
-| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | BLOCKED | Real resumable runner is complete; needs model-config dry-run and separate GPU approval |
-| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | BLOCKED | Real resumable runner is complete; needs canonical vanilla lock and the Phase-2 GPU gate |
-| OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | BLOCKED | Depends on OEA-B3 candidates |
+| OEA-B2 | Clotho audio-to-text direction sanity check using the selected Nemo checkpoint | Confirms the direction used by the new task before changing domains | WAITING_USER | Lock-bound CPU suite is implemented and tested; it reuses the completed Nemo embedding directory and does not load a model or use a GPU |
+| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | BLOCKED | Resumable formal runner and exact Top-100 stage are complete; needs dry-run and separate GPU approval |
+| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | BLOCKED | Resumable formal runner is complete; needs canonical vanilla lock, dry-run, and the Phase-2 GPU gate |
+| OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | BLOCKED | Evaluator now emits both direct and fixed-candidate oracle metrics; real OEA Top-100 is absent |
 | OEA-B6 | Selected Nemo OEA audio/text latency, throughput, and peak memory on the study GPU | Measures the cost inherited by the proposed system | BLOCKED | Run after correctness; hardware must be recorded and separately approved |
 
 The following OEA-paper experiments are outside the ICASSP claim and will not
@@ -48,9 +48,9 @@ toward this checklist.
 | ASR-E7 | B7c: 4-best proxy-posterior aggregation | BLOCKED | Needs Whisper N-best and CE cache |
 | ASR-E8 | Query-level uncertainty gate baseline | BLOCKED | Needs FiQA train/dev generated speech and frozen upstream caches |
 | ASR-E9 | Ours: candidate-level dynamic gate, three seeds | BLOCKED | Needs approved TTS/noise protocol and gate training |
-| ASR-E10 | U1: gold text query + BGE dense upper bound | BLOCKED | Real BGE embedding cache not generated |
+| ASR-E10 | U1: gold text query + BGE dense upper bound | BLOCKED | Formal dev-only instruction selection and test runner are complete; real BGE embedding cache not generated |
 | ASR-E11 | U2: gold transcript + frozen cross-encoder upper bound | BLOCKED | Real CE cache not generated |
-| ASR-E12 | U3/U4: candidate oracle and candidate Recall@20/50/100 | BLOCKED | Depends on OEA Top-100 |
+| ASR-E12 | U3/U4: candidate oracle and candidate Recall@20/50/100 | BLOCKED | Code is wired into the dense evaluator; depends on real OEA Top-100 |
 | ASR-E13 | Main FiQA table: all required methods × four acoustic conditions | BLOCKED | Depends on ASR-E1 through ASR-E12 |
 | ASR-E14 | Three-seed gate mean, standard deviation, and 95% confidence interval | BLOCKED | Depends on ASR-E9 |
 | ASR-E15 | A1–A9 ablations | BLOCKED | Evaluation code is tested; real caches/results absent |
@@ -73,7 +73,7 @@ toward this checklist.
 | P5 | D3 BGE-base-en-v1.5 | COMPLETED | Fixed revision passed strict local audit |
 | P6 | D4 BGE-reranker-v2-m3 | COMPLETED | Fixed revision passed strict local audit |
 | P7 | Dependency-light ranking/gating/statistics framework | COMPLETED | Synthetic tests only; no synthetic number is a research result |
-| P8 | Real BGE/Whisper/CE/OEA/Omni cache producers | COMPLETED | Commits `dd44bc4`/`92d6218`; resumable immutable caches, four independent acoustic-condition runs, FiQA qrels-ID alignment, portable vanilla lock audit, and 381 full-repository tests; GPU execution is not authorized |
+| P8 | Real BGE/Whisper/CE/OEA/Omni cache producers | COMPLETED | Resumable immutable caches; one shared document cache/model; strict FiQA qrels-ID and dev/test isolation; dev-only BGE template selection; exact one-RTX-4090 end-to-end wrapper; exact rankings and candidate oracle; implementation tested but GPU execution is not authorized |
 | P9 | FiQA train/dev TTS, speaker split, and noise construction | WAITING_USER | Deliberately postponed until Phase-2 Go/No-Go; requires a separate concrete proposal |
 
 ## D. Progress accounting
@@ -94,10 +94,11 @@ toward this checklist.
 The next critical path is:
 
 1. finish and strictly accept D2;
-2. build the vanilla-Nemotron canonical lock and complete Phase-2 dry-runs;
-3. request one Phase-2 GPU allocation;
-4. run OEA-B2/B3/B4/B5 and ASR-E1/E10;
-5. apply the preregistered Go/No-Go without changing candidate generation;
-6. if Go, create the frozen CE/N-best caches and run Phase 3;
-7. separately approve the FiQA train/dev TTS/noise protocol before gate
+2. run the new CPU-only Nemo Clotho A2T suite (OEA-B2);
+3. build the vanilla-Nemotron canonical lock and complete Phase-2 dry-runs;
+4. request one Phase-2 GPU allocation;
+5. run OEA-B3/B4/B5 and ASR-E1/E10;
+6. apply the preregistered Go/No-Go without changing candidate generation;
+7. if Go, create the frozen CE/N-best caches and run Phase 3;
+8. separately approve the FiQA train/dev TTS/noise protocol before gate
    training.
