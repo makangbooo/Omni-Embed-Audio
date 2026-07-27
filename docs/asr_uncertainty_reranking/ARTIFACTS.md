@@ -1,6 +1,6 @@
 # ASR-Uncertainty Reranking 资产登记
 
-最后更新：2026-07-26（Phase 0 confirmed；CPU 主实验框架完成）
+最后更新：2026-07-27（Nemo 全量 Clotho embedding 完成）
 
 大型数据、权重、embedding、索引和日志不进入普通 Git。本表登记身份、路径、证据
 和使用限制。`historical remote evidence` 表示已有完成证据，但正式运行前仍要做
@@ -29,8 +29,9 @@
 | F-ASRUR-NEMO-POSIXPATH | Nemo Phase 1 attempt 3 safe-global compatibility failure | execution `cd34cbc`；run `asrur_nemo_phase1_audit_20260727_000937`；resource/preparation=`0/1` | `results/audits/asrur_nemo_phase1_posixpath_alias_failure_20260727.json` | FAILED；资源全量通过，`pathlib._local.PosixPath` 精确安全别名缺失；由 `7bd4765` 修复 |
 | A-ASRUR-NEMO-PHASE1 | Nemo Phase 1 attempt 4 CPU gate success | execution `58f80bb`；run `asrur_nemo_phase1_audit_20260727_004107`；pipeline/wrapper=`0/0` | `results/audits/asrur_nemo_phase1_success_20260727.json` | COMPLETE；resource/preparation/lock 均 complete |
 | L-OEA-NEMO-CL | OEA-Nemo3B (+Cl) canonical model lock | 5,932 B；SHA256 `fd09e4d2...c8c2` | `results/model_locks/oea_nemo3b_cl.json` | LOCKED；与远程 portable lock 逐字一致 |
-| C-ASRUR-NEMO-G1 | Nemo3B-Cl Clotho 锁绑定 5/25 smoke 与同锁全量生成入口 | commit `ff73287`；39 项相关 CPU 测试通过 | `configs/eval/nemo3b_cl_clotho_*`、`scripts/run_nemo3b_cl_clotho_*` | WAITING_USER；Nemo 本地 custom model code 由完整模型锁逐文件约束，GPU 尚未启动 |
+| C-ASRUR-NEMO-G1 | Nemo3B-Cl Clotho 锁绑定 5/25 smoke、同锁全量生成与 CPU T2A 套件 | generator commit `ff73287`；suite commit `64647a0`；T2A 套件绑定同一 model lock 与生成协议 SHA256 | `configs/eval/nemo3b_cl_clotho_*`、`scripts/run_nemo3b_cl_clotho_*` | COMPLETE implementation；Nemo 本地 custom model code 由完整模型锁逐文件约束 |
 | R-ASRUR-NEMO-G1-SMOKE | Nemo3B-Cl Clotho 锁绑定 5/25 GPU smoke | execution `1b23c50`；run `..._20260727_092654`；RTX 4090；exit `0/0` | `results/audits/asrur_nemo_g1_smoke_20260727.json`；大型原始工件保留远程 run 目录 | COMPLETE；5×512/25×512、544 LoRA、严格离线、峰值 9.14/9.49 GiB；不是论文 Recall 结果 |
+| R-ASRUR-NEMO-G1-FULL | Nemo3B-Cl Clotho 全量 embedding | execution `4d2341d`；run `..._20260727_094554`；RTX 4090；exit `0/0` | `results/audits/asrur_nemo_g1_full_embeddings_20260727.json`；大型 embedding/chunks 保留远程 run 目录 | COMPLETE；1,045×512 audio、5,225×512 text、严格离线、峰值 9.39/10.48 GiB；Recall 尚待 CPU 套件 |
 
 ## 2. 已有远程数据
 

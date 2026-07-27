@@ -1,6 +1,6 @@
 # Omni-Embed-Audio 复现状态
 
-最后更新：2026-07-26（Asia/Shanghai）
+最后更新：2026-07-27（Asia/Shanghai）
 
 状态值仅使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、`COMPLETED`、`FAILED`、`BLOCKED`。
 
@@ -21,8 +21,10 @@
 | 2 官方权重 | MODEL-01：Qwen2.5-Omni-3B + OEA-Qwen3B-Cl | COMPLETED | `bba6084` | 断点续传完成；两个 asset 和全部 LFS SHA256 通过；无临时文件/下载进程 | 无；首次失败证据保留在旧运行目录 | 审计 checkpoint 内部结构 |
 | 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | COMPLETED | `18e4c3b` | 固定 revision 的 3 个文件、9,466,844,378 bytes 全部通过逐文件内容审计；`step_350.pt` 提取为 59,069,203-byte inference-only 权重，SHA256 `b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101` | 无；原始 checkpoint 与派生权重均未提交到 Git | GPU 服务器拉取已提交的 5,262-byte 模型锁后运行独立锁绑定 smoke |
 | 2 官方权重 | OEA 模型存储迁移与旧缓存清理 | COMPLETED | `aac088d` | run=`model_cache_migration_v3_20260726_214834`；exit=`0`；254 files 与前后字节不变量一致；旧 `/home/jg525/model_cache` 已删除 | 无 | 所有运行脚本默认路径已切换到 `/home/jg525/models/oea` |
-| 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | COMPLETED | `ff73287` | attempt 4 CPU gate 全 complete；派生权重 59,072,047 B、SHA256 `2a5bee90...80c4`；canonical lock SHA256 `fd09e4d2...c8c2`；Nemo 5/25 与同锁全量生成入口已提交，39 项相关 CPU 测试通过 | OEA-Nemo3B-AC 仍仅有迁移证据，但当前 ASRUR 主实验固定使用 +Cl，不阻塞 G1 | 用户切换到 1×RTX 4090 24GB 后执行严格离线锁绑定 5/25 smoke |
+| 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | COMPLETED | `4d2341d` | attempt 4 CPU gate、5/25 GPU smoke 与 +Cl 全量 Clotho embedding 均完成；派生权重 59,072,047 B、SHA256 `2a5bee90...80c4`；canonical lock SHA256 `fd09e4d2...c8c2` | OEA-Nemo3B-AC 仍仅有迁移证据，但当前 ASRUR 主实验固定使用 +Cl，不阻塞 G1 | 在 CPU 侧计算 +Cl Table 2 T2A |
 | 2 官方权重 | Nemo3B-Cl 正式生成器锁绑定 5/25 GPU smoke | COMPLETED | `1b23c50` | RTX 4090 run=`oea_nemo3b_clotho_lock_bound_smoke_seed42_20260727_092654`：strict-offline、wrapper/attempt=`0/0`、5×512/25×512、544 LoRA、pending=0；allocated/reserved=9.14/9.49 GiB；五个工件 SHA256 已固定 | 两条 Transformers 兼容性警告为非致命但需在正式 Recall 对照前保留审计；不得为消除警告修改锁定 snapshot | 同一 GPU、lock 和协议执行全量 Clotho embedding，随后 CPU 计算 Table 2 T2A |
+| 2 官方权重 | Nemo3B-Cl 全量 Clotho embedding | COMPLETED | `4d2341d` | RTX 4090 run=`oea_nemo3b_clotho_embeddings_seed42_20260727_094554`：strict-offline、wrapper/attempt=`0/0`、1,045 audio/5,225 caption、512 维、pending=0；allocated/reserved=9.39/10.48 GiB；五个工件 SHA256 已固定 | 无；论文 `passage:` 与公开代码 audio-only no-prefix 冲突继续显式保留 | GPU 可释放；CPU 双协议 T2A 套件分别对照论文值 |
+| 2 官方权重 | Nemo3B-Cl/Clotho Table 2 T2A 双协议 CPU 套件 | WAITING_USER | `64647a0` | 套件固定评测 all-caption 5,225 query 与公开代码 seed0 单-caption 1,045 query；不加载模型、不使用 GPU、不下载 | `[MISSING]` 论文 caption 选择；严禁按接近 21.57/47.16/60.36 的程度择优 | CPU 服务器复用完整 embedding 目录执行套件并回传 suite_metrics/CSV |
 | 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | IN_PROGRESS | `48c9b3c` | 已知 base 完整、AC 曾保留 partial、Cl 未有开始证据；最近检查的主容器无活动下载进程 | CAS 链路不稳定；跨实例状态未确认 | 后续单独核对全部目录与 manifest，再断点续传 |
 | 2 官方权重 | MODEL-03/04 只读完整性审计器 | COMPLETED | `f4309a7` | 远程尚未运行；本地实现及 105 项完整测试通过 | 无；工具完成不代表六个 asset 已完成 | DATA-04 保持为唯一用户步骤；随后在 CPU 侧运行审计并按 asset 决定续传 |
 | 2 官方权重 | 六变体按变体资源审计入口 | COMPLETED | `d2f066c` | 注册表驱动地只选择一个 base 与一个 checkpoint；Qwen3B AC 跨 MODEL-01/02 manifest 已覆盖；报告固定 scope/registry/逐文件 Git-LFS 身份，完整 172 项测试通过 | 尚未在远程对六个变体逐一运行；工具完成不代表资源完整 | DATA-04 后按已知下载状态选择变体，在 CPU 侧运行只读审计；超过 30 分钟的读取任务执行前单独汇报 |
