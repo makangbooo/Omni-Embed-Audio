@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "stage": "asrur_phase2_attempt5_clean_whisper_rebuild",
+  "execution_git_commit": "dc995b5b14ba2264013143772aba8ae85d6e483a",
+  "source": {
+    "kind": "user_provided_remote_execution_output",
+    "host": "bitahub-a20626401511337984908046",
+    "run_dir": "/home/jg525/Omni-Embed-Audio/logs/asrur_phase2_frozen_retrieval_execute_20260728_170350",
+    "cache_root": "/file_system/jg525/experiment_cache/asr_uncertainty/fiqa_phase2_dc995b5b14ba",
+    "result_root": "/file_system/jg525/Omni-Embed-Audio/results/raw/asrur_phase2_fiqa_dc995b5b14ba",
+    "wrapper_exit_code": 0,
+    "completion_status": "complete"
+  },
+  "scale": "fraction",
+  "condition_order": [
+    "clean",
+    "snr_20",
+    "snr_10",
+    "snr_0"
+  ],
+  "conditions": {
+    "clean": {
+      "B1_whisper_1best_bge_dense": {
+        "nDCG@10": 0.39202,
+        "MRR@10": 0.474573,
+        "Recall@20": 0.544632,
+        "Recall@50": 0.654032,
+        "Recall@100": 0.730642
+      },
+      "B2_original_omni": {
+        "nDCG@10": 0.258495,
+        "MRR@10": 0.318226,
+        "Recall@20": 0.392105,
+        "Recall@50": 0.509323,
+        "Recall@100": 0.602574
+      },
+      "B3_oea": {
+        "nDCG@10": 0.0,
+        "MRR@10": 0.0,
+        "Recall@20": 0.000514,
+        "Recall@50": 0.001789,
+        "Recall@100": 0.002561
+      },
+      "U1_gold_bge_dense": {
+        "nDCG@10": 0.405853,
+        "MRR@10": 0.485246,
+        "Recall@20": 0.561568,
+        "Recall@50": 0.665954,
+        "Recall@100": 0.740957
+      },
+      "OEA_TOP100_ORACLE": {
+        "nDCG@10": 0.003761,
+        "Recall@20": 0.002561,
+        "Recall@50": 0.002561,
+        "Recall@100": 0.002561
+      },
+      "whisper_content_gate": {
+        "status": "complete",
+        "unique_top1": 648,
+        "mode_fraction": 0.001543,
+        "WER": 0.127663,
+        "violations": []
+      }
+    },
+    "snr_20": {
+      "B1_whisper_1best_bge_dense": {
+        "nDCG@10": 0.392082,
+        "MRR@10": 0.473647,
+        "Recall@20": 0.545992,
+        "Recall@50": 0.652281,
+        "Recall@100": 0.727489
+      },
+      "B2_original_omni": {
+        "nDCG@10": 0.258448,
+        "MRR@10": 0.320495,
+        "Recall@20": 0.379196,
+        "Recall@50": 0.497504,
+        "Recall@100": 0.597378
+      },
+      "B3_oea": {
+        "nDCG@10": 0.0,
+        "MRR@10": 0.0,
+        "Recall@20": 0.000514,
+        "Recall@50": 0.0018,
+        "Recall@100": 0.001941
+      },
+      "U1_gold_bge_dense": {
+        "nDCG@10": 0.405853,
+        "MRR@10": 0.485246,
+        "Recall@20": 0.561568,
+        "Recall@50": 0.665954,
+        "Recall@100": 0.740957
+      },
+      "OEA_TOP100_ORACLE": {
+        "nDCG@10": 0.002734,
+        "Recall@20": 0.001941,
+        "Recall@50": 0.001941,
+        "Recall@100": 0.001941
+      },
+      "whisper_content_gate": {
+        "status": "complete",
+        "unique_top1": 648,
+        "mode_fraction": 0.001543,
+        "WER": 0.127663,
+        "violations": []
+      }
+    },
+    "snr_10": {
+      "B1_whisper_1best_bge_dense": {
+        "nDCG@10": 0.391101,
+        "MRR@10": 0.470871,
+        "Recall@20": 0.551496,
+        "Recall@50": 0.65065,
+        "Recall@100": 0.728764
+      },
+      "B2_original_omni": {
+        "nDCG@10": 0.249776,
+        "MRR@10": 0.307047,
+        "Recall@20": 0.375945,
+        "Recall@50": 0.49113,
+        "Recall@100": 0.583562
+      },
+      "B3_oea": {
+        "nDCG@10": 0.000724,
+        "MRR@10": 0.001543,
+        "Recall@20": 0.000514,
+        "Recall@50": 0.001337,
+        "Recall@100": 0.001337
+      },
+      "U1_gold_bge_dense": {
+        "nDCG@10": 0.405853,
+        "MRR@10": 0.485246,
+        "Recall@20": 0.561568,
+        "Recall@50": 0.665954,
+        "Recall@100": 0.740957
+      },
+      "OEA_TOP100_ORACLE": {
+        "nDCG@10": 0.001972,
+        "Recall@20": 0.001337,
+        "Recall@50": 0.001337,
+        "Recall@100": 0.001337
+      },
+      "whisper_content_gate": {
+        "status": "complete",
+        "unique_top1": 648,
+        "mode_fraction": 0.001543,
+        "WER": 0.125123,
+        "violations": []
+      }
+    },
+    "snr_0": {
+      "B1_whisper_1best_bge_dense": {
+        "nDCG@10": 0.379271,
+        "MRR@10": 0.45628,
+        "Recall@20": 0.533293,
+        "Recall@50": 0.635232,
+        "Recall@100": 0.713021
+      },
+      "B2_original_omni": {
+        "nDCG@10": 0.214043,
+        "MRR@10": 0.262101,
+        "Recall@20": 0.345869,
+        "Recall@50": 0.454796,
+        "Recall@100": 0.554182
+      },
+      "B3_oea": {
+        "nDCG@10": 0.000202,
+        "MRR@10": 0.000309,
+        "Recall@20": 0.000823,
+        "Recall@50": 0.001337,
+        "Recall@100": 0.001646
+      },
+      "U1_gold_bge_dense": {
+        "nDCG@10": 0.405853,
+        "MRR@10": 0.485246,
+        "Recall@20": 0.561568,
+        "Recall@50": 0.665954,
+        "Recall@100": 0.740957
+      },
+      "OEA_TOP100_ORACLE": {
+        "nDCG@10": 0.002302,
+        "Recall@20": 0.001646,
+        "Recall@50": 0.001646,
+        "Recall@100": 0.001646
+      },
+      "whisper_content_gate": {
+        "status": "complete",
+        "unique_top1": 648,
+        "mode_fraction": 0.001543,
+        "WER": 0.147411,
+        "violations": []
+      }
+    }
+  },
+  "derived_observations": {
+    "clean_b1_ndcg_gap_to_gold": 0.013833,
+    "snr_0_b1_ndcg_gap_to_gold": 0.026582,
+    "b1_clean_to_snr_0_absolute_ndcg_drop": 0.012749,
+    "b1_clean_to_snr_0_relative_ndcg_drop": 0.032521,
+    "b1_outperforms_original_omni_ndcg": {
+      "clean": 0.133525,
+      "snr_20": 0.133634,
+      "snr_10": 0.141325,
+      "snr_0": 0.165228
+    }
+  },
+  "interpretation": {
+    "verified": [
+      "All four fresh Whisper caches passed the catastrophic-content integrity gate.",
+      "Whisper one-best plus BGE is a strong and noise-robust FiQA baseline.",
+      "The repaired Clean B1 nDCG@10 is within 0.013833 of the gold-text BGE upper bound.",
+      "OEA-Nemo3B-Cl Top-100 remains unusable because Recall@100 is below 0.003 in every condition.",
+      "The OEA fixed-candidate oracle cannot recover meaningful nDCG@10 because relevant documents are absent from the candidate set."
+    ],
+    "consequences": [
+      "ASR-E1 is complete.",
+      "Phase 3 cannot use the current OEA-Nemo3B-Cl Top-100 candidates.",
+      "The independently approved OEA-Nemo3B-Cl full rerun remains required before any candidate-generation change is proposed."
+    ]
+  }
+}

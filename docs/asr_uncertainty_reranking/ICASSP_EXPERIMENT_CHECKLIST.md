@@ -23,7 +23,7 @@ Allowed statuses are `TODO`, `IN_PROGRESS`, `WAITING_USER`,
 | OEA-B0 | Lock OEA-Nemo3B(+Cl), its base model, prefix, pooling, projection, dimension, and normalization; run a real embedding smoke test | Prevents an invalid OEA baseline | COMPLETED | Canonical lock and RTX 4090 5-audio/25-text smoke; peak allocated 9.14 GiB |
 | OEA-B1 | Reproduce OEA-Nemo3B(+Cl) Clotho T2A R@1/5/10 | Numerical connection to the OEA paper | COMPLETED | Paper 21.57/47.16/60.36; reproduced all-caption 21.7225/47.1196/60.4402 |
 | OEA-B2 | Clotho audio-to-text direction sanity check using the selected Nemo checkpoint | Confirms the direction used by the new task before changing domains | COMPLETED | CPU suite `..._20260727_161133` completed at `7cfbfab`: 1,045 audio queries against 5,225 captions; R@1/5/10=`26.8900/51.3876/65.2632`; stderr empty; this is a `[CODE]` direction extension, not a paper-reported result |
-| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | FAILED_RERUN_PREPARED | Attempt 4 completed all four 648-query conditions, but OEA nDCG@10=`0.0000/0.0000/0.000724/0.000202` and Recall@100=`0.002561/0.001941/0.001337/0.001646`. An 8-query attribution run shows base hidden R@10=`1.0`, full LoRA+heads R@10=`0.25`, and fresh full audio/cache cosine=`1.0`; a same-checkpoint, same-protocol, zero-old-OEA-reuse full rerun is prepared and GPU-gated |
+| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | IN_PROGRESS | Attempt 5 reports the same read-only-reused OEA metrics: nDCG@10=`0.0000/0.0000/0.000724/0.000202` and Recall@100=`0.002561/0.001941/0.001337/0.001646`; this is not an independent confirmation. An 8-query attribution run shows base hidden R@10=`1.0`, full LoRA+heads R@10=`0.25`, and fresh full audio/cache cosine=`1.0`; a same-checkpoint, same-protocol, zero-old-OEA-reuse full rerun is prepared and separately approved |
 | OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | COMPLETED | Clean/20/10/0 dB nDCG@10=`0.258495/0.258448/0.249776/0.214043`; Recall@100=`0.602574/0.597378/0.583562/0.554182`; the non-trivial result is evidence against a global audio/corpus/qrels identity failure |
 | OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | COMPLETED | All four fixed-candidate oracles were computed; Oracle nDCG@10=`0.003761/0.002734/0.001972/0.002302`, so the selected OEA candidate set leaves essentially no reranking headroom |
 | OEA-B6 | Selected Nemo OEA audio/text latency, throughput, and peak memory on the study GPU | Measures the cost inherited by the proposed system | WAITING_USER | RTX 4090 lock-bound entrypoint is ready; requires a separate 1-GPU approval and an isolated checkout while Phase 2 is running |
@@ -39,7 +39,7 @@ toward this checklist.
 
 | ID | Required result | Status | Evidence / blocker |
 |---|---|---|---|
-| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | INVALIDATED_REBUILD_PENDING | Attempt-4 metrics are rejected because its cached Top-1 collapsed to `Thank you.`. An 8-record differential at `576c4f6` passed for current generic BF16 and official BF16/FP32; attempt 5 must now regenerate all 2,592 formal records without reusing old Whisper artifacts |
+| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | COMPLETED | Attempt 5 regenerated all 2,592 formal records with zero old Whisper reuse. All four content gates passed (648 unique Top-1 each; no violations); WER Clean/20/10/0=`0.127663/0.127663/0.125123/0.147411`; nDCG@10=`0.392020/0.392082/0.391101/0.379271` |
 | ASR-E2 | B4: OEA Top-100 + 1-best cross-encoder | BLOCKED | Formal no-test-selection evaluator and resumable four-condition runner are tested; execution waits for Phase-2 aggregate GO and separate GPU approval |
 | ASR-E3 | B5: fixed fusion using preregistered 4-best proxy-posterior ASR evidence | BLOCKED | Dev selection only; no test tuning |
 | ASR-E4 | B6: RRF using the same 4-best proxy-posterior ASR route | BLOCKED | Dev selection only; no test tuning |
@@ -55,7 +55,7 @@ toward this checklist.
 | ASR-E14 | Three-seed gate mean, standard deviation, and 95% confidence interval | BLOCKED | Depends on ASR-E9 |
 | ASR-E15 | A1–A9 ablations | BLOCKED | Evaluation code is tested; real caches/results absent |
 | ASR-E16 | Paired bootstrap against the strongest baseline | BLOCKED | Tested implementation; real per-query metrics absent |
-| ASR-E17 | WER and performance stratified by WER | BLOCKED | Attempt-4 caches are invalid. The three-way fixed-sample diagnostic passed (generic WER=`0.141304`; official BF16/FP32=`0.130435`), so the next required artifact is a fresh four-condition attempt-5 cache that passes the preregistered catastrophic-content integrity gate |
+| ASR-E17 | WER and performance stratified by WER | IN_PROGRESS | Attempt-5 four-condition WER and valid per-query ASR/ranking artifacts now exist; aggregate WER is complete, while preregistered WER-bin retrieval analysis remains to be generated |
 | ASR-E18 | Gate weight versus SNR/ASR uncertainty; verify lower trust under unreliable ASR | BLOCKED | Needs trained gates and formal features |
 | ASR-E19 | Complementarity and failure-case analysis | BLOCKED | Needs final per-query rankings |
 | ASR-E20 | End-to-end and component latency, throughput, peak memory | BLOCKED | Needs correctness-complete models and separate GPU approval |
@@ -80,23 +80,23 @@ toward this checklist.
 
 - Required experiment packages: **28** (`OEA-B0`–`OEA-B6` plus
   `ASR-E1`–`ASR-E21`).
-- Completed experiment packages: **7/28 = 25.0%**; two additional packages
-  (`OEA-B3`, `ASR-E1`) were executed but are `FAILED`, not counted complete.
+- Completed experiment packages: **8/28 = 28.6%**; `OEA-B3` has been executed
+  but remains an in-progress failure investigation and is not counted complete.
 - Completed Phase-2 result cells: **16**, of which the eight
-  original-Omni/Gold-BGE cells are currently scientifically usable; the eight
-  OEA/Whisper cells remain failure evidence pending diagnosis.
+  original-Omni/Gold-BGE cells and four fresh Whisper+BGE cells are currently
+  scientifically usable; the four OEA cells remain failure evidence pending
+  the zero-reuse independent rerun.
 - Prerequisites completed: **9/10**; the remaining TTS/noise prerequisite
   deliberately awaits the later Phase-2 Go/No-Go decision.
-- A transparent project-level estimate is **30%**:
+- A transparent project-level estimate is **44%**:
   preparation is weighted 30% and approximately 90% complete; real experiments
-  are weighted 60% and approximately 5% complete; final analysis/reporting is
+  are weighted 60% and approximately 29% complete; final analysis/reporting is
   weighted 10% and 0% complete. This estimate is planning metadata, not a
   scientific result.
 
 The next critical path is:
 
-1. run the approved minimal Whisper three-way differential smoke to separate
-   generic-generation-entrypoint failure from BF16 precision failure;
+1. complete the separately approved zero-old-cache OEA-Nemo3B-Cl full rerun;
 2. treat the selected OEA checkpoint's FiQA candidate route as failed unless
    the user authorizes an a-priori checkpoint change or candidate-generator
    redesign; its Clotho reproduction remains valid;

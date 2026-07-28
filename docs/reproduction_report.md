@@ -514,3 +514,31 @@ fresh row and metric with attempt 4. It does not change or select a checkpoint,
 train a model, download data, or alter candidate generation. The runner and
 audit are `scripts/run_asrur_oea_cl_fiqa_rerun.sh` and
 `scripts/audit_asrur_oea_cl_fiqa_rerun.py`.
+
+Phase-2 attempt 5 subsequently completed at execution commit `dc995b5` on
+host `bitahub-a20626401511337984908046`. The wrapper exited zero and the
+completion manifest is `complete`. All 2,592 Whisper records were regenerated
+in a new cache root; no attempt-4 Whisper shard was reused. Every acoustic
+condition passed the preregistered content gate with 648 unique Top-1
+transcripts, mode fraction `0.001543`, and no violation. Corpus WER for
+Clean/20/10/0 dB is `0.127663/0.127663/0.125123/0.147411`.
+
+The repaired Whisper 1-best+BGE baseline is both strong and stable:
+nDCG@10 for Clean/20/10/0 dB is
+`0.392020/0.392082/0.391101/0.379271`, compared with the fixed Gold+BGE
+upper bound `0.405853`. The Clean-to-0 dB absolute nDCG@10 decrease is
+`0.012749` (relative `3.2521%`). It also exceeds the original Omni baseline
+by `0.133525/0.133634/0.141325/0.165228` nDCG@10 across the four conditions.
+This closes ASR-E1 and invalidates the earlier conclusion that Whisper itself
+was unusable; the attempt-4 Whisper output remains preserved only as failure
+evidence.
+
+The scientific Go/No-Go decision nevertheless remains NO-GO for the proposed
+OEA-Top-100 reranking pipeline. Attempt 5 did not regenerate OEA artifacts,
+and the fixed OEA candidate Recall@100 remains
+`0.002561/0.001941/0.001337/0.001646`; its oracle nDCG@10 remains
+`0.003761/0.002734/0.001972/0.002302`. A cross-encoder or learned gate cannot
+recover relevant documents that are absent from the candidate set. The
+separately approved, same-checkpoint, same-protocol, zero-old-OEA-cache full
+rerun is therefore still the next decision gate. Compact attempt-5 evidence is
+stored in `results/audits/asrur_phase2_attempt5_success_20260728.json`.

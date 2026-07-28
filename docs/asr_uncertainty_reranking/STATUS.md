@@ -7,13 +7,15 @@
 - OEA 仅作为论文基线；不再把“完整复现 OEA 全部实验”列为本论文前置任务。
 - 必须完成的 OEA 基线与新增实验已逐项固化在
   `docs/asr_uncertainty_reranking/ICASSP_EXPERIMENT_CHECKLIST.md`。
-- 当前真实实验完成度：`3/28 = 10.7%`；FiQA 主结果单元为 `0`。已完成的 CPU
-  框架和合成测试只计执行准备度，绝不计作研究结果。
+- 当前真实实验包完成度：`8/28 = 28.6%`。Phase-2 已产生 16 个四条件
+  一级召回结果单元，其中 12 个（Whisper+BGE、原始 Omni、Gold+BGE）可用于
+  科学比较，4 个 OEA 单元是待独立复算确认的失败证据。已完成的 CPU 框架和
+  合成测试只计执行准备度，绝不计作研究结果。
 - 代码 commit `207bcd0` 已加入本地只读模型适配层；commit `f9fc977` 已加入
   BGE/Whisper/CE、OEA-Nemo 与原始 Omni 的可恢复真实缓存生成器及 Phase-2
   工作量预检。四个声学条件强制独立缓存，并统一使用 FiQA qrels query ID。
   Gold transcript CE 上限允许单假设，但正式 Whisper 路径固定为 4-best。
-- 验证：本地全仓 `402` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
+- 验证：本地全仓 `443` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
 - Phase-2 dry-run attempt 2 已通过：17/17 个步骤、run、wrapper 和调用端退出码
   均为 0，stderr 为空；未加载模型、未使用 GPU、未产生研究指标。
 - Phase-2 GPU attempt 1 已结束：`oea_clean=0`、`vanilla_clean=1`、
@@ -72,13 +74,16 @@
   吞吐和近似 step ETA。
 - Phase-3 无需 dev 选择的 E2/E5/E6/E11 接续 runner 已实现并通过 28 项相关测试；
   只在 Phase-2 四条件汇总为 `GO` 且另行获得 GPU 批准后执行。
-- 后续进展：单记录数值诊断和 8-record Whisper 内容差分均已完成；旧
-  universal-hallucination Whisper cache 已判为不可复用。attempt 5 正在全新生成
-  四条件 Whisper，Clean 内容门禁已通过。OEA 8-query/64-negative 归因显示
+- 后续进展：Phase-2 attempt 5 已在全新 root 完成四条件 2,592 条 Whisper
+  生成；四个内容门禁均为 `complete`、各有 648 个 unique Top-1、无 violation，
+  WER=`0.127663/0.127663/0.125123/0.147411`
+  （Clean/20/10/0 dB）。B1 Whisper 1-best+BGE 的四条件 nDCG@10 为
+  `0.392020/0.392082/0.391101/0.379271`，旧 universal-hallucination cache
+  已被新结果替代且仍保留为失败证据。OEA 8-query/64-negative 归因显示
   base hidden 可检索，而 LoRA、投影头及二者组合逐步恶化；全量独立重跑已实现，
-  等待单独 GPU 确认。
+  等待在另一张已批准的 GPU 上执行。
 
-最后更新：2026-07-28（Whisper attempt 5 运行中；OEA-Cl 全量独立重跑等待 GPU）
+最后更新：2026-07-28（Whisper attempt 5 已完成；OEA-Cl 全量独立重跑等待执行）
 
 状态只使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、
 `COMPLETED`、`FAILED`、`BLOCKED`。
@@ -124,10 +129,10 @@
 | 2 | Phase-2 四条件结果与 Go/No-Go 审计 | COMPLETED | `d9baf22` | audit SHA256=`f919a84f...eb8e`；四条件均含 648 queries 与 B1/B2/B3/U1；原始 Omni clean nDCG@10=`0.258495`，Gold+BGE=`0.405853` | OEA clean Recall@100=`0.002561`，Whisper+BGE clean nDCG@10=`0`；每个条件的三项门禁全部失败 | 运行 CPU-only transcript/WER 与 embedding-geometry 诊断 |
 | 2 | Phase-2 NO-GO CPU 根因诊断 | COMPLETED | `50eddcb` | 648-query 完成工件审计耗时 17 秒；Whisper Clean/20/10 dB 的 648 条 Top-1 全为 `Thank you.`、WER=`1.0`，snr_0 为 647 条相同幻觉；OEA Clean audio/document 平均非对角余弦=`0.755988/0.509644`，Top-100 仅 6/648 queries 含正例；vanilla 对照=`0.386363/0.196054` 且 498/648 含正例 | 当前 Whisper 缓存确定无效；OEA 路线存在严重 projected-space anisotropy，但 Clotho 已复现，不能无证据宣称加载错误 | 使用同一小批音频对比当前 generic BF16、官方 BF16、官方 FP32；另行向用户确认 OEA 候选生成策略 |
 | 2 | Whisper 生成入口/精度三路差分 | COMPLETED | `576c4f6` | run=`asrur_whisper_content_diagnostic_20260728_164156`；wrapper=`0`；8 records；当前 generic BF16 4-best WER=`0.141304`，官方 BF16/FP32 均为 `0.130435` 且输出一致；峰值 allocated=`3.36/6.83 GB` | 当前模型、音频、BF16 与 generic 入口均正常；旧 attempt-4 Whisper cache 的 `Thank you.` 塌缩没有在固定样本复现，不能再复用 | 保留旧 cache 作为失败证据；以新 cache root 全量重建四条件 Whisper，并逐条件执行内容完整性门禁 |
-| 2 | Phase-2 attempt 5：Whisper 全量干净重建 | IN_PROGRESS | `dc995b5` | 用户已在独立 1×RTX 4090 tmux 启动；Clean 648/648 首次成功，内容门禁 `unique_top1=648`、mode fraction=`0.001543`、WER=`0.127663`、violations 为空；随后进入 snr_20 | 仍在运行；不得中断或复用旧 Whisper shard | 完成四条件后重新生成 ASR+BGE 指标；与 OEA 独立重跑互不覆盖 |
+| 2 | Phase-2 attempt 5：Whisper 全量干净重建 | COMPLETED | `dc995b5` | host=`bitahub-a20626401511337984908046`；run=`asrur_phase2_frozen_retrieval_execute_20260728_170350`；wrapper=`0`、completion=`complete`；四条件各 648 unique Top-1、mode fraction=`0.001543`、violations 为空；WER Clean/20/10/0=`0.127663/0.127663/0.125123/0.147411`；B1 nDCG@10=`0.392020/0.392082/0.391101/0.379271` | 无执行错误；OEA Top-100 仍失败 | 固化审计；释放本服务器 GPU；继续独立 OEA 全量重跑 |
 | 2 | OEA LoRA/projection 塌缩归因 | COMPLETED | `dc995b5` | run=`asrur_oea_collapse_diagnostic_20260728_170045`；wrapper=`0`；base hidden R@1/10=`0.875/1.0`，full LoRA+heads=`0/0.25`；audio off-diagonal cosine 从 `0.372756` 增至 `0.843654`；fresh full audio 与旧 OEA cache cosine=`1.0` | 8-query 诊断证明失效位于 OEA 适配后的空间，不等于全量独立复算 | 使用相同 +Cl checkpoint/协议、全新 cache 重算 57,638 文档和四条件 2,592 音频 |
 | 2 | OEA-Nemo3B-Cl FiQA 全量独立重跑 | IN_PROGRESS | 本提交 | `[USER-APPROVED 2026-07-28]` 1×RTX 4090 阶段已批准；`run_asrur_oea_cl_fiqa_rerun.sh` 禁止旧 OEA embedding/symlink 复用，支持同一新 root 分片恢复，重算四条件 exact Top-100、B3 指标、Oracle，并逐行对照 attempt-4 embedding/metrics | 等待用户在独立空闲 4090 实例的 tmux 中启动；预计 45–90 分钟、约 11–14 GiB；不下载、不训练、不选 checkpoint、不改协议 | 拉取本提交后执行；完成时根据固定阈值判定是否稳定复现跨域失效 |
-| 2 | Go/No-Go 审查 | FAILED | `d9baf22` | overall=`NO_GO_REQUIRES_USER_DECISION`；未授权改变候选生成；OEA Top-100 oracle nDCG@10 仅 `0.001972–0.003761` | OEA 小规模归因支持 released +Cl 适配空间的跨域失效，但仍需全量独立重跑确认；Whisper attempt 5 尚在运行 | 重跑期间不运行 CE、融合或门控训练；任何换 checkpoint/ASR 协议/双路召回都先问用户 |
+| 2 | Go/No-Go 审查 | FAILED | `dc995b5` | Whisper attempt 5 已修复并形成强基线，但 OEA Recall@100 仍仅 `0.001337–0.002561`、Top-100 oracle nDCG@10 仅 `0.001972–0.003761`；按固定阈值当前仍为 NO-GO | OEA 同 checkpoint/协议全量独立重跑尚未完成；未授权改变候选生成 | 重跑期间不运行依赖 OEA Top-100 的 CE、融合或门控训练；任何换 checkpoint/双路召回都先问用户 |
 | 3 | E2/E5/E6/E11：1-best CE、4-best equal/max、Gold CE | BLOCKED | 本提交 | 四条件共享冻结 4×100 CE 矩阵、单独 Gold 单假设 CE、严格无 test 调参评测和断点恢复 runner 已实现；28 项相关测试、Python compile 与 Bash 语法通过 | 依赖 Phase-2 汇总 GO 和新的 GPU 批准 | 复用唯一 OEA Top-100，不重新召回；Gold 不伪造 ASR 后验 |
 | 3 | E3/E4/E7：固定融合、RRF、proxy posterior | BLOCKED | `8f28c55` | CPU 聚合与 dev 选择已有测试实现；尚无真实 CE 缓存或 dev 选择结果 | 必须使用 FiQA dev 选择 | 不得用 FiQA test qrels 选择超参数 |
 | 4 | 4-best、proxy posterior、不确定性实验 | BLOCKED | `8f28c55` | 缓存装配、聚合、特征、dev 选择、正式评测实现完成；模型推理未开始 | 依赖 Whisper 下载、Phase 3 缓存和 GPU 批准 | 补模型 adapter 后生成正式缓存 |
@@ -139,9 +144,9 @@
 
 ## 当前焦点
 
-- 当前阶段：Phase 0、数据/模型门禁、OEA Phase 1 和 Phase-2 首轮真实 FiQA
-  推理已完成；首轮 OEA 候选失败，首轮 Whisper cache 无效。Whisper attempt 5
-  正在全新重建，OEA-Cl 同 checkpoint/协议全量独立重跑等待 GPU。
+- 当前阶段：Phase 0、数据/模型门禁、OEA Phase 1 和 Phase-2 FiQA 一级召回
+  已完成。Whisper attempt 5 的全新四条件 cache 和 B1 指标有效；OEA 候选仍
+  失败，OEA-Cl 同 checkpoint/协议全量独立重跑等待执行。
 - 当前主实验：FiQA 四种 SQuTR 声学条件上的 OEA Top-100 + Whisper 4-best
   proxy-posterior + BGE Cross-Encoder + ASR 不确定性感知候选级动态门控；
   OEA-5/SQuTR 数据门禁与 Clotho 正确性检查只是前置条件，不是最终创新实验。
@@ -159,6 +164,6 @@
   `/proc/locks` 或开放 FD 匹配。因此同目录 `flock` 正常，旧锁由另一台共享
   存储服务器或 DPC 远端租约持有。不得删除或绕过 lock。
 - 当前未执行：有效 OEA Top-100 上的 CE、融合、TTS 与真实 gate 训练。
-- 下一步：保持正在运行的 Whisper attempt 5；另用 1×RTX 4090 对固定
-  OEA-Nemo3B-Cl 做零旧-OEA-cache 的四条件独立重跑。两项结果确认前不改变
-  候选生成方式，也不进入 TTS/gate 训练。
+- 下一步：在另一张已批准的 RTX 4090 上对固定 OEA-Nemo3B-Cl 做零旧-OEA-cache
+  的四条件独立重跑。结果确认前不改变候选生成方式，也不进入依赖 OEA Top-100
+  的 CE、融合或 gate 训练；已完成的 attempt-5 GPU 可以释放。

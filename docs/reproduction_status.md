@@ -60,11 +60,11 @@
 | 2 ASR reranking 扩展 | Phase-2 attempt 4 严格恢复 | COMPLETED | `d9baf22` | run=`asrur_phase2_frozen_retrieval_execute_20260728_093950`；wrapper=`0`；44/44 steps=`0`；复用 14 个完整 cache，验证并复制 647 个 snr_0 shards，缺失记录首次成功；最终 648 shards、无新 failure、completion=`complete` | 无执行错误 | 固化四条件结果与恢复 provenance |
 | 2 ASR reranking 扩展 | Phase-2 NO-GO CPU 根因诊断 | COMPLETED | `50eddcb` | 648-query 审计 17 秒完成；Whisper Clean/20/10 dB 每条均为 `Thank you.`、WER=`1.0`，snr_0 仅 1 条不同；OEA projected embedding 高度各向异性且 Clean Top-100 仅 6/648 含正例，vanilla 为 498/648 | 当前 Whisper 结果无效；OEA 跨域候选不可用于预注册 reranker | 运行最小 Whisper 官方入口/BF16/FP32 三路 GPU 诊断；OEA checkpoint/候选策略需用户实质决定 |
 | 2 ASR reranking 扩展 | Whisper 三路内容差分 | COMPLETED | `576c4f6` | run=`asrur_whisper_content_diagnostic_20260728_164156`；8 records；wrapper=`0`；generic BF16 4-best WER=`0.141304`；官方 BF16/FP32 WER=`0.130435` 且输出一致 | 旧 Phase-2 Whisper cache 的 universal hallucination 未在当前固定样本复现；旧 cache 不可复用 | attempt 5 仅复用 11 组非 Whisper cache，在新 root 全量重建四条件 ASR 并执行内容门禁 |
-| 2 ASR reranking 扩展 | Phase-2 attempt 5 Whisper 全量干净重建 | IN_PROGRESS | `dc995b5` | 用户已在独立 1×RTX 4090 tmux 启动；Clean 648/648 首次成功，内容门禁 unique Top-1=`648`、WER=`0.127663`、violations 为空；随后进入 snr_20 | 仍在运行；旧 Whisper cache/shard 全部禁止复用 | 完成四条件内容门禁和 ASR+BGE 指标；不干扰 OEA 独立重跑 |
+| 2 ASR reranking 扩展 | Phase-2 attempt 5 Whisper 全量干净重建 | COMPLETED | `dc995b5` | host=`bitahub-a20626401511337984908046`；run=`asrur_phase2_frozen_retrieval_execute_20260728_170350`；wrapper=`0`、completion=`complete`；四条件内容门禁均通过、各 648 unique Top-1、violations 为空；B1 nDCG@10 Clean/20/10/0=`0.392020/0.392082/0.391101/0.379271` | 无执行错误；OEA candidate failure 不受本修复影响 | 固化成功审计；本服务器 GPU 可释放；继续 OEA 独立重跑 |
 | 2 ASR reranking 扩展 | OEA LoRA/projection 塌缩归因 | COMPLETED | `dc995b5` | run=`asrur_oea_collapse_diagnostic_20260728_170045`；base hidden R@10=`1.0`，LoRA hidden=`0.75`，base+heads=`0.5`，full LoRA+heads=`0.25`；fresh full audio 与旧 OEA cache cosine=`1.0`；峰值 allocated/reserved=`10,544,491,008/11,286,872,064` B | 小样本证明适配空间塌缩并排除全局旧音频 cache 错误；全量稳定性仍需独立复算 | 同 checkpoint/协议、全新 OEA cache 重算 FiQA 四条件 |
 | 2 ASR reranking 扩展 | OEA-Nemo3B-Cl FiQA 全量独立重跑 | IN_PROGRESS | 本提交 | `[USER-APPROVED 2026-07-28]` 1×RTX 4090 已批准；已实现新 cache root、禁止旧 OEA embedding/symlink、四条件 exact Top-100、B3/Oracle、与 attempt-4 逐行 embedding/metric 审计；专项测试通过 | 等待在独立空闲 4090 实例的 tmux 启动；预计 45–90 分钟、11–14 GiB；不下载、不训练、不选择 checkpoint | 拉取本提交后运行；中断时保留分片并可恢复 |
 | 2 ASR reranking 扩展 | 后台执行与 Phase-2 实时监控协议 | COMPLETED | 本提交 | 后续后台任务统一使用 tmux，禁止 nohup；实时监控脚本支持 follow/once、GPU、step、run/step elapsed、局部百分比、吞吐、近似 ETA、metrics 和 completion；当前 PID `6769` 保持运行 | 无 | 后续每个 GPU/CPU 长任务均给出 tmux session 名、启动、attach、detach 和 capture 命令，并尽可能记录耗时/ETA |
-| 2 ASR reranking 扩展 | Phase-2 结果与 Go/No-Go 自动审计 | FAILED | `d9baf22` | 四条件真实 metrics 与 audit 已生成；overall=`NO_GO_REQUIRES_USER_DECISION`；audit SHA256=`f919a84f...eb8e`；原始 Omni 与 Gold+BGE 非平凡，但 OEA Recall@100 仅 `0.001337–0.002561`，Whisper+BGE 近零 | 必须分别诊断 OEA checkpoint/protocol 与 Whisper transcription；未授权改变候选生成 | Phase 3 停止；先运行 CPU-only 完成工件诊断，再向用户报告需要作出的实质选择 |
+| 2 ASR reranking 扩展 | Phase-2 结果与 Go/No-Go 自动审计 | FAILED | `dc995b5` | attempt 5 已修复 Whisper 路线：B1 nDCG@10=`0.379271–0.392082`、WER=`0.125123–0.147411`；原始 Omni 与 Gold+BGE 非平凡；但 OEA Recall@100 仍仅 `0.001337–0.002561` | 当前唯一实质失败是 OEA candidate coverage；未授权改变候选生成 | 等待同 checkpoint/协议零复用 OEA 全量重跑；此前 Phase 3 继续停止 |
 | 3 ASR reranking 扩展 | E2/E5/E6/E11 无 dev 选择的冻结 CE 接续 | COMPLETED | 本提交 | 已实现四条件共享 4-best×Top-100 CE 缓存、单独 Gold 单假设 CE、1-best CE/4-best equal/4-best max/Gold CE 的严格评测、断点恢复与 Phase-2 GO 门禁；Gold 不伪造 ASR 后验；28 项相关测试、Python compile 与 Bash 语法通过；未运行 GPU、未产生真实指标 | 真实执行依赖 Phase-2 汇总 GO 和单独 GPU 批准 | Phase-2 完成后先审计；仅在 GO 时申请下一阶段 1×RTX 4090 |
 | 2 ASR reranking 扩展 | D1 FiQA 固定资源下载 | COMPLETED | `41efefa` | run=`asrur_d1_fiqa_download_20260726_200414`：5/5 files、download/wrapper exit=`0/0`、manifest=`complete`、目标目录约 47 MiB | 无；真实数据协议审计等待目标子集 manifest | DATA-13D 在同一 CPU run 中执行 FiQA split/count/hash/leakage 审计 |
 | 2 ASR reranking 扩展 | D2–D4 Whisper/BGE 固定资源下载 | COMPLETED | `6e55e2b` | D2 repair run=`asrur_d2_whisper_repair_20260727_134626`；strict/wrapper=`0/0`；Whisper 权重 3,087,130,976 B、SHA256=`a8e94b85...fd95`；D2–D4 selected bytes=`5,823,662,271/5,823,662,271`、errors 为空 | 无 | 后续全部严格离线加载；不重复下载 |
@@ -107,12 +107,13 @@
 
 - 当前阶段：OEA 论文复现结果继续冻结保存；用户已将后续研究范围固定为 ASR-Uncertainty-Guided Reranking over OEA。训练继续暂停。SQuTR DATA-12/13A 及 DATA-13B 的全量 extraction/CRC 已完成；全六子集 DATA-13C 仍受遗留锁阻塞，但主实验所需 FiQA/NQ 已由 DATA-13D 独立门禁解耦。
 - 当前对应论文范围：所有主表 1–5、附录表 6–17、图 1–3、附录 A–M 已建清单。
-- 最近完成：Phase-2 attempt 4 产生四条件真实一级召回；原始 Omni 正常，
-  但 OEA Recall@100 仅 `0.001337–0.002561`，旧 Whisper cache 内容无效。
-  Whisper 内容差分已排除当前模型/音频/BF16 的稳定故障，attempt 5 正在全新重建。
+- 最近完成：Phase-2 attempt 5 已完成四条件 Whisper 全量干净重建；
+  Whisper+BGE nDCG@10=`0.379271–0.392082`，四条件 WER=`0.125123–0.147411`，
+  内容门禁全部通过。原始 Omni 正常，但 OEA Recall@100 仍仅
+  `0.001337–0.002561`。
 - 当前阻塞：主实验数据不再受 DPC 遗留租约阻塞。旧租约只影响全六子集 DATA-13C/OEA-5；DATA-13D 已以干净 commit 完成且所有门禁通过。
 - 最近完成：OEA 8-query/64-negative 归因证明 base hidden 可检索，LoRA 与
   投影头均造成退化，full OEA 最差；fresh full audio 与旧 cache cosine=`1.0`，
   排除旧音频 cache 作为全局根因。
-- 下一步：继续 Whisper attempt 5；单独批准并执行 OEA-Nemo3B-Cl 全量独立重跑，
+- 下一步：在另一张已批准的 RTX 4090 上执行 OEA-Nemo3B-Cl 全量独立重跑，
   以同 checkpoint/协议的全新 57,638 文档和 2,592 音频确认失效是否稳定。
