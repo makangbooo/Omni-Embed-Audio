@@ -425,3 +425,28 @@ same-protocol result may become a shard. Filtering, clamping, replacing a
 score, or silently switching to FP32 is prohibited. Success evidence is
 stored in
 `results/audits/asrur_whisper_numeric_diagnostic_success_20260728.json`.
+
+Phase-2 attempt 4 then completed at execution commit `d9baf22`. The wrapper
+and all 44 recorded steps exited zero. Fourteen immutable complete caches were
+verified and reused, 647 `snr_0` Whisper shards were validated and copied with
+source-commit provenance, and the missing record succeeded on its first new
+attempt. The final Whisper condition contains 648 shards, a complete cache
+manifest, and no new failure record.
+
+The successful execution produced a scientific NO-GO, not a usable candidate
+pipeline. On Clean SQuTR-FiQA, the original Omni backbone reached
+nDCG@10=`0.258495` and Recall@100=`0.602574`, while Gold+BGE reached
+nDCG@10=`0.405853`. These non-trivial controls argue against a global
+audio/corpus/qrels identity failure. In contrast, the selected
+OEA-Nemo3B(+Cl) route reached nDCG@10=`0` and Recall@100=`0.002561`, and its
+Top-100 oracle nDCG@10 was only `0.003761`. Whisper 1-best+BGE also reached
+nDCG@10=`0`. Every preregistered check failed under all four conditions, so
+the overall decision is `NO_GO_REQUIRES_USER_DECISION`; changing checkpoint,
+ASR generation, or candidate generation is not automatically authorized.
+
+The compact execution evidence is
+`results/audits/asrur_phase2_attempt4_no_go_20260728.json`. A CPU-only
+diagnostic now measures cached Whisper WER/content/diversity and compares OEA
+versus vanilla embedding geometry and retrieval hubness. Phase 3, CE scoring,
+fusion, and gate training remain stopped until the diagnostic separates
+implementation/protocol errors from genuine cross-domain model failure.

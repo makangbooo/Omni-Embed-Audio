@@ -1,6 +1,6 @@
 # ICASSP experiment checklist
 
-Last updated: 2026-07-27
+Last updated: 2026-07-28
 
 This is the scope of the proposed paper:
 
@@ -23,9 +23,9 @@ Allowed statuses are `TODO`, `IN_PROGRESS`, `WAITING_USER`,
 | OEA-B0 | Lock OEA-Nemo3B(+Cl), its base model, prefix, pooling, projection, dimension, and normalization; run a real embedding smoke test | Prevents an invalid OEA baseline | COMPLETED | Canonical lock and RTX 4090 5-audio/25-text smoke; peak allocated 9.14 GiB |
 | OEA-B1 | Reproduce OEA-Nemo3B(+Cl) Clotho T2A R@1/5/10 | Numerical connection to the OEA paper | COMPLETED | Paper 21.57/47.16/60.36; reproduced all-caption 21.7225/47.1196/60.4402 |
 | OEA-B2 | Clotho audio-to-text direction sanity check using the selected Nemo checkpoint | Confirms the direction used by the new task before changing domains | COMPLETED | CPU suite `..._20260727_161133` completed at `7cfbfab`: 1,045 audio queries against 5,225 captions; R@1/5/10=`26.8900/51.3876/65.2632`; stderr empty; this is a `[CODE]` direction extension, not a paper-reported result |
-| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | WAITING_USER | OEA caches remain complete; the failed snr_0 Whisper record passed all three isolated numeric paths on retry. Attempt-4 recovery is tested and awaits one RTX 4090; no formal ranking metric exists yet |
-| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | WAITING_USER | All four vanilla caches are complete and checksummed for reuse; no formal ranking metric exists until repaired Phase 2 resumes |
-| OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | WAITING_USER | Depends on repaired Phase-2 finalization; no metric is complete |
+| OEA-B3 | SQuTR-FiQA OEA direct audio-to-text retrieval for Clean/20/10/0 dB | Primary frozen first-stage baseline and candidate generator | FAILED | Attempt 4 completed all four 648-query conditions, but OEA nDCG@10=`0.0000/0.0000/0.000724/0.000202` and Recall@100=`0.002561/0.001941/0.001337/0.001646`; this cannot be used as a Top-100 reranking source until the checkpoint/protocol failure is diagnosed |
+| OEA-B4 | SQuTR-FiQA original `nvidia/omni-embed-nemotron-3b` direct retrieval for four conditions | Shows whether OEA adaptation is a meaningful baseline | COMPLETED | Clean/20/10/0 dB nDCG@10=`0.258495/0.258448/0.249776/0.214043`; Recall@100=`0.602574/0.597378/0.583562/0.554182`; the non-trivial result is evidence against a global audio/corpus/qrels identity failure |
+| OEA-B5 | OEA Top-100 Recall@20/50/100 and Top-100 Oracle nDCG@10 | Establishes whether reranking can succeed without changing recall | COMPLETED | All four fixed-candidate oracles were computed; Oracle nDCG@10=`0.003761/0.002734/0.001972/0.002302`, so the selected OEA candidate set leaves essentially no reranking headroom |
 | OEA-B6 | Selected Nemo OEA audio/text latency, throughput, and peak memory on the study GPU | Measures the cost inherited by the proposed system | WAITING_USER | RTX 4090 lock-bound entrypoint is ready; requires a separate 1-GPU approval and an isolated checkout while Phase 2 is running |
 
 The following OEA-paper experiments are outside the ICASSP claim and will not
@@ -39,7 +39,7 @@ toward this checklist.
 
 | ID | Required result | Status | Evidence / blocker |
 |---|---|---|---|
-| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | WAITING_USER | clean/snr_20/snr_10 complete; snr_0 has 647/648 shards. Exact-record BF16/FP32 numerical diagnosis is required before a non-fabricated repair |
+| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | FAILED | Attempt 4 completed all four conditions, but nDCG@10=`0/0/0/0.000523`; because Gold+BGE reaches `0.405853`, cached Whisper transcription content must be audited before this is accepted as a valid ASR baseline |
 | ASR-E2 | B4: OEA Top-100 + 1-best cross-encoder | BLOCKED | Formal no-test-selection evaluator and resumable four-condition runner are tested; execution waits for Phase-2 aggregate GO and separate GPU approval |
 | ASR-E3 | B5: fixed fusion using preregistered 4-best proxy-posterior ASR evidence | BLOCKED | Dev selection only; no test tuning |
 | ASR-E4 | B6: RRF using the same 4-best proxy-posterior ASR route | BLOCKED | Dev selection only; no test tuning |
@@ -48,14 +48,14 @@ toward this checklist.
 | ASR-E7 | B7c: 4-best proxy-posterior aggregation | BLOCKED | Needs Whisper N-best and CE cache |
 | ASR-E8 | Query-level uncertainty gate baseline | BLOCKED | Needs FiQA train/dev generated speech and frozen upstream caches |
 | ASR-E9 | Ours: candidate-level dynamic gate, three seeds | BLOCKED | Needs approved TTS/noise protocol and gate training |
-| ASR-E10 | U1: gold text query + BGE dense upper bound | WAITING_USER | BGE corpus/dev caches are complete and reusable; gold-test encoding and final metric resume after the Whisper repair smoke |
+| ASR-E10 | U1: gold text query + BGE dense upper bound | COMPLETED | Dev selected `bge_retrieval`; all four conditions share the fixed Gold result nDCG@10=`0.405853`, MRR@10=`0.485246`, Recall@100=`0.740957` |
 | ASR-E11 | U2: gold transcript + frozen cross-encoder upper bound | BLOCKED | Strict one-hypothesis Gold artifact and same-candidate CE/evaluator are tested without fabricating an ASR posterior; execution waits for Phase-2 aggregate GO and separate GPU approval |
-| ASR-E12 | U3/U4: candidate oracle and candidate Recall@20/50/100 | WAITING_USER | Requires repaired Phase-2 ranking finalization; no metric is complete |
+| ASR-E12 | U3/U4: candidate oracle and candidate Recall@20/50/100 | COMPLETED | All four OEA fixed-candidate Recall@20/50/100 and Oracle nDCG@10 values exist; every preregistered Go/No-Go check failed under every condition |
 | ASR-E13 | Main FiQA table: all required methods × four acoustic conditions | BLOCKED | Depends on ASR-E1 through ASR-E12 |
 | ASR-E14 | Three-seed gate mean, standard deviation, and 95% confidence interval | BLOCKED | Depends on ASR-E9 |
 | ASR-E15 | A1–A9 ablations | BLOCKED | Evaluation code is tested; real caches/results absent |
 | ASR-E16 | Paired bootstrap against the strongest baseline | BLOCKED | Tested implementation; real per-query metrics absent |
-| ASR-E17 | WER and performance stratified by WER | BLOCKED | Needs Whisper outputs and formal rankings |
+| ASR-E17 | WER and performance stratified by WER | IN_PROGRESS | Four complete N-best caches now exist; a CPU-only transcript/WER/content diagnostic must first determine whether they are valid ASR outputs |
 | ASR-E18 | Gate weight versus SNR/ASR uncertainty; verify lower trust under unreliable ASR | BLOCKED | Needs trained gates and formal features |
 | ASR-E19 | Complementarity and failure-case analysis | BLOCKED | Needs final per-query rankings |
 | ASR-E20 | End-to-end and component latency, throughput, peak memory | BLOCKED | Needs correctness-complete models and separate GPU approval |
@@ -80,9 +80,11 @@ toward this checklist.
 
 - Required experiment packages: **28** (`OEA-B0`–`OEA-B6` plus
   `ASR-E1`–`ASR-E21`).
-- Completed experiment packages: **3/28 = 10.7%**.
-- Completed main FiQA result cells: **0**. Code readiness must not be reported
-  as an experimental result.
+- Completed experiment packages: **7/28 = 25.0%**; two additional packages
+  (`OEA-B3`, `ASR-E1`) were executed but are `FAILED`, not counted complete.
+- Completed Phase-2 result cells: **16**, of which the eight
+  original-Omni/Gold-BGE cells are currently scientifically usable; the eight
+  OEA/Whisper cells remain failure evidence pending diagnosis.
 - Prerequisites completed: **9/10**; the remaining TTS/noise prerequisite
   deliberately awaits the later Phase-2 Go/No-Go decision.
 - A transparent project-level estimate is **30%**:
@@ -93,9 +95,14 @@ toward this checklist.
 
 The next critical path is:
 
-1. diagnose and repair the single `en/fiqa:snr_0:10639` numerical failure without filtering or replacing its score, then resume Phase 2 from preserved caches;
-2. complete OEA-B3/B4/B5 and ASR-E1/E10/E12;
-3. apply the preregistered Go/No-Go without changing candidate generation;
-4. if Go, create the frozen CE/N-best caches and run Phase 3;
+1. run the CPU-only completed-artifact diagnostic for Whisper transcript/WER
+   validity and OEA/vanilla embedding geometry;
+2. determine whether OEA-B3 and ASR-E1 are implementation/protocol failures
+   or genuine model failures;
+3. ask the user before changing the OEA checkpoint, ASR generation protocol,
+   or candidate generator; Phase 3 remains prohibited under the current
+   `NO_GO_REQUIRES_USER_DECISION`;
+4. only after a valid Phase-2 GO, create the frozen CE/N-best caches and run
+   Phase 3;
 5. separately approve the FiQA train/dev TTS/noise protocol before gate
    training.
