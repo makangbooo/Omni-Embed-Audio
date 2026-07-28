@@ -13,8 +13,9 @@ fi
 
 CAPTION_EMBEDDING_DIR="$(cd "$1" && pwd)"
 UIQ_EMBEDDING_DIR="$(cd "$2" && pwd)"
-CONFIG="${ROOT_DIR}/configs/eval/qwen3b_clotho_positive_uiq_suite.json"
-SUITE_ID="${SUITE_ID:-oea_qwen3b_ac_clotho_positive_uiq_suite_seed42_$(date +%Y%m%d_%H%M%S)}"
+CONFIG="${POSITIVE_UIQ_SUITE_CONFIG:-${ROOT_DIR}/configs/eval/qwen3b_clotho_positive_uiq_suite.json}"
+SUITE_PREFIX="${POSITIVE_UIQ_SUITE_PREFIX:-oea_qwen3b_ac_clotho_positive_uiq_suite_seed42}"
+SUITE_ID="${SUITE_ID:-${SUITE_PREFIX}_$(date +%Y%m%d_%H%M%S)}"
 SUITE_DIR="${RESULT_ROOT:-${ROOT_DIR}/results/raw}/${SUITE_ID}"
 ATTEMPT_ID="attempt_$(date +%Y%m%d_%H%M%S)"
 ATTEMPT_DIR="${SUITE_DIR}/attempts/${ATTEMPT_ID}"

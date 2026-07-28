@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 import traceback
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -62,6 +62,49 @@ def parse_args() -> argparse.Namespace:
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def format_duration(seconds: float) -> str:
+    seconds = max(0, int(round(seconds)))
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+
+def print_progress(
+    *,
+    completed: int,
+    total: int,
+    completed_this_attempt: int,
+    stage_started: float,
+    overall_started_at: str,
+) -> None:
+    stage_elapsed = max(time.monotonic() - stage_started, 1e-9)
+    throughput = completed_this_attempt / stage_elapsed
+    remaining = max(total - completed, 0)
+    remaining_seconds = remaining / throughput if throughput > 0 else float("inf")
+    try:
+        overall_started = datetime.fromisoformat(overall_started_at)
+        overall_elapsed = (datetime.now(timezone.utc) - overall_started).total_seconds()
+    except (TypeError, ValueError):
+        overall_elapsed = stage_elapsed
+    expected_completion = (
+        datetime.now(timezone.utc) + timedelta(seconds=remaining_seconds)
+        if remaining_seconds != float("inf")
+        else None
+    )
+    eta = format_duration(remaining_seconds) if expected_completion else "unknown"
+    completion = expected_completion.isoformat() if expected_completion else "unknown"
+    print(
+        "[PROGRESS] stage=uiq_text "
+        f"current={completed} total={total} percent={completed / total * 100:.2f}% "
+        f"stage_elapsed={format_duration(stage_elapsed)} "
+        f"overall_elapsed={format_duration(overall_elapsed)} "
+        f"throughput={throughput:.3f}_queries_per_second "
+        f"stage_remaining={eta} overall_remaining={eta} "
+        f"expected_completion={completion}",
+        flush=True,
+    )
 
 
 def git_output(*arguments: str) -> str:
@@ -405,19 +448,28 @@ def main() -> int:
         text_batch_size = int(config["text_batch_size"])
         chunk_root = output_dir / "chunks"
         chunk_root.mkdir(exist_ok=True)
+        all_ranges = list(ranges(len(queries), text_batch_size))
         pending = [
             (start, stop)
-            for start, stop in ranges(len(queries), text_batch_size)
+            for start, stop in all_ranges
             if load_verified_chunk(
                 chunk_root, "uiq_text", start, stop, embedding_dim
             )
             is None
         ]
-        report["completed_text_chunks"] = len(
-            list(ranges(len(queries), text_batch_size))
-        ) - len(pending)
+        report["completed_text_chunks"] = len(all_ranges) - len(pending)
         report["pending_text_chunks"] = len(pending)
         atomic_write_json(metrics_path, report)
+
+        stage_started = time.monotonic()
+        completed_this_attempt = 0
+        print_progress(
+            completed=report["completed_text_chunks"],
+            total=len(all_ranges),
+            completed_this_attempt=completed_this_attempt,
+            stage_started=stage_started,
+            overall_started_at=str(report["started_at"]),
+        )
 
         if pending:
             torch, adapter, model, _audio_head, text_head, device = load_model_bundle(
@@ -447,6 +499,19 @@ def main() -> int:
                 report["completed_text_chunks"] += 1
                 report["pending_text_chunks"] -= 1
                 atomic_write_json(metrics_path, report)
+                completed_this_attempt += 1
+                if (
+                    completed_this_attempt == 1
+                    or completed_this_attempt % 25 == 0
+                    or report["pending_text_chunks"] == 0
+                ):
+                    print_progress(
+                        completed=report["completed_text_chunks"],
+                        total=len(all_ranges),
+                        completed_this_attempt=completed_this_attempt,
+                        stage_started=stage_started,
+                        overall_started_at=str(report["started_at"]),
+                    )
             report["gpu_peak_allocated_bytes"] = int(
                 torch.cuda.max_memory_allocated(device)
             )

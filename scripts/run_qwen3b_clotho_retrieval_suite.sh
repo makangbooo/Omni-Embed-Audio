@@ -80,6 +80,47 @@ export CUDA_VISIBLE_DEVICES=""
 exec > >(tee "${ATTEMPT_DIR}/stdout.log") \
   2> >(tee "${ATTEMPT_DIR}/stderr.log" >&2)
 
+SUITE_START_EPOCH="$(date +%s)"
+
+format_duration() {
+  local total="$1"
+  printf '%02d:%02d:%02d' \
+    "$((total / 3600))" "$(((total % 3600) / 60))" "$((total % 60))"
+}
+
+print_retrieval_progress() {
+  local stage="$1"
+  local completed="$2"
+  local total="$3"
+  local stage_started="$4"
+  local now overall_elapsed stage_elapsed percent_whole percent_fraction
+  local throughput remaining expected_completion
+  now="$(date +%s)"
+  overall_elapsed="$((now - SUITE_START_EPOCH))"
+  stage_elapsed="$((now - stage_started))"
+  percent_whole="$((completed * 100 / total))"
+  percent_fraction="$(((completed * 10000 / total) % 100))"
+  if [[ "${completed}" -gt 0 && "${overall_elapsed}" -gt 0 ]]; then
+    throughput="$(awk -v completed="${completed}" -v elapsed="${overall_elapsed}" \
+      'BEGIN {printf "%.4f", completed / elapsed}')"
+    remaining="$((overall_elapsed * (total - completed) / completed))"
+    expected_completion="$(date -Is --date="@$((now + remaining))")"
+    remaining="$(format_duration "${remaining}")"
+  else
+    throughput="0.0000"
+    remaining="unknown"
+    expected_completion="unknown"
+  fi
+  printf '[PROGRESS] stage=%s current=%d total=%d percent=%d.%02d%% ' \
+    "${stage}" "${completed}" "${total}" \
+    "${percent_whole}" "${percent_fraction}"
+  printf 'stage_elapsed=%s overall_elapsed=%s throughput=%s_protocols_per_second ' \
+    "$(format_duration "${stage_elapsed}")" \
+    "$(format_duration "${overall_elapsed}")" "${throughput}"
+  printf 'stage_remaining=%s overall_remaining=%s expected_completion=%s\n' \
+    "${remaining}" "${remaining}" "${expected_completion}"
+}
+
 echo "[INFO] Suite ID: ${SUITE_ID}"
 echo "[INFO] Suite directory: ${SUITE_DIR}"
 echo "[INFO] Attempt directory: ${ATTEMPT_DIR}"
@@ -91,7 +132,22 @@ python scripts/prepare_embedding_evaluation_suite.py prepare \
   --embedding-dir "${EMBEDDING_DIR}" \
   --suite-dir "${SUITE_DIR}"
 
+TOTAL_PROTOCOLS="$(python - "${SUITE_DIR}/suite_plan.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+plan = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(len(plan["protocols"]))
+PY
+)"
+COMPLETED_PROTOCOLS=0
+print_retrieval_progress \
+  "suite_prepared" "${COMPLETED_PROTOCOLS}" "${TOTAL_PROTOCOLS}" \
+  "${SUITE_START_EPOCH}"
+
 while IFS=$'\t' read -r protocol_id protocol_config output_dir; do
+  PROTOCOL_START_EPOCH="$(date +%s)"
   if [[ -f "${output_dir}/metrics.json" ]]; then
     if python - "${output_dir}/metrics.json" <<'PY'
 import json
@@ -103,6 +159,10 @@ raise SystemExit(0 if report.get("status") == "complete" else 1)
 PY
     then
       echo "[INFO] Reusing complete protocol: ${protocol_id}"
+      COMPLETED_PROTOCOLS="$((COMPLETED_PROTOCOLS + 1))"
+      print_retrieval_progress \
+        "reused:${protocol_id}" "${COMPLETED_PROTOCOLS}" \
+        "${TOTAL_PROTOCOLS}" "${PROTOCOL_START_EPOCH}"
       continue
     fi
     echo "[ERROR] Protocol has non-complete prior artifacts: ${protocol_id}" >&2
@@ -115,9 +175,16 @@ PY
     exit 6
   fi
   echo "[INFO] Evaluating protocol: ${protocol_id}"
+  print_retrieval_progress \
+    "evaluating:${protocol_id}" "${COMPLETED_PROTOCOLS}" \
+    "${TOTAL_PROTOCOLS}" "${PROTOCOL_START_EPOCH}"
   bash scripts/run_embedding_evaluation.sh \
     "${protocol_config}" \
     "${output_dir}"
+  COMPLETED_PROTOCOLS="$((COMPLETED_PROTOCOLS + 1))"
+  print_retrieval_progress \
+    "completed:${protocol_id}" "${COMPLETED_PROTOCOLS}" \
+    "${TOTAL_PROTOCOLS}" "${PROTOCOL_START_EPOCH}"
 done < <(
   python - "${SUITE_DIR}/suite_plan.json" <<'PY'
 import json
@@ -141,6 +208,10 @@ python scripts/prepare_embedding_evaluation_suite.py finalize \
   --config "${CONFIG}" \
   --embedding-dir "${EMBEDDING_DIR}" \
   --suite-dir "${SUITE_DIR}"
+
+print_retrieval_progress \
+  "finalized" "${COMPLETED_PROTOCOLS}" "${TOTAL_PROTOCOLS}" \
+  "${SUITE_START_EPOCH}"
 
 echo "[INFO] Retrieval suite completed"
 echo "[INFO] Summary: ${SUITE_DIR}/retrieval_summary.csv"

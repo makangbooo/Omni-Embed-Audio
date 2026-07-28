@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "inventory_id": "FIG-02",
+  "assessment_git_commit": "4a7852e0d35e544ea87fb1d5a7eef4f44493714d",
+  "scope": "Paper Figure 2 method and tensor-contract verification; not a claim that every OEA checkpoint or evaluation cell is complete",
+  "source_labels": {
+    "paper": "[PAPER] Figure 2, Section 3.1 and Appendix A",
+    "code": "[CODE] fixed reproduction-branch implementation and official checkpoint registry",
+    "checkpoint": "[CHECKPOINT] immutable model locks and measured checkpoint structure",
+    "observed": "[OBSERVED] completed lock-bound Qwen3B and Nemo3B runtime evidence",
+    "missing": "[MISSING] no committed lock-bound Qwen7B runtime evidence"
+  },
+  "claims": {
+    "shared_multimodal_backbone": {
+      "status": "verified",
+      "evidence": "[CODE] One OmniEmbedAdapter underlying model is wrapped once with LoRA and reused by the audio and text project_batch paths."
+    },
+    "lora_attachment": {
+      "status": "verified",
+      "evidence": "[CHECKPOINT][OBSERVED] Qwen3B, Qwen3B(+Cl), and Nemo3B(+Cl) locks each report 544 LoRA tensors / 50,462,720 tensor bytes; runtime loaders require an exact LoRA key-set match."
+    },
+    "separate_projection_heads": {
+      "status": "verified",
+      "evidence": "[CODE][CHECKPOINT] The checkpoint contract requires distinct audio_head and text_head state dictionaries and loads both strictly. The measured Qwen3B(+Cl) checkpoint has 1,049,600 parameters in each head."
+    },
+    "projection_dimension_512": {
+      "status": "verified",
+      "evidence": "[CODE][OBSERVED] projection_dim is fixed to 512 by the protocol; Qwen3B and Nemo3B smoke outputs are 5x512 audio and 25x512 text."
+    },
+    "l2_normalization": {
+      "status": "verified",
+      "evidence": "[CODE][OBSERVED] ProjectionHead normalizes outputs and the resumable generator rejects non-unit chunk embeddings. Completed smoke and full-run contracts passed."
+    },
+    "five_example_smoke": {
+      "status": "verified",
+      "evidence": "[OBSERVED] Independent AudioCaps-trained Qwen3B and Nemo3B(+Cl) runs completed 5 audio / 25 text items with exit code 0 and no pending chunks."
+    }
+  },
+  "evidence_files": [
+    {
+      "path": "AudioRetrieval/models/omni_embed_adapter.py",
+      "size_bytes": 19538,
+      "sha256": "e7d9902d5b40187647a211e38cc020d8cb3e8534f20656df141e3719287a1ba9"
+    },
+    {
+      "path": "AudioRetrieval/training/oea/train_omniembed_lora.py",
+      "size_bytes": 58886,
+      "sha256": "2c9f408befb987511a57df4155467fcd3b6e62994b9849c5a5d47d2728701c19"
+    },
+    {
+      "path": "scripts/generate_oea_embeddings.py",
+      "size_bytes": 31561,
+      "sha256": "51a6a223054fbfcddc8d941539dce19df1212fc442e2f9581beefbe32e8d58a5"
+    },
+    {
+      "path": "results/model_locks/oea_qwen3b.json",
+      "size_bytes": 5262,
+      "sha256": "b6c819311206f583e861991c0678b0b3b61cc2fd346c98c1c30f67c62d0127fa"
+    },
+    {
+      "path": "results/model_locks/oea_qwen3b_cl.json",
+      "size_bytes": 5292,
+      "sha256": "790d12ccc8f25ea29eecb37519db5c24262253f85dcb9055b473a45304589e36"
+    },
+    {
+      "path": "results/model_locks/oea_nemo3b_cl.json",
+      "size_bytes": 5932,
+      "sha256": "fd09e4d2b482aafdae7e297275c8106e10f82a6de99780d0ccfeb22b06bfc8c2"
+    },
+    {
+      "path": "results/audits/qwen3b_clotho_lock_bound_smoke_20260719.json",
+      "size_bytes": 3487,
+      "sha256": "e31fee8450888fac64bd5c770e69e72603816190b2f05c30a85d962cdf856989"
+    },
+    {
+      "path": "results/audits/qwen3b_cl_clotho_official_eval_20260719.json",
+      "size_bytes": 4861,
+      "sha256": "37fb82db856f394cb0dc5ccb2af370667ca91986fcee6c54dee8c4b5c0c5a4a0"
+    },
+    {
+      "path": "results/audits/asrur_nemo_g1_smoke_20260727.json",
+      "size_bytes": 3511,
+      "sha256": "ffd0fce424cdc1aead27f5417cd9ebfd797b12a2257a6bfa2d837699c36e7a83"
+    },
+    {
+      "path": "results/audits/qwen3b_clotho_a100_efficiency_20260721.json",
+      "size_bytes": 6506,
+      "sha256": "b8ae91294bfdf841a29c6f8e52081a0d164a103b64350deeafa930b208aef3ce"
+    }
+  ],
+  "completion_boundary": {
+    "completed": "The generic Figure 2 architecture and runtime tensor contract required by the inventory are verified on two backbone families.",
+    "not_completed": [
+      "Qwen7B checkpoint resource audit or runtime smoke",
+      "any missing Table 2/3/12-17 model-dataset cell",
+      "strict reproduction of PAPER's audio passage-prefix behavior"
+    ],
+    "paper_code_conflict": "[PAPER] states an audio passage: prefix; [CODE] the public adapter deliberately omits it. This conflict remains open and is not hidden by FIG-02 completion."
+  }
+}

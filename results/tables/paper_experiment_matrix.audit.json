@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "scope": "committed evidence snapshot; remote shared artifacts not revalidated",
+  "paper_cell_count": 374,
+  "paper_metric_count": 910,
+  "status_counts": {
+    "BLOCKED": 162,
+    "CONTROLLED_ONLY": 4,
+    "PARTIAL": 20,
+    "REPRODUCED_CLOSE": 13,
+    "TODO": 175
+  },
+  "inputs": {
+    "paper_registry": {
+      "path": "configs/results/paper_reported_metrics.jsonl",
+      "size_bytes": 386143,
+      "sha256": "5c2cab8c2c7d71f0a7a1677416304f0088ec0ccae2fe7c6cd3249635c8ba1524"
+    },
+    "observations": {
+      "path": "results/observations/reproduction_observations.jsonl",
+      "size_bytes": 66660,
+      "sha256": "7a30ff7c2ad44300982cd19b0d8181594753317a3bdef11679677677997af380"
+    }
+  },
+  "output": {
+    "path": "results/tables/paper_experiment_matrix.csv",
+    "size_bytes": 75189,
+    "sha256": "c4275b57b774a25a4a644c79a44fc16c81e4a941e35f5e20ee07d6ccb50e627e"
+  }
+}

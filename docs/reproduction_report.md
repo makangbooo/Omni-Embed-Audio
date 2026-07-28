@@ -4,7 +4,51 @@ This report is updated only from committed code and auditable run artifacts.
 Environment setup, downloads, and unexecuted implementations are not counted
 as reproduced experiments.
 
-## SpeechXBT-OEA baseline scope
+## OEA paper-only takeover snapshot
+
+This section is the completion authority for the current task. SpeechXBT-OEA,
+FiQA, NQ, SQuTR, ASR reranking, A2T, and other extensions later in this file
+are retained only as historical evidence and do not contribute to OEA paper
+completion.
+
+At the committed-evidence snapshot based on `repro/oea-full@4a7852e`, the
+31-row inventory is `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`.
+FIG-02 is now complete as a method and tensor-contract verification: independent
+Qwen3B and Nemo3B lock-bound runs loaded the LoRA and dual-head contract and
+produced 512-dimensional audio/text embeddings. This does not claim Qwen7B
+runtime completion. The exact boundary and file hashes are recorded in
+`results/audits/fig02_architecture_verification_20260728.json`.
+
+The 910 visually audited paper metrics are aggregated into 374
+experiment-model-dataset-task cells in
+`results/tables/paper_experiment_matrix.csv`. Its `paper_status=PAPER` column is
+separate from `REPRODUCED_CLOSE`, `CONTROLLED_ONLY`, `PARTIAL`, `TODO`, and
+`BLOCKED`; the generation audit records all input/output hashes. The compact
+paper-only partial Tables 2/3/12-15 are in
+`results/tables/oea_partial_tables.md`. They contain 18 predeclared protocol
+groups and do not select a protocol after comparing it with the paper value.
+
+Committed value evidence currently covers three Clotho T2A cells, two Clotho
+T2T cells, and eight Clotho positive-UIQ cells. Nemo3B(+Cl) has complete Clotho
+audio/caption embeddings and close T2A evidence, but its T2T CPU finalizer and
+positive-UIQ query encoding are still pending. The missing Nemo finalizers are
+now fixed as tracked, lock-bound configurations: T2T retains the same CODE and
+INFERRED protocols used for both Qwen3B variants and has a tmux-only wrapper
+with per-protocol elapsed/throughput/ETA; positive UIQ binds all four
+released query files, prints elapsed/throughput/ETA during generation, and has
+a tmux-only wrapper that tees output, prints a final status block, and retains
+an interactive shell. No model execution is implied by this code readiness.
+Qwen3B(+Cl) efficiency and
+14.71488M LoRA-plus-head parameter count are `CONTROLLED_ONLY`: strict Tables
+5/16 remain blocked by the paper's missing timing, memory, count, and checkpoint
+variant definitions.
+
+The remote shared directories have not been revalidated in this takeover. The
+Bitahub SSH host key changed and no working authentication is available, so no
+remote state is promoted from historical compact audits. No download, GPU run,
+training, deletion, overwrite, or long CPU task was started.
+
+## Excluded SpeechXBT-OEA extension evidence
 
 | ID | Evaluation | Source | Status | Evidence |
 |---|---|---|---|---|

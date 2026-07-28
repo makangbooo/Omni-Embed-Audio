@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "suite_prefix": "oea_nemo3b_clotho_positive_uiq_suite_seed42",
+  "model": "OEA-Nemo3B (+Cl)",
+  "caption_dataset": "Clotho v2.1 evaluation",
+  "dataset": "Clotho v2.1 evaluation UIQ",
+  "embedding_seed": 42,
+  "expected_candidate_count": 1045,
+  "expected_caption_query_count": 5225,
+  "expected_uiq_query_count": 4180,
+  "expected_queries_per_type": 1045,
+  "expected_embedding_dim": 512,
+  "expected_captions_per_clip": 5,
+  "expected_caption_generation_protocol_sha256": "8c7d1c3de25ea08cfc0bcc5ad1e964d89582df3eec344e13567c093693b4db64",
+  "expected_uiq_generation_config_sha256": "41e47339c9549cccdfc1709f91be37933805dfe76756ff0e3e469eb0a7205f2d",
+  "official_variant_id": "oea_nemo3b_cl",
+  "official_model_lock_path": "results/model_locks/oea_nemo3b_cl.json",
+  "minimum_caption_generator_commit": "ff73287c9765352edefbe92082ad5b91a1951575",
+  "minimum_uiq_generator_commit": "ff73287c9765352edefbe92082ad5b91a1951575",
+  "checkpoint": {
+    "repo_id": "JudeJiwoo/OEA-Nemo3B-Cl",
+    "revision": "9588912298afca0b11f5895b864ae28083f35022",
+    "local_subpath": "OEA-Nemo3B-Cl/step_450_best_inference_only.pt",
+    "size_bytes": 59072047,
+    "sha256": "2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+    "source": "DERIVED_FROM_CODE_CHECKPOINT"
+  },
+  "embedding_protocol": {
+    "audio": "public-code audio-only chat message without passage: insertion",
+    "text": "query: prefix, last-hidden attention-mask mean pooling, checkpoint text projection, L2 normalization",
+    "source": "CODE",
+    "paper_conflict": "PAPER states passage: for audio; this suite reuses the public-code candidate bank and does not hide that conflict"
+  },
+  "protocols": [
+    {
+      "protocol_id": "question_released_uiq",
+      "released_query_type": "question",
+      "paper_query_type": "Question",
+      "paper_table": "Table 12",
+      "protocol_label": "released-question-uiq-canonical-id",
+      "protocol_source": "CODE",
+      "expected_evaluated_queries": 1045,
+      "note": "Released GPT-5.1 question queries, one exact target ID per canonical Clotho candidate"
+    },
+    {
+      "protocol_id": "imperative_released_uiq",
+      "released_query_type": "imperative",
+      "paper_query_type": "Imperative",
+      "paper_table": "Table 13",
+      "protocol_label": "released-imperative-uiq-canonical-id",
+      "protocol_source": "CODE",
+      "expected_evaluated_queries": 1045,
+      "note": "Released GPT-5.1 imperative queries, one exact target ID per canonical Clotho candidate"
+    },
+    {
+      "protocol_id": "paraphrase_released_uiq",
+      "released_query_type": "paraphrase",
+      "paper_query_type": "Paraphrase",
+      "paper_table": "Table 14",
+      "protocol_label": "released-paraphrase-uiq-canonical-id",
+      "protocol_source": "CODE",
+      "expected_evaluated_queries": 1045,
+      "note": "Released GPT-5.1 paraphrase queries, one exact target ID per canonical Clotho candidate"
+    },
+    {
+      "protocol_id": "tagging_released_uiq",
+      "released_query_type": "tagging",
+      "paper_query_type": "Keyphrase",
+      "paper_table": "Table 15",
+      "protocol_label": "released-tagging-keyphrase-uiq-canonical-id",
+      "protocol_source": "CODE",
+      "expected_evaluated_queries": 1045,
+      "note": "The release calls this type tagging while PAPER calls it Keyphrase; both names are retained"
+    }
+  ]
+}

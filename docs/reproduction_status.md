@@ -1,6 +1,6 @@
 # Omni-Embed-Audio 复现状态
 
-最后更新：2026-07-27（Asia/Shanghai）
+最后更新：2026-07-28（Asia/Shanghai）
 
 状态值仅使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、`COMPLETED`、`FAILED`、`BLOCKED`。
 
@@ -9,6 +9,7 @@
 | 0 项目审计 | 完整阅读论文正文/附录/表/图/脚注 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 固定 inventory |
 | 0 项目审计 | 审计 README、依赖、训练/评测、数据、UIQ、HN、指标 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认审计结论 |
 | 0 项目审计 | 31 条实验/图/派生分析 inventory | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认复现边界 |
+| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | 本提交 | 提交内 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`；910 个论文指标聚合为 374 个可审计单元；FIG-02 方法/张量契约完成；扩展实验明确排除 | 远程共享模型/数据/logs/raw 尚未重新只读核验；Bitahub SSH 主机指纹变化且当前无可用认证 | 用户确认新 ED25519 指纹并提供可用 SSH 认证后，先只读复核远程，再执行 Nemo3B-Cl/Clotho T2T CPU finalizer |
 | 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `48d7a50` | 本地与 fork 分支均存在 | 无 | 后续提交仅推送该分支 |
 | 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
 | 0 编排 | 统一复现入口与 CPU/GPU 阶段门禁 | COMPLETED | `d13b115` | 公共入口、精确阶段注册表、默认只规划/显式执行、长任务确认和干净 worktree 门禁已实现；baseline 计划已展开为 vanilla CPU 模型锁 → A100 smoke → A100 full → CPU 四协议 metrics 与独立 CLAP blocker；全量 227 项测试通过；尚未在远程执行这些新阶段 | 无；入口完成不代表任何 blocked 实验已解锁或产生复现值 | 仅在固定资源与证据满足后更新叶子阶段状态；当前仍只等待 DATA-04 |
@@ -25,6 +26,7 @@
 | 2 官方权重 | Nemo3B-Cl 正式生成器锁绑定 5/25 GPU smoke | COMPLETED | `1b23c50` | RTX 4090 run=`oea_nemo3b_clotho_lock_bound_smoke_seed42_20260727_092654`：strict-offline、wrapper/attempt=`0/0`、5×512/25×512、544 LoRA、pending=0；allocated/reserved=9.14/9.49 GiB；五个工件 SHA256 已固定 | 两条 Transformers 兼容性警告为非致命但需在正式 Recall 对照前保留审计；不得为消除警告修改锁定 snapshot | 同一 GPU、lock 和协议执行全量 Clotho embedding，随后 CPU 计算 Table 2 T2A |
 | 2 官方权重 | Nemo3B-Cl 全量 Clotho embedding | COMPLETED | `4d2341d` | RTX 4090 run=`oea_nemo3b_clotho_embeddings_seed42_20260727_094554`：strict-offline、wrapper/attempt=`0/0`、1,045 audio/5,225 caption、512 维、pending=0；allocated/reserved=9.39/10.48 GiB；五个工件 SHA256 已固定 | 无；论文 `passage:` 与公开代码 audio-only no-prefix 冲突继续显式保留 | GPU 可释放；CPU 双协议 T2A 套件分别对照论文值 |
 | 2 官方权重 | Nemo3B-Cl/Clotho Table 2 T2A 双协议 CPU 套件 | COMPLETED | `20533b1` | suite=`oea_nemo3b_clotho_t2a_suite_seed42_20260727_125803`，suite/attempt/run=`0/0/0`、stderr 为空；all-caption R@1/5/10=`21.7225/47.1196/60.4402`，seed0=`21.6268/46.7943/59.8086`；suite/CSV SHA256 已固定 | `[MISSING]` 论文 caption 选择；两个预声明 `[CODE]` 协议均 close，严格论文协议继续 blocked，未按接近度择优 | Phase 1 正确性检查完成；转入 ASRUR Phase 2 FiQA 一级召回准备 |
+| 2 官方权重 | Nemo3B-Cl/Clotho Table 3 T2T 与 Tables 12–15 正向 UIQ 完成器 | IN_PROGRESS | 本提交 | 已固定同构 T2A/T2T 四协议、Nemo UIQ embedding/suite 配置、模型锁、query/base-config SHA256；T2T 与 UIQ 均有 tmux-only 前台入口、同屏 tee、阶段/整体 elapsed、吞吐、双 ETA、最终摘要和保留交互 shell；UIQ 生成器另每 25 query 更新进度 | 远程完整 embedding 路径尚未重新只读核验；T2T 等待 SSH 后 CPU 执行；UIQ GPU 尚未获本轮批准 | 先用现有 embedding 跑 CPU T2T；另行批准 1×RTX 4090 后在 tmux 中运行 4,180-query UIQ embedding，再 CPU finalize |
 | 2 官方权重 | Nemo3B-Cl/Clotho A2T 方向 CPU 套件 | COMPLETED | `7cfbfab` | suite=`oea_nemo3b_clotho_a2t_suite_seed42_20260727_161133`；attempt=`0`、stderr 为空；1,045 audio→5,225 captions；R@1/5/10=`26.8900/51.3876/65.2632`；suite/CSV SHA256 已固定 | 无；该结果是主实验前置方向检查，不是论文报告值 | OEA-B2 完成；进入 SQuTR-FiQA frozen-index 方向 |
 | 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | IN_PROGRESS | `48c9b3c` | 已知 base 完整、AC 曾保留 partial、Cl 未有开始证据；最近检查的主容器无活动下载进程 | CAS 链路不稳定；跨实例状态未确认 | 后续单独核对全部目录与 manifest，再断点续传 |
 | 2 官方权重 | MODEL-03/04 只读完整性审计器 | COMPLETED | `f4309a7` | 远程尚未运行；本地实现及 105 项完整测试通过 | 无；工具完成不代表六个 asset 已完成 | DATA-04 保持为唯一用户步骤；随后在 CPU 侧运行审计并按 asset 决定续传 |
