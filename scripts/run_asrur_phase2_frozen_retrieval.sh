@@ -32,6 +32,7 @@ GIT_COMMIT="$(git rev-parse HEAD)"
 COMMIT_SHORT="${GIT_COMMIT:0:12}"
 CACHE_ROOT="${PHASE2_CACHE_ROOT:-/home/jg525/experiment_cache/asr_uncertainty/fiqa_phase2_${COMMIT_SHORT}}"
 REUSE_CACHE_ROOT="${PHASE2_REUSE_CACHE_ROOT:-}"
+REUSE_WHISPER="${PHASE2_REUSE_WHISPER:-1}"
 REQUIRED_REUSE_COUNT="${PHASE2_REQUIRED_REUSE_COUNT:-0}"
 RESULT_ROOT="${PHASE2_RESULT_ROOT:-${ROOT_DIR}/results/raw/asrur_phase2_fiqa_${COMMIT_SHORT}}"
 RUN_ID="asrur_phase2_frozen_retrieval_${MODE#--}_$(date +%Y%m%d_%H%M%S)"
@@ -165,6 +166,10 @@ if [[ ! "${REQUIRED_REUSE_COUNT}" =~ ^[0-9]+$ ]]; then
   echo "[ERROR] PHASE2_REQUIRED_REUSE_COUNT must be a non-negative integer." >&2
   exit 3
 fi
+if [[ "${REUSE_WHISPER}" != "0" && "${REUSE_WHISPER}" != "1" ]]; then
+  echo "[ERROR] PHASE2_REUSE_WHISPER must be 0 or 1." >&2
+  exit 3
+fi
 if [[ ! "${WHISPER_MAX_RECORD_ATTEMPTS}" =~ ^[1-3]$ ]]; then
   echo "[ERROR] ASRUR_WHISPER_MAX_RECORD_ATTEMPTS must be 1, 2, or 3." >&2
   exit 3
@@ -215,6 +220,7 @@ done
   printf 'mode=%s\n' "${MODE}"
   printf 'cache_root=%s\n' "${CACHE_ROOT}"
   printf 'reuse_cache_root=%s\n' "${REUSE_CACHE_ROOT}"
+  printf 'reuse_whisper=%s\n' "${REUSE_WHISPER}"
   printf 'required_reuse_count=%s\n' "${REQUIRED_REUSE_COUNT}"
   printf 'result_root=%s\n' "${RESULT_ROOT}"
   printf 'text_batch_size=%s\n' "${TEXT_BATCH_SIZE}"
@@ -280,9 +286,11 @@ if [[ -n "${REUSE_CACHE_ROOT}" ]]; then
     reuse_complete_cache_dir \
       "${REUSE_CACHE_ROOT}/vanilla/${condition}" \
       "${CACHE_ROOT}/vanilla/${condition}"
-    reuse_complete_cache_dir \
-      "${REUSE_CACHE_ROOT}/whisper/${condition}" \
-      "${CACHE_ROOT}/whisper/${condition}"
+    if [[ "${REUSE_WHISPER}" == "1" ]]; then
+      reuse_complete_cache_dir \
+        "${REUSE_CACHE_ROOT}/whisper/${condition}" \
+        "${CACHE_ROOT}/whisper/${condition}"
+    fi
   done
   reuse_complete_cache_dir \
     "${REUSE_CACHE_ROOT}/bge/corpus" \
@@ -412,6 +420,19 @@ for condition in "${CONDITIONS[@]}"; do
       --max-record-attempts "${WHISPER_MAX_RECORD_ATTEMPTS}" \
       "${WHISPER_RESUME_ARGUMENTS[@]}" \
       "${DRY_ARGUMENTS[@]}"
+  if [[ "${MODE}" == "--execute" ]]; then
+    run_step "whisper_content_gate_${condition}" \
+      python scripts/audit_asrur_whisper_cache.py \
+        --nbest "${CACHE_ROOT}/whisper/${condition}/nbest.jsonl" \
+        --queries "${QUERIES}" \
+        --qrels "${TEST_QRELS}" \
+        --condition "${condition}" \
+        --expected-hypotheses 4 \
+        --min-unique-top1 8 \
+        --max-mode-fraction 0.95 \
+        --max-corpus-wer 0.95 \
+        --output "${RUN_DIR}/steps/whisper_content_gate_${condition}/content_gate.json"
+  fi
 done
 
 if [[ "${MODE}" == "--dry-run" ]]; then

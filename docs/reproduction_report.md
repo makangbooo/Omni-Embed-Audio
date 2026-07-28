@@ -463,3 +463,15 @@ only 6/648 Clean queries, versus 498/648 for vanilla. These observations do not
 authorize changing the formal ASR or candidate protocol. A small three-way
 GPU diagnostic now compares the current generic BF16 four-best entrypoint
 against official Whisper BF16 and FP32 one-best on identical audio.
+
+That differential completed at `576c4f6` on eight fixed records. Current
+generic BF16 four-best produced the intended FiQA content with corpus
+WER=`0.141304`; official BF16 and FP32 one-best were identical and each
+reached WER=`0.130435`. The pinned model, present audio, BF16 precision, and
+current generic generation entrypoint therefore pass the fixed sample. This
+does not retroactively validate the attempt-4 cache or identify a unique
+historical trigger from its completed artifacts. Attempt 5 consequently
+preserves that cache as failure evidence, reuses only the 11 complete
+OEA/vanilla/BGE groups, regenerates every Whisper record in a new cache root,
+and applies a per-condition catastrophic-content integrity gate before any
+ASR ranking is accepted.

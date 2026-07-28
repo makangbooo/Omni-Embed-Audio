@@ -39,7 +39,7 @@ toward this checklist.
 
 | ID | Required result | Status | Evidence / blocker |
 |---|---|---|---|
-| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | FAILED | Attempt 4 completed all four conditions, but nDCG@10=`0/0/0/0.000523`; because Gold+BGE reaches `0.405853`, cached Whisper transcription content must be audited before this is accepted as a valid ASR baseline |
+| ASR-E1 | B1: Whisper 1-best + BGE dense retrieval, four FiQA conditions | INVALIDATED_REBUILD_PENDING | Attempt-4 metrics are rejected because its cached Top-1 collapsed to `Thank you.`. An 8-record differential at `576c4f6` passed for current generic BF16 and official BF16/FP32; attempt 5 must now regenerate all 2,592 formal records without reusing old Whisper artifacts |
 | ASR-E2 | B4: OEA Top-100 + 1-best cross-encoder | BLOCKED | Formal no-test-selection evaluator and resumable four-condition runner are tested; execution waits for Phase-2 aggregate GO and separate GPU approval |
 | ASR-E3 | B5: fixed fusion using preregistered 4-best proxy-posterior ASR evidence | BLOCKED | Dev selection only; no test tuning |
 | ASR-E4 | B6: RRF using the same 4-best proxy-posterior ASR route | BLOCKED | Dev selection only; no test tuning |
@@ -55,7 +55,7 @@ toward this checklist.
 | ASR-E14 | Three-seed gate mean, standard deviation, and 95% confidence interval | BLOCKED | Depends on ASR-E9 |
 | ASR-E15 | A1–A9 ablations | BLOCKED | Evaluation code is tested; real caches/results absent |
 | ASR-E16 | Paired bootstrap against the strongest baseline | BLOCKED | Tested implementation; real per-query metrics absent |
-| ASR-E17 | WER and performance stratified by WER | BLOCKED | CPU audit proved the current caches invalid: Clean/20/10 dB have one unique Top-1 (`Thank you.`) across all 648 records and WER=`1.0`; snr_0 has 647 identical hallucinations. A three-way official-entrypoint/precision smoke is implemented and requires GPU approval before formal ASR regeneration |
+| ASR-E17 | WER and performance stratified by WER | BLOCKED | Attempt-4 caches are invalid. The three-way fixed-sample diagnostic passed (generic WER=`0.141304`; official BF16/FP32=`0.130435`), so the next required artifact is a fresh four-condition attempt-5 cache that passes the preregistered catastrophic-content integrity gate |
 | ASR-E18 | Gate weight versus SNR/ASR uncertainty; verify lower trust under unreliable ASR | BLOCKED | Needs trained gates and formal features |
 | ASR-E19 | Complementarity and failure-case analysis | BLOCKED | Needs final per-query rankings |
 | ASR-E20 | End-to-end and component latency, throughput, peak memory | BLOCKED | Needs correctness-complete models and separate GPU approval |
