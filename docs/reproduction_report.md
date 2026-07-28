@@ -475,3 +475,42 @@ preserves that cache as failure evidence, reuses only the 11 complete
 OEA/vanilla/BGE groups, regenerates every Whisper record in a new cache root,
 and applies a per-condition catastrophic-content integrity gate before any
 ASR ranking is accepted.
+
+The OEA-Nemo3B(+Cl) failure was separately localized at execution commit
+`dc995b5`. On eight fixed Clean FiQA queries, all relevant positive documents,
+and 64 fixed negatives, the frozen base hidden space remained strongly
+retrievable (R@1=`0.875`, R@10=`1.0`). Applying only the released OEA LoRA
+reduced R@10 to `0.75` and raised mean audio/audio cosine from `0.372756` to
+`0.708041`. Applying only the OEA modality heads to base hidden states reduced
+R@10 to `0.5`. Applying both released components was worst: R@1=`0`,
+R@10=`0.25`, mean audio/audio cosine=`0.843654`, and mean positive rank=`23`.
+Fresh full audio embeddings matched the prior OEA cache exactly
+(mean/minimum row cosine=`1.0`), while fresh base audio matched the vanilla
+cache at mean cosine `0.999999`. The global collapse is therefore not explained
+by stale audio embeddings, the loader selecting a different checkpoint, or a
+globally broken FiQA/SQuTR identity.
+
+The evidence supports, but does not by itself causally prove, a transfer/domain
+failure in the retrieval-specific LoRA and modality heads. This interpretation
+is consistent with the paper's stated curriculum: WavCaps audio captions,
+AudioCaps caption retrieval, and an optional final 3,839-clip Clotho stage that
+is specifically described as improving natural audio descriptions
+(`Omni-Embed-Audio.pdf`, page 5). The paper also warns that AudioCaps and
+Clotho caption queries mirror training distributions (pages 1 and 3). Spoken
+financial questions paired with long FiQA documents are outside those reported
+training and evaluation distributions. The checkpoint is not globally corrupt:
+the same locked `+Cl` weights already reproduced Clotho T2A and passed the
+Clotho A2T direction check.
+
+One remaining implementation question is localized text-cache disagreement:
+the eight-query diagnostic found full-text fresh/cache mean cosine `0.995951`
+but a minimum of `0.663597`. This is too sparse to explain the global
+audio-space collapse, but it must not be ignored. The independent full rerun
+therefore re-encodes all 57,638 FiQA documents and all 2,592 four-condition
+audio queries under the same checkpoint, public-code audio protocol, text
+prefix, BF16 setting, and exact Top-100 evaluator. It reuses no previous OEA
+embedding or symlink, preserves partial chunks for recovery, and compares every
+fresh row and metric with attempt 4. It does not change or select a checkpoint,
+train a model, download data, or alter candidate generation. The runner and
+audit are `scripts/run_asrur_oea_cl_fiqa_rerun.sh` and
+`scripts/audit_asrur_oea_cl_fiqa_rerun.py`.
