@@ -55,7 +55,7 @@ toward this checklist.
 | ASR-E14 | Three-seed gate mean, standard deviation, and 95% confidence interval | BLOCKED | Depends on ASR-E9 |
 | ASR-E15 | A1–A9 ablations | BLOCKED | Evaluation code is tested; real caches/results absent |
 | ASR-E16 | Paired bootstrap against the strongest baseline | BLOCKED | Tested implementation; real per-query metrics absent |
-| ASR-E17 | WER and performance stratified by WER | IN_PROGRESS | Four complete N-best caches now exist; a CPU-only transcript/WER/content diagnostic must first determine whether they are valid ASR outputs |
+| ASR-E17 | WER and performance stratified by WER | BLOCKED | CPU audit proved the current caches invalid: Clean/20/10 dB have one unique Top-1 (`Thank you.`) across all 648 records and WER=`1.0`; snr_0 has 647 identical hallucinations. A three-way official-entrypoint/precision smoke is implemented and requires GPU approval before formal ASR regeneration |
 | ASR-E18 | Gate weight versus SNR/ASR uncertainty; verify lower trust under unreliable ASR | BLOCKED | Needs trained gates and formal features |
 | ASR-E19 | Complementarity and failure-case analysis | BLOCKED | Needs final per-query rankings |
 | ASR-E20 | End-to-end and component latency, throughput, peak memory | BLOCKED | Needs correctness-complete models and separate GPU approval |
@@ -95,13 +95,14 @@ toward this checklist.
 
 The next critical path is:
 
-1. run the CPU-only completed-artifact diagnostic for Whisper transcript/WER
-   validity and OEA/vanilla embedding geometry;
-2. determine whether OEA-B3 and ASR-E1 are implementation/protocol failures
-   or genuine model failures;
-3. ask the user before changing the OEA checkpoint, ASR generation protocol,
-   or candidate generator; Phase 3 remains prohibited under the current
-   `NO_GO_REQUIRES_USER_DECISION`;
+1. run the approved minimal Whisper three-way differential smoke to separate
+   generic-generation-entrypoint failure from BF16 precision failure;
+2. treat the selected OEA checkpoint's FiQA candidate route as failed unless
+   the user authorizes an a-priori checkpoint change or candidate-generator
+   redesign; its Clotho reproduction remains valid;
+3. ask the user before changing the OEA checkpoint, formal ASR generation
+   protocol, or candidate generator; Phase 3 remains prohibited under the
+   current `NO_GO_REQUIRES_USER_DECISION`;
 4. only after a valid Phase-2 GO, create the frozen CE/N-best caches and run
    Phase 3;
 5. separately approve the FiQA train/dev TTS/noise protocol before gate

@@ -450,3 +450,16 @@ diagnostic now measures cached Whisper WER/content/diversity and compares OEA
 versus vanilla embedding geometry and retrieval hubness. Phase 3, CE scoring,
 fusion, and gate training remain stopped until the diagnostic separates
 implementation/protocol errors from genuine cross-domain model failure.
+
+The completed CPU diagnostic established that the formal Whisper cache is
+invalid rather than merely weak. Clean, 20 dB, and 10 dB each contain one
+unique Top-1 transcript across all 648 queries: `Thank you.`; whitespace
+case-folded corpus WER is `1.0`. At 0 dB, 647/648 records have the same
+hallucination. The selected OEA projected space also shows severe anisotropy:
+on Clean, sampled audio/audio and document/document mean off-diagonal cosine
+similarities are `0.755988` and `0.509644`, compared with `0.386363` and
+`0.196054` for the original Omni control. OEA Top-100 includes a positive for
+only 6/648 Clean queries, versus 498/648 for vanilla. These observations do not
+authorize changing the formal ASR or candidate protocol. A small three-way
+GPU diagnostic now compares the current generic BF16 four-best entrypoint
+against official Whisper BF16 and FP32 one-best on identical audio.
