@@ -55,7 +55,7 @@ toward this checklist.
 | ASR-E14 | Three-seed gate mean, standard deviation, and 95% confidence interval | BLOCKED | Depends on ASR-E9 |
 | ASR-E15 | A1–A9 ablations | BLOCKED | Evaluation code is tested; real caches/results absent |
 | ASR-E16 | Paired bootstrap against the strongest baseline | BLOCKED | Tested implementation; real per-query metrics absent |
-| ASR-E17 | WER and performance stratified by WER | IN_PROGRESS | Attempt-5 four-condition WER and valid per-query ASR/ranking artifacts now exist; aggregate WER is complete, while preregistered WER-bin retrieval analysis remains to be generated |
+| ASR-E17 | WER and performance stratified by WER | IN_PROGRESS | Attempt-5 four-condition WER and valid per-query ASR/ranking artifacts now exist. A fail-closed CPU analyzer with fixed WER bins, per-query evidence, hashes and immutable outputs is tested; remote formal analysis remains to be generated |
 | ASR-E18 | Gate weight versus SNR/ASR uncertainty; verify lower trust under unreliable ASR | BLOCKED | Needs trained gates and formal features |
 | ASR-E19 | Complementarity and failure-case analysis | BLOCKED | Needs final per-query rankings |
 | ASR-E20 | End-to-end and component latency, throughput, peak memory | BLOCKED | Needs correctness-complete models and separate GPU approval |

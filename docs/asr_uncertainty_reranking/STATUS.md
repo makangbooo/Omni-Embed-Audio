@@ -15,7 +15,7 @@
   BGE/Whisper/CE、OEA-Nemo 与原始 Omni 的可恢复真实缓存生成器及 Phase-2
   工作量预检。四个声学条件强制独立缓存，并统一使用 FiQA qrels query ID。
   Gold transcript CE 上限允许单假设，但正式 Whisper 路径固定为 4-best。
-- 验证：本地全仓 `443` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
+- 验证：本地全仓 `445` 项 `unittest` 全部通过；未下载、未加载模型、未启动 GPU。
 - Phase-2 dry-run attempt 2 已通过：17/17 个步骤、run、wrapper 和调用端退出码
   均为 0，stderr 为空；未加载模型、未使用 GPU、未产生研究指标。
 - Phase-2 GPU attempt 1 已结束：`oea_clean=0`、`vanilla_clean=1`、
@@ -133,6 +133,7 @@
 | 2 | OEA LoRA/projection 塌缩归因 | COMPLETED | `dc995b5` | run=`asrur_oea_collapse_diagnostic_20260728_170045`；wrapper=`0`；base hidden R@1/10=`0.875/1.0`，full LoRA+heads=`0/0.25`；audio off-diagonal cosine 从 `0.372756` 增至 `0.843654`；fresh full audio 与旧 OEA cache cosine=`1.0` | 8-query 诊断证明失效位于 OEA 适配后的空间，不等于全量独立复算 | 使用相同 +Cl checkpoint/协议、全新 cache 重算 57,638 文档和四条件 2,592 音频 |
 | 2 | OEA-Nemo3B-Cl FiQA 全量独立重跑 | IN_PROGRESS | 本提交 | `[USER-APPROVED 2026-07-28]` 1×RTX 4090 阶段已批准；`run_asrur_oea_cl_fiqa_rerun.sh` 禁止旧 OEA embedding/symlink 复用，支持同一新 root 分片恢复，重算四条件 exact Top-100、B3 指标、Oracle，并逐行对照 attempt-4 embedding/metrics | 等待用户在独立空闲 4090 实例的 tmux 中启动；预计 45–90 分钟、约 11–14 GiB；不下载、不训练、不选 checkpoint、不改协议 | 拉取本提交后执行；完成时根据固定阈值判定是否稳定复现跨域失效 |
 | 2 | Go/No-Go 审查 | FAILED | `dc995b5` | Whisper attempt 5 已修复并形成强基线，但 OEA Recall@100 仍仅 `0.001337–0.002561`、Top-100 oracle nDCG@10 仅 `0.001972–0.003761`；按固定阈值当前仍为 NO-GO | OEA 同 checkpoint/协议全量独立重跑尚未完成；未授权改变候选生成 | 重跑期间不运行依赖 OEA Top-100 的 CE、融合或门控训练；任何换 checkpoint/双路召回都先问用户 |
+| 2/5 | E17：Whisper WER–B1 检索性能分桶 | IN_PROGRESS | 本提交 | 固定 WER bins、四条件 per-query WER 与 B1 nDCG/MRR/Recall join、JSON/CSV/JSONL、输入 SHA256、输出不覆盖和 CPU elapsed 记录均已实现；2 项专项测试通过 | 远程 attempt-5 cache/result 未在本地；尚无正式分桶数值 | 在 CPU 服务器前台运行 `scripts/run_asrur_phase2_wer_analysis.sh`；无需 GPU，预计少于 1 分钟 |
 | 3 | E2/E5/E6/E11：1-best CE、4-best equal/max、Gold CE | BLOCKED | 本提交 | 四条件共享冻结 4×100 CE 矩阵、单独 Gold 单假设 CE、严格无 test 调参评测和断点恢复 runner 已实现；28 项相关测试、Python compile 与 Bash 语法通过 | 依赖 Phase-2 汇总 GO 和新的 GPU 批准 | 复用唯一 OEA Top-100，不重新召回；Gold 不伪造 ASR 后验 |
 | 3 | E3/E4/E7：固定融合、RRF、proxy posterior | BLOCKED | `8f28c55` | CPU 聚合与 dev 选择已有测试实现；尚无真实 CE 缓存或 dev 选择结果 | 必须使用 FiQA dev 选择 | 不得用 FiQA test qrels 选择超参数 |
 | 4 | 4-best、proxy posterior、不确定性实验 | BLOCKED | `8f28c55` | 缓存装配、聚合、特征、dev 选择、正式评测实现完成；模型推理未开始 | 依赖 Whisper 下载、Phase 3 缓存和 GPU 批准 | 补模型 adapter 后生成正式缓存 |
