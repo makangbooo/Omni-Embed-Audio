@@ -54,10 +54,11 @@ class ReproductionProgressReportingTests(unittest.TestCase):
         self.assertEqual(positions, sorted(positions))
         self.assertIn("`4/31 = 12.9%`", self.status_text)
         self.assertIn("`是否使用 GPU：是/否`", self.status_text)
+        self.assertIn("`是否使用 OEA 论文的源代码文件：是/否`", self.status_text)
         self.assertIn("`预计执行时间：<可审计的时间范围>`", self.status_text)
         self.assertIn("必须在命令前以独立字段显式列出", self.status_text)
         self.assertIn(
-            "不得只把 GPU 使用情况或预计时间埋在说明段落中",
+            "不得只把 GPU、OEA 官方源码使用情况或预计时间埋在说明段落中",
             self.status_text,
         )
 
