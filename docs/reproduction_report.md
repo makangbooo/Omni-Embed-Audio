@@ -43,10 +43,15 @@ Qwen3B(+Cl) efficiency and
 5/16 remain blocked by the paper's missing timing, memory, count, and checkpoint
 variant definitions.
 
-The remote shared directories have not been revalidated in this takeover. The
-Bitahub SSH host key changed and no working authentication is available, so no
-remote state is promoted from historical compact audits. No download, GPU run,
-training, deletion, overwrite, or long CPU task was started.
+The remote shared directories have not been revalidated in this takeover. A
+later authenticated Bitahub Web-console check established that the current
+instance `bitahub-a20633967503994880812290` uses ED25519 fingerprint
+`SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA`, while the anomalous
+`etC2...` fingerprint does not match that instance. The new external endpoint
+`xj-member.bitahub.com:42156` is not yet bound in the client `known_hosts`, and
+no external connection was made. No remote state is promoted from historical
+compact audits. No download, GPU run, training, deletion, overwrite, or long
+CPU task was started.
 
 On 2026-07-29 the user approved DATA-04, DATA-06, DATA-08, and the
 Nemo3B-Cl/Clotho positive-UIQ GPU task. The approvals and their unstarted state

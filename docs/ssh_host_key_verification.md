@@ -18,7 +18,7 @@ Web console. From the repository root, run:
 
 ```bash
 bash scripts/print_ssh_host_fingerprints.sh \
-  SHA256:etC2qN4P9phlmmEtoHi7hO3qfnmevz/u7bJv8Q1JwlM
+  SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA
 ```
 
 A local instance match must include both of these lines:
@@ -29,7 +29,7 @@ VERIFY_RESULT=ED25519_MATCH
 ```
 
 Also inspect `HOST_KEY_IDENTITY`: its second field must be exactly
-`SHA256:etC2qN4P9phlmmEtoHi7hO3qfnmevz/u7bJv8Q1JwlM` and its algorithm must be
+`SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA` and its algorithm must be
 `ED25519`.
 
 If the result is `ED25519_MISMATCH`, do not accept the client-observed key. If
@@ -38,6 +38,34 @@ gateway. In that case, obtain the gateway fingerprint from the authenticated
 Bitahub console or Bitahub support and compare the full SHA256 value. Do not
 use `StrictHostKeyChecking=no`, `UserKnownHostsFile=/dev/null`, or an
 unverified `ssh-keyscan` result as proof of identity.
+
+## Current verified instance observation
+
+On 2026-07-29 the authenticated Bitahub Web console reported:
+
+- instance: `bitahub-a20633967503994880812290`;
+- external endpoint: `xj-member.bitahub.com:42156`;
+- local key: `/etc/ssh/ssh_host_ed25519_key.pub`;
+- local ED25519 fingerprint:
+  `SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA`;
+- repository: clean `repro/oea-full` at `4a7852e` before fast-forward.
+
+The earlier client-observed `SHA256:etC2qN4P9phlmmEtoHi7hO3qfnmevz/u7bJv8Q1JwlM`
+does not match this instance and must not be accepted for port `42156`.
+The local key is verified out of band, but the external endpoint remains
+unbound until its exact public key is installed for the new host/port tuple.
+
+The following Web-console command prints a `known_hosts` candidate without
+modifying any file:
+
+```bash
+awk 'NR == 1 {print "[xj-member.bitahub.com]:42156", $1, $2}' \
+  /etc/ssh/ssh_host_ed25519_key.pub
+```
+
+Before installation, independently confirm that the candidate's fingerprint
+is the verified `+lMy...` value. Adding it for port `42156` must not remove or
+silently replace entries for other ports.
 
 ## After a verified match
 

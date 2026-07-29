@@ -33,8 +33,23 @@
   "remote_access": {
     "connect_in_this_turn": false,
     "reason": "User requested instructions for independent Bitahub-side verification and explicitly said no Bitahub connection is needed.",
-    "client_observed_ed25519_fingerprint": "SHA256:etC2qN4P9phlmmEtoHi7hO3qfnmevz/u7bJv8Q1JwlM",
-    "verification_status": "pending_user_out_of_band_verification"
+    "previous_client_observed_ed25519_fingerprint": "SHA256:etC2qN4P9phlmmEtoHi7hO3qfnmevz/u7bJv8Q1JwlM",
+    "previous_fingerprint_assessment": "Does not match the current instance host key and must not be accepted for the current endpoint.",
+    "user_console_observation": {
+      "source": "User-supplied transcript from the authenticated Bitahub Web console",
+      "instance_hostname": "bitahub-a20633967503994880812290",
+      "external_hostname": "xj-member.bitahub.com",
+      "external_port": 42156,
+      "host_key_file": "/etc/ssh/ssh_host_ed25519_key.pub",
+      "host_key_bits": 256,
+      "host_key_algorithm": "ED25519",
+      "host_key_fingerprint": "SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA",
+      "git_branch_status": "repro/oea-full...origin/repro/oea-full",
+      "git_head": "4a7852e0d35e544ea87fb1d5a7eef4f44493714d",
+      "git_worktree": "clean"
+    },
+    "verification_status": "local_instance_key_verified_external_endpoint_binding_pending",
+    "verification_boundary": "The Web-console observation authenticates the current instance's local host key. The public key has not yet been bound to [xj-member.bitahub.com]:42156 in the client known_hosts file, and no external connection was made."
   },
   "execution_boundary": "Approval does not assert download or experiment completion; every approved item remains unstarted until a verified execution environment is available."
 }

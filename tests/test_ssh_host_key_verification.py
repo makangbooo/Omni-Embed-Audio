@@ -37,6 +37,17 @@ class SshHostKeyVerificationTests(unittest.TestCase):
         )
         self.assertEqual(receipt["status"], "recorded")
         self.assertFalse(receipt["remote_access"]["connect_in_this_turn"])
+        self.assertEqual(
+            receipt["remote_access"]["verification_status"],
+            "local_instance_key_verified_external_endpoint_binding_pending",
+        )
+        observation = receipt["remote_access"]["user_console_observation"]
+        self.assertEqual(observation["external_port"], 42156)
+        self.assertEqual(
+            observation["host_key_fingerprint"],
+            "SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA",
+        )
+        self.assertEqual(observation["git_worktree"], "clean")
         self.assertEqual(len(receipt["approvals"]), 4)
         for approval in receipt["approvals"]:
             self.assertTrue(approval["approved"])

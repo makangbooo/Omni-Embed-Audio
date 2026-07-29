@@ -20,15 +20,21 @@ The GitHub mirror was clean and synchronized at
 receipt was recorded. Read-only audit of
 `/home/jg525/Omni-Embed-Audio`, `/home/jg525/models/oea`,
 `/home/jg525/datasets/oea`, `/home/jg525/experiment_cache`, logs, raw results,
-and tmux is blocked by SSH authentication. Alias `bitahub_JG` also reports a
+and tmux is not yet re-audited. Alias `bitahub_JG` previously reported a
 changed ED25519 host key:
 
-- newly presented: `SHA256:etC2qN4P9phlmmEtoHi7hO3qfnmevz/u7bJv8Q1JwlM`
-- stored for port 42017: `SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA`
+- anomalous fingerprint at the old endpoint:
+  `SHA256:etC2qN4P9phlmmEtoHi7hO3qfnmevz/u7bJv8Q1JwlM`;
+- stored fingerprint for old port 42017:
+  `SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA`.
 
-No `known_hosts` entry will be changed and host-key verification will not be
-bypassed. The user will verify the key from the authenticated Bitahub Web
-console; Codex was explicitly instructed not to connect in this turn.
+The authenticated Bitahub Web console has since verified that current instance
+`bitahub-a20633967503994880812290` uses the stored `+lMy...` ED25519 key and
+that its worktree is clean at `4a7852e`. The current external endpoint is
+`xj-member.bitahub.com:42156`; its exact public key is not yet installed for
+that host/port tuple. The `etC2...` key must not be accepted for the current
+instance. Host-key verification will not be bypassed, and Codex did not connect
+to Bitahub in this turn.
 
 ## Download request DATA-04: MECAT 00A test
 
