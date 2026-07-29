@@ -1,6 +1,6 @@
 # Omni-Embed-Audio 复现状态
 
-最后更新：2026-07-28（Asia/Shanghai）
+最后更新：2026-07-29（Asia/Shanghai）
 
 状态值仅使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、`COMPLETED`、`FAILED`、`BLOCKED`。
 
@@ -9,7 +9,7 @@
 | 0 项目审计 | 完整阅读论文正文/附录/表/图/脚注 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 固定 inventory |
 | 0 项目审计 | 审计 README、依赖、训练/评测、数据、UIQ、HN、指标 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认审计结论 |
 | 0 项目审计 | 31 条实验/图/派生分析 inventory | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认复现边界 |
-| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | 本提交 | 提交内 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`；910 个论文指标聚合为 374 个可审计单元；FIG-02 方法/张量契约完成；扩展实验明确排除 | 远程共享模型/数据/logs/raw 尚未重新只读核验；Bitahub SSH 主机指纹变化且当前无可用认证 | 用户确认新 ED25519 指纹并提供可用 SSH 认证后，先只读复核远程，再执行 Nemo3B-Cl/Clotho T2T CPU finalizer |
+| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | `49b61a1` | 提交内 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`；910 个论文指标聚合为 374 个可审计单元；FIG-02 方法/张量契约完成；扩展实验明确排除 | 远程共享模型/数据/logs/raw 尚未重新只读核验；Bitahub SSH 主机指纹变化 | 用户从 Bitahub Web 控制台运行只读指纹脚本并报告结果；本轮按用户指示不连接 Bitahub |
 | 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `48d7a50` | 本地与 fork 分支均存在 | 无 | 后续提交仅推送该分支 |
 | 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
 | 0 编排 | 统一复现入口与 CPU/GPU 阶段门禁 | COMPLETED | `d13b115` | 公共入口、精确阶段注册表、默认只规划/显式执行、长任务确认和干净 worktree 门禁已实现；baseline 计划已展开为 vanilla CPU 模型锁 → A100 smoke → A100 full → CPU 四协议 metrics 与独立 CLAP blocker；全量 227 项测试通过；尚未在远程执行这些新阶段 | 无；入口完成不代表任何 blocked 实验已解锁或产生复现值 | 仅在固定资源与证据满足后更新叶子阶段状态；当前仍只等待 DATA-04 |
@@ -26,7 +26,7 @@
 | 2 官方权重 | Nemo3B-Cl 正式生成器锁绑定 5/25 GPU smoke | COMPLETED | `1b23c50` | RTX 4090 run=`oea_nemo3b_clotho_lock_bound_smoke_seed42_20260727_092654`：strict-offline、wrapper/attempt=`0/0`、5×512/25×512、544 LoRA、pending=0；allocated/reserved=9.14/9.49 GiB；五个工件 SHA256 已固定 | 两条 Transformers 兼容性警告为非致命但需在正式 Recall 对照前保留审计；不得为消除警告修改锁定 snapshot | 同一 GPU、lock 和协议执行全量 Clotho embedding，随后 CPU 计算 Table 2 T2A |
 | 2 官方权重 | Nemo3B-Cl 全量 Clotho embedding | COMPLETED | `4d2341d` | RTX 4090 run=`oea_nemo3b_clotho_embeddings_seed42_20260727_094554`：strict-offline、wrapper/attempt=`0/0`、1,045 audio/5,225 caption、512 维、pending=0；allocated/reserved=9.39/10.48 GiB；五个工件 SHA256 已固定 | 无；论文 `passage:` 与公开代码 audio-only no-prefix 冲突继续显式保留 | GPU 可释放；CPU 双协议 T2A 套件分别对照论文值 |
 | 2 官方权重 | Nemo3B-Cl/Clotho Table 2 T2A 双协议 CPU 套件 | COMPLETED | `20533b1` | suite=`oea_nemo3b_clotho_t2a_suite_seed42_20260727_125803`，suite/attempt/run=`0/0/0`、stderr 为空；all-caption R@1/5/10=`21.7225/47.1196/60.4402`，seed0=`21.6268/46.7943/59.8086`；suite/CSV SHA256 已固定 | `[MISSING]` 论文 caption 选择；两个预声明 `[CODE]` 协议均 close，严格论文协议继续 blocked，未按接近度择优 | Phase 1 正确性检查完成；转入 ASRUR Phase 2 FiQA 一级召回准备 |
-| 2 官方权重 | Nemo3B-Cl/Clotho Table 3 T2T 与 Tables 12–15 正向 UIQ 完成器 | IN_PROGRESS | 本提交 | 已固定同构 T2A/T2T 四协议、Nemo UIQ embedding/suite 配置、模型锁、query/base-config SHA256；T2T 与 UIQ 均有 tmux-only 前台入口、同屏 tee、阶段/整体 elapsed、吞吐、双 ETA、最终摘要和保留交互 shell；UIQ 生成器另每 25 query 更新进度 | 远程完整 embedding 路径尚未重新只读核验；T2T 等待 SSH 后 CPU 执行；UIQ GPU 尚未获本轮批准 | 先用现有 embedding 跑 CPU T2T；另行批准 1×RTX 4090 后在 tmux 中运行 4,180-query UIQ embedding，再 CPU finalize |
+| 2 官方权重 | Nemo3B-Cl/Clotho Table 3 T2T 与 Tables 12–15 正向 UIQ 完成器 | IN_PROGRESS | `49b61a1`；批准记录见 `results/audits/takeover_approvals_20260729.json` | 已固定同构 T2A/T2T 四协议、Nemo UIQ embedding/suite 配置、模型锁、query/base-config SHA256；T2T 与 UIQ 均有 tmux-only 前台入口；`[USER-APPROVED 2026-07-29]` 1×RTX 4090 UIQ 任务已批准但未启动 | 远程完整 embedding 路径尚未重新只读核验；用户要求本轮不连接 Bitahub | 用户完成服务器端指纹核验后，先只读审计；随后执行 CPU T2T，并在 tmux 中启动已批准的 4,180-query UIQ 任务 |
 | 2 官方权重 | Nemo3B-Cl/Clotho A2T 方向 CPU 套件 | COMPLETED | `7cfbfab` | suite=`oea_nemo3b_clotho_a2t_suite_seed42_20260727_161133`；attempt=`0`、stderr 为空；1,045 audio→5,225 captions；R@1/5/10=`26.8900/51.3876/65.2632`；suite/CSV SHA256 已固定 | 无；该结果是主实验前置方向检查，不是论文报告值 | OEA-B2 完成；进入 SQuTR-FiQA frozen-index 方向 |
 | 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | IN_PROGRESS | `48c9b3c` | 已知 base 完整、AC 曾保留 partial、Cl 未有开始证据；最近检查的主容器无活动下载进程 | CAS 链路不稳定；跨实例状态未确认 | 后续单独核对全部目录与 manifest，再断点续传 |
 | 2 官方权重 | MODEL-03/04 只读完整性审计器 | COMPLETED | `f4309a7` | 远程尚未运行；本地实现及 105 项完整测试通过 | 无；工具完成不代表六个 asset 已完成 | DATA-04 保持为唯一用户步骤；随后在 CPU 侧运行审计并按 asset 决定续传 |
@@ -83,16 +83,16 @@
 | 2 UIQ | Qwen3B-AC/Clotho 正向 UIQ 四协议 CPU 套件 | COMPLETED | `c44a7d5` | CPU suite `...positive_uiq_suite_seed42_20260720_011600`：wrapper 与四协议共五个 exit 全为 0、100 MB；Question=`21.5311/44.4976/59.5215`、Imperative=`22.4880/46.2201/59.1388`、Paraphrase=`20.9569/46.7943/60.0957`、Keyphrase=`24.3062/49.6651/61.7225`；suite/CSV SHA256 已固定 | 无；公开代码音频候选无论文所述 `passage:` 前缀，因此标为 `[CODE] close` 而非严格论文协议 | 将 12 个 R@k 写入统一汇总；大型排名保留远程路径与哈希 |
 | 2 Negative | Tables 4/17 否定查询 | BLOCKED | N/A | 未开始 | 发布文件无 HN audio ID | 请求作者 pairing 或审计式重建 |
 | 3 数据 | WavCaps duration + leakage blocklists | IN_PROGRESS | `3c5b1e9` | 本地两次全量 metadata pass 已完成；精确复现 173 个 AudioCaps 与 638 个 Clotho 文件名重叠 | 论文 `<=31s` 与公开元数据计数冲突；精确 filtered manifest、Clotho 消歧和论文 blocklist 未发布 | 远程执行 DATA-08/09 复算；训练前再准备音频 |
-| 3 数据 | DATA-08：固定 WavCaps metadata 下载 | TODO | `3c5b1e9` | 8 个固定文件、176,863,095 bytes、逐文件 SHA256/LFS ID 已提交并通过本地真实下载 | 当前按步骤先完成 DATA-04/05/06/07 | 后续在 CPU 服务器下载，不需要 GPU 或 819 GB 音频 |
+| 3 数据 | DATA-08：固定 WavCaps metadata 下载 | IN_PROGRESS | `3c5b1e9`；批准记录见 `results/audits/takeover_approvals_20260729.json` | 8 个固定文件、176,863,095 bytes、逐文件 SHA256/LFS ID 已提交并通过本地真实下载；`[USER-APPROVED 2026-07-29]` 下载已批准但未启动 | 等待用户完成 Bitahub host-key 核验和远程只读预检 | 在 CPU 服务器下载；不含 GPU 或 819 GB 音频 |
 | 3 数据 | DATA-09：WavCaps metadata/duration/leakage 审计 | TODO | `3c5b1e9` | 本地全量 403,050 条审计与确定性 hash 复核完成；89 项测试通过 | 等待远程 DATA-08；论文精确 post-blocklist 口径仍 `[MISSING]` | 远程生成 manifests/blocklists 并核对摘要 hash |
-| 3 数据 | DATA-06：AudioCaps 2.0 官方 metadata 下载 | TODO | `4ef4f29` | 固定 commit、MD5/SHA256/bytes 与 CPU 下载脚本已提交；本地真实下载闭环通过 | 当前优先等待 DATA-04，尚未安排远程运行 | DATA-04 后在 CPU 服务器下载约 6.9 MB metadata |
+| 3 数据 | DATA-06：AudioCaps 2.0 官方 metadata 下载 | IN_PROGRESS | `4ef4f29`；批准记录见 `results/audits/takeover_approvals_20260729.json` | 固定 commit、MD5/SHA256/bytes 与 CPU 下载脚本已提交；本地真实下载闭环通过；`[USER-APPROVED 2026-07-29]` 下载已批准但未启动 | 等待用户完成 Bitahub host-key 核验和远程只读预检 | DATA-04 后在 CPU 服务器下载约 6.9 MB metadata |
 | 3 数据 | DATA-07：AudioCaps 2.0 metadata/UIQ 全量校验 | TODO | `4ef4f29` | 本地真实全量验证通过：91,254 train、495 val、975 test、正/负 UIQ 精确对齐；82 项测试通过 | 远程尚未运行 | DATA-06 后生成远程 manifests 和统计证据 |
 | 3 数据 | AudioCaps v2 论文 91,256 train 口径 | BLOCKED | `4ef4f29` | 官方固定 CSV 与公共 loader 已审计；另有 `[CODE]` 91,254 和 `[INFERRED]` 修复 91,254 两套 manifest | `[MISSING]` 能产生 91,256 个有效样本的论文 manifest/loader；实际音频尚未提供 | 请求官方音频；训练前显式选择公开 loader 或修复口径，不冒充 exact |
 | 3 数据 | Clotho v2.1 evaluation 下载与 checksum | COMPLETED | `aff03e4` | DATA-01 首次下载及两次幂等复核完成；3 个 MD5 全部匹配 | 无；两次复核均为 `verified_existing`，未重复下载 | DATA-02 已完成安全解压、1,045 条 WAV/CSV/UIQ ID 校验 |
 | 3 数据 | DATA-02：Clotho evaluation 解压与完整性校验 | COMPLETED | `7a8fb50` | `logs/data02_clotho_validation_20260717_233100`：1,045 WAV 全部解码；5 captions/clip；四类正 UIQ ID 精确对齐；manifest MD5 `253c1b275e3618fa94750150d7962da5` | 无；negative 仅验证了 `[INFERRED]` `.wav` 后缀映射，不含官方 target/HN 配对 | 保留小型审计摘要，待 CPU 数据准备完成后进入 GPU embedding |
 | 3 数据 | DATA-03：Clotho development/validation 下载与 checksum | IN_PROGRESS | `f04128d` | 四个 CSV 已本地逐文件验证；最后已知远程下载目录 `logs/data03_clotho_trainval_download_20260716_170930`，当前主容器无下载进程 | 两个音频归档的远程完成状态尚未重新确认；六个文件精确总计 5,805,043,699 bytes | 不干扰当前 DATA-04；后续单独核对六个文件的 size/MD5/SHA256 |
 | 3 数据 | DATA-10：Clotho development/validation 安全解压与全量校验 | TODO | `f04128d` | 本地四 CSV 全量审计和 97 项测试通过；远程 4,884 WAV 尚未解压/解码 | 等待 DATA-03 两个归档完成；论文 early-stopping split `[MISSING]` | DATA-04/05 后再安排 CPU 远程执行；公开代码与 clean-validation 路线分栏 |
-| 3 数据 | DATA-04：固定并下载 MECAT `00A/test` | WAITING_USER | `87dbe32` | 独立工作副本 `/home/jg525/Omni-Embed-Audio-data04` 已创建且干净；下载命令尚未运行 | 需要远程 CPU 执行约 173 MB 下载 | 拉取最新分支后运行下载并核对 manifest/size/SHA256 |
+| 3 数据 | DATA-04：固定并下载 MECAT `00A/test` | IN_PROGRESS | `87dbe32`；批准记录见 `results/audits/takeover_approvals_20260729.json` | 独立工作副本 `/home/jg525/Omni-Embed-Audio-data04` 已创建；`[USER-APPROVED 2026-07-29]` 约 173 MB 下载已批准但未启动 | 等待用户完成 Bitahub host-key 核验和远程工作树只读预检 | 拉取最新分支后运行下载并核对 manifest/size/SHA256 |
 | 3 数据 | DATA-05：MECAT 848 条安全解压/解码/UIQ ID 校验 | BLOCKED | `87dbe32` | 尚未运行；安全解压、FLAC 完整解码、六字段保留、UIQ 集合校验已通过合成测试 | 等待 DATA-04 | DATA-04 完成后在同一 CPU 服务器执行 |
 | 3 数据 | MECAT 论文 847 条子集与检索 caption 口径 | BLOCKED | `87dbe32` | 官方 `00A/test` 与发布正向 UIQ 均为 848；审计文档已完成 | `[MISSING]` 被排除 ID、过滤规则、caption 字段/组合均未公开 | 不擅自删样本；先报告 848 条公开口径，继续请求作者证据 |
 | 3 数据 | DATA-11：MECAT–WavCaps 来源视频候选审计 | IN_PROGRESS | `e5bf4db` | 本地发布 UIQ 848 IDs × 固定 AudioSet_SL 108,317 rows 已完成：807 唯一来源视频、4 个同源视频候选；109 项测试通过 | DATA-05 archive manifest 与 DATA-08 远程 metadata 尚未复算；论文音频/embedding 阈值 `[MISSING]` | DATA-05/08 后在 CPU 侧运行 canonical join；不把来源视频候选写成音频重复或 blocklist |

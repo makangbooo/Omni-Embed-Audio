@@ -48,6 +48,13 @@ Bitahub SSH host key changed and no working authentication is available, so no
 remote state is promoted from historical compact audits. No download, GPU run,
 training, deletion, overwrite, or long CPU task was started.
 
+On 2026-07-29 the user approved DATA-04, DATA-06, DATA-08, and the
+Nemo3B-Cl/Clotho positive-UIQ GPU task. The approvals and their unstarted state
+are recorded in `results/audits/takeover_approvals_20260729.json`. The user
+requested an independent Bitahub-side host-key check and no client connection
+in that turn; the read-only procedure is fixed in
+`docs/ssh_host_key_verification.md`.
+
 ## Excluded SpeechXBT-OEA extension evidence
 
 | ID | Evaluation | Source | Status | Evidence |

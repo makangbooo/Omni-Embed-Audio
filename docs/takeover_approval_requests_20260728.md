@@ -3,10 +3,21 @@
 This file covers only original OEA paper experiments. Nothing listed here has
 been downloaded or executed in this takeover.
 
+## Approval receipt (2026-07-29)
+
+The user explicitly approved `DATA-04`, `DATA-06`, `DATA-08`, and the
+Nemo3B-Cl Clotho positive-UIQ GPU request below. Approval is recorded in
+`results/audits/takeover_approvals_20260729.json`; all four items remain
+unstarted. Per the same instruction, Codex did not connect to Bitahub. Host-key
+verification must first be performed independently with
+`docs/ssh_host_key_verification.md` and
+`scripts/print_ssh_host_fingerprints.sh`.
+
 ## Remote access prerequisite
 
-The GitHub mirror is clean and synchronized at
-`repro/oea-full@4a7852e0d35e544ea87fb1d5a7eef4f44493714d`. Read-only audit of
+The GitHub mirror was clean and synchronized at
+`repro/oea-full@49b61a1754cc594c7c36e671c8cb321d7c8d6e94` before this approval
+receipt was recorded. Read-only audit of
 `/home/jg525/Omni-Embed-Audio`, `/home/jg525/models/oea`,
 `/home/jg525/datasets/oea`, `/home/jg525/experiment_cache`, logs, raw results,
 and tmux is blocked by SSH authentication. Alias `bitahub_JG` also reports a
@@ -16,8 +27,8 @@ changed ED25519 host key:
 - stored for port 42017: `SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA`
 
 No `known_hosts` entry will be changed and host-key verification will not be
-bypassed without explicit confirmation of the new fingerprint. A working SSH
-authentication method is also required; no usable local agent/key is present.
+bypassed. The user will verify the key from the authenticated Bitahub Web
+console; Codex was explicitly instructed not to connect in this turn.
 
 ## Download request DATA-04: MECAT 00A test
 

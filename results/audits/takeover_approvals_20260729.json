@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "status": "recorded",
+  "recorded_date": "2026-07-29",
+  "scope": "Original OEA paper reproduction only",
+  "source": "Explicit user response in the Codex task",
+  "approvals": [
+    {
+      "id": "DATA-04",
+      "item": "MECAT 00A test public release",
+      "approved": true,
+      "started": false
+    },
+    {
+      "id": "DATA-06",
+      "item": "AudioCaps 2.0 metadata only",
+      "approved": true,
+      "started": false
+    },
+    {
+      "id": "DATA-08",
+      "item": "WavCaps metadata only; no audio archives",
+      "approved": true,
+      "started": false
+    },
+    {
+      "id": "EXP-12-15-NEMO3B-CL-CLOTHO-UIQ",
+      "item": "Nemo3B-Cl Clotho positive UIQ GPU generation and CPU finalization",
+      "approved": true,
+      "started": false
+    }
+  ],
+  "remote_access": {
+    "connect_in_this_turn": false,
+    "reason": "User requested instructions for independent Bitahub-side verification and explicitly said no Bitahub connection is needed.",
+    "client_observed_ed25519_fingerprint": "SHA256:etC2qN4P9phlmmEtoHi7hO3qfnmevz/u7bJv8Q1JwlM",
+    "verification_status": "pending_user_out_of_band_verification"
+  },
+  "execution_boundary": "Approval does not assert download or experiment completion; every approved item remains unstarted until a verified execution environment is available."
+}
