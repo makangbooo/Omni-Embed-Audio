@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_model_resource_audit_compact_evidence",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "User-returned compact evidence includes report identity, exact per-asset counts and bytes, mismatch counters, report size/SHA256, all available exit codes, and the retained tmux final status block. The full per-file report remains at the recorded remote path."
+  },
+  "run": {
+    "run_id": "official_model_resource_audit_oea_nemo3b_20260729_163518",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/logs/official_model_resource_audit_oea_nemo3b_20260729_163518",
+    "tmux_log_path": "/home/jg525/Omni-Embed-Audio/logs/tmux_official_model_resource_audit_oea_nemo3b_20260729_163518",
+    "metrics_path": "/home/jg525/Omni-Embed-Audio/logs/official_model_resource_audit_oea_nemo3b_20260729_163518/model_resource_audit.json",
+    "metrics_size_bytes": 20874,
+    "metrics_sha256": "2985b739877ad5c5f2cad07f0bddc509b6b3e773ec5dfc1a91f5d6fee888f4f5",
+    "git_commit": "708cf9ce5d4babf9533d4f43af94d0746cfabbc4",
+    "git_status_short": "",
+    "started_at": "2026-07-29T08:35:33.339221+00:00",
+    "finished_at": "2026-07-29T08:36:05.229231+00:00",
+    "tmux_start_time": "2026-07-29T16:35:18+08:00",
+    "tmux_end_time": "2026-07-29T16:36:10+08:00",
+    "tmux_elapsed": "00:00:52",
+    "final_run_rc": 0,
+    "audit_exit_code": 0,
+    "wrapper_exit_code": 0,
+    "completion_status": "complete",
+    "audit_status": "complete",
+    "failed_stage": null,
+    "error_summary": null,
+    "resource": "CPU",
+    "gpu_used": false,
+    "downloads_performed": false,
+    "model_files_modified": false
+  },
+  "scope": {
+    "variant_id": "oea_nemo3b",
+    "paper_model": "OEA-Nemo3B",
+    "training_variant": "AudioCaps",
+    "checkpoint_registry_sha256": "2e3a9baf9adf725c4e247981433721759c4dbb8d4fbd8612a36f6c6cfeb8526a"
+  },
+  "summary": {
+    "complete": 2,
+    "incomplete": 0,
+    "failed": 0,
+    "expected_file_count": 25,
+    "verified_file_count": 25,
+    "expected_bytes": 18889955098,
+    "verified_bytes": 18889955098,
+    "missing_files": 0,
+    "extra_files": 0,
+    "incomplete_files": 0,
+    "errors": 0,
+    "size_mismatches": 0,
+    "lfs_sha256_mismatches": 0,
+    "git_blob_mismatches": 0
+  },
+  "assets": [
+    {
+      "name": "omni_embed_nemotron_3b",
+      "repo_id": "nvidia/omni-embed-nemotron-3b",
+      "revision": "865db1bb57e369a85357cf114cbd6b3c5322d19d",
+      "status": "complete",
+      "expected_file_count": 22,
+      "verified_file_count": 22,
+      "expected_bytes": 9423120401,
+      "verified_bytes": 9423120401,
+      "all_mismatch_and_error_counts": 0
+    },
+    {
+      "name": "oea_nemo3b_ac",
+      "repo_id": "JudeJiwoo/OEA-Nemo3B-AC",
+      "revision": "8ed66aa77bc6f2001b807b5d2bd3e60503d89535",
+      "status": "complete",
+      "expected_file_count": 3,
+      "verified_file_count": 3,
+      "expected_bytes": 9466834697,
+      "verified_bytes": 9466834697,
+      "all_mismatch_and_error_counts": 0,
+      "source_checkpoint": {
+        "path": "step_400_best.pt",
+        "size_bytes": 9466826153,
+        "sha256": "55579dfbd4f6621b5d842c5e731d6a1d37dbfd04b26b1c55bf8cdea980e67d25",
+        "matches_remote_lfs_sha256": true
+      }
+    }
+  ],
+  "claim_boundary": {
+    "source_label": "OBSERVED",
+    "supported_claim": "The pinned OEA-Nemo3B base snapshot and AudioCaps checkpoint snapshot are complete and content/provenance-identical to their immutable remote revisions.",
+    "not_yet_proven": [
+      "checkpoint internal LoRA and projection-head structure",
+      "inference-only extraction identity",
+      "portable model lock identity",
+      "checkpoint loadability on GPU",
+      "paper retrieval metrics"
+    ],
+    "next_gate": "Run weights-only structure inspection, non-overwriting inference-only extraction, and portable model-lock generation before requesting the 5-audio/25-text GPU smoke."
+  }
+}
