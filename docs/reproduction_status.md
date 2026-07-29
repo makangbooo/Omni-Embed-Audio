@@ -41,6 +41,7 @@
 | 2 官方权重 | MODEL-02：OEA-Qwen3B-AC checkpoint | COMPLETED | `18e4c3b` | 固定 revision 的 3 个文件、9,466,844,378 bytes 全部通过逐文件内容审计；`step_350.pt` 提取为 59,069,203-byte inference-only 权重，SHA256 `b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101` | 无；原始 checkpoint 与派生权重均未提交到 Git | GPU 服务器拉取已提交的 5,262-byte 模型锁后运行独立锁绑定 smoke |
 | 2 官方权重 | OEA 模型存储迁移与旧缓存清理 | COMPLETED | `aac088d` | run=`model_cache_migration_v3_20260726_214834`；exit=`0`；254 files 与前后字节不变量一致；旧 `/home/jg525/model_cache` 已删除 | 无 | 所有运行脚本默认路径已切换到 `/home/jg525/models/oea` |
 | 2 官方权重 | MODEL-03：Nemotron-3B base + OEA-Nemo3B AC/Cl | COMPLETED | `4d2341d` | attempt 4 CPU gate、5/25 GPU smoke 与 +Cl 全量 Clotho embedding 均完成；派生权重 59,072,047 B、SHA256 `2a5bee90...80c4`；canonical lock SHA256 `fd09e4d2...c8c2` | OEA-Nemo3B-AC 仍仅有迁移证据，但当前 ASRUR 主实验固定使用 +Cl，不阻塞 G1 | 在 CPU 侧计算 +Cl Table 2 T2A |
+| 2 官方权重 | 官方源码优先：OEA-Nemo3B-AC 5-clip example smoke | WAITING_USER | `b4e2721` | 已核对 upstream `b261ad0`；官方 example 的 LoRA、双 projection head 与编码逻辑保持不变；仅增加本地 base/checkpoint 参数并将大型训练 checkpoint 先加载到 CPU；定向测试与编译检查通过 | 需要单独批准 1×RTX 4090 GPU smoke；尚未产生该模型的运行结果 | 批准后直接运行 `examples/encode_example.py`，通过后转官方 OEA precomputer 完成 Clotho 全量矩阵 |
 | 2 官方权重 | Nemo3B-Cl 正式生成器锁绑定 5/25 GPU smoke | COMPLETED | `1b23c50` | RTX 4090 run=`oea_nemo3b_clotho_lock_bound_smoke_seed42_20260727_092654`：strict-offline、wrapper/attempt=`0/0`、5×512/25×512、544 LoRA、pending=0；allocated/reserved=9.14/9.49 GiB；五个工件 SHA256 已固定 | 两条 Transformers 兼容性警告为非致命但需在正式 Recall 对照前保留审计；不得为消除警告修改锁定 snapshot | 同一 GPU、lock 和协议执行全量 Clotho embedding，随后 CPU 计算 Table 2 T2A |
 | 2 官方权重 | Nemo3B-Cl 全量 Clotho embedding | COMPLETED | `4d2341d` | RTX 4090 run=`oea_nemo3b_clotho_embeddings_seed42_20260727_094554`：strict-offline、wrapper/attempt=`0/0`、1,045 audio/5,225 caption、512 维、pending=0；allocated/reserved=9.39/10.48 GiB；五个工件 SHA256 已固定 | 无；论文 `passage:` 与公开代码 audio-only no-prefix 冲突继续显式保留 | GPU 可释放；CPU 双协议 T2A 套件分别对照论文值 |
 | 2 官方权重 | Nemo3B-Cl/Clotho Table 2 T2A 双协议 CPU 套件 | COMPLETED | `20533b1` | suite=`oea_nemo3b_clotho_t2a_suite_seed42_20260727_125803`，suite/attempt/run=`0/0/0`、stderr 为空；all-caption R@1/5/10=`21.7225/47.1196/60.4402`，seed0=`21.6268/46.7943/59.8086`；suite/CSV SHA256 已固定 | `[MISSING]` 论文 caption 选择；两个预声明 `[CODE]` 协议均 close，严格论文协议继续 blocked，未按接近度择优 | Phase 1 正确性检查完成；转入 ASRUR Phase 2 FiQA 一级召回准备 |
@@ -129,8 +130,8 @@
 
 ## 当前焦点
 
-- 当前阶段：只推进 OEA 论文原实验复现；SpeechXBT、FiQA、NQ、SQuTR、ASR reranker 与 A2T 仅保留为历史记录，不计入本轮完成度，也不继续启动。训练在官方 checkpoint 评测矩阵完成前继续暂停。
+- 当前阶段：官方源码优先推进 OEA 论文原实验复现；先运行 upstream example/precomputer/evaluator，保存其原始输出或错误，仅在实际阻塞时做最小兼容补丁。SpeechXBT、FiQA、NQ、SQuTR、ASR reranker 与 A2T 仅保留为历史记录，不计入本轮完成度，也不继续启动。训练在官方 checkpoint 评测矩阵完成前继续暂停。
 - 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
 - 最近完成：OEA-Nemo3B-Cl/Clotho Table 3 T2T 与 Tables 12–15 四类正向 UIQ 已闭环；UIQ 的 4,180 条查询全部生成，四协议均 complete，12 个 R@k 与论文最大绝对差均小于 0.29 pp。
 - 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；CLAP/checkpoint 资源与若干论文协议细节仍未固定。
-- 下一步：优先盘点已存在的 OEA-Nemo3B-AC、Qwen7B 与 vanilla backbone 资源，选择无需下载且已有数据的下一项官方 checkpoint 评测；任何新 GPU 任务须按论文实验 ID 单独申请。
+- 下一步：不再增加模型锁或资源审计前置步骤；在已有完整 OEA-Nemo3B-AC/base 与 Clotho 上先运行官方 `examples/encode_example.py` 5-clip GPU smoke，再直接使用官方 `OEAEmbeddingPrecomputer` 执行 Clotho 全量 T2A/T2T/正向 UIQ。任何新 GPU 任务仍按论文实验 ID 单独申请。
