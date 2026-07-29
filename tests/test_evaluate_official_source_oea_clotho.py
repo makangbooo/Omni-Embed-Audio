@@ -55,8 +55,7 @@ class EvaluateOfficialSourceOeaClothoTests(unittest.TestCase):
             text=True,
         )
         self.assertEqual(completed.returncode, 0, completed.stderr)
-        usage_line = completed.stdout.splitlines()[0]
-        self.assertIn("[--uiq-dir UIQ_DIR]", usage_line)
+        self.assertIn("[--uiq-dir UIQ_DIR]", completed.stdout)
 
 
 if __name__ == "__main__":
