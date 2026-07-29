@@ -275,17 +275,17 @@ class BuildReproductionSummaryTests(unittest.TestCase):
         )
         with DEFAULT_OUTPUT.open(encoding="utf-8", newline="") as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(len(rows), 95)
+        self.assertEqual(len(rows), 119)
         self.assertEqual({row["status"] for row in rows}, {"blocked", "close"})
         blocked = [row for row in rows if row["status"] == "blocked"]
         close = [row for row in rows if row["status"] == "close"]
         self.assertEqual(len(blocked), 23)
-        self.assertEqual(len(close), 72)
+        self.assertEqual(len(close), 96)
         self.assertTrue(all(row["reproduced_value"] == "" for row in blocked))
         self.assertTrue(all(row["reproduced_value"] != "" for row in close))
         self.assertEqual(result["paper_metric_count"], 910)
-        self.assertEqual(result["unobserved_paper_metric_count"], 848)
-        self.assertEqual(result["status_counts"], {"blocked": 23, "close": 72})
+        self.assertEqual(result["unobserved_paper_metric_count"], 830)
+        self.assertEqual(result["status_counts"], {"blocked": 23, "close": 96})
 
         nemo_t2t = [
             row
@@ -302,6 +302,16 @@ class BuildReproductionSummaryTests(unittest.TestCase):
         ]
         self.assertEqual(len(nemo_uiq), 12)
         self.assertEqual({row["status"] for row in nemo_uiq}, {"close"})
+
+        nemo_ac = [
+            row
+            for row in rows
+            if row["experiment"].startswith(
+                "official_source_oea_nemo3b_ac_clotho_"
+            )
+        ]
+        self.assertEqual(len(nemo_ac), 24)
+        self.assertEqual({row["status"] for row in nemo_ac}, {"close"})
 
 
 if __name__ == "__main__":

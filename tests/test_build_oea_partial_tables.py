@@ -15,12 +15,12 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
         self.assertEqual(
             Counter(group["paper_table"] for group in self.groups),
             {
-                "Table 2": 6,
-                "Table 3": 6,
-                "Table 12": 3,
-                "Table 13": 3,
-                "Table 14": 3,
-                "Table 15": 3,
+                "Table 2": 8,
+                "Table 3": 8,
+                "Table 12": 4,
+                "Table 13": 4,
+                "Table 14": 4,
+                "Table 15": 4,
             },
         )
 
@@ -71,6 +71,26 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
         self.assertEqual(
             {group["protocol"] for group in matches},
             {"[CODE] released positive UIQ"},
+        )
+
+    def test_nemo3b_ac_official_source_cells_are_present(self) -> None:
+        matches = [
+            group
+            for group in self.groups
+            if group["model"] == "OEA-Nemo3B"
+            and group["dataset"] == "Clotho"
+        ]
+        self.assertEqual(len(matches), 8)
+        self.assertEqual(
+            Counter(group["paper_table"] for group in matches),
+            {
+                "Table 2": 2,
+                "Table 3": 2,
+                "Table 12": 1,
+                "Table 13": 1,
+                "Table 14": 1,
+                "Table 15": 1,
+            },
         )
 
     def test_no_extension_tasks_are_present(self) -> None:

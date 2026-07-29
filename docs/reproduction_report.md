@@ -26,12 +26,29 @@ experiment-model-dataset-task cells in
 separate from `REPRODUCED_CLOSE`, `CONTROLLED_ONLY`, `PARTIAL`, `TODO`, and
 `BLOCKED`; the generation audit records all input/output hashes. The compact
 paper-only partial Tables 2/3/12-15 are in
-`results/tables/oea_partial_tables.md`. They contain 24 predeclared protocol
+`results/tables/oea_partial_tables.md`. They contain 32 predeclared protocol
 groups and do not select a protocol after comparing it with the paper value.
 
-Committed value evidence currently covers three Clotho T2A cells, three Clotho
-T2T cells, and twelve Clotho positive-UIQ cells. The newest Clotho T2T cell,
-Nemo3B(+Cl), completed at run commit `23bf6ee`: the `[CODE]` seed-0 one-caption
+Committed value evidence currently covers four Clotho T2A cells, four Clotho
+T2T cells, and sixteen Clotho positive-UIQ cells. OEA-Nemo3B-AC is the newest
+complete paper cell: its official-source GPU precomputation and CPU finalizer
+completed at run commits `effe67d` and `1f991ab`. The finalizer returned
+`FINAL_RUN_RC=0` in 7 seconds and fixed eight protocols in
+`results/audits/oea_nemo3b_ac_clotho_official_source_eval_20260729.json`.
+The `[CODE]` all-caption/seed-0 T2A results are
+`18.2775/41.3206/54.2010` and `17.9904/41.6268/55.7895`; the `[CODE]` seed-0
+and `[INFERRED]` all-caption T2T results are `63.3493/74.8325/80.0957` and
+`64.6316/74.9856/79.2536`. Released positive UIQ gives
+Question=`18.9474/43.6364/56.3636`, Imperative=`19.0431/43.3493/56.8421`,
+Paraphrase=`20.7656/44.3062/56.6507`, and
+Keyphrase/tagging=`21.5311/45.8373/60.1914`. The failed non-empty-output UIQ
+attempt and failed import-path metric attempt remain recorded; neither was
+deleted or rewritten. Baseline NPZ SHA256 identities were not present in the
+returned terminal excerpt and remain explicitly missing, while the successful
+suite JSON SHA256 is fixed.
+
+The earlier Nemo3B(+Cl) Clotho T2T cell completed at run commit `23bf6ee`:
+the `[CODE]` seed-0 one-caption
 protocol gives R@1/5/10=`62.9665/75.9809/80.8612`, while the predeclared
 `[INFERRED]` all-caption sensitivity gives `63.6938/75.2344/80.0191`, against
 paper values `63.77/75.29/80.11`. Both remain separate; the sensitivity result

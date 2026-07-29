@@ -6,6 +6,8 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| OEA-Nemo3B | Clotho | [CODE] all-caption | 19.04 / 40.57 / 54.24 | 18.2775 / 41.3206 / 54.2010 | 0.762488 |
+| OEA-Nemo3B | Clotho | [CODE] seed-0 one-caption | 19.04 / 40.57 / 54.24 | 17.9904 / 41.6268 / 55.7895 | 1.549474 |
 | OEA-Nemo3B (+Cl) | Clotho | [CODE] all-caption | 21.57 / 47.16 / 60.36 | 21.7225 / 47.1196 / 60.4402 | 0.152488 |
 | OEA-Nemo3B (+Cl) | Clotho | [CODE] seed-0 one-caption | 21.57 / 47.16 / 60.36 | 21.6268 / 46.7943 / 59.8086 | 0.551388 |
 | OEA-Qwen3B | Clotho | [CODE] all-caption | 19.18 / 42.05 / 55.85 | 19.0048 / 41.9522 / 55.9617 | 0.175215 |
@@ -17,6 +19,8 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| OEA-Nemo3B | Clotho | [INFERRED] all-caption sensitivity | 62.79 / 74.12 / 78.91 | 64.6316 / 74.9856 / 79.2536 | 1.841579 |
+| OEA-Nemo3B | Clotho | [CODE] seed-0 one-caption/self-exclusion | 62.79 / 74.12 / 78.91 | 63.3493 / 74.8325 / 80.0957 | 1.185694 |
 | OEA-Nemo3B (+Cl) | Clotho | [INFERRED] all-caption sensitivity | 63.77 / 75.29 / 80.11 | 63.6938 / 75.2344 / 80.0191 | 0.090861 |
 | OEA-Nemo3B (+Cl) | Clotho | [CODE] seed-0 one-caption/self-exclusion | 63.77 / 75.29 / 80.11 | 62.9665 / 75.9809 / 80.8612 | 0.803493 |
 | OEA-Qwen3B | Clotho | [INFERRED] all-caption sensitivity | 62.81 / 73.76 / 78.22 | 62.7943 / 73.8756 / 78.3158 | 0.115598 |
@@ -28,6 +32,7 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| OEA-Nemo3B | Clotho | [CODE] released positive UIQ | 19.81 / 43.54 / 57.61 | 18.9474 / 43.6364 / 56.3636 | 1.246364 |
 | OEA-Nemo3B (+Cl) | Clotho | [CODE] released positive UIQ | 23.44 / 50.62 / 63.73 | 23.6364 / 50.8134 / 63.9234 | 0.196364 |
 | OEA-Qwen3B | Clotho | [CODE] released positive UIQ | 21.34 / 44.11 / 59.71 | 21.5311 / 44.4976 / 59.5215 | 0.387608 |
 | OEA-Qwen3B (+Cl) | Clotho | [CODE] released positive UIQ | 25.74 / 54.26 / 66.79 | 25.8373 / 54.0670 / 66.6029 | 0.193014 |
@@ -36,6 +41,7 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| OEA-Nemo3B | Clotho | [CODE] released positive UIQ | 18.85 / 43.25 / 57.03 | 19.0431 / 43.3493 / 56.8421 | 0.193062 |
 | OEA-Nemo3B (+Cl) | Clotho | [CODE] released positive UIQ | 24.02 / 51.29 / 64.69 | 24.0191 / 51.1005 / 64.9761 | 0.286077 |
 | OEA-Qwen3B | Clotho | [CODE] released positive UIQ | 22.30 / 46.12 / 59.33 | 22.4880 / 46.2201 / 59.1388 | 0.191244 |
 | OEA-Qwen3B (+Cl) | Clotho | [CODE] released positive UIQ | 25.45 / 55.69 / 67.56 | 25.8373 / 55.6938 / 66.9856 | 0.574354 |
@@ -44,6 +50,7 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| OEA-Nemo3B | Clotho | [CODE] released positive UIQ | 20.96 / 44.50 / 57.22 | 20.7656 / 44.3062 / 56.6507 | 0.569282 |
 | OEA-Nemo3B (+Cl) | Clotho | [CODE] released positive UIQ | 23.83 / 50.14 / 64.50 | 23.5407 / 49.9522 / 64.4019 | 0.289330 |
 | OEA-Qwen3B | Clotho | [CODE] released positive UIQ | 21.24 / 46.79 / 60.19 | 20.9569 / 46.7943 / 60.0957 | 0.283062 |
 | OEA-Qwen3B (+Cl) | Clotho | [CODE] released positive UIQ | 27.56 / 55.50 / 70.81 | 26.9856 / 55.1196 / 70.2392 | 0.574354 |
@@ -52,6 +59,7 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| OEA-Nemo3B | Clotho | [CODE] released positive UIQ | 21.53 / 45.45 / 59.14 | 21.5311 / 45.8373 / 60.1914 | 1.051388 |
 | OEA-Nemo3B (+Cl) | Clotho | [CODE] released positive UIQ | 25.93 / 52.54 / 66.03 | 25.8373 / 52.6316 / 66.1244 | 0.094402 |
 | OEA-Qwen3B | Clotho | [CODE] released positive UIQ | 24.50 / 49.76 / 61.72 | 24.3062 / 49.6651 / 61.7225 | 0.193780 |
 | OEA-Qwen3B (+Cl) | Clotho | [CODE] released positive UIQ | 27.66 / 57.99 / 71.87 | 27.5598 / 58.0861 / 71.6746 | 0.195359 |

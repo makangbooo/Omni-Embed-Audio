@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_remote_run_compact_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The returned evidence contains the final suite status, clean Git identity, exit code, elapsed time, all eight protocol metric blocks, suite and log SHA256 values, plus identities for the successful UIQ embedding run. Large embeddings and rankings remain at the recorded remote paths."
+  },
+  "model": {
+    "paper_name": "OEA-Nemo3B",
+    "released_name": "OEA-Nemo3B-AC",
+    "checkpoint": "JudeJiwoo/OEA-Nemo3B-AC@8ed66aa77bc6f2001b807b5d2bd3e60503d89535/step_400_best.pt#sha256:55579dfbd4f6621b5d842c5e731d6a1d37dbfd04b26b1c55bf8cdea980e67d25"
+  },
+  "dataset": "Clotho v2.1 evaluation",
+  "official_source": {
+    "upstream_commit": "b261ad0743dbfac67cb6b20016fd951a366b3f35",
+    "source_files": [
+      "AudioRetrieval/models/omni_embed_adapter.py",
+      "AudioRetrieval/training/oea/train_omniembed_lora.py",
+      "AudioRetrieval/preprocessing/embeddings/oea.py",
+      "AudioRetrieval/preprocessing/embeddings/uiq_text.py",
+      "AudioRetrieval/evaluation/metrics.py"
+    ],
+    "compatibility_layer": "AudioRetrieval/evaluation/canonical.py",
+    "compatibility_reason": "The upstream unified evaluator neither loads the released OEA LoRA/projection heads nor implements T2T or released-UIQ canonical ID alignment."
+  },
+  "baseline_embeddings": {
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/official_source_oea_nemo3b_ac_5clip_20260729_213846/baseline",
+    "audio_count": 1045,
+    "caption_count": 5225,
+    "audio_file": "audio_embeddings.npz",
+    "caption_file": "caption_embeddings.npz",
+    "audio_elapsed": "approximately 5m38s",
+    "caption_elapsed": "approximately 15s",
+    "status": "complete",
+    "artifact_sha256": null,
+    "artifact_sha256_status": "MISSING_FROM_RETURNED_TERMINAL_OUTPUT",
+    "path_note": "The full baseline embeddings were written under the earlier smoke run directory. The returned output states that no original smoke artifacts were overwritten."
+  },
+  "uiq_attempts": [
+    {
+      "run_id": "official_source_oea_nemo3b_ac_clotho_uiq_20260729_223152",
+      "run_commit": "effe67d61806a60e1173b97ee068d9a83deb22e4",
+      "git_status_short": "",
+      "status": "failed",
+      "final_run_rc": 2,
+      "elapsed_seconds": 7,
+      "failed_stage": "official_uiq_embedding_cli",
+      "error_summary": "UIQ output directory was not empty because wrapper evidence files occupied the CLI output directory before the CLI started.",
+      "preserved": true
+    },
+    {
+      "run_id": "official_source_oea_nemo3b_ac_clotho_uiq_20260729_224240_attempt02",
+      "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/official_source_oea_nemo3b_ac_clotho_uiq_20260729_224240_attempt02",
+      "log_path": "/home/jg525/Omni-Embed-Audio/logs/official_source_oea_nemo3b_ac_clotho_uiq_20260729_224240_attempt02/combined.log",
+      "run_commit": "effe67d61806a60e1173b97ee068d9a83deb22e4",
+      "git_status_short": "",
+      "status": "complete",
+      "final_run_rc": 0,
+      "elapsed_seconds": 63,
+      "gpu_used": true,
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "query_count": 4180,
+      "query_count_per_type": 1045,
+      "embedding_dimension": 512,
+      "artifacts": {
+        "uiq_imperative_embeddings.npz": "266ec1c08af33e8b99f48ef2bf802ddf26e0d86d55ff41ddbd1a22f0941a69e9",
+        "uiq_paraphrase_embeddings.npz": "0eab93260ba9e876dc4d7db81da4c29012064115e722ddb9e92e0ba9ec203d36",
+        "uiq_question_embeddings.npz": "078da472937061d444b11cc8d5ffddecf592d211b15a55d85eb6cd37e3557da0",
+        "uiq_tagging_embeddings.npz": "7f971273e588f25f199b2689805d6e2a35bcc8587d9f2f37e594b322ae254b94",
+        "uiq_run_summary.json": "06568a05ac2f13616c0b7005babfbe0772ce6eb2d0d720ff85d0fbef82c368e3",
+        "combined.log": "39bcc537503ce9b1e137f8b42e14eaae4f0dfb7f34f067cd9e6ce007d623aad0"
+      }
+    }
+  ],
+  "metric_attempts": [
+    {
+      "run_id": "official_source_oea_nemo3b_ac_clotho_metrics_20260729_225501",
+      "status": "failed",
+      "final_run_rc": 1,
+      "elapsed_seconds": 1,
+      "failed_stage": "cpu_metric_finalizer",
+      "error_summary": "ModuleNotFoundError: No module named 'AudioRetrieval' when the script was executed by file path.",
+      "preserved": true
+    },
+    {
+      "run_id": "official_source_oea_nemo3b_ac_clotho_metrics_20260729_230219_attempt02",
+      "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/official_source_oea_nemo3b_ac_clotho_metrics_20260729_230219_attempt02",
+      "log_path": "/home/jg525/Omni-Embed-Audio/logs/official_source_oea_nemo3b_ac_clotho_metrics_20260729_230219_attempt02/combined.log",
+      "run_commit": "1f991ab4c644cc5d5a5e0622a934db032830751b",
+      "git_status_short": "",
+      "status": "complete",
+      "final_run_rc": 0,
+      "elapsed_seconds": 7,
+      "gpu_used": false,
+      "result_directory_size": "335M",
+      "suite_metrics_sha256": "05cc707af53c0cd86dd8735456eacc3f0fe80c52ad38050518b2f501b70bcc2c",
+      "combined_log_sha256": "a1a81da7c458f71599f2eba1287838241b7394cf2b1cbb558f3e6f52fc180741"
+    }
+  ],
+  "final_suite": {
+    "run_id": "official_source_oea_nemo3b_ac_clotho_metrics_20260729_230219_attempt02",
+    "run_commit": "1f991ab4c644cc5d5a5e0622a934db032830751b",
+    "git_status_short": "",
+    "status": "complete",
+    "final_run_rc": 0,
+    "seed": 42,
+    "protocol_count": 8,
+    "protocols": {
+      "t2a_public_code_default_joint_all_captions": {
+        "task": "t2a",
+        "protocol_source": "CODE",
+        "evaluated_queries": 5225,
+        "metrics": {
+          "R@1": 18.277511961722485,
+          "R@5": 41.32057416267942,
+          "R@10": 54.20095693779904,
+          "MRR": 0.2986830783880724,
+          "DCG": 0.43429406337610527
+        }
+      },
+      "t2a_public_code_t2a_only_seed0": {
+        "task": "t2a",
+        "protocol_source": "CODE",
+        "query_selection_seed": 0,
+        "evaluated_queries": 1045,
+        "metrics": {
+          "R@1": 17.99043062200957,
+          "R@5": 41.62679425837321,
+          "R@10": 55.78947368421052,
+          "MRR": 0.2974283745797129,
+          "DCG": 0.4337200299882714
+        }
+      },
+      "t2t_public_code_default_seed0": {
+        "task": "t2t",
+        "protocol_source": "CODE",
+        "query_selection_seed": 0,
+        "evaluated_queries": 1045,
+        "metrics": {
+          "R@1": 63.34928229665072,
+          "R@5": 74.83253588516746,
+          "R@10": 80.09569377990431,
+          "MRR": 0.687102259793222,
+          "DCG": 0.7451483287043094
+        }
+      },
+      "t2t_all_captions_sensitivity": {
+        "task": "t2t",
+        "protocol_source": "INFERRED",
+        "evaluated_queries": 5225,
+        "metrics": {
+          "R@1": 64.63157894736841,
+          "R@5": 74.98564593301435,
+          "R@10": 79.2535885167464,
+          "MRR": 0.695439837195158,
+          "DCG": 0.751048254575382
+        }
+      },
+      "question_released_uiq": {
+        "task": "uiq_question_t2a",
+        "protocol_source": "CODE",
+        "evaluated_queries": 1045,
+        "metrics": {
+          "R@1": 18.947368421052634,
+          "R@5": 43.63636363636363,
+          "R@10": 56.36363636363636,
+          "MRR": 0.30918892363599326,
+          "DCG": 0.44510071046412736
+        }
+      },
+      "imperative_released_uiq": {
+        "task": "uiq_imperative_t2a",
+        "protocol_source": "CODE",
+        "evaluated_queries": 1045,
+        "metrics": {
+          "R@1": 19.043062200956935,
+          "R@5": 43.34928229665071,
+          "R@10": 56.84210526315789,
+          "MRR": 0.31636502236552483,
+          "DCG": 0.4502869745155133
+        }
+      },
+      "paraphrase_released_uiq": {
+        "task": "uiq_paraphrase_t2a",
+        "protocol_source": "CODE",
+        "evaluated_queries": 1045,
+        "metrics": {
+          "R@1": 20.76555023923445,
+          "R@5": 44.30622009569378,
+          "R@10": 56.65071770334929,
+          "MRR": 0.3268093254741612,
+          "DCG": 0.4585229686442111
+        }
+      },
+      "tagging_released_uiq": {
+        "task": "uiq_keyphrase_t2a",
+        "protocol_source": "CODE",
+        "released_query_type": "tagging",
+        "evaluated_queries": 1045,
+        "metrics": {
+          "R@1": 21.5311004784689,
+          "R@5": 45.83732057416268,
+          "R@10": 60.19138755980862,
+          "MRR": 0.3406322531663729,
+          "DCG": 0.4716357250056619
+        }
+      }
+    }
+  },
+  "paper_protocol_limitations": [
+    "PAPER does not disclose the Clotho caption-selection protocol for T2A.",
+    "PAPER does not disclose T2T caption selection, self-exclusion, or tie handling. Both predeclared protocols remain reported and no protocol is selected post hoc.",
+    "PAPER states an audio passage prefix, while the public source path used here omits that prefix.",
+    "The upstream unified evaluator cannot produce these OEA results without the recorded compatibility layer."
+  ],
+  "claim_boundary": {
+    "supported": "The released OEA-Nemo3B-AC checkpoint completed Clotho T2A, T2T, and four released positive-UIQ retrieval protocols using the official OEA loading and metric source paths plus the documented compatibility layer.",
+    "not_supported": [
+      "strict identity with an undisclosed paper protocol",
+      "AudioCaps or MECAT reproduction",
+      "negative UIQ hard-negative metrics",
+      "complete Tables 2, 3, or 12-15 across all models and datasets"
+    ]
+  }
+}

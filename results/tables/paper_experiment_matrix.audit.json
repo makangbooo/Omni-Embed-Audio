@@ -8,8 +8,8 @@
     "BLOCKED": 162,
     "CONTROLLED_ONLY": 4,
     "PARTIAL": 15,
-    "REPRODUCED_CLOSE": 18,
-    "TODO": 175
+    "REPRODUCED_CLOSE": 24,
+    "TODO": 169
   },
   "inputs": {
     "paper_registry": {
@@ -19,13 +19,13 @@
     },
     "observations": {
       "path": "results/observations/reproduction_observations.jsonl",
-      "size_bytes": 83863,
-      "sha256": "a01c058c10ea1251bc5558a2aa047dc123e490d88ce8bcb490a4b707c19776b3"
+      "size_bytes": 105509,
+      "sha256": "eed713222fcd3dea0deaeca882bef3549248cf31e5f4cf1ae818229434932b79"
     }
   },
   "output": {
     "path": "results/tables/paper_experiment_matrix.csv",
-    "size_bytes": 75274,
-    "sha256": "fa138d1533b9c655b671b98437df64d8f08a20583059acfedf8d9b76334afe9c"
+    "size_bytes": 75874,
+    "sha256": "0756e1ce1a08932bf506d44d45657d3f795590dc74fe2eec678891e5ce25a019"
   }
 }
