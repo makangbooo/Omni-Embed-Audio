@@ -17,10 +17,10 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
             {
                 "Table 2": 6,
                 "Table 3": 6,
-                "Table 12": 2,
-                "Table 13": 2,
-                "Table 14": 2,
-                "Table 15": 2,
+                "Table 12": 3,
+                "Table 13": 3,
+                "Table 14": 3,
+                "Table 15": 3,
             },
         )
 
@@ -55,6 +55,23 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
             },
         )
         self.assertEqual({tuple(group["paper"]) for group in matches}, {("63.77", "75.29", "80.11")})
+
+    def test_nemo_positive_uiq_protocols_are_present(self) -> None:
+        matches = [
+            group
+            for group in self.groups
+            if group["model"] == "OEA-Nemo3B (+Cl)"
+            and group["paper_table"] in {"Table 12", "Table 13", "Table 14", "Table 15"}
+        ]
+        self.assertEqual(len(matches), 4)
+        self.assertEqual(
+            {group["paper_table"] for group in matches},
+            {"Table 12", "Table 13", "Table 14", "Table 15"},
+        )
+        self.assertEqual(
+            {group["protocol"] for group in matches},
+            {"[CODE] released positive UIQ"},
+        )
 
     def test_no_extension_tasks_are_present(self) -> None:
         serialized = " ".join(

@@ -48,7 +48,7 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
         )
         self.assertEqual(self.by_key[nemo]["observed_metric_count"], 3)
 
-    def test_nemo_t2t_is_reproduced_while_uiq_remains_partial(self) -> None:
+    def test_nemo_t2t_and_clotho_positive_uiq_are_reproduced(self) -> None:
         t2t = (
             "EXP-11",
             "Table 3",
@@ -56,18 +56,28 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
             "Clotho",
             "T2T",
         )
-        question = (
-            "EXP-12",
-            "Table 12",
-            "OEA-Nemo3B (+Cl)",
-            "Clotho",
-            "UIQ Question T2A",
-        )
         self.assertEqual(
             self.by_key[t2t]["reproduction_status"], "REPRODUCED_CLOSE"
         )
         self.assertEqual(self.by_key[t2t]["observed_metric_count"], 3)
-        self.assertEqual(self.by_key[question]["reproduction_status"], "PARTIAL")
+        uiq_tasks = {
+            "EXP-12": ("Table 12", "UIQ Question T2A"),
+            "EXP-13": ("Table 13", "UIQ Imperative T2A"),
+            "EXP-14": ("Table 14", "UIQ Paraphrase T2A"),
+            "EXP-15": ("Table 15", "UIQ Keyphrase T2A"),
+        }
+        for inventory_id, (paper_table, task) in uiq_tasks.items():
+            key = (
+                inventory_id,
+                paper_table,
+                "OEA-Nemo3B (+Cl)",
+                "Clotho",
+                task,
+            )
+            self.assertEqual(
+                self.by_key[key]["reproduction_status"], "REPRODUCED_CLOSE"
+            )
+            self.assertEqual(self.by_key[key]["observed_metric_count"], 3)
 
     def test_efficiency_and_negative_boundaries_are_explicit(self) -> None:
         controlled = (

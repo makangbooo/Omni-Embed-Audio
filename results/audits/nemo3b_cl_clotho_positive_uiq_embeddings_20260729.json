@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_run_compact_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "The returned read-only evidence fixed the generation metrics, GPU preflight, six exit-code files, Git identities, eight top-level artifact identities, directory sizes, and retained tmux session. The combined log was classified as binary by grep, so the outer wrapper FINAL_RUN_RC line was not returned; completion is established directly by the embedding attempt exit 0, generation status complete, 4,180/4,180 completed queries, zero pending queries, and the finalized artifact hashes. No GPU work was rerun."
+  },
+  "model": "OEA-Nemo3B (+Cl)",
+  "dataset": "Clotho v2.1 evaluation UIQ",
+  "model_lock": {
+    "path": "results/model_locks/oea_nemo3b_cl.json",
+    "size_bytes": 5932,
+    "sha256": "fd09e4d2b482aafdae7e297275c8106e10f82a6de99780d0ccfeb22b06bfc8c2"
+  },
+  "checkpoint": "JudeJiwoo/OEA-Nemo3B-Cl@9588912298afca0b11f5895b864ae28083f35022/step_450_best_inference_only.pt#sha256:2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+  "run": {
+    "run_id": "oea_nemo3b_clotho_positive_uiq_embeddings_seed42_20260729_takeover01",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_positive_uiq_embeddings_seed42_20260729_takeover01",
+    "attempt_id": "attempt_20260729_135745",
+    "git_commit": "e3cce6f8e84c00c47fea0bc03de0c9ee502cd724",
+    "git_status_short": "",
+    "status": "complete",
+    "attempt_exit_code": 0,
+    "outer_wrapper_final_run_rc": null,
+    "outer_wrapper_final_run_rc_source": "not returned because grep classified combined.log as binary",
+    "started_at": "2026-07-29T05:59:10.140039+00:00",
+    "finished_at": "2026-07-29T06:07:34.837593+00:00",
+    "seed": 42,
+    "gpu_preflight": {
+      "status": "complete",
+      "torch": "2.7.1+cu126",
+      "compiled_cuda": "12.6",
+      "cuda_available": true,
+      "visible_gpu_count": 1,
+      "bf16_supported": true,
+      "gpu_index": 0,
+      "gpu_uuid": "GPU-7bc3a79f-6a01-76ab-509d-6cc0d58749d8",
+      "gpu_name": "NVIDIA GeForce RTX 4090",
+      "gpu_total_memory_bytes": 25250627584,
+      "driver_version": "580.76.05"
+    },
+    "query_count": 4180,
+    "query_type_counts": {
+      "question": 1045,
+      "imperative": 1045,
+      "paraphrase": 1045,
+      "tagging": 1045
+    },
+    "completed_text_chunks": 4180,
+    "pending_text_chunks": 0,
+    "query_embedding_shape": [
+      4180,
+      512
+    ],
+    "remote_directory_size": "43M",
+    "artifacts": {
+      "generation_metrics.json": {
+        "size_bytes": 9645,
+        "sha256": "15e7df87be1aa23be065eccb49b256b4d3695209a150e053c864ffc4f2bb7705"
+      },
+      "run_identity.json": {
+        "size_bytes": 3692,
+        "sha256": "29d2f7300878240b15004a853b44d14019d874bcf01b360347a3b4ad1abcd25a"
+      },
+      "query_embeddings.npy": {
+        "size_bytes": 8560768,
+        "sha256": "f09134da2eaaf8b4a7e9fd577c41f76bf8321853c172cd4549472e617c12042f"
+      },
+      "query_metadata.jsonl": {
+        "size_bytes": 1635369,
+        "sha256": "27037a7ba1dc1fcb097bdadcb1a723ee0a41eab0a8fd186bdc2dabb5d4d22d31"
+      }
+    }
+  },
+  "execution_evidence": {
+    "all_discovered_exit_code_file_count": 6,
+    "all_discovered_exit_code_values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "tmux_session": "oea_nemo3b_uiq_takeover01",
+    "tmux_session_retained": true,
+    "log_directory": "/home/jg525/Omni-Embed-Audio/logs/tmux_oea_nemo3b_clotho_positive_uiq_embeddings_seed42_20260729_takeover01_20260729_135743"
+  }
+}

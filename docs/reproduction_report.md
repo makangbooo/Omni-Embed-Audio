@@ -25,11 +25,11 @@ experiment-model-dataset-task cells in
 separate from `REPRODUCED_CLOSE`, `CONTROLLED_ONLY`, `PARTIAL`, `TODO`, and
 `BLOCKED`; the generation audit records all input/output hashes. The compact
 paper-only partial Tables 2/3/12-15 are in
-`results/tables/oea_partial_tables.md`. They contain 20 predeclared protocol
+`results/tables/oea_partial_tables.md`. They contain 24 predeclared protocol
 groups and do not select a protocol after comparing it with the paper value.
 
 Committed value evidence currently covers three Clotho T2A cells, three Clotho
-T2T cells, and eight Clotho positive-UIQ cells. The newest Clotho T2T cell,
+T2T cells, and twelve Clotho positive-UIQ cells. The newest Clotho T2T cell,
 Nemo3B(+Cl), completed at run commit `23bf6ee`: the `[CODE]` seed-0 one-caption
 protocol gives R@1/5/10=`62.9665/75.9809/80.8612`, while the predeclared
 `[INFERRED]` all-caption sensitivity gives `63.6938/75.2344/80.0191`, against
@@ -38,10 +38,16 @@ is not promoted post hoc because it is closer. The suite finished with
 `FINAL_RUN_RC=0` in 47 seconds, and its compact evidence is fixed in
 `results/audits/oea_nemo3b_clotho_t2t_20260729.json`. Strict Table 3 protocol
 status remains blocked because caption selection, self-exclusion, and tie
-handling are not disclosed. Nemo positive UIQ still awaits GPU execution; its
-four released query files, progress/ETA output, tee logging, final status block,
-and retained interactive tmux shell are already fixed by the lock-bound runner.
-Qwen3B(+Cl) efficiency and
+handling are not disclosed. Nemo3B(+Cl) positive UIQ subsequently completed on
+an RTX 4090 at run commit `e3cce6f`: all 4,180 queries were embedded as 512-D
+vectors, pending count is zero, the four CPU retrieval protocols are complete,
+and all six discovered attempt/protocol exit-code files contain zero. The
+released `[CODE]` protocols give Question=`23.6364/50.8134/63.9234`,
+Imperative=`24.0191/51.1005/64.9761`, Paraphrase=`23.5407/49.9522/64.4019`,
+and Keyphrase/tagging=`25.8373/52.6316/66.1244`; each category's maximum
+absolute difference from PAPER is below 0.29 percentage points. They remain
+`[CODE] close`, rather than strict paper-protocol results, because the public
+audio candidate path omits PAPER's `passage:` prefix. Qwen3B(+Cl) efficiency and
 14.71488M LoRA-plus-head parameter count are `CONTROLLED_ONLY`: strict Tables
 5/16 remain blocked by the paper's missing timing, memory, count, and checkpoint
 variant definitions.
@@ -60,8 +66,8 @@ or overwrite was started. The separately approved data runs are recorded below.
 On 2026-07-29 the user approved DATA-04, DATA-06, DATA-08, and the
 Nemo3B-Cl/Clotho positive-UIQ GPU task. DATA-04/05 and DATA-06/07 completed
 through visible tmux wrappers at run commit `febfbe4`; DATA-08/09 then completed
-at run commit `1046641`, followed by DATA-11 at `e415c1d`. The GPU task remains
-unstarted because the current instance exposes no CUDA device. The approvals are recorded in
+at run commit `1046641`, followed by DATA-11 at `e415c1d`. The GPU task later
+completed on a replacement RTX 4090 instance at run commit `e3cce6f`. The approvals are recorded in
 `results/audits/takeover_approvals_20260729.json`. The user
 requested an independent Bitahub-side host-key check and no client connection
 in that turn; the read-only procedure is fixed in
@@ -110,11 +116,20 @@ paper's 847-row subset, embedding model, threshold, and reviewed candidates are
 `[MISSING]`. Evidence is fixed in
 `results/audits/data11_mecat_wavcaps_remote_20260729.json`.
 
-The approved Nemo3B-Cl/Clotho positive-UIQ task was not launched: the current
-instance reports PyTorch `2.7.1+cu126` but CUDA available=false, device count=0,
-and BF16 support=false. The preflight is fixed in
-`results/audits/nemo3b_cl_uiq_gpu_preflight_20260729.json`; execution requires a
-GPU-enabled instance attached to the same shared storage.
+The first Nemo3B-Cl/Clotho positive-UIQ preflight correctly stopped on a
+CPU-only instance and is fixed in
+`results/audits/nemo3b_cl_uiq_gpu_preflight_20260729.json`. The approved task was
+then run on a replacement instance exposing one RTX 4090. Generation ran from
+`2026-07-29T05:59:10Z` to `06:07:34Z` and produced a `[4180, 512]` embedding
+array with zero pending chunks. The finalized CPU suite completed four 1,045-row
+protocols. Compact evidence and all top-level artifact identities are fixed in
+`results/audits/nemo3b_cl_clotho_positive_uiq_embeddings_20260729.json` and
+`results/audits/nemo3b_cl_clotho_positive_uiq_eval_20260729.json`; large
+embeddings and rankings remain at their recorded remote paths. The retained
+tmux `combined.log` was classified as binary by `grep`, so its outer
+`FINAL_RUN_RC` line was not returned and is not reconstructed. Completion is
+instead established by the embedding attempt exit 0, suite/protocol exits 0,
+finalized `complete` statuses, exact counts, and artifact hashes.
 
 ## Excluded SpeechXBT-OEA extension evidence
 

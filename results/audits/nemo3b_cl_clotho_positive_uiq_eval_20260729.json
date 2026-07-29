@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_run_compact_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "The returned evidence includes the complete summary CSV, compact suite metric block, suite status, clean Git identity, five suite/protocol exit files all equal to zero, top-level artifact sizes and SHA256 values, and the retained tmux session. Large rankings and raw logs remain at the recorded remote paths."
+  },
+  "git_commit": "e3cce6f8e84c00c47fea0bc03de0c9ee502cd724",
+  "model": "OEA-Nemo3B (+Cl)",
+  "dataset": "Clotho v2.1 evaluation UIQ",
+  "checkpoint": "JudeJiwoo/OEA-Nemo3B-Cl@9588912298afca0b11f5895b864ae28083f35022/step_450_best_inference_only.pt#sha256:2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+  "embedding_run": {
+    "audit_path": "results/audits/nemo3b_cl_clotho_positive_uiq_embeddings_20260729.json",
+    "run_id": "oea_nemo3b_clotho_positive_uiq_embeddings_seed42_20260729_takeover01",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_positive_uiq_embeddings_seed42_20260729_takeover01",
+    "status": "complete",
+    "exit_code": 0,
+    "query_count": 4180,
+    "embedding_dimension": 512
+  },
+  "suite": {
+    "suite_id": "oea_nemo3b_clotho_positive_uiq_suite_seed42_20260729_takeover01",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_positive_uiq_suite_seed42_20260729_takeover01",
+    "attempt_id": "attempt_20260729_140736",
+    "status": "complete",
+    "attempt_exit_code": 0,
+    "git_status_short": "",
+    "started_at": "2026-07-29T06:08:45.946389+00:00",
+    "finished_at": "2026-07-29T06:08:46.945812+00:00",
+    "resource": "CPU",
+    "gpu_disabled": true,
+    "seed": 42,
+    "protocol_count": 4,
+    "all_suite_and_protocol_exit_codes": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "remote_directory_size": "100M",
+    "artifacts": {
+      "positive_uiq_summary.csv": {
+        "size_bytes": 1801,
+        "sha256": "02a4ad97610e51ff926c013b77bbbcc70f6acba6dfae32e860fb66c0249428e4"
+      },
+      "suite_metrics.json": {
+        "size_bytes": 39459,
+        "sha256": "ddd7f3526c69bd12d7b43ef658fea6f34cf3e52ef49ed151d251d9587402060b"
+      },
+      "suite_identity.json": {
+        "size_bytes": 8018,
+        "sha256": "2ceab63779cfb2bec9c2425309d5a549416693b7753c95f82806c1c384231f35"
+      },
+      "suite_plan.json": {
+        "size_bytes": 4100,
+        "sha256": "50393cad4bda30d01b82bb7c47c14c208e7a0385697478abd88bb3bb05a43836"
+      }
+    }
+  },
+  "protocols": {
+    "question_released_uiq": {
+      "paper_table": "Table 12",
+      "released_query_type": "question",
+      "paper_query_type": "Question",
+      "protocol_source": "CODE",
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 23.636363636363637,
+        "R@5": 50.8133971291866,
+        "R@10": 63.92344497607656,
+        "MRR": 0.3673165000864891,
+        "DCG": 0.49552224973278053
+      }
+    },
+    "imperative_released_uiq": {
+      "paper_table": "Table 13",
+      "released_query_type": "imperative",
+      "paper_query_type": "Imperative",
+      "protocol_source": "CODE",
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 24.019138755980862,
+        "R@5": 51.100478468899524,
+        "R@10": 64.97607655502392,
+        "MRR": 0.3683240325946844,
+        "DCG": 0.49652483359043714
+      }
+    },
+    "paraphrase_released_uiq": {
+      "paper_table": "Table 14",
+      "released_query_type": "paraphrase",
+      "paper_query_type": "Paraphrase",
+      "protocol_source": "CODE",
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 23.54066985645933,
+        "R@5": 49.952153110047846,
+        "R@10": 64.40191387559808,
+        "MRR": 0.36670375265316196,
+        "DCG": 0.4958769970895468
+      }
+    },
+    "tagging_released_uiq": {
+      "paper_table": "Table 15",
+      "released_query_type": "tagging",
+      "paper_query_type": "Keyphrase",
+      "protocol_source": "CODE",
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 25.837320574162682,
+        "R@5": 52.63157894736842,
+        "R@10": 66.1244019138756,
+        "MRR": 0.3884364513451018,
+        "DCG": 0.5137732756589036
+      }
+    }
+  },
+  "paper_values": {
+    "question": {
+      "R@1": 23.44,
+      "R@5": 50.62,
+      "R@10": 63.73
+    },
+    "imperative": {
+      "R@1": 24.02,
+      "R@5": 51.29,
+      "R@10": 64.69
+    },
+    "paraphrase": {
+      "R@1": 23.83,
+      "R@5": 50.14,
+      "R@10": 64.5
+    },
+    "tagging_keyphrase": {
+      "R@1": 25.93,
+      "R@5": 52.54,
+      "R@10": 66.03
+    }
+  },
+  "comparison": {
+    "question_released_uiq": {
+      "absolute_delta_percentage_points": {
+        "R@1": 0.1963636363636354,
+        "R@5": 0.19339712918660013,
+        "R@10": 0.19344497607656308
+      },
+      "maximum_absolute_delta_percentage_points": 0.1963636363636354,
+      "status": "close"
+    },
+    "imperative_released_uiq": {
+      "absolute_delta_percentage_points": {
+        "R@1": 0.0008612440191377857,
+        "R@5": 0.18952153110047476,
+        "R@10": 0.28607655502392504
+      },
+      "maximum_absolute_delta_percentage_points": 0.28607655502392504,
+      "status": "close"
+    },
+    "paraphrase_released_uiq": {
+      "absolute_delta_percentage_points": {
+        "R@1": 0.289330143540667,
+        "R@5": 0.18784688995215504,
+        "R@10": 0.09808612440191666
+      },
+      "maximum_absolute_delta_percentage_points": 0.289330143540667,
+      "status": "close"
+    },
+    "tagging_released_uiq": {
+      "absolute_delta_percentage_points": {
+        "R@1": 0.09267942583731781,
+        "R@5": 0.09157894736841854,
+        "R@10": 0.09440191387560048
+      },
+      "maximum_absolute_delta_percentage_points": 0.09440191387560048,
+      "status": "close"
+    }
+  },
+  "protocol_boundary": {
+    "source": "CODE",
+    "note": "Each released UIQ query is matched to exactly one canonical Clotho candidate ID. The public-code audio candidate bank omits the passage: prefix stated by PAPER, so these observations are CODE close reproductions rather than strict paper-protocol reproductions."
+  }
+}
