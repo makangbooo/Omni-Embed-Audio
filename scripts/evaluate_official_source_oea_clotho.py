@@ -9,6 +9,7 @@ import hashlib
 import json
 import random
 import subprocess
+import sys
 import traceback
 from collections import Counter
 from datetime import datetime, timezone
@@ -16,6 +17,10 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from AudioRetrieval.evaluation.canonical import (
     CanonicalRetrievalResult,
@@ -287,10 +292,10 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "started_at": started_at,
         "finished_at": now(),
         "git_commit": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], text=True
+            ["git", "rev-parse", "HEAD"], cwd=REPOSITORY_ROOT, text=True
         ).strip(),
         "git_status_short": subprocess.check_output(
-            ["git", "status", "--short"], text=True
+            ["git", "status", "--short"], cwd=REPOSITORY_ROOT, text=True
         ).strip(),
         "seed": args.seed,
         "source_usage": {
