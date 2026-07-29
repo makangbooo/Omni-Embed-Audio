@@ -67,6 +67,18 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--checkpoint-file", default=DEFAULT_CHECKPOINT_FILE,
                    help="Filename inside the HF repo (default: %(default)s).")
+    p.add_argument(
+        "--checkpoint-path",
+        type=Path,
+        default=None,
+        help="Use an already-downloaded checkpoint instead of Hugging Face Hub.",
+    )
+    p.add_argument(
+        "--base-model-path",
+        type=Path,
+        default=None,
+        help="Use an already-downloaded base-model directory instead of Hugging Face Hub.",
+    )
     p.add_argument("--device", default="cuda", help="cuda | cpu (default: %(default)s).")
     p.add_argument("--audio-dir", default=str(REPO_ROOT / "examples/data/clotho_samples"))
     p.add_argument("--manifest", default=str(REPO_ROOT / "examples/data/clotho_samples/captions.jsonl"))
@@ -110,6 +122,7 @@ def build_model(args: argparse.Namespace):
     from AudioRetrieval.training.oea.train_omniembed_lora import (
         ProjectionHead,
         attach_lora,
+        safe_torch_load,
     )
 
     base_repo = BASE_MODEL[args.model]
@@ -117,10 +130,29 @@ def build_model(args: argparse.Namespace):
     print(f"[OEA] checkpoint repo: JudeJiwoo/{args.model}")
     print(f"[OEA] checkpoint file: {args.checkpoint_file}")
 
-    ckpt_path = hf_hub_download(repo_id=f"JudeJiwoo/{args.model}", filename=args.checkpoint_file)
+    if args.checkpoint_path is not None:
+        ckpt_path = args.checkpoint_path.expanduser().resolve()
+        if not ckpt_path.is_file():
+            raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
+        print(f"[OEA] checkpoint path: {ckpt_path}")
+    else:
+        ckpt_path = Path(
+            hf_hub_download(
+                repo_id=f"JudeJiwoo/{args.model}",
+                filename=args.checkpoint_file,
+            )
+        )
+
+    local_path = None
+    if args.base_model_path is not None:
+        local_path = args.base_model_path.expanduser().resolve()
+        if not local_path.is_dir():
+            raise NotADirectoryError(f"Base model directory not found: {local_path}")
+        print(f"[OEA] base model path: {local_path}")
 
     adapter = OmniEmbedAdapter(
         repo_id=base_repo,
+        local_path=str(local_path) if local_path is not None else None,
         device=args.device,
         passage_prefix="passage:",
         query_prefix="query:",
@@ -138,7 +170,7 @@ def build_model(args: argparse.Namespace):
     adapter.set_underlying_model(peft_model)
 
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
-    ckpt = torch.load(ckpt_path, map_location=device)
+    ckpt = safe_torch_load(ckpt_path, map_location=device)
 
     peft_model.load_state_dict(ckpt["lora_state_dict"], strict=False)
 
