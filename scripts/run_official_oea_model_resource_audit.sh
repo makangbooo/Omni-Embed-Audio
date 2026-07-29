@@ -20,7 +20,11 @@ fi
 ENV_NAME="oea-repro"
 MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 REGISTRY="${ROOT_DIR}/configs/checkpoints/official_oea_checkpoints.json"
-RUN_ID="official_model_resource_audit_${VARIANT_ID}_$(date +%Y%m%d_%H%M%S)"
+RUN_ID="${RUN_ID:-official_model_resource_audit_${VARIANT_ID}_$(date +%Y%m%d_%H%M%S)}"
+if [[ ! "${RUN_ID}" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]]; then
+  echo "[ERROR] Invalid RUN_ID: ${RUN_ID}" >&2
+  exit 2
+fi
 RUN_DIR="${ROOT_DIR}/logs/${RUN_ID}"
 
 if [[ -e "${RUN_DIR}" ]]; then
