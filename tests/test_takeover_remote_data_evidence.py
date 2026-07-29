@@ -11,6 +11,12 @@ AUDIOCAPS_AUDIT = (
     ROOT / "results/audits/data06_data07_audiocaps_remote_20260729.json"
 )
 WAVCAPS_AUDIT = ROOT / "results/audits/data08_data09_wavcaps_remote_20260729.json"
+MECAT_WAVCAPS_AUDIT = (
+    ROOT / "results/audits/data11_mecat_wavcaps_remote_20260729.json"
+)
+NEMO_UIQ_PREFLIGHT = (
+    ROOT / "results/audits/nemo3b_cl_uiq_gpu_preflight_20260729.json"
+)
 AUDIOCAPS_RESOURCE = ROOT / "configs/resources/data06_audiocaps_v2_metadata.json"
 
 
@@ -20,6 +26,12 @@ class TakeoverRemoteDataEvidenceTests(unittest.TestCase):
         cls.mecat = json.loads(MECAT_AUDIT.read_text(encoding="utf-8"))
         cls.audiocaps = json.loads(AUDIOCAPS_AUDIT.read_text(encoding="utf-8"))
         cls.wavcaps = json.loads(WAVCAPS_AUDIT.read_text(encoding="utf-8"))
+        cls.mecat_wavcaps = json.loads(
+            MECAT_WAVCAPS_AUDIT.read_text(encoding="utf-8")
+        )
+        cls.nemo_uiq_preflight = json.loads(
+            NEMO_UIQ_PREFLIGHT.read_text(encoding="utf-8")
+        )
         cls.audiocaps_resource = json.loads(
             AUDIOCAPS_RESOURCE.read_text(encoding="utf-8")
         )
@@ -83,19 +95,60 @@ class TakeoverRemoteDataEvidenceTests(unittest.TestCase):
             self.assertEqual(len(artifact["sha256"]), 64)
             self.assertGreater(artifact["size_bytes"], 0)
 
-    def test_wavcaps_wrapper_is_complete_but_hash_gap_is_explicit(self) -> None:
+    def test_wavcaps_remote_evidence_registration_is_complete(self) -> None:
+        self.assertEqual(self.wavcaps["status"], "complete")
         self.assertEqual(self.wavcaps["execution"]["final_run_rc"], 0)
         self.assertEqual(self.wavcaps["execution"]["elapsed_seconds"], 130)
+        self.assertEqual(self.wavcaps["data08"]["download_exit_code"], 0)
+        self.assertEqual(self.wavcaps["data08"]["wrapper_exit_code"], 0)
+        self.assertEqual(self.wavcaps["data09"]["validation_exit_code"], 0)
+        self.assertEqual(self.wavcaps["data09"]["wrapper_exit_code"], 0)
         self.assertEqual(self.wavcaps["data08"]["selected_files"], 8)
         self.assertEqual(self.wavcaps["data08"]["expected_total_bytes"], 176863095)
         self.assertEqual(self.wavcaps["data09"]["manifest"]["rows"], 403050)
         self.assertEqual(
-            self.wavcaps["status"],
-            "remote_execution_complete_artifact_hashes_pending",
+            self.wavcaps["evidence_registration"]["status"], "complete"
         )
-        pending = self.wavcaps["pending_evidence_registration"]
-        self.assertIn("but not the DATA-08/09 child exit-code files", pending["reason"])
-        self.assertEqual(len(pending["not_claimed_observed"]), 5)
+
+    def test_wavcaps_generated_artifact_identities_are_fixed(self) -> None:
+        artifacts = {
+            "manifest": (
+                self.wavcaps["data09"]["manifest"],
+                403050,
+                "ad1c1ce7e6294c985398ab8dd1a4e66ac3021f392e6fc39fefa6c48de4bb3ba7",
+            ),
+            "audiocaps_test": (
+                self.wavcaps["data09"]["blocklist_artifacts"]["audiocaps_test"],
+                173,
+                "77da39bcfa6283cff1fa59fdb0c012d16067e0dd6bfc3efdd2423ed4c1921a1d",
+            ),
+            "clotho_filename_matches": (
+                self.wavcaps["data09"]["blocklist_artifacts"][
+                    "clotho_filename_matches"
+                ],
+                638,
+                "c40700763ce2094c909ee424cf3fa57b7057c2186bc2c0137f6313e7958c7cc4",
+            ),
+            "clotho_sound_id_filename_confirmed": (
+                self.wavcaps["data09"]["blocklist_artifacts"][
+                    "clotho_sound_id_filename_confirmed"
+                ],
+                611,
+                "d6c51f269e8a81ef7b470d5f266595c6949573c6819928f930abc34fb6e7afb1",
+            ),
+            "clotho_conservative_candidates": (
+                self.wavcaps["data09"]["blocklist_artifacts"][
+                    "clotho_conservative_candidates"
+                ],
+                1017,
+                "11c2a1d1f6e97f98f117dfb7c453419f554dd4bff4bdc724ee1c30ab88adb805",
+            ),
+        }
+        for name, (artifact, expected_rows, expected_sha256) in artifacts.items():
+            with self.subTest(name=name):
+                self.assertEqual(artifact["rows"], expected_rows)
+                self.assertEqual(artifact["sha256"], expected_sha256)
+                self.assertGreater(artifact["size_bytes"], 0)
 
     def test_wavcaps_paper_protocol_conflict_remains_explicit(self) -> None:
         boundary = self.wavcaps["data09"]["claim_boundary"]
@@ -105,6 +158,45 @@ class TakeoverRemoteDataEvidenceTests(unittest.TestCase):
         self.assertFalse(
             boundary["metadata_only_conservative_reconstruction_is_paper_exact"]
         )
+
+    def test_data11_canonical_join_is_complete_with_fixed_candidates(self) -> None:
+        audit = self.mecat_wavcaps
+        self.assertEqual(audit["status"], "complete")
+        self.assertEqual(audit["execution"]["call_exit_code"], 0)
+        self.assertEqual(audit["execution"]["audit_exit_code"], 0)
+        self.assertEqual(audit["execution"]["wrapper_exit_code"], 0)
+        self.assertEqual(audit["results"]["mecat_examples"], 848)
+        self.assertEqual(audit["results"]["mecat_unique_source_videos"], 807)
+        self.assertEqual(audit["results"]["source_video_overlap_count"], 4)
+        self.assertEqual(
+            audit["results"]["source_video_overlap_ids"],
+            ["FQIZHO6l0IY", "Nw2EarZypA0", "qEfTLLEpojc", "vzt3AXNeKIQ"],
+        )
+        self.assertEqual(
+            audit["artifacts"]["statistics"]["sha256"],
+            "1e89bf6031c7899e095884e713a890c067d56056318f4f194d897b73fdda630a",
+        )
+        candidates = audit["artifacts"]["source_video_candidates"]
+        self.assertEqual(candidates["rows"], 4)
+        self.assertEqual(candidates["size_bytes"], 1873)
+        self.assertEqual(
+            candidates["sha256"],
+            "d0f50a93c9b05f6bcaaaa94959c2c5c3a8e2b17aa8107960d1f49990ab7a5b85",
+        )
+
+    def test_data11_strict_claim_boundary_remains_in_progress(self) -> None:
+        boundary = self.mecat_wavcaps["claim_boundary"]
+        self.assertIn("does not prove", boundary["not_proven"])
+        self.assertIn("[MISSING]", boundary["paper_protocol"])
+        self.assertEqual(boundary["strict_exp09_status"], "IN_PROGRESS")
+
+    def test_nemo_uiq_gpu_task_was_not_started_without_visible_gpu(self) -> None:
+        preflight = self.nemo_uiq_preflight
+        self.assertEqual(preflight["status"], "blocked_no_visible_gpu")
+        self.assertFalse(preflight["torch_cuda_available"])
+        self.assertEqual(preflight["torch_cuda_device_count"], 0)
+        self.assertFalse(preflight["torch_bf16_supported"])
+        self.assertEqual(preflight["launch_status"], "NOT_STARTED")
 
 
 if __name__ == "__main__":

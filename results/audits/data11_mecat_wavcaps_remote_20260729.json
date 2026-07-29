@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_source": "[OBSERVED] terminal output returned by the user from the authenticated Bitahub Web console",
+  "execution": {
+    "git_commit": "e415c1de13c3813145ec690505953a8f5c54b106",
+    "git_status_short": "",
+    "host": "bitahub-a20633967503994880812290",
+    "command": "bash scripts/run_data11_mecat_wavcaps_provenance.sh",
+    "run_id": "data11_mecat_wavcaps_provenance_20260729_130758",
+    "log_directory": "/home/jg525/Omni-Embed-Audio/logs/data11_mecat_wavcaps_provenance_20260729_130758",
+    "call_exit_code": 0,
+    "audit_exit_code": 0,
+    "wrapper_exit_code": 0,
+    "started_at": "2026-07-29T05:08:06.856721+00:00",
+    "finished_at": "2026-07-29T05:08:08.231410+00:00"
+  },
+  "inputs": {
+    "mecat_revision": "be4a24c3f7309d74208e08a7cce49e72cb7a5834",
+    "mecat_manifest": {
+      "path": "/home/jg525/datasets/oea/mecat_caption_be4a24c3/manifests/mecat_00a_test_manifest.jsonl",
+      "rows": 848,
+      "sha256": "b4c4d8c1c5928ba5b23a25b3169519871cb2438dfed05823610aebeccb8594a6"
+    },
+    "wavcaps_revision": "0930ec11ded28fa0eaa910fde2f6fc3538acbeac",
+    "wavcaps_audioset_rows": 108317
+  },
+  "results": {
+    "mecat_examples": 848,
+    "mecat_unique_source_videos": 807,
+    "mecat_videos_with_multiple_segments": 37,
+    "source_video_overlap_count": 4,
+    "mecat_overlap_sample_count": 4,
+    "source_video_overlap_ids": [
+      "FQIZHO6l0IY",
+      "Nw2EarZypA0",
+      "qEfTLLEpojc",
+      "vzt3AXNeKIQ"
+    ]
+  },
+  "artifacts": {
+    "statistics": {
+      "path": "/home/jg525/Omni-Embed-Audio/logs/data11_mecat_wavcaps_provenance_20260729_130758/data_statistics.json",
+      "size_bytes": 1929,
+      "sha256": "1e89bf6031c7899e095884e713a890c067d56056318f4f194d897b73fdda630a"
+    },
+    "source_video_candidates": {
+      "path": "/home/jg525/datasets/oea/wavcaps_0930ec11/audits/mecat_00a_test_wavcaps_audioset_source_video_matches.jsonl",
+      "rows": 4,
+      "size_bytes": 1873,
+      "sha256": "d0f50a93c9b05f6bcaaaa94959c2c5c3a8e2b17aa8107960d1f49990ab7a5b85"
+    }
+  },
+  "claim_boundary": {
+    "proven": "[CODE][OBSERVED] four exact source-video ID candidates between the public 848-row MECAT release and pinned WavCaps AudioSet_SL metadata",
+    "not_proven": "[INFERRED] a shared source-video ID does not prove temporal or audio-content overlap",
+    "paper_protocol": "[MISSING] audio/embedding implementation, model, threshold, reviewed candidates, and exact 847-row MECAT subset",
+    "policy": "No sample was deleted and no training or evaluation set was changed",
+    "strict_exp09_status": "IN_PROGRESS"
+  }
+}

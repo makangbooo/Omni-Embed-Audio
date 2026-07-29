@@ -97,7 +97,7 @@ DATA-04 不解压、不使用 GPU，也不覆盖已有无 revision marker 的非
 | 与 WavCaps AudioSet_SL 同源的 YouTube IDs | 4 | `[CODE][INFERRED]` |
 | 涉及 MECAT samples | 4 | `[CODE][INFERRED]` |
 
-4 个候选 source-video IDs 为 `FQIZHO6l0IY`、`Nw2EarZypA0`、`qEfTLLEpojc`、`vzt3AXNeKIQ`。它们只证明同一来源视频，不能证明 MECAT 与 WavCaps 使用了相同时间段或相同音频字节，也不能替代论文的 embedding 检查。小型证据保存在 `results/data_audits/data11_mecat_wavcaps_provenance_local.json`；DATA-08/09 完成后由 DATA-11 用两个远程 canonical manifest 正式复算。
+4 个候选 source-video IDs 为 `FQIZHO6l0IY`、`Nw2EarZypA0`、`qEfTLLEpojc`、`vzt3AXNeKIQ`。它们只证明同一来源视频，不能证明 MECAT 与 WavCaps 使用了相同时间段或相同音频字节，也不能替代论文的 embedding 检查。远程 canonical DATA-11 已在 commit `e415c1de13c3813145ec690505953a8f5c54b106` 完成，调用/审计/wrapper 退出码均为 0；统计 JSON SHA256 为 `1e89bf6031c7899e095884e713a890c067d56056318f4f194d897b73fdda630a`，4-row 候选 JSONL SHA256 为 `d0f50a93c9b05f6bcaaaa94959c2c5c3a8e2b17aa8107960d1f49990ab7a5b85`。紧凑远程证据保存在 `results/audits/data11_mecat_wavcaps_remote_20260729.json`，未删除任何样本或改变训练/评测集合。
 
 ## 尚未解决的问题
 

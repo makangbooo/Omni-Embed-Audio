@@ -60,7 +60,8 @@ or overwrite was started. The separately approved data runs are recorded below.
 On 2026-07-29 the user approved DATA-04, DATA-06, DATA-08, and the
 Nemo3B-Cl/Clotho positive-UIQ GPU task. DATA-04/05 and DATA-06/07 completed
 through visible tmux wrappers at run commit `febfbe4`; DATA-08/09 then completed
-at run commit `1046641`. The GPU task remains unstarted. The approvals are recorded in
+at run commit `1046641`, followed by DATA-11 at `e415c1d`. The GPU task remains
+unstarted because the current instance exposes no CUDA device. The approvals are recorded in
 `results/audits/takeover_approvals_20260729.json`. The user
 requested an independent Bitahub-side host-key check and no client connection
 in that turn; the read-only procedure is fixed in
@@ -92,9 +93,28 @@ The WavCaps metadata wrapper `oea_takeover_data08_20260729_124908` completed in
 the 403,050-row metadata/count/leakage pass and retained the protocol conflict:
 PAPER writes `duration <= 31`, whereas the public metadata reaches 275,618 only
 under `[INFERRED] 0 < duration < 31`. The wrapper evidence is fixed in
-`results/audits/data08_data09_wavcaps_remote_20260729.json`; child evidence JSON
-and generated manifest/blocklist identities remain pending read-only collection.
-No exact post-blocklist paper training manifest is claimed.
+`results/audits/data08_data09_wavcaps_remote_20260729.json`. Subsequent read-only
+collection fixed all four child/wrapper exit codes, both evidence JSON identities,
+all eight source identities, and the line count, byte size, and SHA256 of the
+403,050-row manifest plus four blocklist/candidate artifacts. These hashes match
+the prior two-pass local audit. No exact post-blocklist paper training manifest
+is claimed.
+
+DATA-11 then completed the canonical MECAT/WavCaps source-video join with
+call/audit/wrapper exit codes `0/0/0`. Among 848 public MECAT samples representing
+807 unique source videos, it found four exact WavCaps AudioSet_SL source-video
+candidates. The statistics SHA256 is `1e89bf60...630a` and the 4-row candidate
+JSONL SHA256 is `d0f50a93...5b85`. This proves only common source-video IDs, not
+temporal or audio-content overlap; EXP-09 remains `IN_PROGRESS` because the
+paper's 847-row subset, embedding model, threshold, and reviewed candidates are
+`[MISSING]`. Evidence is fixed in
+`results/audits/data11_mecat_wavcaps_remote_20260729.json`.
+
+The approved Nemo3B-Cl/Clotho positive-UIQ task was not launched: the current
+instance reports PyTorch `2.7.1+cu126` but CUDA available=false, device count=0,
+and BF16 support=false. The preflight is fixed in
+`results/audits/nemo3b_cl_uiq_gpu_preflight_20260729.json`; execution requires a
+GPU-enabled instance attached to the same shared storage.
 
 ## Excluded SpeechXBT-OEA extension evidence
 

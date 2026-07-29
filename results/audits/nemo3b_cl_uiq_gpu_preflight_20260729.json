@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "status": "blocked_no_visible_gpu",
+  "evidence_source": "[OBSERVED] terminal output returned by the user from the authenticated Bitahub Web console",
+  "host": "bitahub-a20633967503994880812290",
+  "git_commit": "e415c1de13c3813145ec690505953a8f5c54b106",
+  "environment": "oea-repro",
+  "pytorch": "2.7.1+cu126",
+  "nvidia_smi_output": [],
+  "nvidia_smi_exit_code": null,
+  "torch_cuda_available": false,
+  "torch_cuda_device_count": 0,
+  "torch_cuda_device_0": null,
+  "torch_bf16_supported": false,
+  "approved_task": "OEA-Nemo3B-Cl Clotho positive UIQ Tables 12-15",
+  "approved_command": "bash scripts/run_nemo3b_cl_clotho_positive_uiq_tmux.sh /home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_embeddings_seed42_20260727_094554",
+  "launch_status": "NOT_STARTED",
+  "next_action": "Attach the shared project/model/data storage to a GPU-enabled Bitahub instance, confirm exactly one visible BF16-capable GPU, and run the already approved command inside a visible tmux pane."
+}
