@@ -16,7 +16,7 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
             Counter(group["paper_table"] for group in self.groups),
             {
                 "Table 2": 6,
-                "Table 3": 4,
+                "Table 3": 6,
                 "Table 12": 2,
                 "Table 13": 2,
                 "Table 14": 2,
@@ -38,6 +38,23 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
             matches[0]["reproduced"],
             ["21.72248803827751", "47.119617224880386", "60.44019138755981"],
         )
+
+    def test_nemo_t2t_protocols_remain_separate(self) -> None:
+        matches = [
+            group
+            for group in self.groups
+            if group["model"] == "OEA-Nemo3B (+Cl)"
+            and group["paper_table"] == "Table 3"
+        ]
+        self.assertEqual(len(matches), 2)
+        self.assertEqual(
+            {group["protocol"] for group in matches},
+            {
+                "[CODE] seed-0 one-caption/self-exclusion",
+                "[INFERRED] all-caption sensitivity",
+            },
+        )
+        self.assertEqual({tuple(group["paper"]) for group in matches}, {("63.77", "75.29", "80.11")})
 
     def test_no_extension_tasks_are_present(self) -> None:
         serialized = " ".join(

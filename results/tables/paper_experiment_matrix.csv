@@ -66,7 +66,7 @@ EXP-11,Table 3,OEA-Nemo3B,AudioCaps,T2T,PAPER,TODO,3,0,,"Paper value is transcri
 EXP-11,Table 3,OEA-Nemo3B,Clotho,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-11,Table 3,OEA-Nemo3B,MECAT,T2T,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-11,Table 3,OEA-Nemo3B (+Cl),AudioCaps,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-11,Table 3,OEA-Nemo3B (+Cl),Clotho,T2T,PAPER,PARTIAL,3,0,results/audits/asrur_nemo_g1_full_embeddings_20260727.json,"Complete 1,045 audio and 5,225 caption embeddings exist; CPU T2T finalization is pending remote artifact access."
+EXP-11,Table 3,OEA-Nemo3B (+Cl),Clotho,T2T,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_nemo3b_clotho_t2t_20260729.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-11,Table 3,OEA-Nemo3B (+Cl),MECAT,T2T,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-11,Table 3,OEA-Qwen3B,AudioCaps,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-11,Table 3,OEA-Qwen3B,Clotho,T2T,PAPER,REPRODUCED_CLOSE,3,3,results/audits/qwen3b_clotho_retrieval_suite_20260720.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.

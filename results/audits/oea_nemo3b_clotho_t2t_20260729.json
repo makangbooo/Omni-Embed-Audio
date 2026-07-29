@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_run_compact_audit",
+  "source": {
+    "kind": "REMOTE_TERMINAL_OUTPUT",
+    "note": "The returned evidence includes the complete retrieval-summary CSV, all four top-level suite artifact hashes, both protocol metric blocks, empty protocol stderr evidence, and the final tmux status block. A later read-only helper failed with KeyError because suite_metrics.json stores protocol results under runs rather than a top-level protocols key; that helper failure occurred after the completed experiment and does not alter its exit status or artifacts."
+  },
+  "git_commit": "23bf6ee63d306837ae0b61a42ade29de329e0064",
+  "model": "OEA-Nemo3B (+Cl)",
+  "training_variant": "AudioCaps + Clotho",
+  "dataset": "Clotho v2.1 evaluation",
+  "embedding_seed": 42,
+  "model_lock": {
+    "path": "results/model_locks/oea_nemo3b_cl.json",
+    "size_bytes": 5932,
+    "sha256": "fd09e4d2b482aafdae7e297275c8106e10f82a6de99780d0ccfeb22b06bfc8c2"
+  },
+  "checkpoint": "JudeJiwoo/OEA-Nemo3B-Cl@9588912298afca0b11f5895b864ae28083f35022/step_450_best_inference_only.pt#sha256:2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+  "embedding_run": {
+    "run_id": "oea_nemo3b_clotho_embeddings_seed42_20260727_094554",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_embeddings_seed42_20260727_094554",
+    "audit_path": "results/audits/asrur_nemo_g1_full_embeddings_20260727.json",
+    "status": "complete",
+    "candidate_audio_count": 1045,
+    "caption_query_count": 5225,
+    "embedding_dimension": 512
+  },
+  "retrieval_suite": {
+    "suite_id": "oea_nemo3b_clotho_t2t_suite_seed42_20260729_takeover01",
+    "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_t2t_suite_seed42_20260729_takeover01",
+    "log_directory": "/home/jg525/Omni-Embed-Audio/logs/oea_nemo3b_clotho_t2t_20260729_takeover01",
+    "metrics_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_t2t_suite_seed42_20260729_takeover01/suite_metrics.json",
+    "started_at": "2026-07-29T11:04:49+08:00",
+    "finished_at": "2026-07-29T11:05:36+08:00",
+    "elapsed_seconds": 47,
+    "status": "complete",
+    "final_run_rc": 0,
+    "failed_stage": null,
+    "error_summary": null,
+    "protocol_count": 2,
+    "artifacts": {
+      "suite_metrics.json": {
+        "size_bytes": null,
+        "size_source": "not returned",
+        "sha256": "8c0bf1f370a5c6ed049bb33f908bfe40d798f0ec2c46b810cf195f2c889fe129"
+      },
+      "retrieval_summary.csv": {
+        "size_bytes": 1125,
+        "sha256": "d874881fca5d9266f22175a39885fa0bd9c6f780be9481e83bc62591c1c1abb4"
+      },
+      "suite_identity.json": {
+        "size_bytes": null,
+        "size_source": "not returned",
+        "sha256": "d1488a00f2a1ed6a1177e9d3b79a23271a3f72b1e60739357c7a2c2619b8eb7e"
+      },
+      "suite_plan.json": {
+        "size_bytes": null,
+        "size_source": "not returned",
+        "sha256": "0fb4ba679ee7b05a1cd3a9be2c89399d1733f5898d558ad395b7e937f2ae37cd"
+      }
+    },
+    "protocols": {
+      "t2t_public_code_default_seed0": {
+        "task": "t2t",
+        "protocol_source": "CODE",
+        "query_selection": "public_code_seed0_one_per_clip",
+        "query_selection_seed": 0,
+        "embedding_seed": 42,
+        "evaluated_queries": 1045,
+        "stderr_empty": true,
+        "metrics": {
+          "R@1": 62.96650717703349,
+          "R@5": 75.98086124401914,
+          "R@10": 80.86124401913875,
+          "MRR": 0.6885831848423701,
+          "DCG": 0.7474843659280417
+        }
+      },
+      "t2t_all_captions_sensitivity": {
+        "task": "t2t",
+        "protocol_source": "INFERRED",
+        "query_selection": "all",
+        "query_selection_seed": null,
+        "embedding_seed": 42,
+        "evaluated_queries": 5225,
+        "stderr_empty": true,
+        "metrics": {
+          "R@1": 63.693779904306226,
+          "R@5": 75.23444976076556,
+          "R@10": 80.01913875598086,
+          "MRR": 0.6919725083442058,
+          "DCG": 0.7493360920246421
+        },
+        "full_rankings": {
+          "size_bytes": 218405128,
+          "sha256": "c1eb82c420d3ec751ee76b675cdafa3c1e7ccf369128c474f3c9df750f6a9f54"
+        }
+      }
+    }
+  },
+  "paper_values": {
+    "source": "PAPER",
+    "table_3_clotho_t2t": {
+      "R@1": 63.77,
+      "R@5": 75.29,
+      "R@10": 80.11
+    }
+  },
+  "comparison": {
+    "t2t_public_code_default_seed0": {
+      "absolute_delta_percentage_points": {
+        "R@1": 0.80349282296651,
+        "R@5": 0.69086124401914,
+        "R@10": 0.75124401913875
+      },
+      "maximum_absolute_delta_percentage_points": 0.80349282296651,
+      "status": "close"
+    },
+    "t2t_all_captions_sensitivity": {
+      "absolute_delta_percentage_points": {
+        "R@1": 0.076220095693774,
+        "R@5": 0.05555023923444,
+        "R@10": 0.09086124401914
+      },
+      "maximum_absolute_delta_percentage_points": 0.09086124401914,
+      "status": "close"
+    }
+  },
+  "paper_protocol_limitation": {
+    "status": "MISSING",
+    "note": "The paper does not identify Clotho query-caption selection, T2T self-exclusion, or tie handling. Both protocols were declared before the run and remain separately reported. The all-caption sensitivity result is not promoted to a strict-paper result because it is numerically closer."
+  },
+  "conclusion": {
+    "cpu_finalization": "complete",
+    "core_numerical_result": "reproduced_close_under_both_predeclared_protocols",
+    "strict_paper_protocol_status": "blocked",
+    "reason": "caption selection, self-exclusion, and tie handling are not disclosed"
+  }
+}

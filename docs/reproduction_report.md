@@ -11,8 +11,8 @@ FiQA, NQ, SQuTR, ASR reranking, A2T, and other extensions later in this file
 are retained only as historical evidence and do not contribute to OEA paper
 completion.
 
-At the committed-evidence snapshot based on `repro/oea-full@4a7852e`, the
-31-row inventory is `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`.
+At the current committed-evidence snapshot, the 31-row inventory remains
+`4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`.
 FIG-02 is now complete as a method and tensor-contract verification: independent
 Qwen3B and Nemo3B lock-bound runs loaded the LoRA and dual-head contract and
 produced 512-dimensional audio/text embeddings. This does not claim Qwen7B
@@ -25,37 +25,42 @@ experiment-model-dataset-task cells in
 separate from `REPRODUCED_CLOSE`, `CONTROLLED_ONLY`, `PARTIAL`, `TODO`, and
 `BLOCKED`; the generation audit records all input/output hashes. The compact
 paper-only partial Tables 2/3/12-15 are in
-`results/tables/oea_partial_tables.md`. They contain 18 predeclared protocol
+`results/tables/oea_partial_tables.md`. They contain 20 predeclared protocol
 groups and do not select a protocol after comparing it with the paper value.
 
-Committed value evidence currently covers three Clotho T2A cells, two Clotho
-T2T cells, and eight Clotho positive-UIQ cells. Nemo3B(+Cl) has complete Clotho
-audio/caption embeddings and close T2A evidence, but its T2T CPU finalizer and
-positive-UIQ query encoding are still pending. The missing Nemo finalizers are
-now fixed as tracked, lock-bound configurations: T2T retains the same CODE and
-INFERRED protocols used for both Qwen3B variants and has a tmux-only wrapper
-with per-protocol elapsed/throughput/ETA; positive UIQ binds all four
-released query files, prints elapsed/throughput/ETA during generation, and has
-a tmux-only wrapper that tees output, prints a final status block, and retains
-an interactive shell. No model execution is implied by this code readiness.
+Committed value evidence currently covers three Clotho T2A cells, three Clotho
+T2T cells, and eight Clotho positive-UIQ cells. The newest Clotho T2T cell,
+Nemo3B(+Cl), completed at run commit `23bf6ee`: the `[CODE]` seed-0 one-caption
+protocol gives R@1/5/10=`62.9665/75.9809/80.8612`, while the predeclared
+`[INFERRED]` all-caption sensitivity gives `63.6938/75.2344/80.0191`, against
+paper values `63.77/75.29/80.11`. Both remain separate; the sensitivity result
+is not promoted post hoc because it is closer. The suite finished with
+`FINAL_RUN_RC=0` in 47 seconds, and its compact evidence is fixed in
+`results/audits/oea_nemo3b_clotho_t2t_20260729.json`. Strict Table 3 protocol
+status remains blocked because caption selection, self-exclusion, and tie
+handling are not disclosed. Nemo positive UIQ still awaits GPU execution; its
+four released query files, progress/ETA output, tee logging, final status block,
+and retained interactive tmux shell are already fixed by the lock-bound runner.
 Qwen3B(+Cl) efficiency and
 14.71488M LoRA-plus-head parameter count are `CONTROLLED_ONLY`: strict Tables
 5/16 remain blocked by the paper's missing timing, memory, count, and checkpoint
 variant definitions.
 
-The remote shared directories have not been revalidated in this takeover. A
-later authenticated Bitahub Web-console check established that the current
+The remote shared directories were inventoried read-only through the user's
+authenticated Bitahub Web console. That check established that the current
 instance `bitahub-a20633967503994880812290` uses ED25519 fingerprint
 `SHA256:+lMykBVk8nCgA/Aav7/pG5AcS6UrJqy5OuKKLt+q8ZA`, while the anomalous
 `etC2...` fingerprint does not match that instance. The new external endpoint
 `xj-member.bitahub.com:42156` is not yet bound in the client `known_hosts`, and
-no external connection was made. No remote state is promoted from historical
-compact audits. No download, GPU run, training, deletion, overwrite, or long
-CPU task was started.
+no external connection was made by Codex. The newly completed Nemo T2T CPU run
+is promoted only from its returned status, metrics, hashes, and remote paths.
+No download, GPU run, training, deletion, or overwrite was started.
 
 On 2026-07-29 the user approved DATA-04, DATA-06, DATA-08, and the
-Nemo3B-Cl/Clotho positive-UIQ GPU task. The approvals and their unstarted state
-are recorded in `results/audits/takeover_approvals_20260729.json`. The user
+Nemo3B-Cl/Clotho positive-UIQ GPU task. The download and GPU approvals remain
+unstarted; DATA-04 is already present and must be verified rather than
+redownloaded. The approvals are recorded in
+`results/audits/takeover_approvals_20260729.json`. The user
 requested an independent Bitahub-side host-key check and no client connection
 in that turn; the read-only procedure is fixed in
 `docs/ssh_host_key_verification.md`.

@@ -17,6 +17,8 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| OEA-Nemo3B (+Cl) | Clotho | [INFERRED] all-caption sensitivity | 63.77 / 75.29 / 80.11 | 63.6938 / 75.2344 / 80.0191 | 0.090861 |
+| OEA-Nemo3B (+Cl) | Clotho | [CODE] seed-0 one-caption/self-exclusion | 63.77 / 75.29 / 80.11 | 62.9665 / 75.9809 / 80.8612 | 0.803493 |
 | OEA-Qwen3B | Clotho | [INFERRED] all-caption sensitivity | 62.81 / 73.76 / 78.22 | 62.7943 / 73.8756 / 78.3158 | 0.115598 |
 | OEA-Qwen3B | Clotho | [CODE] seed-0 one-caption/self-exclusion | 62.81 / 73.76 / 78.22 | 61.3397 / 74.1627 / 79.3301 | 1.470287 |
 | OEA-Qwen3B (+Cl) | Clotho | [INFERRED] all-caption sensitivity | 64.52 / 75.25 / 79.71 | 64.3636 / 75.1388 / 79.7321 | 0.156364 |
@@ -55,4 +57,4 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 - [PAPER] Clotho caption selection is not specified.
 - [PAPER] T2T self-exclusion and tie handling are not fully specified.
 - [CODE] The public audio path omits the `passage:` prefix stated by the paper.
-- [OBSERVED] Nemo3B (+Cl) T2T and positive UIQ are not listed because no completed metric artifact is committed yet.
+- [OBSERVED] Nemo3B (+Cl) T2T is listed from a completed CPU suite; positive UIQ remains pending.

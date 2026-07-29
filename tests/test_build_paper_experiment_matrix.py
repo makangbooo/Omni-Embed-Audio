@@ -48,7 +48,7 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
         )
         self.assertEqual(self.by_key[nemo]["observed_metric_count"], 3)
 
-    def test_nemo_t2t_and_uiq_are_partial_not_reproduced(self) -> None:
+    def test_nemo_t2t_is_reproduced_while_uiq_remains_partial(self) -> None:
         t2t = (
             "EXP-11",
             "Table 3",
@@ -63,7 +63,10 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
             "Clotho",
             "UIQ Question T2A",
         )
-        self.assertEqual(self.by_key[t2t]["reproduction_status"], "PARTIAL")
+        self.assertEqual(
+            self.by_key[t2t]["reproduction_status"], "REPRODUCED_CLOSE"
+        )
+        self.assertEqual(self.by_key[t2t]["observed_metric_count"], 3)
         self.assertEqual(self.by_key[question]["reproduction_status"], "PARTIAL")
 
     def test_efficiency_and_negative_boundaries_are_explicit(self) -> None:

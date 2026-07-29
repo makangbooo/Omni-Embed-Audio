@@ -162,7 +162,7 @@ def markdown_text(groups: list[dict[str, Any]]) -> str:
             "- [PAPER] Clotho caption selection is not specified.",
             "- [PAPER] T2T self-exclusion and tie handling are not fully specified.",
             "- [CODE] The public audio path omits the `passage:` prefix stated by the paper.",
-            "- [OBSERVED] Nemo3B (+Cl) T2T and positive UIQ are not listed because no completed metric artifact is committed yet.",
+            "- [OBSERVED] Nemo3B (+Cl) T2T is listed from a completed CPU suite; positive UIQ remains pending.",
             "",
         ]
     )

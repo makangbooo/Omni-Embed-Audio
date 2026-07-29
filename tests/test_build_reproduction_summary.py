@@ -275,17 +275,25 @@ class BuildReproductionSummaryTests(unittest.TestCase):
         )
         with DEFAULT_OUTPUT.open(encoding="utf-8", newline="") as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(len(rows), 77)
+        self.assertEqual(len(rows), 83)
         self.assertEqual({row["status"] for row in rows}, {"blocked", "close"})
         blocked = [row for row in rows if row["status"] == "blocked"]
         close = [row for row in rows if row["status"] == "close"]
         self.assertEqual(len(blocked), 23)
-        self.assertEqual(len(close), 54)
+        self.assertEqual(len(close), 60)
         self.assertTrue(all(row["reproduced_value"] == "" for row in blocked))
         self.assertTrue(all(row["reproduced_value"] != "" for row in close))
         self.assertEqual(result["paper_metric_count"], 910)
-        self.assertEqual(result["unobserved_paper_metric_count"], 863)
-        self.assertEqual(result["status_counts"], {"blocked": 23, "close": 54})
+        self.assertEqual(result["unobserved_paper_metric_count"], 860)
+        self.assertEqual(result["status_counts"], {"blocked": 23, "close": 60})
+
+        nemo_t2t = [
+            row
+            for row in rows
+            if row["experiment"].startswith("oea_nemo3b_cl_clotho_t2t_")
+        ]
+        self.assertEqual(len(nemo_t2t), 6)
+        self.assertEqual({row["status"] for row in nemo_t2t}, {"close"})
 
 
 if __name__ == "__main__":
