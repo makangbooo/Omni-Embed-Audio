@@ -9,7 +9,7 @@
 - 来源标签：`[PAPER]` 论文明确给出；`[CODE]` 官方代码、配置、官方模型仓库或发布数据给出；`[INFERRED]` 为待验证推断；`[MISSING]` 论文和代码均未给出。
 - 可复现性：A=官方代码和数据完整；B=需要额外公开资源或小型兼容补丁；C=缺少配置/映射，只能近似或需作者补充；D=人工评测或闭源 API，不能完全自动复现。
 
-截至 2026-07-29 的提交内证据重校准计数为：`COMPLETED=4`、`IN_PROGRESS=10`、`TODO=5`、`BLOCKED=12`，总计 31。DATA-04/05 和 DATA-06/07 的完成不改变该论文实验计数：MECAT 的 847-row/caption 协议和 AudioCaps 实际音频仍缺失。该计数不包含 SpeechXBT-OEA、FiQA、NQ、SQuTR、ASR reranker 或 A2T 扩展。910 个论文指标聚合后的模型×数据集×任务矩阵见 `results/tables/paper_experiment_matrix.csv`；其中 `PAPER` 与复现状态分列，避免把论文转录值误写成复现值。
+截至 2026-07-29 的提交内证据重校准计数为：`COMPLETED=4`、`IN_PROGRESS=10`、`TODO=5`、`BLOCKED=12`，总计 31；整行实验完成度为 `4/31 = 12.9%`。DATA-04/05 和 DATA-06/07 的完成不改变该论文实验计数：MECAT 的 847-row/caption 协议和 AudioCaps 实际音频仍缺失。该计数不包含 SpeechXBT-OEA、FiQA、NQ、SQuTR、ASR reranker 或 A2T 扩展。910 个论文指标聚合后的模型×数据集×任务矩阵见 `results/tables/paper_experiment_matrix.csv`；其中 `PAPER` 与复现状态分列，避免把论文转录值误写成复现值。
 
 ## 全量清单
 

@@ -4,12 +4,23 @@
 
 状态值仅使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、`COMPLETED`、`FAILED`、`BLOCKED`。
 
+## 强制用户汇报格式
+
+任何需要用户执行操作、提供资源、确认配置或返回结果的回复，必须依次包含以下四个区块，不得省略：
+
+1. `【需要你执行的操作】`
+2. `【执行后请告诉我】`
+3. `【实验进度】`
+4. `【我目前正在做什么】`
+
+`【实验进度】` 必须至少报告论文 inventory 的整行完成度、状态分布和计数口径。当前为：已完成 `4/31 = 12.9%`，状态分布为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`。百分比按 `COMPLETED / 31 * 100` 计算并保留一位小数；部分完成的模型×数据集×任务单元不得提前计为整项完成。可以另列 374-cell 矩阵覆盖率，但不能用它替代 31 项论文实验完成率。
+
 | 阶段 | 任务 | 状态 | 当前 Commit | 远程状态 | 阻塞原因 | 下一步 |
 |---|---|---|---|---|---|---|
 | 0 项目审计 | 完整阅读论文正文/附录/表/图/脚注 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 固定 inventory |
 | 0 项目审计 | 审计 README、依赖、训练/评测、数据、UIQ、HN、指标 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认审计结论 |
 | 0 项目审计 | 31 条实验/图/派生分析 inventory | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认复现边界 |
-| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | `23bf6ee`；批准/主机证据见 `results/audits/takeover_approvals_20260729.json` | 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`；910 个论文指标聚合为 374 个可审计单元；当前 cell 状态=`14 REPRODUCED_CLOSE/4 CONTROLLED_ONLY/19 PARTIAL/175 TODO/162 BLOCKED`；FIG-02 方法/张量契约完成；扩展实验明确排除；Bitahub Web 控制台已确认当前实例本地 ED25519=`+lMy...`，异常 `etC2...` 不属于当前实例；远程模型/数据/logs/raw 已完成只读目录盘点 | 外部端点 `xj-member.bitahub.com:42156` 未绑定，Codex 未直接连接；共享目录盘点不等于逐文件完整性校验 | 继续由用户在 Web 控制台运行经过审计的 DATA/GPU 命令，并回传终态与哈希 |
+| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | `23bf6ee`；批准/主机证据见 `results/audits/takeover_approvals_20260729.json` | 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`，整行完成度=`4/31 = 12.9%`；910 个论文指标聚合为 374 个可审计单元；当前 cell 状态=`18 REPRODUCED_CLOSE/4 CONTROLLED_ONLY/15 PARTIAL/175 TODO/162 BLOCKED`；FIG-02 方法/张量契约完成；扩展实验明确排除；Bitahub Web 控制台已确认当前实例本地 ED25519=`+lMy...`，异常 `etC2...` 不属于当前实例；远程模型/数据/logs/raw 已完成只读目录盘点 | 外部端点 `xj-member.bitahub.com:42156` 未绑定，Codex 未直接连接；共享目录盘点不等于逐文件完整性校验 | 继续由用户在 Web 控制台运行经过审计的 DATA/GPU 命令，并回传终态与哈希 |
 | 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `48d7a50` | 本地与 fork 分支均存在 | 无 | 后续提交仅推送该分支 |
 | 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
 | 0 编排 | 统一复现入口与 CPU/GPU 阶段门禁 | COMPLETED | `d13b115` | 公共入口、精确阶段注册表、默认只规划/显式执行、长任务确认和干净 worktree 门禁已实现；baseline 计划已展开为 vanilla CPU 模型锁 → A100 smoke → A100 full → CPU 四协议 metrics 与独立 CLAP blocker | 无；入口完成不代表任何 blocked 实验已解锁或产生复现值 | DATA-04/05、DATA-06/07、DATA-08/09、DATA-11 已完成；继续只读模型资源审计 |
@@ -109,7 +120,7 @@
 ## 当前焦点
 
 - 当前阶段：只推进 OEA 论文原实验复现；SpeechXBT、FiQA、NQ、SQuTR、ASR reranker 与 A2T 仅保留为历史记录，不计入本轮完成度，也不继续启动。训练在官方 checkpoint 评测矩阵完成前继续暂停。
-- 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`。
+- 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
 - 最近完成：OEA-Nemo3B-Cl/Clotho Table 3 T2T 与 Tables 12–15 四类正向 UIQ 已闭环；UIQ 的 4,180 条查询全部生成，四协议均 complete，12 个 R@k 与论文最大绝对差均小于 0.29 pp。
 - 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；CLAP/checkpoint 资源与若干论文协议细节仍未固定。
 - 下一步：优先盘点已存在的 OEA-Nemo3B-AC、Qwen7B 与 vanilla backbone 资源，选择无需下载且已有数据的下一项官方 checkpoint 评测；任何新 GPU 任务须按论文实验 ID 单独申请。

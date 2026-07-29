@@ -12,7 +12,8 @@ are retained only as historical evidence and do not contribute to OEA paper
 completion.
 
 At the current committed-evidence snapshot, the 31-row inventory remains
-`4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`.
+`4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`, or `4/31 = 12.9%`
+complete under the whole-row inventory definition.
 FIG-02 is now complete as a method and tensor-contract verification: independent
 Qwen3B and Nemo3B lock-bound runs loaded the LoRA and dual-head contract and
 produced 512-dimensional audio/text embeddings. This does not claim Qwen7B
