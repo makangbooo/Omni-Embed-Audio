@@ -41,6 +41,23 @@ class EvaluateOfficialSourceOeaClothoTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "absent from audio candidates"):
             select_one_per_clip(["unknown"], ["known"], seed=0)
 
+    def test_uiq_directory_is_optional_for_main_tables(self):
+        repository_root = Path(__file__).resolve().parents[1]
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(repository_root / "scripts" / "evaluate_official_source_oea_clotho.py"),
+                "--help",
+            ],
+            cwd=repository_root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        usage_line = completed.stdout.splitlines()[0]
+        self.assertIn("[--uiq-dir UIQ_DIR]", usage_line)
+
 
 if __name__ == "__main__":
     unittest.main()

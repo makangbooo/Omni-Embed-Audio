@@ -35,7 +35,11 @@ QUERY_TYPES = ("question", "imperative", "paraphrase", "tagging")
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline-dir", type=Path, required=True)
-    parser.add_argument("--uiq-dir", type=Path, required=True)
+    parser.add_argument(
+        "--uiq-dir",
+        type=Path,
+        help="Optional released-UIQ embedding directory; omit for Tables 2/3 only.",
+    )
     parser.add_argument("--captions-csv", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--model", default="OEA-Nemo3B-AC")
@@ -246,43 +250,44 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     )
 
     uiq_inputs: dict[str, dict[str, Any]] = {}
-    for query_type in QUERY_TYPES:
-        path = args.uiq_dir / f"uiq_{query_type}_embeddings.npz"
-        data = load_npz(path)
-        embeddings = np.asarray(data["embeddings"])
-        raw_ids = strings(data["clip_ids"])
-        if embeddings.shape != (1045, 512):
-            raise ValueError(f"unexpected {query_type} shape: {embeddings.shape}")
-        missing = sorted(set(raw_ids) - set(filename_to_audio_id))
-        if missing:
-            raise KeyError(f"{query_type} IDs absent from caption CSV: {missing[:10]}")
-        target_ids = [filename_to_audio_id[value] for value in raw_ids]
-        if len(set(target_ids)) != 1045:
-            raise ValueError(f"{query_type} targets are not one-to-one")
-        protocol_results.append(
-            save_result(
-                output_dir,
-                {
-                    "protocol_id": f"{query_type}_released_uiq",
-                    "task": "uiq",
-                    "paper_table": {
-                        "question": "Table 12",
-                        "imperative": "Table 13",
-                        "paraphrase": "Table 14",
-                        "tagging": "Table 15",
-                    }[query_type],
-                    "protocol_source": "CODE",
-                    "query_selection": "released_uiq_all",
-                },
-                evaluate_id_retrieval(
-                    embeddings,
-                    target_ids,
-                    audio_embeddings,
-                    audio_ids,
-                ),
+    if args.uiq_dir is not None:
+        for query_type in QUERY_TYPES:
+            path = args.uiq_dir / f"uiq_{query_type}_embeddings.npz"
+            data = load_npz(path)
+            embeddings = np.asarray(data["embeddings"])
+            raw_ids = strings(data["clip_ids"])
+            if embeddings.shape != (1045, 512):
+                raise ValueError(f"unexpected {query_type} shape: {embeddings.shape}")
+            missing = sorted(set(raw_ids) - set(filename_to_audio_id))
+            if missing:
+                raise KeyError(f"{query_type} IDs absent from caption CSV: {missing[:10]}")
+            target_ids = [filename_to_audio_id[value] for value in raw_ids]
+            if len(set(target_ids)) != 1045:
+                raise ValueError(f"{query_type} targets are not one-to-one")
+            protocol_results.append(
+                save_result(
+                    output_dir,
+                    {
+                        "protocol_id": f"{query_type}_released_uiq",
+                        "task": "uiq",
+                        "paper_table": {
+                            "question": "Table 12",
+                            "imperative": "Table 13",
+                            "paraphrase": "Table 14",
+                            "tagging": "Table 15",
+                        }[query_type],
+                        "protocol_source": "CODE",
+                        "query_selection": "released_uiq_all",
+                    },
+                    evaluate_id_retrieval(
+                        embeddings,
+                        target_ids,
+                        audio_embeddings,
+                        audio_ids,
+                    ),
+                )
             )
-        )
-        uiq_inputs[query_type] = identity(path)
+            uiq_inputs[query_type] = identity(path)
 
     summary = {
         "schema_version": 1,
@@ -302,7 +307,11 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             "official_embedding_source": True,
             "official_metric_file": "AudioRetrieval/evaluation/metrics.py",
             "compatibility_layer": "AudioRetrieval/evaluation/canonical.py",
-            "reason": "upstream evaluator omits T2T and cannot align released UIQ filename IDs",
+            "reason": (
+                "upstream evaluator omits T2T"
+                if args.uiq_dir is None
+                else "upstream evaluator omits T2T and cannot align released UIQ filename IDs"
+            ),
         },
         "inputs": {
             "audio_embeddings": identity(baseline_audio_path),
