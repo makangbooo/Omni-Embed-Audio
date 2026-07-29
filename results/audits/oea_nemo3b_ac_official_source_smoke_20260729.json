@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_example_smoke",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "upstream_commit": "b261ad0743dbfac67cb6b20016fd951a366b3f35",
+    "run_commit": "4b4b36c7e0a799847a1d896568cc6f4f390cf065",
+    "git_status_short": ""
+  },
+  "run": {
+    "run_id": "official_source_oea_nemo3b_ac_5clip_20260729_213846",
+    "result_directory": "/home/jg525/Omni-Embed-Audio/results/raw/official_source_oea_nemo3b_ac_5clip_20260729_213846",
+    "log_directory": "/home/jg525/Omni-Embed-Audio/logs/official_source_oea_nemo3b_ac_5clip_20260729_213846",
+    "log_path": "/home/jg525/Omni-Embed-Audio/logs/official_source_oea_nemo3b_ac_5clip_20260729_213846/combined.log",
+    "log_sha256": "2b37c8910e1b0addd753b8a84dbcbeb12df31f2b818ccbe15ef79b7b45bf09dd",
+    "started_at": "2026-07-29T21:38:49+08:00",
+    "finished_at": "2026-07-29T21:40:47+08:00",
+    "elapsed_seconds": 118,
+    "final_run_rc": 0,
+    "completion_status": "complete",
+    "failed_stage": null,
+    "error_summary": null,
+    "gpu_used": true,
+    "downloads_performed": false
+  },
+  "model": {
+    "paper_name": "OEA-Nemo3B",
+    "released_name": "OEA-Nemo3B-AC",
+    "base_model": "nvidia/omni-embed-nemotron-3b",
+    "base_model_path": "/home/jg525/models/oea/omni-embed-nemotron-3b",
+    "checkpoint_path": "/home/jg525/models/oea/OEA-Nemo3B-AC/step_400_best.pt",
+    "checkpoint_sha256": "55579dfbd4f6621b5d842c5e731d6a1d37dbfd04b26b1c55bf8cdea980e67d25"
+  },
+  "workload": {
+    "dataset": "five Clotho samples bundled with the official repository",
+    "audio_count": 5,
+    "query_count": 5,
+    "audio_embedding_shape": [5, 512],
+    "query_embedding_shape": [5, 512]
+  },
+  "top1": [
+    {"query_type": "question", "audio": "water_stream.wav", "cosine": 0.718},
+    {"query_type": "imperative", "audio": "water_stream.wav", "cosine": 0.674},
+    {"query_type": "paraphrase", "audio": "water_stream.wav", "cosine": 0.586},
+    {"query_type": "tagging", "audio": "water_stream.wav", "cosine": 0.729},
+    {"query_type": "negative", "audio": "water_stream.wav", "cosine": 0.686}
+  ],
+  "warnings": [
+    "Transformers reports that video processor configuration in preprocessor.json is deprecated.",
+    "Transformers reports an unrecognized mrope_section key for rope_type=default.",
+    "The released checkpoint referenced pathlib._local; the official trainer compatibility shim handled it successfully."
+  ],
+  "artifact_sha256": {
+    "exit_code.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "git_commit.txt": "432a8d51560b01f420f0b8f0c3a06f07dea45aaa4ce16b8a1f778180ccd2d753",
+    "git_status.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gpu_info.txt": "3aa6ada23ba5e9ae1bc3e4a2116685b93ad485a5305ce68d7fa0209c33a1fe16"
+  },
+  "claim_boundary": {
+    "supported": "The released OEA-Nemo3B-AC LoRA and both projection heads load through the official example path and produce 512-dimensional audio/query embeddings on the bundled five-clip smoke set.",
+    "not_supported": [
+      "paper Table 2 or Table 3 retrieval metrics",
+      "Tables 12-15 positive UIQ metrics",
+      "negative UIQ hard-negative metrics",
+      "full Clotho evaluation completion"
+    ]
+  }
+}
