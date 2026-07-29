@@ -54,16 +54,38 @@ instance `bitahub-a20633967503994880812290` uses ED25519 fingerprint
 `xj-member.bitahub.com:42156` is not yet bound in the client `known_hosts`, and
 no external connection was made by Codex. The newly completed Nemo T2T CPU run
 is promoted only from its returned status, metrics, hashes, and remote paths.
-No download, GPU run, training, deletion, or overwrite was started.
+During that read-only takeover audit, no download, GPU run, training, deletion,
+or overwrite was started. The separately approved data runs are recorded below.
 
 On 2026-07-29 the user approved DATA-04, DATA-06, DATA-08, and the
-Nemo3B-Cl/Clotho positive-UIQ GPU task. The download and GPU approvals remain
-unstarted; DATA-04 is already present and must be verified rather than
-redownloaded. The approvals are recorded in
+Nemo3B-Cl/Clotho positive-UIQ GPU task. DATA-04/05 and DATA-06/07 have now
+completed through visible tmux wrappers at run commit `febfbe4`; DATA-08/09 and
+the GPU task remain unstarted. The approvals are recorded in
 `results/audits/takeover_approvals_20260729.json`. The user
 requested an independent Bitahub-side host-key check and no client connection
 in that turn; the read-only procedure is fixed in
 `docs/ssh_host_key_verification.md`.
+
+The MECAT run completed in 121 seconds with all four child/wrapper exit codes
+equal to zero. It fixed the 173,168,424-byte archive at SHA256
+`644cf75e...122c4`, decoded all 848 FLAC files, preserved all six caption
+fields, and proved exact 848-ID equality for all four released positive UIQ
+sets. The recursive count of 849 JSON files is 848 sample metadata files plus
+the validator's hidden completion marker, not an extra sample. The canonical
+manifest SHA256 is `b4c4d8c1...94a6`; full compact evidence is in
+`results/audits/data04_data05_mecat_remote_20260729.json`. This does not unblock
+strict MECAT Tables 2/3/12-15: PAPER's excluded 1 sample and the retrieval
+caption construction remain `[MISSING]`.
+
+The AudioCaps metadata wrapper completed in 40 seconds with
+`FINAL_RUN_RC=0`. Its child stages reported all pinned source identities and
+the full metadata/UIQ validation complete, while preserving the 91,256 versus
+91,254 conflict. The returned terminal excerpt did not include child exit-code
+files or statistics/manifest hashes, so
+`results/audits/data06_data07_audiocaps_remote_20260729.json` marks those
+fine-grained identities pending rather than inventing them. The existing run
+directories will be read only; no rerun or redownload is required. Actual
+AudioCaps evaluation audio is still absent.
 
 ## Excluded SpeechXBT-OEA extension evidence
 

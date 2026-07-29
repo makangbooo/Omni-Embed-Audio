@@ -1,10 +1,10 @@
 # AudioCaps 2.0 数据审计
 
-最后更新：2026-07-17（Asia/Shanghai）
+最后更新：2026-07-29（Asia/Shanghai）
 
 ## 结论
 
-论文所称 AudioCaps v2 可以固定到 AudioCaps 官方仓库在 2025-02-24 发布的 `dataset2.0`，不是私有数据集别名。官方仓库 commit `d004db3ea1b01cf4fd0347dd8d27db90cadc8809` 的 validation/test 与论文评测口径一致，但 train 的公开文件存在可重复确认的计数和 CSV 格式冲突。
+论文所称 AudioCaps v2 可以固定到 AudioCaps 官方仓库在 2025-02-24 发布的 `dataset2.0`，不是私有数据集别名。DATA-06/07 已在 Bitahub 远程 CPU 环境完成；官方仓库 commit `d004db3ea1b01cf4fd0347dd8d27db90cadc8809` 的 validation/test metadata 与论文评测口径一致，但 train 的公开文件存在可重复确认的计数和 CSV 格式冲突。
 
 - `[PAPER]` 训练集为 91,256 samples。
 - `[CODE]` 官方 AudioCaps 2.0 README 同样报告 train 91,256、validation 2,475、test 4,875，总计 98,606。
@@ -64,6 +64,15 @@ DATA-07 对固定 test CSV 和仓库 UIQ 做了真实全量闭环：
 
 - `bash scripts/download_data06_audiocaps_v2_metadata.sh`：CPU-only，下载约 6.9 MB 官方 metadata，校验 MD5/SHA256/bytes。
 - `bash scripts/run_data07_audiocaps_v2_metadata_validation.sh`：CPU-only，生成四个 metadata-only manifest、统计报告和 SHA256。
+
+远程 wrapper `oea_takeover_data06_20260729_122259` 在 commit
+`febfbe4af7043dbad63183992143ecd7f51124e3` 上以 `FINAL_RUN_RC=0` 完成，
+耗时 40 秒。DATA-06 子阶段报告 MD5、SHA256 和精确 bytes 全部通过；DATA-07
+子阶段报告 metadata/UIQ validation 完成，并再次保留 91,256 与 91,254 的冲突。
+返回的终端记录没有包含子阶段 exit-code 文件、`download_manifest.json`、
+`data_statistics.json` 和四个 manifest 的 SHA256，因此这些细粒度工件身份仍待只读补采，
+不重新下载或重跑。现有证据边界见
+`results/audits/data06_data07_audiocaps_remote_20260729.json`。
 
 输出 manifests：
 

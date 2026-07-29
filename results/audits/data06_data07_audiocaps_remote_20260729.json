@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "status": "remote_execution_complete_artifact_hashes_pending",
+  "evidence_source": "[OBSERVED] terminal output returned by the user from the authenticated Bitahub Web console",
+  "execution": {
+    "git_commit": "febfbe4af7043dbad63183992143ecd7f51124e3",
+    "git_status_short": "",
+    "host": "bitahub-a20633967503994880812290",
+    "wrapper_run_id": "oea_takeover_data06_20260729_122259",
+    "command": "bash scripts/run_takeover_approved_data_tmux.sh data06",
+    "start_time": "2026-07-29T12:22:59+08:00",
+    "end_time": "2026-07-29T12:23:39+08:00",
+    "elapsed_seconds": 40,
+    "final_run_rc": 0,
+    "completion_status": "complete",
+    "failed_stage": null,
+    "error_summary": null,
+    "result_directory": "/home/jg525/datasets/oea/audiocaps_v2_d004db3",
+    "log_directory": "/home/jg525/Omni-Embed-Audio/logs/oea_takeover_data06_20260729_122259",
+    "combined_log": "/home/jg525/Omni-Embed-Audio/logs/oea_takeover_data06_20260729_122259/combined.log"
+  },
+  "data06": {
+    "status": "complete",
+    "child_log_directory": "/home/jg525/Omni-Embed-Audio/logs/data06_audiocaps_v2_metadata_download_20260729_122259",
+    "observed_assertions": [
+      "official metadata download completed",
+      "MD5, SHA256, and exact byte sizes all verified"
+    ],
+    "source": "https://github.com/cdjkim/audiocaps/tree/d004db3ea1b01cf4fd0347dd8d27db90cadc8809/dataset2.0",
+    "revision": "d004db3ea1b01cf4fd0347dd8d27db90cadc8809",
+    "expected_source_identities": {
+      "source_tag": "[CODE] committed DATA-06 resource manifest; remote child reported all identities verified",
+      "README.md": {
+        "size_bytes": 753,
+        "sha256": "ae2fcbcf7e4f93964dfaf02c094998b2cfc199a16f4eb0350f65f170ad01a906"
+      },
+      "train.csv": {
+        "size_bytes": 6311901,
+        "sha256": "25659eee0ff887972b6a8a74008dfffe582343930e89db71519d66e9dd014f6e"
+      },
+      "val.csv": {
+        "size_bytes": 169508,
+        "sha256": "dfdd0f83c70fb818fbb86dcba42754abfb97f7774d811fff91a1c89d84d868c5"
+      },
+      "test.csv": {
+        "size_bytes": 397498,
+        "sha256": "365c8a8a71c9070a8d5dba5dd44f3a781f906632a49cb82b38bebaaa8f3c5ccb"
+      }
+    }
+  },
+  "data07": {
+    "status": "complete",
+    "child_log_directory": "/home/jg525/Omni-Embed-Audio/logs/data07_audiocaps_v2_metadata_validation_20260729_122319",
+    "observed_assertions": [
+      "AudioCaps 2.0 metadata/UIQ validation completed",
+      "paper and README report 91,256 train rows while the public OEA loader yields 91,254"
+    ],
+    "expected_validated_counts": {
+      "source_tag": "[CODE] enforced by the committed validator; detailed remote statistics file was not printed in the returned transcript",
+      "train_public_loader_records": 91254,
+      "train_repaired_bare_cr_records": 91254,
+      "validation_caption_rows": 2475,
+      "validation_audio_ids": 495,
+      "test_caption_rows": 4875,
+      "test_audio_ids": 975,
+      "positive_uiq_rows_per_type": 975,
+      "negative_uiq_rows": 630
+    },
+    "claim_boundary": "[PAPER][MISSING] no published loader or manifest yields 91,256 valid train records; AudioCaps evaluation audio is also not present"
+  },
+  "pending_evidence_registration": {
+    "reason": "The returned terminal transcript contains the wrapper final block and child success messages but not the child exit-code files, download_manifest.json, data_statistics.json, manifest hashes, or manifest line counts.",
+    "not_claimed_observed": [
+      "DATA-06 child exit-code file values",
+      "DATA-06 download_manifest.json SHA256",
+      "DATA-07 child exit-code file values",
+      "DATA-07 data_statistics.json SHA256",
+      "four remote manifest SHA256 values and line counts"
+    ],
+    "next_action": "Collect those read-only identities from the existing run directories; do not rerun or redownload DATA-06/07."
+  }
+}

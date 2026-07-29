@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_source": "[OBSERVED] terminal output returned by the user from the authenticated Bitahub Web console",
+  "execution": {
+    "git_commit": "febfbe4af7043dbad63183992143ecd7f51124e3",
+    "git_status_short": "",
+    "host": "bitahub-a20633967503994880812290",
+    "wrapper_run_id": "oea_takeover_data04_20260729_121242",
+    "command": "bash scripts/run_takeover_approved_data_tmux.sh data04",
+    "start_time": "2026-07-29T12:12:42+08:00",
+    "end_time": "2026-07-29T12:14:43+08:00",
+    "elapsed_seconds": 121,
+    "final_run_rc": 0,
+    "completion_status": "complete",
+    "failed_stage": null,
+    "error_summary": null,
+    "log_directory": "/home/jg525/Omni-Embed-Audio/logs/oea_takeover_data04_20260729_121242",
+    "combined_log": "/home/jg525/Omni-Embed-Audio/logs/oea_takeover_data04_20260729_121242/combined.log"
+  },
+  "data04": {
+    "status": "complete",
+    "child_log_directory": "/home/jg525/Omni-Embed-Audio/logs/data04_mecat_00a_test_download_20260729_121242",
+    "download_exit_code": 0,
+    "wrapper_exit_code": 0,
+    "download_manifest": {
+      "path": "/home/jg525/Omni-Embed-Audio/logs/data04_mecat_00a_test_download_20260729_121242/download_manifest.json",
+      "sha256": "c43088890e7ac7b56f1ab05aebb38e3d7e5899f40db685d6c05e9f61183a5a35",
+      "reported_status": "complete"
+    },
+    "repository": "mispeech/MECAT-Caption",
+    "requested_revision": "be4a24c3f7309d74208e08a7cce49e72cb7a5834",
+    "resolved_revision": "be4a24c3f7309d74208e08a7cce49e72cb7a5834",
+    "archive": {
+      "path": "/home/jg525/datasets/oea/mecat_caption_be4a24c3/source/00A/test_0000-0000000.tar.gz",
+      "size_bytes": 173168424,
+      "sha256": "644cf75e2509c633452a18e36c41b285a317c6cbc06198d7dfe406c5aa5122c4",
+      "matches_remote_lfs_sha256": true
+    },
+    "readme": {
+      "path": "/home/jg525/datasets/oea/mecat_caption_be4a24c3/source/README.md",
+      "size_bytes": 15289,
+      "sha256": "96a11a00420d92437e8008f6454f7230f81567aad3f4fabfce8bf81c0f330987"
+    }
+  },
+  "data05": {
+    "status": "complete",
+    "child_log_directory": "/home/jg525/Omni-Embed-Audio/logs/data05_mecat_validation_20260729_121302",
+    "validation_exit_code": 0,
+    "wrapper_exit_code": 0,
+    "statistics": {
+      "path": "/home/jg525/Omni-Embed-Audio/logs/data05_mecat_validation_20260729_121302/data_statistics.json",
+      "sha256": "9a1bd4b781d025ddec834127d7a4fd0a4f44cf63f03c6b62ee90f359a018a804",
+      "reported_status": "complete"
+    },
+    "manifest": {
+      "path": "/home/jg525/datasets/oea/mecat_caption_be4a24c3/manifests/mecat_00a_test_manifest.jsonl",
+      "rows": 848,
+      "size_bytes": 1960251,
+      "sha256": "b4c4d8c1c5928ba5b23a25b3169519871cb2438dfed05823610aebeccb8594a6"
+    },
+    "archive_examples": 848,
+    "decoded_files": 848,
+    "recursive_flac_file_count": 848,
+    "recursive_json_file_count": 849,
+    "recursive_json_count_reconciliation": "[OBSERVED][CODE] 848 sample metadata JSON files plus the validator-created hidden .data05_mecat_extraction_complete.json marker; this is not a 849th sample",
+    "total_audio_bytes": 172366974,
+    "total_duration_seconds": 8520.704,
+    "duration_seconds": {
+      "minimum": 10.048,
+      "maximum": 10.048,
+      "mean": 10.048
+    },
+    "sample_rate_counts": {
+      "16000": 848
+    },
+    "channel_counts": {
+      "1": 848
+    },
+    "positive_uiq": {
+      "question": 848,
+      "imperative": 848,
+      "paraphrase": 848,
+      "tagging": 848,
+      "all_exact_archive_id_set_matches": true
+    },
+    "negative_uiq": {
+      "rows": 409,
+      "unique_target_audio_ids": 176,
+      "all_target_audio_ids_in_archive": true,
+      "hard_negative_audio_id_source": "[MISSING] not present in released JSONL"
+    }
+  },
+  "claim_boundary": {
+    "public_release": "[CODE][OBSERVED] the pinned public 00A/test release is complete and auditable at 848 samples",
+    "paper_subset": "[PAPER][MISSING] the paper reports 847 samples but does not publish the excluded ID or filtering rule",
+    "retrieval_caption": "[MISSING] the paper and public evaluator do not identify which of the six MECAT caption fields constructs Table 2/3 retrieval text",
+    "strict_paper_retrieval_status": "BLOCKED"
+  }
+}
