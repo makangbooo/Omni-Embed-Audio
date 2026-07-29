@@ -13,6 +13,13 @@
 3. `【实验进度】`
 4. `【我目前正在做什么】`
 
+`【需要你执行的操作】` 中必须在命令前以独立字段显式列出：
+
+- `是否使用 GPU：是/否`
+- `预计执行时间：<可审计的时间范围>`
+
+不得只把 GPU 使用情况或预计时间埋在说明段落中。预计时间必须覆盖该次请求的完整操作；如果包含多个阶段，应同时给出分阶段和总预计时间。GPU 字段为“是”时，仍须完整列出实验 ID、精确命令、模型/checkpoint/数据集、GPU 型号和数量、预计显存、缓存与结果目录、断点恢复和失败处理方案。
+
 `【实验进度】` 必须至少报告论文 inventory 的整行完成度、状态分布和计数口径。当前为：已完成 `4/31 = 12.9%`，状态分布为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`。百分比按 `COMPLETED / 31 * 100` 计算并保留一位小数；部分完成的模型×数据集×任务单元不得提前计为整项完成。可以另列 374-cell 矩阵覆盖率，但不能用它替代 31 项论文实验完成率。
 
 | 阶段 | 任务 | 状态 | 当前 Commit | 远程状态 | 阻塞原因 | 下一步 |
@@ -41,7 +48,7 @@
 | 2 官方权重 | Nemo3B-Cl/Clotho A2T 方向 CPU 套件 | COMPLETED | `7cfbfab` | suite=`oea_nemo3b_clotho_a2t_suite_seed42_20260727_161133`；attempt=`0`、stderr 为空；1,045 audio→5,225 captions；R@1/5/10=`26.8900/51.3876/65.2632`；suite/CSV SHA256 已固定 | 无；该结果是主实验前置方向检查，不是论文报告值 | OEA-B2 完成；进入 SQuTR-FiQA frozen-index 方向 |
 | 2 官方权重 | MODEL-04：Qwen2.5-Omni-7B base + OEA-Qwen7B AC/Cl | IN_PROGRESS | `48c9b3c` | 已知 base 完整、AC 曾保留 partial、Cl 未有开始证据；最近检查的主容器无活动下载进程 | CAS 链路不稳定；跨实例状态未确认 | 后续单独核对全部目录与 manifest，再断点续传 |
 | 2 官方权重 | MODEL-03/04 只读完整性审计器 | COMPLETED | `f4309a7` | 远程尚未运行；本地实现及 105 项完整测试通过 | 无；工具完成不代表六个 asset 已完成 | 已批准 DATA-08/09 完成后，在 CPU 侧按 asset 运行只读模型审计 |
-| 2 官方权重 | 九个 OEA/base 资产轻量 presence scan | WAITING_USER | 本提交 | 已实现 metadata-only 本地 stat、revision marker、required file、primary size 与 `.incomplete` 扫描；不读取大文件内容、不联网、不下载，presence candidate 不代表完整性通过 | 等待远程执行 1–3 分钟只读扫描 | 根据九资产实际状态选择后续逐变体完整 hash/provenance 审计；预计超过 30 分钟者另行申请批准 |
+| 2 官方权重 | 九个 OEA/base 资产轻量 presence scan | COMPLETED | `513e078`；审计=`results/audits/official_oea_model_presence_scan_20260729.json` | run=`official_oea_model_presence_scan_20260729_154556`；scan/wrapper/call RC 均为 `0`；9/9 assets 的 revision marker、required files 与已固定的 primary checkpoint size 均匹配，无 `.incomplete` 或 symlink；远程 JSON SHA256=`123cd069...e9c1` | `[OBSERVED]` 仅为 metadata-only presence candidate；未做完整文件集合、内容 SHA256 或远端 provenance 校验，不能据此授权模型评测 | 执行已实现的 MODEL-03/04 只读完整 hash/provenance 审计；约读取 86.7 GB，预计可能超过 30 分钟，须先获用户批准 |
 | 2 官方权重 | 六变体按变体资源审计入口 | COMPLETED | `d2f066c` | 注册表驱动地只选择一个 base 与一个 checkpoint；Qwen3B AC 跨 MODEL-01/02 manifest 已覆盖；报告固定 scope/registry/逐文件 Git-LFS 身份，完整 172 项测试通过 | 尚未在远程对六个变体逐一运行；工具完成不代表资源完整 | 按已知下载状态选择变体，在 CPU 侧运行只读审计；超过 30 分钟的读取任务执行前单独汇报 |
 | 2 官方权重 | 六变体原始 checkpoint 固定、结构审计与推理权重提取器 | COMPLETED | `ee28245` | 六个不可变 revision 的真实文件名/字节数/LFS SHA256 已固定；FakeTensor LoRA 子集统计、逐 checkpoint 非覆盖提取、逐张量等值复核和失败工件已实现；完整 160 项测试通过 | 除已验证的 Qwen3B-Cl 外，其余五个派生权重尚未在远程生成；工具完成不代表原始下载已完整 | 对已完成的原始 checkpoint 先做 CPU 结构审计，再凭派生 SHA256 生成模型专属评测配置 |
 | 2 官方权重 | 六变体可移植模型资源锁生成器 | COMPLETED | `18e4c3b` | Qwen3B-Cl 与 Qwen3B 两个变体均已完成真实远程审计、派生权重提取和正式模型锁；基础模型全文件、原始/派生 checkpoint SHA256 及实测 LoRA 结构均已锁定 | Nemo3B AC/Cl 与 Qwen7B AC/Cl 四个变体仍需完成资源审计和模型锁 | 先完成 Qwen3B 锁绑定 GPU smoke，再按已下载资源状态选择其余变体 |

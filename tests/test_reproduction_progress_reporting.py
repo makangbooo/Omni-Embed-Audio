@@ -53,6 +53,13 @@ class ReproductionProgressReportingTests(unittest.TestCase):
         positions = [self.status_text.index(section) for section in expected_sections]
         self.assertEqual(positions, sorted(positions))
         self.assertIn("`4/31 = 12.9%`", self.status_text)
+        self.assertIn("`是否使用 GPU：是/否`", self.status_text)
+        self.assertIn("`预计执行时间：<可审计的时间范围>`", self.status_text)
+        self.assertIn("必须在命令前以独立字段显式列出", self.status_text)
+        self.assertIn(
+            "不得只把 GPU 使用情况或预计时间埋在说明段落中",
+            self.status_text,
+        )
 
     def test_inventory_and_report_publish_the_same_percentage(self) -> None:
         self.assertIn("`4/31 = 12.9%`", self.inventory_text)
