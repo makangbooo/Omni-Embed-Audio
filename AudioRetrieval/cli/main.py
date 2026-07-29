@@ -50,6 +50,29 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     embeddings.add_argument("--cache-dir", type=Path,
                            help="Optional Hugging Face cache directory")
 
+    uiq_embeddings = preprocess_sub.add_parser(
+        "uiq-embeddings",
+        help="Precompute released UIQ text embeddings",
+    )
+    uiq_embeddings.add_argument("--model", choices=["oea"], default="oea")
+    uiq_embeddings.add_argument(
+        "--uiq-jsonl",
+        type=Path,
+        action="append",
+        required=True,
+        help="Released UIQ JSONL; repeat for multiple query types",
+    )
+    uiq_embeddings.add_argument("--output-dir", type=Path, required=True)
+    uiq_embeddings.add_argument("--dataset", default="unknown")
+    uiq_embeddings.add_argument("--device", default="cuda")
+    uiq_embeddings.add_argument("--batch-size-text", type=int, default=16)
+    uiq_embeddings.add_argument("--checkpoint", type=Path, required=True)
+    uiq_embeddings.add_argument(
+        "--repo-id",
+        default="nvidia/omni-embed-nemotron-3b",
+    )
+    uiq_embeddings.add_argument("--local-path", type=Path)
+
     # MGA-CLAP specific options
     embeddings.add_argument("--mga-repo", type=Path, help="MGA-CLAP repository path")
     embeddings.add_argument("--mga-ckpt", type=Path, help="MGA-CLAP checkpoint path")
@@ -190,6 +213,50 @@ def run_preprocess(args: argparse.Namespace) -> int:
             output_dir=args.output_dir,
             dataset_type=args.dataset,
         )
+        return 0
+
+    elif args.preprocess_cmd == "uiq-embeddings":
+        import json
+
+        from AudioRetrieval.preprocessing.embeddings import UIQTextEmbeddingPrecomputer
+
+        if args.output_dir.exists() and any(args.output_dir.iterdir()):
+            print(f"Error: UIQ output directory is not empty: {args.output_dir}")
+            return 2
+
+        encoder = UIQTextEmbeddingPrecomputer(
+            model=args.model,
+            device=args.device,
+            batch_size_text=args.batch_size_text,
+            oea_checkpoint=str(args.checkpoint),
+            oea_repo_id=args.repo_id,
+            oea_local_path=str(args.local_path) if args.local_path else None,
+        )
+
+        summaries = {}
+        for uiq_path in args.uiq_jsonl:
+            result = encoder.precompute(
+                uiq_jsonl=uiq_path,
+                output_dir=args.output_dir,
+                dataset=args.dataset,
+            )
+            summaries[str(uiq_path)] = result
+
+        summary_path = args.output_dir / "uiq_run_summary.json"
+        summary_path.write_text(
+            json.dumps(
+                {
+                    "dataset": args.dataset,
+                    "model": args.model,
+                    "inputs": [str(path) for path in args.uiq_jsonl],
+                    "summaries": summaries,
+                },
+                indent=2,
+                sort_keys=True,
+            ),
+            encoding="utf-8",
+        )
+        print(f"[INFO] UIQ run summary written to {summary_path}")
         return 0
 
     elif args.preprocess_cmd == "hard-negatives":
