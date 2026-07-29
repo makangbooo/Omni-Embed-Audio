@@ -58,6 +58,11 @@ class OfficialModelResourceAuditTmuxTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, self.tmux_text)
         self.assertIn("sleep 15", self.tmux_text)
+        self.assertIn(
+            '"${AUDIT_STATUS}" != "running" && "${PROCESSED_ASSETS}" -ge "${EXPECTED_ASSETS}"',
+            self.tmux_text,
+        )
+        self.assertIn('ACCOUNTED_BYTES="${EXPECTED_BYTES}"', self.tmux_text)
 
     def test_audit_remains_cpu_only_read_only_and_uniquely_addressable(self) -> None:
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', self.tmux_text)

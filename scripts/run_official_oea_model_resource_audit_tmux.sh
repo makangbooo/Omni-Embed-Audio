@@ -149,6 +149,12 @@ else:
 PY
     )
   fi
+  if [[ "${AUDIT_STATUS}" != "running" && "${PROCESSED_ASSETS}" -ge "${EXPECTED_ASSETS}" ]]; then
+    # The Python child can exit between polling samples. Once its atomic report
+    # confirms that every asset was processed, report completed workload rather
+    # than a stale /proc byte counter from the preceding sample.
+    ACCOUNTED_BYTES="${EXPECTED_BYTES}"
+  fi
 
   DELTA_BYTES="$((RCHAR - LAST_RCHAR))"
   if (( DELTA_BYTES < 0 )); then DELTA_BYTES=0; fi
