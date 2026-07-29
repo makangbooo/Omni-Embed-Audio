@@ -132,7 +132,10 @@ class OEAEmbeddingPrecomputer(BaseEmbeddingPrecomputer):
 
         # Load checkpoint
         device = torch.device(self.device if torch.cuda.is_available() else "cpu")
-        checkpoint_data = torch.load(self.checkpoint, map_location=device)
+        checkpoint_data = training_module.safe_torch_load(
+            self.checkpoint,
+            map_location=torch.device("cpu"),
+        )
 
         # Load LoRA weights
         self._peft_model.load_state_dict(checkpoint_data["lora_state_dict"], strict=False)

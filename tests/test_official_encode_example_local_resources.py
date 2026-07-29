@@ -43,6 +43,13 @@ class OfficialEncodeExampleLocalResourcesTests(unittest.TestCase):
                 module.parse_args()
         self.assertEqual(raised.exception.code, 0)
 
+    def test_checkpoint_is_loaded_on_cpu(self):
+        source = EXAMPLE_PATH.read_text(encoding="utf-8")
+        self.assertIn(
+            'safe_torch_load(ckpt_path, map_location=torch.device("cpu"))',
+            source,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

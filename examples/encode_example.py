@@ -170,7 +170,9 @@ def build_model(args: argparse.Namespace):
     adapter.set_underlying_model(peft_model)
 
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
-    ckpt = safe_torch_load(ckpt_path, map_location=device)
+    # Released checkpoints can include a full training state. Loading that state
+    # directly onto the inference GPU needlessly consumes several extra GiB.
+    ckpt = safe_torch_load(ckpt_path, map_location=torch.device("cpu"))
 
     peft_model.load_state_dict(ckpt["lora_state_dict"], strict=False)
 

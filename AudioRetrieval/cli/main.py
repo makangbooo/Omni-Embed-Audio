@@ -45,6 +45,10 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     embeddings.add_argument("--checkpoint", type=Path, help="OEA checkpoint path")
     embeddings.add_argument("--repo-id", default="nvidia/omni-embed-nemotron-3b",
                            help="OEA HuggingFace repo ID")
+    embeddings.add_argument("--local-path", type=Path,
+                           help="Already-downloaded OEA base-model directory")
+    embeddings.add_argument("--cache-dir", type=Path,
+                           help="Optional Hugging Face cache directory")
 
     # MGA-CLAP specific options
     embeddings.add_argument("--mga-repo", type=Path, help="MGA-CLAP repository path")
@@ -169,6 +173,8 @@ def run_preprocess(args: argparse.Namespace) -> int:
             precomputer = OEAEmbeddingPrecomputer(
                 checkpoint=str(args.checkpoint),
                 repo_id=args.repo_id,
+                local_path=str(args.local_path) if args.local_path else None,
+                cache_dir=str(args.cache_dir) if args.cache_dir else None,
                 device=args.device,
                 batch_size_audio=args.batch_size_audio,
                 batch_size_text=args.batch_size_text,
