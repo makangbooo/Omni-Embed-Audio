@@ -58,9 +58,9 @@ During that read-only takeover audit, no download, GPU run, training, deletion,
 or overwrite was started. The separately approved data runs are recorded below.
 
 On 2026-07-29 the user approved DATA-04, DATA-06, DATA-08, and the
-Nemo3B-Cl/Clotho positive-UIQ GPU task. DATA-04/05 and DATA-06/07 have now
-completed through visible tmux wrappers at run commit `febfbe4`; DATA-08/09 and
-the GPU task remain unstarted. The approvals are recorded in
+Nemo3B-Cl/Clotho positive-UIQ GPU task. DATA-04/05 and DATA-06/07 completed
+through visible tmux wrappers at run commit `febfbe4`; DATA-08/09 then completed
+at run commit `1046641`. The GPU task remains unstarted. The approvals are recorded in
 `results/audits/takeover_approvals_20260729.json`. The user
 requested an independent Bitahub-side host-key check and no client connection
 in that turn; the read-only procedure is fixed in
@@ -78,14 +78,23 @@ strict MECAT Tables 2/3/12-15: PAPER's excluded 1 sample and the retrieval
 caption construction remain `[MISSING]`.
 
 The AudioCaps metadata wrapper completed in 40 seconds with
-`FINAL_RUN_RC=0`. Its child stages reported all pinned source identities and
-the full metadata/UIQ validation complete, while preserving the 91,256 versus
-91,254 conflict. The returned terminal excerpt did not include child exit-code
-files or statistics/manifest hashes, so
-`results/audits/data06_data07_audiocaps_remote_20260729.json` marks those
-fine-grained identities pending rather than inventing them. The existing run
-directories will be read only; no rerun or redownload is required. Actual
-AudioCaps evaluation audio is still absent.
+`FINAL_RUN_RC=0`. Subsequent read-only collection fixed all four child/wrapper
+exit codes at zero, both evidence JSON hashes, and the line count, byte size,
+and SHA256 of all four manifests. The public-loader and bare-CR-repaired train
+manifests both contain 91,254 rows, so the paper's 91,256-row protocol remains
+`[MISSING]`. Complete evidence is in
+`results/audits/data06_data07_audiocaps_remote_20260729.json`; actual AudioCaps
+evaluation audio is still absent.
+
+The WavCaps metadata wrapper `oea_takeover_data08_20260729_124908` completed in
+130 seconds with `FINAL_RUN_RC=0`. It verified exactly 8 pinned files totaling
+176,863,095 bytes and explicitly excluded every audio archive. DATA-09 completed
+the 403,050-row metadata/count/leakage pass and retained the protocol conflict:
+PAPER writes `duration <= 31`, whereas the public metadata reaches 275,618 only
+under `[INFERRED] 0 < duration < 31`. The wrapper evidence is fixed in
+`results/audits/data08_data09_wavcaps_remote_20260729.json`; child evidence JSON
+and generated manifest/blocklist identities remain pending read-only collection.
+No exact post-blocklist paper training manifest is claimed.
 
 ## Excluded SpeechXBT-OEA extension evidence
 

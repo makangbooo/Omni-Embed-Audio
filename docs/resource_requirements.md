@@ -57,18 +57,18 @@
 
 ### WavCaps
 
-- `[CODE]` 已固定公共 `cvssp/WavCaps` revision `0930ec11ded28fa0eaa910fde2f6fc3538acbeac`。DATA-08 只下载 8 个 metadata/官方 blacklist 文件，共 176,863,095 bytes；完整仓库（含音频）约 819.51 GB。
+- `[CODE][OBSERVED]` 已固定公共 `cvssp/WavCaps` revision `0930ec11ded28fa0eaa910fde2f6fc3538acbeac`。远程 DATA-08 已完成且只下载 8 个 metadata/官方 blacklist 文件，共 176,863,095 bytes；完整仓库（含音频）约 819.51 GB，未被下载。
 - `[CODE]` 固定元数据共有 403,050 条：AudioSet_SL 108,317、BBC 31,201、FreeSound 262,300、SoundBible 1,232。
 - `[PAPER]` 报告长度 `<=31` 秒后为 275,618；公共元数据按该条件为 275,691，只有 `[INFERRED]` `0 < duration < 31` 才精确得到 275,618。论文精确 filtered manifest 仍为 `[MISSING]`。
 - DATA-09 已精确复现 173 个 AudioCaps test 重叠和 638 个 Clotho evaluation 文件名重叠。638 个文件名对应 1,017 个 WavCaps 候选（64 个文件名存在歧义），因此 Clotho 保守 blocklist 是 `[INFERRED]`，不是论文未公开的原始 blocklist。
 - `[MISSING]` 论文 validation split、精确去泄漏 blocklist、重复文件名消歧规则和去泄漏后的最终训练数量。metadata-only 保守重建为 275,062 条，不能标为 exact。
-- 当前先在远程 CPU 侧复算 176.86 MB metadata；训练前才需要下载/准备全量 WavCaps 音频。
+- 远程 CPU metadata 复算已完成；训练前才需要另行申请并准备全量 WavCaps 音频。
 - 目录要求：`datasets/wavcaps/{metadata,audio}`；manifest 写入 `data/manifests/wavcaps/`，blocklist 写入 `data/blocklists/`。
 - 详见 `docs/wavcaps_data_audit.md`。
 
 ### AudioCaps v2
 
-- `[CODE][OBSERVED]` 已固定官方 AudioCaps 2.0 commit `d004db3ea1b01cf4fd0347dd8d27db90cadc8809` 的 `dataset2.0/{train,val,test}.csv`；DATA-06/07 远程 wrapper 已 exit 0，并报告 MD5、SHA256、bytes、schema、计数及 UIQ 对齐全部通过。细粒度远程工件 SHA256 待只读补采。
+- `[CODE][OBSERVED]` 已固定官方 AudioCaps 2.0 commit `d004db3ea1b01cf4fd0347dd8d27db90cadc8809` 的 `dataset2.0/{train,val,test}.csv`；DATA-06/07 远程 wrapper 及四个子阶段 exit 均为 0，MD5、SHA256、bytes、schema、计数、UIQ 对齐和四个 manifest 身份均已固定。
 - `[PAPER][CODE]` 论文与官方 README 均报告 91,256 train；`[CODE]` 公共 OEA loader 实际只能得到 91,254 个有效记录，原因是 3 个 bare-CR 孤立 caption 片段和 2 个 quoted 多行 caption。
 - `[INFERRED]` 仅修复 3 个 caption 尾部仍为 91,254 条；`[MISSING]` 论文的有效 91,256-row manifest 或另外 2 条记录。
 - test 已固定为 975 clips × 5 captions；四类正 UIQ 的 ID 和去重 captions、630 条 negative 的原 captions 均与官方 CSV 精确对齐。
@@ -89,7 +89,7 @@
 - 官方数据仓库：`mispeech/MECAT-Caption` revision `be4a24c3f7309d74208e08a7cce49e72cb7a5834`；官方实现仓库：`xiaomi-research/mecat` commit `a004949d58e86e2ee56baa879607ec2109cfcc46`。
 - `[OBSERVED]` DATA-04 已完成 `00A/test_0000-0000000.tar.gz` 的远程固定：173,168,424 bytes，LFS/本地 SHA256 均为 `644cf75e2509c633452a18e36c41b285a317c6cbc06198d7dfe406c5aa5122c4`；未下载约 16 GB 的其他域。
 - `[CODE][OBSERVED]` 官方 `00A/test` 和四个 OEA 正向 UIQ 文件均为 848 IDs，DATA-05 已确认精确集合相等且 848 个 FLAC 全部解码；`[PAPER]` 评测写 847 auto-captioned pairs。
-- DATA-11 在固定 WavCaps AudioSet_SL metadata 中找到 4 个 MECAT 同源 YouTube video candidates；该结果仅为 `[CODE][INFERRED]` provenance，不证明时间片/音频重复。DATA-05 已确认 MECAT canonical manifest；远程联合复算等待 DATA-08/09。
+- DATA-11 在固定 WavCaps AudioSet_SL metadata 中找到 4 个 MECAT 同源 YouTube video candidates；该结果仅为 `[CODE][INFERRED]` provenance，不证明时间片/音频重复。DATA-05 与 DATA-08/09 均完成，现可运行远程 canonical join。
 - `[MISSING]` 论文使用的精确 847-row manifest、排除的 1 条样本、T2A/T2T caption 字段/组合。
 - DATA-04/05 已完成公开 848 条数据的下载校验、解压、解码、六字段保存和 UIQ ID 精确对齐；严格 847 条主表在作者提供缺失信息前保持 BLOCKED。详见 `docs/mecat_data_audit.md`。
 

@@ -10,6 +10,7 @@ MECAT_AUDIT = ROOT / "results/audits/data04_data05_mecat_remote_20260729.json"
 AUDIOCAPS_AUDIT = (
     ROOT / "results/audits/data06_data07_audiocaps_remote_20260729.json"
 )
+WAVCAPS_AUDIT = ROOT / "results/audits/data08_data09_wavcaps_remote_20260729.json"
 AUDIOCAPS_RESOURCE = ROOT / "configs/resources/data06_audiocaps_v2_metadata.json"
 
 
@@ -18,6 +19,7 @@ class TakeoverRemoteDataEvidenceTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.mecat = json.loads(MECAT_AUDIT.read_text(encoding="utf-8"))
         cls.audiocaps = json.loads(AUDIOCAPS_AUDIT.read_text(encoding="utf-8"))
+        cls.wavcaps = json.loads(WAVCAPS_AUDIT.read_text(encoding="utf-8"))
         cls.audiocaps_resource = json.loads(
             AUDIOCAPS_RESOURCE.read_text(encoding="utf-8")
         )
@@ -49,26 +51,60 @@ class TakeoverRemoteDataEvidenceTests(unittest.TestCase):
         self.assertIn("[PAPER][MISSING]", boundary["paper_subset"])
         self.assertIn("[MISSING]", boundary["retrieval_caption"])
 
-    def test_audiocaps_wrapper_is_complete_but_hash_gap_is_explicit(self) -> None:
+    def test_audiocaps_remote_evidence_registration_is_complete(self) -> None:
         self.assertEqual(self.audiocaps["execution"]["final_run_rc"], 0)
         self.assertEqual(self.audiocaps["data06"]["status"], "complete")
         self.assertEqual(self.audiocaps["data07"]["status"], "complete")
+        self.assertEqual(self.audiocaps["status"], "complete")
+        self.assertEqual(self.audiocaps["data06"]["download_exit_code"], 0)
+        self.assertEqual(self.audiocaps["data06"]["wrapper_exit_code"], 0)
+        self.assertEqual(self.audiocaps["data07"]["validation_exit_code"], 0)
+        self.assertEqual(self.audiocaps["data07"]["wrapper_exit_code"], 0)
         self.assertEqual(
-            self.audiocaps["status"],
-            "remote_execution_complete_artifact_hashes_pending",
+            self.audiocaps["evidence_registration"]["status"], "complete"
         )
-        pending = self.audiocaps["pending_evidence_registration"]
-        self.assertIn("but not the child exit-code files", pending["reason"])
-        self.assertEqual(len(pending["not_claimed_observed"]), 5)
 
     def test_audiocaps_expected_identities_match_resource_manifest(self) -> None:
-        expected = self.audiocaps["data06"]["expected_source_identities"]
+        expected = self.audiocaps["data06"]["source_identities"]
         for file_specification in self.audiocaps_resource["files"]:
             name = file_specification["name"]
             self.assertEqual(
                 expected[name]["size_bytes"], file_specification["size_bytes"]
             )
             self.assertEqual(expected[name]["sha256"], file_specification["sha256"])
+
+    def test_audiocaps_remote_manifests_are_fixed(self) -> None:
+        manifests = self.audiocaps["data07"]["manifests"]
+        self.assertEqual(manifests["test"]["rows"], 975)
+        self.assertEqual(manifests["validation"]["rows"], 495)
+        self.assertEqual(manifests["train_public_loader"]["rows"], 91254)
+        self.assertEqual(manifests["train_repaired_bare_cr"]["rows"], 91254)
+        for artifact in manifests.values():
+            self.assertEqual(len(artifact["sha256"]), 64)
+            self.assertGreater(artifact["size_bytes"], 0)
+
+    def test_wavcaps_wrapper_is_complete_but_hash_gap_is_explicit(self) -> None:
+        self.assertEqual(self.wavcaps["execution"]["final_run_rc"], 0)
+        self.assertEqual(self.wavcaps["execution"]["elapsed_seconds"], 130)
+        self.assertEqual(self.wavcaps["data08"]["selected_files"], 8)
+        self.assertEqual(self.wavcaps["data08"]["expected_total_bytes"], 176863095)
+        self.assertEqual(self.wavcaps["data09"]["manifest"]["rows"], 403050)
+        self.assertEqual(
+            self.wavcaps["status"],
+            "remote_execution_complete_artifact_hashes_pending",
+        )
+        pending = self.wavcaps["pending_evidence_registration"]
+        self.assertIn("but not the DATA-08/09 child exit-code files", pending["reason"])
+        self.assertEqual(len(pending["not_claimed_observed"]), 5)
+
+    def test_wavcaps_paper_protocol_conflict_remains_explicit(self) -> None:
+        boundary = self.wavcaps["data09"]["claim_boundary"]
+        self.assertIn("[INFERRED]", boundary["count_equivalent_duration_protocol"])
+        self.assertIn("[PAPER]", boundary["paper_written_duration_protocol"])
+        self.assertIn("[MISSING]", boundary["exact_post_blocklist_manifest"])
+        self.assertFalse(
+            boundary["metadata_only_conservative_reconstruction_is_paper_exact"]
+        )
 
 
 if __name__ == "__main__":

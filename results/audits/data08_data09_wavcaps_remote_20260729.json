@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "status": "remote_execution_complete_artifact_hashes_pending",
+  "evidence_source": "[OBSERVED] terminal output returned by the user from the authenticated Bitahub Web console",
+  "execution": {
+    "git_commit": "10466419e8450748247499eba090915709af8e74",
+    "git_status_short": "",
+    "host": "bitahub-a20633967503994880812290",
+    "wrapper_run_id": "oea_takeover_data08_20260729_124908",
+    "command": "bash scripts/run_takeover_approved_data_tmux.sh data08",
+    "tmux": "/tmp/tmux-1000/default,4381,0",
+    "start_time": "2026-07-29T12:49:08+08:00",
+    "end_time": "2026-07-29T12:51:18+08:00",
+    "elapsed_seconds": 130,
+    "final_run_rc": 0,
+    "completion_status": "complete",
+    "failed_stage": null,
+    "error_summary": null,
+    "result_directory": "/home/jg525/datasets/oea/wavcaps_0930ec11",
+    "log_directory": "/home/jg525/Omni-Embed-Audio/logs/oea_takeover_data08_20260729_124908",
+    "combined_log": "/home/jg525/Omni-Embed-Audio/logs/oea_takeover_data08_20260729_124908/combined.log"
+  },
+  "data08": {
+    "status": "complete",
+    "child_log_directory": "/home/jg525/Omni-Embed-Audio/logs/data08_wavcaps_metadata_download_20260729_124908",
+    "repository": "cvssp/WavCaps",
+    "revision": "0930ec11ded28fa0eaa910fde2f6fc3538acbeac",
+    "selected_files": 8,
+    "expected_total_bytes": 176863095,
+    "observed_assertions": [
+      "WavCaps metadata download completed",
+      "exact bytes and local SHA256 verified for all 8 files",
+      "audio archives under Zip_files/** were excluded"
+    ]
+  },
+  "data09": {
+    "status": "complete",
+    "child_log_directory": "/home/jg525/Omni-Embed-Audio/logs/data09_wavcaps_metadata_audit_20260729_125048",
+    "manifest": {
+      "path": "/home/jg525/datasets/oea/wavcaps_0930ec11/manifests/wavcaps_all_metadata_audit_manifest.jsonl",
+      "rows": 403050,
+      "size_bytes": null,
+      "sha256": null
+    },
+    "observed_assertions": [
+      "WavCaps metadata/count/leakage audit completed",
+      "no audio archives were read or downloaded",
+      "paper reports <=31 seconds but public metadata reaches 275,618 only with 0 < duration < 31"
+    ],
+    "claim_boundary": {
+      "count_equivalent_duration_protocol": "[INFERRED] 0 < duration < 31",
+      "paper_written_duration_protocol": "[PAPER] duration <= 31 seconds",
+      "exact_post_blocklist_manifest": "[MISSING] not published by the paper",
+      "metadata_only_conservative_reconstruction_is_paper_exact": false
+    }
+  },
+  "pending_evidence_registration": {
+    "reason": "The returned terminal transcript contains the wrapper final block and child success messages but not the DATA-08/09 child exit-code files, download/statistics JSON, or generated artifact hashes and line counts.",
+    "not_claimed_observed": [
+      "DATA-08 child exit-code file values",
+      "DATA-08 download_manifest.json SHA256 and per-file identities",
+      "DATA-09 child exit-code file values",
+      "DATA-09 data_statistics.json SHA256 and complete values",
+      "DATA-09 manifest/blocklist SHA256 values, sizes, and line counts"
+    ],
+    "next_action": "Collect those read-only identities from the existing run directories; do not rerun or redownload DATA-08/09."
+  }
+}

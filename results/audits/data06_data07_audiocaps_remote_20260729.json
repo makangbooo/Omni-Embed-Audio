@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "remote_execution_complete_artifact_hashes_pending",
+  "status": "complete",
   "evidence_source": "[OBSERVED] terminal output returned by the user from the authenticated Bitahub Web console",
   "execution": {
     "git_commit": "febfbe4af7043dbad63183992143ecd7f51124e3",
@@ -22,14 +22,22 @@
   "data06": {
     "status": "complete",
     "child_log_directory": "/home/jg525/Omni-Embed-Audio/logs/data06_audiocaps_v2_metadata_download_20260729_122259",
+    "download_exit_code": 0,
+    "wrapper_exit_code": 0,
+    "download_manifest": {
+      "path": "/home/jg525/Omni-Embed-Audio/logs/data06_audiocaps_v2_metadata_download_20260729_122259/download_manifest.json",
+      "size_bytes": null,
+      "sha256": "ebd081897e3a3decd50cd5682f2e278f2e9e06052e3e37957a7c3f43b01a0391",
+      "reported_status": "complete"
+    },
     "observed_assertions": [
       "official metadata download completed",
       "MD5, SHA256, and exact byte sizes all verified"
     ],
     "source": "https://github.com/cdjkim/audiocaps/tree/d004db3ea1b01cf4fd0347dd8d27db90cadc8809/dataset2.0",
     "revision": "d004db3ea1b01cf4fd0347dd8d27db90cadc8809",
-    "expected_source_identities": {
-      "source_tag": "[CODE] committed DATA-06 resource manifest; remote child reported all identities verified",
+    "source_identities": {
+      "source_tag": "[CODE][OBSERVED] committed identities exactly match the returned remote download manifest",
       "README.md": {
         "size_bytes": 753,
         "sha256": "ae2fcbcf7e4f93964dfaf02c094998b2cfc199a16f4eb0350f65f170ad01a906"
@@ -51,12 +59,20 @@
   "data07": {
     "status": "complete",
     "child_log_directory": "/home/jg525/Omni-Embed-Audio/logs/data07_audiocaps_v2_metadata_validation_20260729_122319",
+    "validation_exit_code": 0,
+    "wrapper_exit_code": 0,
+    "statistics": {
+      "path": "/home/jg525/Omni-Embed-Audio/logs/data07_audiocaps_v2_metadata_validation_20260729_122319/data_statistics.json",
+      "size_bytes": null,
+      "sha256": "d865ea5d0200d9ed52420f7348d14fb6935119ab89951aa925aa6d10abfa0212",
+      "reported_status": "complete"
+    },
     "observed_assertions": [
       "AudioCaps 2.0 metadata/UIQ validation completed",
       "paper and README report 91,256 train rows while the public OEA loader yields 91,254"
     ],
-    "expected_validated_counts": {
-      "source_tag": "[CODE] enforced by the committed validator; detailed remote statistics file was not printed in the returned transcript",
+    "validated_counts": {
+      "source_tag": "[CODE][OBSERVED] returned remote statistics and manifest line counts",
       "train_public_loader_records": 91254,
       "train_repaired_bare_cr_records": 91254,
       "validation_caption_rows": 2475,
@@ -64,19 +80,45 @@
       "test_caption_rows": 4875,
       "test_audio_ids": 975,
       "positive_uiq_rows_per_type": 975,
-      "negative_uiq_rows": 630
+      "negative_uiq_rows": 630,
+      "negative_uiq_unique_target_audio_ids": 255
+    },
+    "train_csv_anomalies": {
+      "bare_cr_orphan_fragments": 3,
+      "quoted_multiline_captions": 2,
+      "unresolved_difference_from_paper": 2
+    },
+    "manifests": {
+      "test": {
+        "path": "/home/jg525/datasets/oea/audiocaps_v2_d004db3/manifests/audiocaps_v2_test_manifest.jsonl",
+        "rows": 975,
+        "size_bytes": 1000786,
+        "sha256": "d87bc8f58c1abe625b4914614461bccb1987e5267b9da211e63925d62695c90a"
+      },
+      "train_public_loader": {
+        "path": "/home/jg525/datasets/oea/audiocaps_v2_d004db3/manifests/audiocaps_v2_train_public_loader_manifest.jsonl",
+        "rows": 91254,
+        "size_bytes": 56692191,
+        "sha256": "f2dad56f843e784d91fd731a5e1cad5d97a22ba2f07bad8bfc4b55f8f0eed200"
+      },
+      "train_repaired_bare_cr": {
+        "path": "/home/jg525/datasets/oea/audiocaps_v2_d004db3/manifests/audiocaps_v2_train_repaired_bare_cr_manifest.jsonl",
+        "rows": 91254,
+        "size_bytes": 56692241,
+        "sha256": "cd01d6d9bdfb3772f209f45659476d0c79f3faa95da90c807a41f921d1123e13"
+      },
+      "validation": {
+        "path": "/home/jg525/datasets/oea/audiocaps_v2_d004db3/manifests/audiocaps_v2_validation_manifest.jsonl",
+        "rows": 495,
+        "size_bytes": 478914,
+        "sha256": "ee96ebaa384909ede3e541a3a29536543092de43cbb77aec70adb3bf54341536"
+      }
     },
     "claim_boundary": "[PAPER][MISSING] no published loader or manifest yields 91,256 valid train records; AudioCaps evaluation audio is also not present"
   },
-  "pending_evidence_registration": {
-    "reason": "The returned terminal transcript contains the wrapper final block and child success messages but not the child exit-code files, download_manifest.json, data_statistics.json, manifest hashes, or manifest line counts.",
-    "not_claimed_observed": [
-      "DATA-06 child exit-code file values",
-      "DATA-06 download_manifest.json SHA256",
-      "DATA-07 child exit-code file values",
-      "DATA-07 data_statistics.json SHA256",
-      "four remote manifest SHA256 values and line counts"
-    ],
-    "next_action": "Collect those read-only identities from the existing run directories; do not rerun or redownload DATA-06/07."
+  "evidence_registration": {
+    "status": "complete",
+    "source_tag": "[OBSERVED] all four child/wrapper exit codes, both top-level evidence hashes, all four manifest hashes, sizes, and line counts were returned after the run",
+    "rerun_required": false
   }
 }

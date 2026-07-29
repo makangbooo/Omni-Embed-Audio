@@ -69,10 +69,10 @@ DATA-07 对固定 test CSV 和仓库 UIQ 做了真实全量闭环：
 `febfbe4af7043dbad63183992143ecd7f51124e3` 上以 `FINAL_RUN_RC=0` 完成，
 耗时 40 秒。DATA-06 子阶段报告 MD5、SHA256 和精确 bytes 全部通过；DATA-07
 子阶段报告 metadata/UIQ validation 完成，并再次保留 91,256 与 91,254 的冲突。
-返回的终端记录没有包含子阶段 exit-code 文件、`download_manifest.json`、
-`data_statistics.json` 和四个 manifest 的 SHA256，因此这些细粒度工件身份仍待只读补采，
-不重新下载或重跑。现有证据边界见
-`results/audits/data06_data07_audiocaps_remote_20260729.json`。
+后续只读证据采集确认 download/validation/wrapper 四个退出码均为 0。
+下载 manifest SHA256 为 `ebd08189...a0391`，统计 JSON SHA256 为
+`d865ea5d...0212`；四个 manifest 的行数、bytes 和完整 SHA256 均已固定在
+`results/audits/data06_data07_audiocaps_remote_20260729.json`，无需重新下载或重跑。
 
 输出 manifests：
 
