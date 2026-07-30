@@ -47,6 +47,7 @@ class ReproductionProgressReportingTests(unittest.TestCase):
         expected_sections = (
             "【需要你执行的操作】",
             "【执行后请告诉我】",
+            "【实验结果与论文对比】",
             "【实验进度】",
             "【我目前正在做什么】",
         )
@@ -61,6 +62,10 @@ class ReproductionProgressReportingTests(unittest.TestCase):
             "不得只把 GPU、OEA 官方源码使用情况或预计时间埋在说明段落中",
             self.status_text,
         )
+        self.assertIn("论文值、复现值、绝对差、协议来源和判定", self.status_text)
+        self.assertIn("不得按接近论文数值择优", self.status_text)
+        self.assertIn("非论文表格实验也必须单独列出", self.status_text)
+        self.assertIn("本轮无新实验结果", self.status_text)
 
     def test_inventory_and_report_publish_the_same_percentage(self) -> None:
         self.assertIn("`4/31 = 12.9%`", self.inventory_text)
