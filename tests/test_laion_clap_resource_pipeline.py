@@ -13,6 +13,7 @@ from scripts.build_laion_clap_portable_lock import (
     EXPECTED_DISTRIBUTIONS,
     write_new_json,
 )
+from scripts.select_clotho_smoke_csv import select_rows
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +23,7 @@ REQUIREMENTS = (
     / "configs/resources/laion_clap_1_1_6_overlay.requirements.txt"
 )
 WRAPPER = REPOSITORY_ROOT / "scripts/run_laion_clap_resource_pipeline_tmux.sh"
+MAIN_WRAPPER = REPOSITORY_ROOT / "scripts/run_laion_clap_clotho_main_tmux.sh"
 
 
 class LaionClapResourcePipelineTests(unittest.TestCase):
@@ -167,6 +169,54 @@ class LaionClapResourcePipelineTests(unittest.TestCase):
             "--laion-bart-tokenizer",
         ):
             self.assertIn(option, source)
+
+    def test_smoke_csv_selection_is_fixed_and_non_overwriting(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "captions.csv"
+            output = root / "smoke.csv"
+            header = ["file_name", *(f"caption_{index}" for index in range(1, 6))]
+            lines = [",".join(header)]
+            for row in range(7):
+                lines.append(
+                    ",".join([f"audio-{row}.wav", *(f"caption-{row}-{i}" for i in range(5))])
+                )
+            source.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            self.assertEqual(select_rows(source, output, 5), 5)
+            self.assertEqual(len(output.read_text(encoding="utf-8").splitlines()), 6)
+            with self.assertRaises(FileExistsError):
+                select_rows(source, output, 5)
+
+    def test_main_wrapper_is_only_clotho_table2_table3(self) -> None:
+        source = MAIN_WRAPPER.read_text(encoding="utf-8")
+        for marker in (
+            "LAION-CLAP Clotho main Tables 2 and 3",
+            "gpu_smoke_embeddings",
+            "gpu_full_embeddings",
+            "cpu_table2_table3_metrics",
+            "--expected-audio 1045",
+            "--expected-captions 5225",
+            "evaluate_official_source_oea_clotho.py",
+            "TMUX_RETAINED_SHELL=yes",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+        self.assertNotIn("--uiq-dir", source)
+        self.assertNotIn("positive_uiq", source)
+        self.assertIn("torch.cuda.device_count() == 1", source)
+
+    def test_embedding_gate_requires_shape_finite_norm_and_new_output(self) -> None:
+        source = (
+            REPOSITORY_ROOT / "scripts/validate_laion_clap_embeddings.py"
+        ).read_text(encoding="utf-8")
+        for marker in (
+            "expected_shape = (expected_rows, 512)",
+            "np.isfinite",
+            "np.allclose(norms, 1.0, atol=1e-5)",
+            'with path.open("x"',
+            '"protocol_status": "controlled_public_code_reproduction"',
+        ):
+            self.assertIn(marker, source)
 
 
 if __name__ == "__main__":
