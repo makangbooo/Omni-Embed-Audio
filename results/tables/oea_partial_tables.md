@@ -1,4 +1,4 @@
-# OEA Partial Paper Tables
+# Partial Paper Tables
 
 This view includes only committed value evidence for paper Tables 2, 3 and 12-15. It excludes all extension experiments. Multiple predeclared protocols remain separate; no protocol is selected after observing proximity to the paper value.
 
@@ -6,6 +6,8 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| Nemotron-3B | Clotho | [CODE] all-caption | 7.20 / 21.57 / 30.12 | 7.2536 / 21.3014 / 30.1818 | 0.268565 |
+| Nemotron-3B | Clotho | [CODE] seed-0 one-caption | 7.20 / 21.57 / 30.12 | 7.4641 / 21.2440 / 31.4833 | 1.363254 |
 | OEA-Nemo3B | Clotho | [CODE] all-caption | 19.04 / 40.57 / 54.24 | 18.2775 / 41.3206 / 54.2010 | 0.762488 |
 | OEA-Nemo3B | Clotho | [CODE] seed-0 one-caption | 19.04 / 40.57 / 54.24 | 17.9904 / 41.6268 / 55.7895 | 1.549474 |
 | OEA-Nemo3B (+Cl) | Clotho | [CODE] all-caption | 21.57 / 47.16 / 60.36 | 21.7225 / 47.1196 / 60.4402 | 0.152488 |
@@ -23,6 +25,8 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| Nemotron-3B | Clotho | [INFERRED] all-caption sensitivity | 57.84 / 69.36 / 74.26 | 57.8947 / 69.2823 / 74.2010 | 0.077703 |
+| Nemotron-3B | Clotho | [CODE] seed-0 one-caption/self-exclusion | 57.84 / 69.36 / 74.26 | 57.1292 / 69.3780 / 74.3541 | 0.710813 |
 | OEA-Nemo3B | Clotho | [INFERRED] all-caption sensitivity | 62.79 / 74.12 / 78.91 | 64.6316 / 74.9856 / 79.2536 | 1.841579 |
 | OEA-Nemo3B | Clotho | [CODE] seed-0 one-caption/self-exclusion | 62.79 / 74.12 / 78.91 | 63.3493 / 74.8325 / 80.0957 | 1.185694 |
 | OEA-Nemo3B (+Cl) | Clotho | [INFERRED] all-caption sensitivity | 63.77 / 75.29 / 80.11 | 63.6938 / 75.2344 / 80.0191 | 0.090861 |

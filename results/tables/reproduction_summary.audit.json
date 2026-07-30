@@ -7,8 +7,8 @@
   "inputs": {
     "observations": {
       "path": "results/observations/reproduction_observations.jsonl",
-      "sha256": "d0fe4120ee5475c47a4a85f7c41105a903bfe9ba0eda97aa196b8fcda0a3b1f7",
-      "size_bytes": 126018
+      "sha256": "f924898ea6d4d687b39006894ed995a8acc34bb6833b27c970d9d87699648ac7",
+      "size_bytes": 137031
     },
     "paper_registry": {
       "path": "configs/results/paper_reported_metrics.jsonl",
@@ -16,20 +16,20 @@
       "size_bytes": 386143
     }
   },
-  "observation_count": 143,
+  "observation_count": 155,
   "output": {
     "path": "results/tables/reproduction_summary.csv",
-    "sha256": "4fa9fec1fa7f8af4ecef09d323acdb829883a7589b4d7fc0dca81fb1d3cbaa88",
-    "size_bytes": 77708
+    "sha256": "92b87664e5f8b8f1c2da5a929b9965aa9cfcec8b0471da1d1736a26035dd2958",
+    "size_bytes": 84179
   },
   "paper_metric_count": 910,
   "schema_version": 1,
   "status": "complete",
   "status_counts": {
     "blocked": 23,
-    "close": 120
+    "close": 132
   },
-  "summary_row_count": 143,
+  "summary_row_count": 155,
   "unit_counts": {
     "count": 6,
     "gigabytes": 12,
@@ -40,7 +40,7 @@
     "score_1_to_5": 36,
     "score_standard_deviation": 18
   },
-  "unobserved_paper_metric_count": 818,
+  "unobserved_paper_metric_count": 812,
   "unobserved_paper_metric_ids": [
     "table11_laion_clap_three_dataset_mean_t2a_r1",
     "table11_laion_clap_three_dataset_mean_t2a_r10",
@@ -576,9 +576,6 @@
     "table2_nemotron_3b_audiocaps_t2a_r1",
     "table2_nemotron_3b_audiocaps_t2a_r10",
     "table2_nemotron_3b_audiocaps_t2a_r5",
-    "table2_nemotron_3b_clotho_t2a_r1",
-    "table2_nemotron_3b_clotho_t2a_r10",
-    "table2_nemotron_3b_clotho_t2a_r5",
     "table2_nemotron_3b_mecat_t2a_r1",
     "table2_nemotron_3b_mecat_t2a_r10",
     "table2_nemotron_3b_mecat_t2a_r5",
@@ -675,9 +672,6 @@
     "table3_nemotron_3b_audiocaps_t2t_r1",
     "table3_nemotron_3b_audiocaps_t2t_r10",
     "table3_nemotron_3b_audiocaps_t2t_r5",
-    "table3_nemotron_3b_clotho_t2t_r1",
-    "table3_nemotron_3b_clotho_t2t_r10",
-    "table3_nemotron_3b_clotho_t2t_r5",
     "table3_nemotron_3b_mecat_t2t_r1",
     "table3_nemotron_3b_mecat_t2t_r10",
     "table3_nemotron_3b_mecat_t2t_r5",

@@ -27,10 +27,10 @@ experiment-model-dataset-task cells in
 separate from `REPRODUCED_CLOSE`, `CONTROLLED_ONLY`, `PARTIAL`, `TODO`, and
 `BLOCKED`; the generation audit records all input/output hashes. The compact
 paper-only partial Tables 2/3/12-15 are in
-`results/tables/oea_partial_tables.md`. They contain 40 predeclared protocol
+`results/tables/oea_partial_tables.md`. They contain 44 predeclared protocol
 groups and do not select a protocol after comparing it with the paper value.
 
-Committed value evidence currently covers six Clotho T2A cells, six Clotho
+Committed value evidence currently covers seven Clotho T2A cells, seven Clotho
 T2T cells, and sixteen Clotho positive-UIQ cells. OEA-Qwen7B-AC and
 OEA-Qwen7B-Cl are the newest complete main-table cells. Both official-source
 runs completed on an RTX 4090 at commit `9c080c7`, each in `00:07:36`, with
@@ -45,6 +45,21 @@ SHA256 identities. Qwen7B `[CODE]` all-caption T2A is
 `results/audits/oea_qwen7b_ac_clotho_official_source_eval_20260730.json` and
 `results/audits/oea_qwen7b_cl_clotho_official_source_eval_20260730.json`.
 No protocol is promoted after observing proximity to PAPER.
+
+The vanilla Nemotron-3B Clotho main-table run then completed at commit
+`74325cb` with a clean worktree and `FINAL_RUN_RC=0`. The official
+`OmniEmbedAdapter` path produced 5/25 smoke embeddings and full 1,045-audio /
+5,225-caption embeddings at the base hidden size of 2,048. The runtime recorded
+`projection_head_loaded=false`, `lora_loaded=false`, and
+`oea_checkpoint_loaded=false`, so this is the PAPER vanilla LALM row rather
+than an OEA checkpoint result. `[CODE]` all-caption and seed-0 T2A are
+`7.2536/21.3014/30.1818` and `7.4641/21.2440/31.4833`, versus PAPER
+`7.20/21.57/30.12`. `[CODE]` seed-0 T2T is
+`57.1292/69.3780/74.3541`, while the separate `[INFERRED]` all-caption
+sensitivity is `57.8947/69.2823/74.2010`, versus PAPER
+`57.84/69.36/74.26`. All four protocols and their artifact identities are
+fixed in `results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json`;
+the exact wall-clock elapsed time was not returned and remains `[MISSING]`.
 
 OEA-Nemo3B-AC previously completed official-source GPU precomputation and CPU
 finalization at run commits `effe67d` and `1f991ab`. The finalizer returned

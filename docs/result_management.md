@@ -118,6 +118,10 @@ because the paper and public evaluation command do not fully specify caption
 selection and the T2T self/tie protocol. The remaining 874 registered metrics are unobserved
 pending formal runs; they are not represented as reproduced values.
 
+The vanilla Nemotron-3B/Clotho main-table run adds 12 reviewed `close`
+observations under the same four-protocol separation, bringing the committed
+snapshot to 155 observations: 132 `close` and 23 strict `blocked`.
+
 The four predeclared public-code retrieval protocols remain runnable and must
 be reported separately. The released UIQ name `tagging` and the paper name
 `Keyphrase` are both retained. Formal remote runs add observations only after

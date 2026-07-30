@@ -15,8 +15,8 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
         self.assertEqual(
             Counter(group["paper_table"] for group in self.groups),
             {
-                "Table 2": 12,
-                "Table 3": 12,
+                "Table 2": 14,
+                "Table 3": 14,
                 "Table 12": 4,
                 "Table 13": 4,
                 "Table 14": 4,
@@ -104,6 +104,19 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
         self.assertEqual(
             Counter(group["paper_table"] for group in matches),
             {"Table 2": 4, "Table 3": 4},
+        )
+
+    def test_vanilla_nemotron_main_table_cells_are_present(self) -> None:
+        matches = [
+            group
+            for group in self.groups
+            if group["model"] == "Nemotron-3B"
+            and group["dataset"] == "Clotho"
+        ]
+        self.assertEqual(len(matches), 4)
+        self.assertEqual(
+            Counter(group["paper_table"] for group in matches),
+            {"Table 2": 2, "Table 3": 2},
         )
 
     def test_no_extension_tasks_are_present(self) -> None:

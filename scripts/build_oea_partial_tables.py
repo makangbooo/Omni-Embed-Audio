@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the currently reproduced OEA cells for Tables 2/3/12-15."""
+"""Render currently reproduced cells for paper Tables 2/3/12-15."""
 
 from __future__ import annotations
 
@@ -120,7 +120,7 @@ def triple(values: list[str]) -> str:
 
 def markdown_text(groups: list[dict[str, Any]]) -> str:
     lines = [
-        "# OEA Partial Paper Tables",
+        "# Partial Paper Tables",
         "",
         "This view includes only committed value evidence for paper Tables 2, 3 and 12-15. "
         "It excludes all extension experiments. Multiple predeclared protocols remain separate; "
@@ -199,7 +199,7 @@ def main() -> int:
     audit = {
         "schema_version": 1,
         "status": "complete",
-        "scope": "OEA paper Tables 2, 3 and 12-15 only; extension experiments excluded",
+        "scope": "committed paper Tables 2, 3 and 12-15 only; extension experiments excluded",
         "protocol_group_count": len(groups),
         "table_protocol_counts": {
             table: sum(group["paper_table"] == table for group in groups)

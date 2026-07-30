@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_base_only_remote_run_compact_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The returned evidence fixes the clean Git identity, final exit status, complete four-protocol metrics, base-only model-load boundary, artifact hashes, GPU identity, shapes, and remote paths. Exact wall-clock start/end timestamps were not returned and remain MISSING."
+  },
+  "paper_scope": [
+    "EXP-10 / Table 2 / Nemotron-3B / Clotho / T2A",
+    "EXP-11 / Table 3 / Nemotron-3B / Clotho / T2T"
+  ],
+  "model": {
+    "paper_name": "Nemotron-3B",
+    "paper_group": "Vanilla LALMs (No Retrieval Training)",
+    "base_model": "nvidia/omni-embed-nemotron-3b@865db1bb57e369a85357cf114cbd6b3c5322d19d",
+    "model_lock": "results/model_locks/vanilla_nemotron_3b.json#sha256:eb62da7579d2f5b7ccd774e15d518d3ed50f4d502753b3fc4a7f51187b96cc1c",
+    "parameter_count": 4703464448,
+    "hidden_size": 2048,
+    "hidden_size_runtime_source": "model.config.text_config.hidden_size",
+    "projection_head_loaded": false,
+    "lora_loaded": false,
+    "oea_checkpoint_loaded": false
+  },
+  "dataset": {
+    "name": "Clotho v2.1 evaluation",
+    "audio_count": 1045,
+    "caption_count": 5225
+  },
+  "official_source": {
+    "upstream_commit": "b261ad0743dbfac67cb6b20016fd951a366b3f35",
+    "source_files": [
+      "AudioRetrieval/models/omni_embed_adapter.py",
+      "AudioRetrieval/evaluation/metrics.py"
+    ],
+    "reproduction_orchestration": [
+      "scripts/run_vanilla_backbone_embeddings.sh",
+      "scripts/generate_vanilla_backbone_embeddings.py",
+      "scripts/run_vanilla_clotho_retrieval_suite.sh"
+    ]
+  },
+  "run": {
+    "smoke_run_id": "vanilla_nemotron_3b_clotho_smoke_seed42_20260730_095851",
+    "full_run_id": "vanilla_nemotron_3b_clotho_embeddings_seed42_20260730_095851",
+    "suite_id": "vanilla_nemotron_3b_clotho_retrieval_suite_seed42_20260730_095851",
+    "smoke_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_nemotron_3b_clotho_smoke_seed42_20260730_095851",
+    "full_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_nemotron_3b_clotho_embeddings_seed42_20260730_095851",
+    "suite_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_nemotron_3b_clotho_retrieval_suite_seed42_20260730_095851",
+    "log_path": "/home/jg525/Omni-Embed-Audio/logs/vanilla_nemo_main_20260730_095851/combined.log",
+    "git_commit": "74325cbecb5397f0c80550779b21cb8f834064bd",
+    "git_status_short": "",
+    "started_at": null,
+    "finished_at": null,
+    "elapsed": "[MISSING] not present in returned evidence",
+    "final_run_rc": 0,
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_total_memory_bytes": 25250627584,
+    "directory_sizes": {
+      "smoke": "828K",
+      "full": "149M",
+      "suite": "721M",
+      "log": "112K"
+    }
+  },
+  "generation": {
+    "smoke": {
+      "status": "complete",
+      "candidate_embedding_shape": [5, 2048],
+      "query_embedding_shape": [25, 2048]
+    },
+    "full": {
+      "status": "complete",
+      "candidate_embedding_shape": [1045, 2048],
+      "query_embedding_shape": [5225, 2048]
+    },
+    "load_warnings": [
+      "unclosed sentence-transformers chat-template file warning"
+    ]
+  },
+  "artifacts": {
+    "smoke_generation_metrics.json": "ff1edf983bd800750663d141803b117c97d72b0f8e429289429a345071656466",
+    "full_generation_metrics.json": "f300ed387cb52c91efe45246b96a9b634d7fc987681793d7e221a24e5750fc40",
+    "candidate_embeddings.npy": "424bf32d44aff169a85c91b5afb93192eab697ed046f5a35accb91c1cde909e1",
+    "query_embeddings.npy": "081be37705ee85231c78c7e39cb41ecb3d36e4bed3508f7568879c4180885dd9",
+    "suite_metrics.json": "fec63a599be483c07943121eabcc49125ac8bd1c6316ede4f4d766b05822539b",
+    "retrieval_summary.csv": "5ce718e11aabb9d7ed100519fc1a1d2761a3ee6bcab8c78f9d700251fa88f47b",
+    "combined.log": "99a79288588607de7c7ad1e846c32fbb8410fb511d5d9b6a7f71d71ef0901ef1"
+  },
+  "seed": 42,
+  "protocol_count": 4,
+  "protocols": {
+    "t2a_public_code_default_joint_all_captions": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {
+        "R@1": 7.253588516746412,
+        "R@5": 21.301435406698566,
+        "R@10": 30.181818181818183,
+        "MRR": 0.15024090351880084,
+        "DCG": 0.29639533203363244
+      }
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 7.464114832535886,
+        "R@5": 21.24401913875598,
+        "R@10": 31.483253588516746,
+        "MRR": 0.15287034915387265,
+        "DCG": 0.29878379839779984
+      }
+    },
+    "t2t_public_code_default_seed0": {
+      "task": "t2t",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 57.12918660287082,
+        "R@5": 69.377990430622,
+        "R@10": 74.35406698564593,
+        "MRR": 0.6307039577377657,
+        "DCG": 0.6971244856182932
+      }
+    },
+    "t2t_all_captions_sensitivity": {
+      "task": "t2t",
+      "protocol_source": "INFERRED",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {
+        "R@1": 57.89473684210527,
+        "R@5": 69.2822966507177,
+        "R@10": 74.20095693779905,
+        "MRR": 0.6337170693052049,
+        "DCG": 0.6984991150338149
+      }
+    }
+  },
+  "paper_values": {
+    "Table 2": {"R@1": 7.20, "R@5": 21.57, "R@10": 30.12},
+    "Table 3": {"R@1": 57.84, "R@5": 69.36, "R@10": 74.26}
+  },
+  "paper_protocol_limitations": [
+    "PAPER does not disclose the Clotho caption-selection protocol for T2A.",
+    "PAPER does not disclose T2T caption selection, self-exclusion, or tie handling.",
+    "PAPER states an audio passage prefix, while the public source path used here omits that prefix.",
+    "Both predeclared protocols remain reported; no protocol is selected post hoc."
+  ]
+}
