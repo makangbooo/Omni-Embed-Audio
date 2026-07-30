@@ -11,10 +11,11 @@ MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 OVERLAY="${MODEL_ROOT}/python/paper-model-download-tools-2"
 TOOLS_REQUIREMENTS="${ROOT_DIR}/configs/resources/paper_model_download_tools.requirements.txt"
 DESTINATION="${MODEL_ROOT}/mga-clap/pretrained_models/models/model.pt"
+PARTIAL="${DESTINATION}.partial"
+LOCK_FILE="${DESTINATION}.download.lock"
 STAMP="$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/mga_clap_checkpoint_${STAMP}"
 LOG_FILE="${RUN_DIR}/combined.log"
-ATTEMPT="${DESTINATION}.attempt-${STAMP}"
 
 mkdir -p "${RUN_DIR}" "$(dirname "${DESTINATION}")"
 exec > >(tee -a "${LOG_FILE}") 2> >(tee -a "${LOG_FILE}" >&2)
@@ -44,6 +45,15 @@ if [[ -s "${DESTINATION}" ]]; then
     finish 4 failed_existing_checkpoint_hash
   fi
   finish 0 complete
+fi
+if ! command -v flock >/dev/null 2>&1; then
+  echo "[ERROR] flock is required for cross-server download locking" >&2
+  finish 2 failed_missing_flock
+fi
+exec 9>"${LOCK_FILE}"
+if ! flock -n 9; then
+  echo "[ERROR] Another MGA checkpoint download is already running" >&2
+  finish 2 failed_download_already_running
 fi
 CONDA_BASE="$(resolve_conda_base)"
 # shellcheck disable=SC1091
@@ -77,15 +87,16 @@ else
 fi
 
 PYTHONPATH="${OVERLAY}${PYTHONPATH:+:${PYTHONPATH}}" \
-  python -m gdown 1RWTuVMEPy-L0uK6WYIX2wwxHjD1YSQFz --output "${ATTEMPT}"
+  python -m gdown --continue 1RWTuVMEPy-L0uK6WYIX2wwxHjD1YSQFz \
+    --output "${PARTIAL}"
 RC=$?
 if [[ "${RC}" -ne 0 ]]; then
   finish "${RC}" failed_download
 fi
-if [[ ! -s "${ATTEMPT}" ]]; then
+if [[ ! -s "${PARTIAL}" ]]; then
   finish 3 failed_empty_download
 fi
-python - "${ATTEMPT}" <<'PY'
+python - "${PARTIAL}" <<'PY'
 import sys
 from pathlib import Path
 
@@ -100,7 +111,7 @@ RC=$?
 if [[ "${RC}" -ne 0 ]]; then
   finish "${RC}" failed_content_gate
 fi
-if ! mv "${ATTEMPT}" "${DESTINATION}"; then
+if ! mv "${PARTIAL}" "${DESTINATION}"; then
   finish 4 failed_finalize
 fi
 echo "MGA_CHECKPOINT_STATUS=complete"

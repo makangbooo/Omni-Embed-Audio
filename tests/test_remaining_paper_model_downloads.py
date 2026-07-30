@@ -90,6 +90,9 @@ class RemainingPaperModelDownloadsTests(unittest.TestCase):
         self.assertIn("--require-hashes", source)
         self.assertIn("DOWNLOAD_TOOLS_STATUS=installed", source)
         self.assertIn("failed_download_tools_identity", source)
+        self.assertIn("python -m gdown --continue", source)
+        self.assertIn('PARTIAL="${DESTINATION}.partial"', source)
+        self.assertIn("flock -n 9", source)
         for forbidden in ("tmux", "exec bash -i", "rm -rf", "git reset", "git clean"):
             self.assertNotIn(forbidden, source)
 
