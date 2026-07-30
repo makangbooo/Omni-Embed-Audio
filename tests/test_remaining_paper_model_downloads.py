@@ -7,10 +7,22 @@ import unittest
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = REPOSITORY_ROOT / "configs/resources/remaining_paper_models.json"
+TOOLS_REQUIREMENTS = (
+    REPOSITORY_ROOT
+    / "configs/resources/paper_model_download_tools.requirements.txt"
+)
 WRAPPER = REPOSITORY_ROOT / "scripts/run_remaining_paper_model_downloads_tmux.sh"
 
 
 class RemainingPaperModelDownloadsTests(unittest.TestCase):
+    def test_google_drive_tool_has_complete_hash_locked_runtime(self) -> None:
+        source = TOOLS_REQUIREMENTS.read_text(encoding="utf-8")
+        for distribution in ("beautifulsoup4", "gdown", "soupsieve"):
+            self.assertRegex(
+                source,
+                rf"(?m)^{distribution}==[^ ]+ --hash=sha256:[0-9a-f]{{64}}$",
+            )
+
     def test_manifest_pins_every_public_source(self) -> None:
         document = json.loads(MANIFEST.read_text(encoding="utf-8"))
         assets = document["assets"]

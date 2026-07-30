@@ -31,6 +31,7 @@ EXPECTED_DISTRIBUTIONS = {
     "progressbar": "2.5",
     "torchlibrosa": "0.1.0",
     "webdataset": "0.2.48",
+    "wcwidth": "0.2.13",
     "wget": "3.2",
 }
 
