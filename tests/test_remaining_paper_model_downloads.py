@@ -12,9 +12,25 @@ TOOLS_REQUIREMENTS = (
     / "configs/resources/paper_model_download_tools.requirements.txt"
 )
 WRAPPER = REPOSITORY_ROOT / "scripts/run_remaining_paper_model_downloads.sh"
+CHECKER = REPOSITORY_ROOT / "scripts/check_remaining_paper_models.sh"
 
 
 class RemainingPaperModelDownloadsTests(unittest.TestCase):
+    def test_checker_is_read_only_and_covers_all_six_assets(self) -> None:
+        source = CHECKER.read_text(encoding="utf-8")
+        for asset in (
+            "robust_source",
+            "mga_source",
+            "mga_checkpoint",
+            "m2d_source",
+            "m2d_checkpoint",
+            "bge_snapshot",
+        ):
+            self.assertIn(asset, source)
+        self.assertIn('echo "COMPLETE=${COMPLETE}/6"', source)
+        for forbidden in ("tmux", "curl", "snapshot_download", "mv ", "rm "):
+            self.assertNotIn(forbidden, source)
+
     def test_google_drive_tool_has_complete_hash_locked_runtime(self) -> None:
         source = TOOLS_REQUIREMENTS.read_text(encoding="utf-8")
         for distribution in ("beautifulsoup4", "gdown", "soupsieve"):
