@@ -1,8 +1,75 @@
 # -*- coding: utf-8 -*-
-import warnings, numpy as np
+import hashlib
+import pickle
+import warnings
+from pathlib import Path
+
+import numpy as np
 from typing import List, Optional
 from AudioRetrieval.eval_core import BaseRetrievalModel, l2norm
 from AudioRetrieval.models.laion_clap_tokenizers import local_tokenizer_redirect
+
+
+_TRUSTED_LAION_CLAP_CHECKPOINT_SHA256 = (
+    "8053c9775516af2f4902e1e8281e356cc1bf7a85e8b761908170767b77c3f037"
+)
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _normalize_official_state_dict(state_dict):
+    """Mirror laion-clap 1.1.6 checkpoint key normalization."""
+    if state_dict and next(iter(state_dict)).startswith("module"):
+        state_dict = {key[7:]: value for key, value in state_dict.items()}
+
+    import transformers
+
+    if transformers.__version__ >= "4.31.0":
+        state_dict.pop("text_branch.embeddings.position_ids", None)
+    return state_dict
+
+
+def _load_trusted_checkpoint_compat(clap_module, checkpoint_path) -> None:
+    """Load the pinned official checkpoint under PyTorch 2.6+ semantics."""
+    path = Path(checkpoint_path).expanduser().resolve()
+    actual_sha256 = _sha256_file(path)
+    if actual_sha256 != _TRUSTED_LAION_CLAP_CHECKPOINT_SHA256:
+        raise RuntimeError(
+            "Refusing unsafe LAION-CLAP compatibility load: checkpoint SHA256 "
+            f"{actual_sha256} does not match the pinned official artifact"
+        )
+
+    import torch
+
+    warnings.warn(
+        "Using the PyTorch 2.6 compatibility loader for the SHA256-verified "
+        "official LAION-CLAP checkpoint.",
+        RuntimeWarning,
+    )
+    checkpoint = torch.load(
+        str(path), map_location="cpu", weights_only=False
+    )
+    state_dict = (
+        checkpoint["state_dict"]
+        if isinstance(checkpoint, dict) and "state_dict" in checkpoint
+        else checkpoint
+    )
+    clap_module.model.load_state_dict(_normalize_official_state_dict(state_dict))
+
+
+def _load_checkpoint(clap_module, checkpoint_path) -> None:
+    try:
+        clap_module.load_ckpt(checkpoint_path)
+    except pickle.UnpicklingError as exc:
+        if "Weights only load failed" not in str(exc):
+            raise
+        _load_trusted_checkpoint_compat(clap_module, checkpoint_path)
 
 def _safe_import_sound_loader():
     try:
@@ -62,7 +129,8 @@ class LaionClapAdapter(BaseRetrievalModel):
             self.model = CLAP_Module(
                 enable_fusion=enable_fusion, amodel=amodel, tmodel=tmodel
             )
-        self.model.load_ckpt(ckpt_path); self.model.eval()
+        _load_checkpoint(self.model, ckpt_path)
+        self.model.eval()
         self.target_sr = int(resample_sr)
         self.target_len = int(self.target_sr * float(audio_duration_sec))
         self.audio_crop = audio_crop

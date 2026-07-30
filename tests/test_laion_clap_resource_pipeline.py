@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import pickle
 from pathlib import Path
 import sys
 import tempfile
@@ -8,6 +9,12 @@ import types
 import unittest
 from unittest import mock
 
+from AudioRetrieval.models.laion_clap_adapter import (
+    _TRUSTED_LAION_CLAP_CHECKPOINT_SHA256,
+    _load_checkpoint,
+    _load_trusted_checkpoint_compat,
+    _normalize_official_state_dict,
+)
 from AudioRetrieval.models.laion_clap_tokenizers import local_tokenizer_redirect
 from scripts.build_laion_clap_portable_lock import (
     EXPECTED_DISTRIBUTIONS,
@@ -27,6 +34,62 @@ MAIN_WRAPPER = REPOSITORY_ROOT / "scripts/run_laion_clap_clotho_main.sh"
 
 
 class LaionClapResourcePipelineTests(unittest.TestCase):
+    def test_pytorch_26_fallback_requires_trusted_checkpoint_hash(self) -> None:
+        target = mock.Mock()
+        fake_torch = types.ModuleType("torch")
+        fake_torch.load = mock.Mock(return_value={"state_dict": {"weight": 1}})
+        fake_transformers = types.ModuleType("transformers")
+        fake_transformers.__version__ = "4.47.0"
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            checkpoint.write_bytes(b"untrusted")
+            with mock.patch.dict(
+                sys.modules,
+                {"torch": fake_torch, "transformers": fake_transformers},
+            ):
+                with self.assertRaisesRegex(RuntimeError, "Refusing unsafe"):
+                    _load_trusted_checkpoint_compat(target, checkpoint)
+        fake_torch.load.assert_not_called()
+
+    def test_trusted_fallback_explicitly_disables_weights_only(self) -> None:
+        target = mock.Mock()
+        fake_torch = types.ModuleType("torch")
+        fake_torch.load = mock.Mock(return_value={"state_dict": {"weight": 1}})
+        fake_transformers = types.ModuleType("transformers")
+        fake_transformers.__version__ = "4.47.0"
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            checkpoint.write_bytes(b"trusted-by-mocked-digest")
+            with mock.patch(
+                "AudioRetrieval.models.laion_clap_adapter._sha256_file",
+                return_value=_TRUSTED_LAION_CLAP_CHECKPOINT_SHA256,
+            ), mock.patch.dict(
+                sys.modules,
+                {"torch": fake_torch, "transformers": fake_transformers},
+            ), self.assertWarnsRegex(RuntimeWarning, "SHA256-verified"):
+                _load_trusted_checkpoint_compat(target, checkpoint)
+        fake_torch.load.assert_called_once_with(
+            str(checkpoint.resolve()), map_location="cpu", weights_only=False
+        )
+        target.model.load_state_dict.assert_called_once_with({"weight": 1})
+
+    def test_compatibility_fallback_only_handles_weights_only_error(self) -> None:
+        checkpoint = mock.Mock()
+        checkpoint.load_ckpt.side_effect = pickle.UnpicklingError("other pickle error")
+        with self.assertRaisesRegex(pickle.UnpicklingError, "other pickle error"):
+            _load_checkpoint(checkpoint, "checkpoint.pt")
+
+    def test_official_checkpoint_key_normalization_is_preserved(self) -> None:
+        fake_transformers = types.ModuleType("transformers")
+        fake_transformers.__version__ = "4.47.0"
+        state_dict = {
+            "module.audio_branch.weight": 1,
+            "module.text_branch.embeddings.position_ids": 2,
+        }
+        with mock.patch.dict(sys.modules, {"transformers": fake_transformers}):
+            normalized = _normalize_official_state_dict(state_dict)
+        self.assertEqual(normalized, {"audio_branch.weight": 1})
+
     def test_manifest_fixes_checkpoint_and_all_eager_tokenizers(self) -> None:
         document = json.loads(MANIFEST.read_text(encoding="utf-8"))
         self.assertEqual(document["resource_id"], "MODEL-05")
