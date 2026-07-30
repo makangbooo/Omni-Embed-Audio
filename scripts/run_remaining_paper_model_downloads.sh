@@ -4,20 +4,6 @@ set -uo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
 
-if [[ -z "${TMUX:-}" ]]; then
-  SESSION_NAME="paper_model_downloads_$(date +%Y%m%d_%H%M%S)"
-  tmux new-session -d -s "${SESSION_NAME}" \
-    "cd \"${ROOT_DIR}\" && exec bash scripts/run_remaining_paper_model_downloads_tmux.sh"
-  echo "TMUX_SESSION=${SESSION_NAME}"
-  echo "GPU_USED=no"
-  echo "OEA_OFFICIAL_SOURCE_USED=yes"
-  echo "PARALLEL_DOWNLOADS=6"
-  echo "ESTIMATED_TOTAL_TIME=10-60 minutes"
-  echo "ATTACH_COMMAND=tmux attach -t ${SESSION_NAME}"
-  echo "CAPTURE_COMMAND=tmux capture-pane -pt ${SESSION_NAME} -S -160"
-  exit 0
-fi
-
 # shellcheck source=scripts/lib/conda.sh
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
@@ -57,8 +43,7 @@ finish() {
   echo "ERROR_SUMMARY=$([[ ${rc} -eq 0 ]] && echo 'Robust checkpoint remains unpublished' || echo 'See per-job logs')"
   echo "RESULT_DIRECTORY=${RUN_DIR}"
   echo "METRICS_PATH=${RUN_DIR}/download_summary.txt"
-  echo "TMUX_RETAINED_SHELL=yes"
-  exec bash -i
+  exit "${rc}"
 }
 
 if [[ -n "${GIT_STATUS}" ]]; then

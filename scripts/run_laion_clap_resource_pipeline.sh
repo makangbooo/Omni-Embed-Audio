@@ -4,19 +4,6 @@ set -uo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
 
-if [[ -z "${TMUX:-}" ]]; then
-  SESSION_NAME="laion_clap_resources_$(date +%Y%m%d_%H%M%S)"
-  tmux new-session -d -s "${SESSION_NAME}" \
-    "cd \"${ROOT_DIR}\" && exec bash scripts/run_laion_clap_resource_pipeline_tmux.sh"
-  echo "TMUX_SESSION=${SESSION_NAME}"
-  echo "GPU_USED=no"
-  echo "OEA_OFFICIAL_SOURCE_USED=yes"
-  echo "ESTIMATED_TOTAL_TIME=5-20 minutes"
-  echo "ATTACH_COMMAND=tmux attach -t ${SESSION_NAME}"
-  echo "CAPTURE_COMMAND=tmux capture-pane -pt ${SESSION_NAME} -S -120"
-  exit 0
-fi
-
 # shellcheck source=scripts/lib/conda.sh
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
@@ -59,8 +46,7 @@ finish() {
   echo "ERROR_SUMMARY=$([[ ${rc} -eq 0 ]] && echo none || echo "See combined.log")"
   echo "RESULT_DIRECTORY=${RUN_DIR}"
   echo "METRICS_PATH=${LOCK_OUTPUT}"
-  echo "TMUX_RETAINED_SHELL=yes"
-  exec bash -i
+  exit "${rc}"
 }
 
 if [[ -n "${GIT_STATUS}" ]]; then

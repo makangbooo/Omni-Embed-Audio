@@ -22,8 +22,8 @@ REQUIREMENTS = (
     REPOSITORY_ROOT
     / "configs/resources/laion_clap_1_1_6_overlay.requirements.txt"
 )
-WRAPPER = REPOSITORY_ROOT / "scripts/run_laion_clap_resource_pipeline_tmux.sh"
-MAIN_WRAPPER = REPOSITORY_ROOT / "scripts/run_laion_clap_clotho_main_tmux.sh"
+WRAPPER = REPOSITORY_ROOT / "scripts/run_laion_clap_resource_pipeline.sh"
+MAIN_WRAPPER = REPOSITORY_ROOT / "scripts/run_laion_clap_clotho_main.sh"
 
 
 class LaionClapResourcePipelineTests(unittest.TestCase):
@@ -135,11 +135,9 @@ class LaionClapResourcePipelineTests(unittest.TestCase):
             with self.assertRaises(FileExistsError):
                 write_new_json(output, {"status": "replaced"})
 
-    def test_wrapper_is_cpu_only_tmux_logged_and_non_destructive(self) -> None:
+    def test_wrapper_is_cpu_only_logged_and_non_destructive(self) -> None:
         source = WRAPPER.read_text(encoding="utf-8")
         for marker in (
-            "tmux new-session -d",
-            "exec bash -i",
             "GPU_USED=no",
             "OEA_OFFICIAL_SOURCE_USED=yes",
             "ESTIMATED_TOTAL_TIME=",
@@ -154,7 +152,14 @@ class LaionClapResourcePipelineTests(unittest.TestCase):
                 self.assertIn(marker, source)
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
         self.assertIn("--require-hashes", source)
-        for forbidden in ("rm -rf", "git reset", "git clean", "--upgrade"):
+        for forbidden in (
+            "rm -rf",
+            "git reset",
+            "git clean",
+            "--upgrade",
+            "tmux",
+            "exec bash -i",
+        ):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source)
 
@@ -197,13 +202,14 @@ class LaionClapResourcePipelineTests(unittest.TestCase):
             "--expected-audio 1045",
             "--expected-captions 5225",
             "evaluate_official_source_oea_clotho.py",
-            "TMUX_RETAINED_SHELL=yes",
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)
         self.assertNotIn("--uiq-dir", source)
         self.assertNotIn("positive_uiq", source)
         self.assertIn("torch.cuda.device_count() == 1", source)
+        self.assertNotIn("tmux", source)
+        self.assertNotIn("exec bash -i", source)
 
     def test_embedding_gate_requires_shape_finite_norm_and_new_output(self) -> None:
         source = (

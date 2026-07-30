@@ -15,19 +15,6 @@ if [[ "${RESOURCE_RUN_DIR}" != "${LOGS_ROOT}"/* ]]; then
   exit 3
 fi
 
-if [[ -z "${TMUX:-}" ]]; then
-  SESSION_NAME="laion_clap_clotho_main_$(date +%Y%m%d_%H%M%S)"
-  tmux new-session -d -s "${SESSION_NAME}" \
-    "cd \"${ROOT_DIR}\" && exec bash scripts/run_laion_clap_clotho_main_tmux.sh \"${RESOURCE_RUN_DIR}\""
-  echo "TMUX_SESSION=${SESSION_NAME}"
-  echo "GPU_USED=yes"
-  echo "OEA_OFFICIAL_SOURCE_USED=yes"
-  echo "ESTIMATED_TOTAL_TIME=10-25 minutes"
-  echo "ATTACH_COMMAND=tmux attach -t ${SESSION_NAME}"
-  echo "CAPTURE_COMMAND=tmux capture-pane -pt ${SESSION_NAME} -S -160"
-  exit 0
-fi
-
 # shellcheck source=scripts/lib/conda.sh
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
@@ -35,7 +22,7 @@ MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 DATA_ROOT="${DATA_ROOT:-/home/jg525/datasets/oea}"
 MANIFEST="${ROOT_DIR}/configs/resources/model05_laion_clap.json"
 REQUIREMENTS="${ROOT_DIR}/configs/resources/laion_clap_1_1_6_overlay.requirements.txt"
-OVERLAY_ROOT="${MODEL_ROOT}/python/laion-clap-1.1.6-overlay"
+OVERLAY_ROOT="${MODEL_ROOT}/python/laion-clap-1.1.6-overlay-v3"
 DOWNLOAD_REPORT="${RESOURCE_RUN_DIR}/download_manifest.json"
 RESOURCE_LOCK="${RESOURCE_RUN_DIR}/laion_clap.portable_model_lock.json"
 CHECKPOINT="${MODEL_ROOT}/laion-clap/630k-audioset-best.pt"
@@ -92,8 +79,7 @@ finish() {
   echo "RESULT_DIRECTORY=${RESULT_ROOT}"
   echo "LOG_DIRECTORY=${LOG_DIR}"
   echo "METRICS_PATH=${METRICS_DIR}/suite_metrics.json"
-  echo "TMUX_RETAINED_SHELL=yes"
-  exec bash -i
+  exit "${rc}"
 }
 
 if [[ -n "${GIT_STATUS}" ]]; then

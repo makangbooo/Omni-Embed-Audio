@@ -11,7 +11,7 @@ TOOLS_REQUIREMENTS = (
     REPOSITORY_ROOT
     / "configs/resources/paper_model_download_tools.requirements.txt"
 )
-WRAPPER = REPOSITORY_ROOT / "scripts/run_remaining_paper_model_downloads_tmux.sh"
+WRAPPER = REPOSITORY_ROOT / "scripts/run_remaining_paper_model_downloads.sh"
 
 
 class RemainingPaperModelDownloadsTests(unittest.TestCase):
@@ -41,7 +41,6 @@ class RemainingPaperModelDownloadsTests(unittest.TestCase):
     def test_wrapper_is_parallel_resumable_and_auditable(self) -> None:
         source = WRAPPER.read_text(encoding="utf-8")
         for marker in (
-            "tmux new-session -d",
             "PARALLEL_DOWNLOADS=6",
             "--continue-at -",
             "snapshot_download(",
@@ -50,11 +49,17 @@ class RemainingPaperModelDownloadsTests(unittest.TestCase):
             "declare -A PIDS",
             "FINAL_RUN_RC=",
             "COMPLETION_STATUS=",
-            "TMUX_RETAINED_SHELL=yes",
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)
-        for forbidden in ("rm -rf", "git reset", "git clean", "git checkout"):
+        for forbidden in (
+            "rm -rf",
+            "git reset",
+            "git clean",
+            "git checkout",
+            "tmux",
+            "exec bash -i",
+        ):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source)
 
