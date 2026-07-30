@@ -115,14 +115,14 @@ reviewed `close` T2A/T2T observations under the same four protocols and 12
 reviewed `close` positive-UIQ observations for Tables 12–15.
 Twelve strict Table 2/3 observations across the two variants remain `blocked`
 because the paper and public evaluation command do not fully specify caption
-selection and the T2T self/tie protocol. The remaining 806 unique registered
+selection and the T2T self/tie protocol. The remaining 800 unique registered
 metrics are unobserved pending formal runs; they are not represented as
 reproduced values.
 
-The vanilla Nemotron-3B and Qwen2.5-Omni-3B Clotho main-table runs each add 12
-reviewed `close` observations under the same four-protocol separation, bringing
-the committed snapshot to 167 observations: 144 `close` and 23 strict
-`blocked`.
+The vanilla Nemotron-3B, Qwen2.5-Omni-3B, and Qwen2.5-Omni-7B Clotho
+main-table runs each add 12 reviewed `close` observations under the same
+four-protocol separation, bringing the committed snapshot to 179 observations:
+156 `close` and 23 strict `blocked`.
 
 The four predeclared public-code retrieval protocols remain runnable and must
 be reported separately. The released UIQ name `tagging` and the paper name

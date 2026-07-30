@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_base_only_remote_run_compact_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The returned evidence fixes the clean Git identity, start/end/elapsed time, final exit status, directly printed smoke/full shapes, complete four-protocol R@k metrics at six-decimal display precision, base-only model-load boundary, artifact hashes, GPU identity, workload counts, and remote paths. MRR/DCG and directory sizes were not returned and are not invented."
+  },
+  "paper_scope": [
+    "EXP-10 / Table 2 / Qwen2.5-Omni-7B / Clotho / T2A",
+    "EXP-11 / Table 3 / Qwen2.5-Omni-7B / Clotho / T2T"
+  ],
+  "model": {
+    "paper_name": "Qwen2.5-Omni-7B",
+    "paper_group": "Vanilla LALMs (No Retrieval Training)",
+    "base_model": "Qwen/Qwen2.5-Omni-7B@ae9e1690543ffd5c0221dc27f79834d0294cba00",
+    "model_lock": "results/model_locks/vanilla_qwen2_5_omni_7b.json#sha256:92173cfc0615841f8300b4e03a8954af339635de0b791b94c2d049eb2d8638ef",
+    "hidden_size": 3584,
+    "hidden_size_runtime_source": "model.config.thinker_config.text_config.hidden_size",
+    "projection_head_loaded": false,
+    "lora_loaded": false,
+    "oea_checkpoint_loaded": false
+  },
+  "dataset": {
+    "name": "Clotho v2.1 evaluation",
+    "audio_count": 1045,
+    "caption_count": 5225
+  },
+  "official_source": {
+    "upstream_commit": "b261ad0743dbfac67cb6b20016fd951a366b3f35",
+    "source_files": [
+      "AudioRetrieval/models/omni_embed_adapter.py",
+      "AudioRetrieval/evaluation/metrics.py"
+    ],
+    "reproduction_orchestration": [
+      "scripts/run_vanilla_clotho_main_tmux.sh",
+      "scripts/run_vanilla_backbone_embeddings.sh",
+      "scripts/generate_vanilla_backbone_embeddings.py",
+      "scripts/run_vanilla_clotho_retrieval_suite.sh"
+    ]
+  },
+  "run": {
+    "main_run_id": "vanilla_qwen2_5_omni_7b_clotho_main_20260730_115126",
+    "smoke_run_id": "vanilla_qwen2_5_omni_7b_clotho_smoke_seed42_20260730_115126",
+    "full_run_id": "vanilla_qwen2_5_omni_7b_clotho_embeddings_seed42_20260730_115126",
+    "suite_id": "vanilla_qwen2_5_omni_7b_clotho_retrieval_suite_seed42_20260730_115126",
+    "main_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_7b_clotho_main_20260730_115126",
+    "smoke_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_7b_clotho_main_20260730_115126/vanilla_qwen2_5_omni_7b_clotho_smoke_seed42_20260730_115126",
+    "full_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_7b_clotho_main_20260730_115126/vanilla_qwen2_5_omni_7b_clotho_embeddings_seed42_20260730_115126",
+    "suite_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_7b_clotho_main_20260730_115126/vanilla_qwen2_5_omni_7b_clotho_retrieval_suite_seed42_20260730_115126",
+    "log_path": "/home/jg525/Omni-Embed-Audio/logs/vanilla_qwen2_5_omni_7b_clotho_main_20260730_115126/combined.log",
+    "git_commit": "5110a4ff85fb65e39b9d27ca9298aba1dae48ebe",
+    "git_status_short": "",
+    "started_at": "2026-07-30T11:51:26+08:00",
+    "finished_at": "2026-07-30T12:05:28+08:00",
+    "elapsed_seconds": 842,
+    "final_run_rc": 0,
+    "gpu": "NVIDIA GeForce RTX 4090"
+  },
+  "generation": {
+    "shape_source": "OBSERVED in the user-returned compact result output",
+    "smoke": {
+      "status": "complete",
+      "candidate_embedding_shape": [5, 3584],
+      "query_embedding_shape": [25, 3584]
+    },
+    "full": {
+      "status": "complete",
+      "candidate_embedding_shape": [1045, 3584],
+      "query_embedding_shape": [5225, 3584]
+    }
+  },
+  "artifacts": {
+    "smoke_generation_metrics.json": "cfb8cec8e29c254e521ad22f0ad4d2f3a19265c53fa6957b2e36c63e0e69bd9f",
+    "full_generation_metrics.json": "e7e8a8e15438751de177c83e7d4a4f319f63e17f67983e68f36d9d78d34725a7",
+    "candidate_embeddings.npy": "a91b81374a1db4482a887ee78e9ece83a63c58c56494bdebd4cf382c99b5e3dc",
+    "query_embeddings.npy": "fa2788f4484d4d3de76e4fa82ceac76b7f14cf8e49d85fd895b895495eef27b0",
+    "suite_metrics.json": "9690ef4d001d0acd972d4647fee217796f3417e06885513b05b728ce1203e61c",
+    "retrieval_summary.csv": "253d2f747e9c627d2bc181a45fd550a4e63d07e8999d012589beb2cb9698ec77",
+    "combined.log": "bde4efb80c7ca30a7ae4b349ffee36f4a97e4467e742eae6ead70e62a0a74d5f"
+  },
+  "seed": 42,
+  "protocol_count": 4,
+  "protocols": {
+    "t2a_public_code_default_joint_all_captions": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {"R@1": 0.095694, "R@5": 0.650718, "R@10": 1.244019}
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {"R@1": 0.0, "R@5": 0.669856, "R@10": 1.339713}
+    },
+    "t2t_public_code_default_seed0": {
+      "task": "t2t",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {"R@1": 40.76555, "R@5": 54.162679, "R@10": 59.808612}
+    },
+    "t2t_all_captions_sensitivity": {
+      "task": "t2t",
+      "protocol_source": "INFERRED",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {"R@1": 39.406699, "R@5": 52.976077, "R@10": 59.100478}
+    }
+  },
+  "paper_values": {
+    "Table 2": {"R@1": 0.1, "R@5": 0.65, "R@10": 1.32},
+    "Table 3": {"R@1": 40.23, "R@5": 54.26, "R@10": 60.27}
+  },
+  "paper_protocol_limitations": [
+    "PAPER does not disclose the Clotho caption-selection protocol for T2A.",
+    "PAPER does not disclose T2T caption selection, self-exclusion, or tie handling.",
+    "PAPER states an audio passage prefix, while the public source path used here omits that prefix.",
+    "Both predeclared protocols remain reported; no protocol is selected post hoc."
+  ]
+}

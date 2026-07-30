@@ -116,6 +116,23 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
             )
             self.assertEqual(self.by_key[key]["observed_metric_count"], 3)
 
+    def test_vanilla_qwen7b_clotho_main_cells_are_reproduced(self) -> None:
+        for inventory, table, task in (
+            ("EXP-10", "Table 2", "T2A"),
+            ("EXP-11", "Table 3", "T2T"),
+        ):
+            key = (
+                inventory,
+                table,
+                "Qwen2.5-Omni-7B",
+                "Clotho",
+                task,
+            )
+            self.assertEqual(
+                self.by_key[key]["reproduction_status"], "REPRODUCED_CLOSE"
+            )
+            self.assertEqual(self.by_key[key]["observed_metric_count"], 3)
+
     def test_status_vocabulary_is_closed(self) -> None:
         counts = Counter(row["reproduction_status"] for row in self.rows)
         self.assertEqual(

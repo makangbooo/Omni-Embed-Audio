@@ -74,6 +74,20 @@ sensitivity is `38.4115/51.1388/57.1100`, versus PAPER
 the compact audit and seven top-level artifact hashes are fixed in
 `results/audits/vanilla_qwen2_5_omni_3b_clotho_main_eval_20260730.json`.
 
+The vanilla Qwen2.5-Omni-7B Clotho main-table run completed at commit
+`5110a4f` with a clean worktree and `FINAL_RUN_RC=0` in 842 seconds on one
+RTX 4090. Directly observed smoke/full shapes are `5x3584/25x3584` and
+`1045x3584/5225x3584`; the runtime explicitly recorded
+`projection_head_loaded=false`, `lora_loaded=false`, and
+`oea_checkpoint_loaded=false`. `[CODE]` all-caption and seed-0 T2A are
+`0.0957/0.6507/1.2440` and `0.0000/0.6699/1.3397`, versus PAPER
+`0.10/0.65/1.32`. `[CODE]` seed-0 T2T is
+`40.7656/54.1627/59.8086`, while the separate `[INFERRED]` all-caption
+sensitivity is `39.4067/52.9761/59.1005`, versus PAPER
+`40.23/54.26/60.27`. Both protocols remain visible without post-hoc selection;
+the compact audit and seven top-level artifact hashes are fixed in
+`results/audits/vanilla_qwen2_5_omni_7b_clotho_main_eval_20260730.json`.
+
 OEA-Nemo3B-AC previously completed official-source GPU precomputation and CPU
 finalization at run commits `effe67d` and `1f991ab`. The finalizer returned
 `FINAL_RUN_RC=0` in 7 seconds and fixed eight protocols in

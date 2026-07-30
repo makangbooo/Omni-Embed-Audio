@@ -26,11 +26,12 @@ The pipeline disables GPU visibility, refuses dirty Git state, refuses to overwr
 
 ## Lock-bound embedding path
 
-The formal generator and wrapper are committed. Nemotron-3B has completed its
-real lock-bound smoke, full Clotho generation, and four-protocol finalization;
-Qwen2.5-Omni-3B has a committed base-only lock inherited byte-for-byte from the
-independently audited base inventory in `results/model_locks/oea_qwen3b.json`.
-Its GPU smoke is the next pending gate:
+The formal generator and wrapper are committed. All three vanilla backbones
+have completed real lock-bound smoke, full Clotho generation, and
+four-protocol finalization. Qwen2.5-Omni-3B's base-only lock is inherited
+byte-for-byte from the independently audited base inventory in
+`results/model_locks/oea_qwen3b.json`; Qwen2.5-Omni-7B has its own complete
+20-file lock:
 
 ```bash
 bash scripts/run_vanilla_backbone_embeddings.sh vanilla_nemotron_3b --smoke
@@ -72,7 +73,7 @@ The three pinned configurations expose hidden dimensions through two verified
 structures: Nemotron uses `text_config.hidden_size` (2048), while Qwen3B and
 Qwen7B use `thinker_config.text_config.hidden_size` (2048 and 3584). These are
 read from the locked local file rather than hard-coded as a claimed paper
-parameter. The smoke gate is implemented but has not yet passed on a real GPU.
+parameter. The smoke gate has passed on one RTX 4090 for all three backbones.
 
 ## CPU retrieval finalizer
 
@@ -102,9 +103,9 @@ overwrites a non-complete protocol directory.
 
 The current protocol fixes Clotho evaluation at 1,045 candidates and all 5,225
 captions. Batch size 1 and seed 42 are explicitly `[INFERRED]`; the paper does
-not publish vanilla evaluation values for them. Nemotron-3B and
-Qwen2.5-Omni-3B now each have four committed reproduced protocol groups in
-`results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json` and
-`results/audits/vanilla_qwen2_5_omni_3b_clotho_main_eval_20260730.json`.
-Qwen2.5-Omni-7B has a committed 20-file, 22.38 GB base-only lock and awaits
-separate GPU approval for its smoke/full evaluation.
+not publish vanilla evaluation values for them. Nemotron-3B,
+Qwen2.5-Omni-3B, and Qwen2.5-Omni-7B now each have four committed reproduced
+protocol groups in
+`results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json`,
+`results/audits/vanilla_qwen2_5_omni_3b_clotho_main_eval_20260730.json`, and
+`results/audits/vanilla_qwen2_5_omni_7b_clotho_main_eval_20260730.json`.

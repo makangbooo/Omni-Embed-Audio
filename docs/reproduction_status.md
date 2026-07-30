@@ -31,7 +31,7 @@
 | 0 项目审计 | 完整阅读论文正文/附录/表/图/脚注 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 固定 inventory |
 | 0 项目审计 | 审计 README、依赖、训练/评测、数据、UIQ、HN、指标 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认审计结论 |
 | 0 项目审计 | 31 条实验/图/派生分析 inventory | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认复现边界 |
-| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | `23bf6ee`；批准/主机证据见 `results/audits/takeover_approvals_20260729.json` | 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`，整行完成度=`4/31 = 12.9%`；910 个论文指标聚合为 374 个可审计单元；当前 cell 状态=`32 REPRODUCED_CLOSE/4 CONTROLLED_ONLY/15 PARTIAL/161 TODO/162 BLOCKED`；FIG-02 方法/张量契约及三种 OEA backbone runtime 均已核验；扩展实验明确排除 | 外部端点仍由用户通过 Bitahub Web 控制台操作，Codex 未直接连接；共享目录盘点不等于逐文件完整性校验 | 正文 Table 2/3 优先，继续处理 AudioCaps/MECAT 和缺失 baseline |
+| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | `23bf6ee`；批准/主机证据见 `results/audits/takeover_approvals_20260729.json` | 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`，整行完成度=`4/31 = 12.9%`；910 个论文指标聚合为 374 个可审计单元；当前 cell 状态=`34 REPRODUCED_CLOSE/4 CONTROLLED_ONLY/15 PARTIAL/159 TODO/162 BLOCKED`；FIG-02 方法/张量契约及三种 OEA backbone runtime 均已核验；扩展实验明确排除 | 外部端点仍由用户通过 Bitahub Web 控制台操作，Codex 未直接连接；共享目录盘点不等于逐文件完整性校验 | 正文 Table 2/3 优先，继续处理 AudioCaps/MECAT 和缺失 baseline |
 | 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `48d7a50` | 本地与 fork 分支均存在 | 无 | 后续提交仅推送该分支 |
 | 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
 | 0 编排 | 统一复现入口与 CPU/GPU 阶段门禁 | COMPLETED | `d13b115` | 公共入口、精确阶段注册表、默认只规划/显式执行、长任务确认和干净 worktree 门禁已实现；baseline 计划已展开为 vanilla CPU 模型锁 → A100 smoke → A100 full → CPU 四协议 metrics 与独立 CLAP blocker | 无；入口完成不代表任何 blocked 实验已解锁或产生复现值 | DATA-04/05、DATA-06/07、DATA-08/09、DATA-11 已完成；继续只读模型资源审计 |
@@ -103,7 +103,7 @@
 | 2 OEA-6 A100 论文同硬件对照 | OEA-Qwen3B-Cl 查询编码延迟、显存与吞吐 | COMPLETED | `9f62e20` | `...a100_efficiency_20260721_214156`：严格 A100-SXM4-80GB 门禁、clean worktree、precheck/run/attempt exit 均为 0；1,045 audio 均值/P50/P95=`273.207/267.578/381.090 ms`，5,225 text=`46.638/45.318/52.117 ms`；峰值 allocated/reserved=`9.307/10.115 GiB`；三项工件 SHA256 已固定 | `[MISSING]` 论文未公开计时边界、显存统计和参数计数口径，且未明确效率行使用 Base 或 +Cl checkpoint；因此控制实验完成，但 Tables 5/16 的八个严格论文观察继续标为 `blocked` | 登记小型 A100 审计证据和严格 blocked 观察；与 RTX 4090 结果分栏，下一步等待 OEA-5 目标语料协议 |
 | 2 指标 | Canonical T2A/T2T/UIQ embedding evaluator | COMPLETED | `43158ae` | 确定性 ID 检索、caption 多正例/排除 self、显式 query 子集、完整排名和严格输入校验已实现；相关 15 项测试通过 | 论文未公开 T2T caption 选择与 tie 口径；已在协议文档标为 `[MISSING]` | 接入 checkpoint embedding 生成器 |
 | 2 指标 | 可审计 embedding 实验输出 runner | COMPLETED | `5ed57a7` | CPU-only runner 已保存固定 embedding、metadata、完整排名、输入/工件 SHA256、seed、Git/环境/命令和失败证据；相关测试总计 27 项通过 | 无；正式运行要求干净 worktree 和显式协议来源 | 用 Qwen3B-Cl + Clotho evaluation 完成首个正式 T2A/T2T 闭环 |
-| 2 结果管理 | 论文值/复现观测/证据统一汇总契约 | COMPLETED | 本提交 | Tables 1–17 与 910 个论文指标保持 910/910 转录匹配；当前汇总含 167 个观察：144 个显式审阅的 close 与 23 个 strict blocked；新增 vanilla Qwen2.5-Omni-3B × Clotho T2A/T2T 共 12 个 close；本地证据、远程工件路径/哈希、delta 和状态计数均已生成 | 无；多个预声明协议继续分栏，不按论文数值接近度择优 | 后续正式实验继续仅凭小型固定 JSON 证据追加观察 |
+| 2 结果管理 | 论文值/复现观测/证据统一汇总契约 | COMPLETED | 本提交 | Tables 1–17 与 910 个论文指标保持 910/910 转录匹配；当前汇总含 179 个观察：156 个显式审阅的 close 与 23 个 strict blocked；新增 vanilla Qwen2.5-Omni-7B × Clotho T2A/T2T 共 12 个 close；本地证据、远程工件路径/哈希、delta 和状态计数均已生成 | 无；多个预声明协议继续分栏，不按论文数值接近度择优 | 后续正式实验继续仅凭小型固定 JSON 证据追加观察 |
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 保留为 canonical negative evaluator 的公式回归测试 |
 | 2 指标 | 显式 target/HN 的可审计 negative embedding evaluator | COMPLETED | `cd4d00b` | 严格 query/target/HN ID 覆盖、optimistic rank、确定性完整排序、per-query 证据、输入/输出 SHA256、失败保留和 CPU wrapper 已实现；完整 116 项测试通过 | 工具完成不等于表 17 已解锁；发布数据仍无 HN audio ID | 获得作者 pairing 后才运行正式表 17；否则仅运行单独标记的重建协议 |
 | 2 UIQ | Tables 12–15 正向 UIQ | IN_PROGRESS | 本提交 | Qwen3B-Cl、Qwen3B-AC、Nemo3B-Cl 与 Nemo3B-AC 在 Clotho 上均完成 4,180×512 GPU query embedding 和四协议 CPU suite；四个模型共 48 个 R@k 均作为 `[CODE] close` 分栏，MRR/DCG 作为额外审计指标保留 | 四个 OEA/Clotho 变体无执行阻塞；完整 Tables 12–15 仍缺两个 Qwen7B OEA 变体、四个 CLAP、AudioCaps/MECAT，且 MECAT 847/848 口径未决 | 保留四个已完成单元的审计身份；优先选择已有 checkpoint/data 的下一个论文评测闭环 |
@@ -130,7 +130,7 @@
 | 3 数据 | DATA-13C lock owner provenance patch | COMPLETED | 待本提交 | lock 改为非截断打开；成功后记录 hostname/PID/PPID/commit/run dir，失败时打印最后记录；4 项专项测试通过 | 只改善后续审计，不解除当前远端锁 | 当前锁安全释放后拉取补丁，再启动恢复 |
 | 3 数据 | DATA-13D：SQuTR `en/fiqa` + `en/nq` 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；四个退出码均为 0；16,400/16,400 音频通过；manifest SHA256 `e5053d30...15e93`；FiQA count/ID/text/leakage 无 violations | 无；4,100 条 24 kHz 与 12,300 条 16 kHz 是真实源数据分布 | 主实验数据门禁解除；后续模型输入显式重采样并记录 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
-| 5 基线 | 三个 vanilla backbone × Clotho Table 2/3 | IN_PROGRESS | Nemotron run=`74325cb`；Qwen3B run=`a435585`；Qwen7B base-only lock=`results/model_locks/vanilla_qwen2_5_omni_7b.json` | Nemotron 与 Qwen3B 的 RTX 4090 smoke/full 和 CPU 四协议均 complete、RC=`0`，明确未加载 checkpoint/LoRA/head；Qwen7B 的 20-file/22.38-GB immutable base 已完成 hash/provenance lock | 论文 caption selection、T2T self/tie 与 audio `passage:` 冲突仍 `[MISSING]`；Qwen7B GPU 主实验待单独批准；四个 CLAP 仍需固定 source/checkpoint | 申请 Qwen2.5-Omni-7B 同一正文 smoke→full→CPU metrics |
+| 5 基线 | 三个 vanilla backbone × Clotho Table 2/3 | COMPLETED | Nemotron run=`74325cb`；Qwen3B run=`a435585`；Qwen7B run=`5110a4f`；三个小型审计均在 `results/audits/` | 三个 vanilla backbone 的 RTX 4090 smoke/full 和 CPU 四协议均 complete、RC=`0`，明确未加载 checkpoint/LoRA/head；Qwen7B 直接观测 full shape=`1045×3584/5225×3584`，Table 2 all-caption=`0.0957/0.6507/1.2440`，Table 3 seed0=`40.7656/54.1627/59.8086` | 论文 caption selection、T2T self/tie 与 audio `passage:` 冲突仍 `[MISSING]`；四个 CLAP 仍需固定 source/checkpoint | 保持主实验优先，转向可运行的下一组 Table 2/3 baseline/data cell |
 | 5 基线 | LAION/Robust/MGA/M2D-CLAP | BLOCKED | N/A | 未开始 | checkpoint revision/统一入口不完整 | 官方 OEA 评测完成后逐个固定资源 |
 | 6 扩展 | 人工/闭源 API、效率、token-length、派生图表 | TODO | N/A | 未开始 | 按阶段后置 | 核心训练评测完成后执行 |
 
@@ -138,6 +138,7 @@
 
 - 当前阶段：官方源码优先推进 OEA 论文原实验复现；先运行 upstream example/precomputer/evaluator，保存其原始输出或错误，仅在实际阻塞时做最小兼容补丁。SpeechXBT、FiQA、NQ、SQuTR、ASR reranker 与 A2T 仅保留为历史记录，不计入本轮完成度，也不继续启动。训练在官方 checkpoint 评测矩阵完成前继续暂停。
 - 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
-- 最近完成：vanilla Qwen2.5-Omni-3B 的官方源码 Clotho Table 2/3 闭环；run commit=`a435585`，smoke/full/四协议均 complete、RC=`0`，base-only runtime 为 2,048 维且七个顶层工件 SHA256 已固定。Clotho vanilla 覆盖达到 `2/3`。
+- 正文 Table 2/3 模型×数据集×任务覆盖为 `18/78 = 23.1%`；其中 Clotho 为 `18/26 = 69.2%`，三个 vanilla backbone 的 Clotho 两任务为 `6/6 = 100%`。这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
+- 最近完成：vanilla Qwen2.5-Omni-7B 的官方源码 Clotho Table 2/3 闭环；run commit=`5110a4f`，smoke/full/四协议均 complete、RC=`0`，耗时 842 秒，base-only runtime 为 3,584 维且七个顶层工件 SHA256 已固定。Clotho vanilla 覆盖达到 `3/3`。
 - 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；CLAP/checkpoint 资源与若干论文协议细节仍未固定。
-- 下一步：正文 Table 2/3 优先；Qwen2.5-Omni-7B base-only lock 已就绪，单独申请 Clotho smoke→full→CPU metrics；附录 UIQ、效率、训练及全部扩展继续后移。
+- 下一步：正文 Table 2/3 优先；三个 vanilla Clotho cell 已全部闭环，继续处理可运行的 CLAP/数据集主表 cell；附录 UIQ、效率、训练及全部扩展继续后移。

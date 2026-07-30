@@ -15,8 +15,8 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
         self.assertEqual(
             Counter(group["paper_table"] for group in self.groups),
             {
-                "Table 2": 16,
-                "Table 3": 16,
+                "Table 2": 18,
+                "Table 3": 18,
                 "Table 12": 4,
                 "Table 13": 4,
                 "Table 14": 4,
@@ -124,6 +124,19 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
             group
             for group in self.groups
             if group["model"] == "Qwen2.5-Omni-3B"
+            and group["dataset"] == "Clotho"
+        ]
+        self.assertEqual(len(matches), 4)
+        self.assertEqual(
+            Counter(group["paper_table"] for group in matches),
+            {"Table 2": 2, "Table 3": 2},
+        )
+
+    def test_vanilla_qwen7b_main_table_cells_are_present(self) -> None:
+        matches = [
+            group
+            for group in self.groups
+            if group["model"] == "Qwen2.5-Omni-7B"
             and group["dataset"] == "Clotho"
         ]
         self.assertEqual(len(matches), 4)

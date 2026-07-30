@@ -22,6 +22,8 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 | OEA-Qwen7B (+Cl) | Clotho | [CODE] seed-0 one-caption | 22.53 / 48.80 / 62.70 | 22.0096 / 48.2297 / 60.4785 | 2.221531 |
 | Qwen2.5-Omni-3B | Clotho | [CODE] all-caption | 0.17 / 0.63 / 1.13 | 0.1722 / 0.6316 / 1.1483 | 0.018325 |
 | Qwen2.5-Omni-3B | Clotho | [CODE] seed-0 one-caption | 0.17 / 0.63 / 1.13 | 0.0957 / 0.5742 / 1.1483 | 0.074306 |
+| Qwen2.5-Omni-7B | Clotho | [CODE] all-caption | 0.10 / 0.65 / 1.32 | 0.0957 / 0.6507 / 1.2440 | 0.075981 |
+| Qwen2.5-Omni-7B | Clotho | [CODE] seed-0 one-caption | 0.10 / 0.65 / 1.32 | 0.0000 / 0.6699 / 1.3397 | 0.100000 |
 
 ## Table 3
 
@@ -43,6 +45,8 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 | OEA-Qwen7B (+Cl) | Clotho | [CODE] seed-0 one-caption/self-exclusion | 63.58 / 75.04 / 79.90 | 60.8612 / 72.8230 / 78.4689 | 2.718756 |
 | Qwen2.5-Omni-3B | Clotho | [INFERRED] all-caption sensitivity | 38.35 / 51.14 / 57.07 | 38.4115 / 51.1388 / 57.1100 | 0.061483 |
 | Qwen2.5-Omni-3B | Clotho | [CODE] seed-0 one-caption/self-exclusion | 38.35 / 51.14 / 57.07 | 39.5215 / 52.2488 / 59.0431 | 1.973062 |
+| Qwen2.5-Omni-7B | Clotho | [INFERRED] all-caption sensitivity | 40.23 / 54.26 / 60.27 | 39.4067 / 52.9761 / 59.1005 | 1.283923 |
+| Qwen2.5-Omni-7B | Clotho | [CODE] seed-0 one-caption/self-exclusion | 40.23 / 54.26 / 60.27 | 40.7655 / 54.1627 / 59.8086 | 0.535550 |
 
 ## Table 12
 
