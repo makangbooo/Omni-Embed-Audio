@@ -116,7 +116,7 @@
         {"surface_id": "baseline_runner", "path": "AudioRetrieval/evaluation/runners/baseline.py", "needle": "self.model_name == \"m2d_clap\"", "expected_present": false, "required_for_formal": true},
         {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/m2d_clap.yaml", "expected_present": false, "required_for_formal": true},
         {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"m2d_clap\"", "expected_present": false, "required_for_formal": true},
-        {"surface_id": "argparse_cli", "path": "AudioRetrieval/cli/main.py", "needle": "\"m2d_clap\"", "expected_present": false, "required_for_formal": true}
+        {"surface_id": "argparse_cli", "path": "AudioRetrieval/cli/main.py", "needle": "\"m2d_clap\"", "expected_present": true, "required_for_formal": true}
       ],
       "required_local_resources": [
         {"resource_id": "checkpoint", "root": "repository", "path": "ModelCheckpoint/M2D2/m2d_clap/checkpoint-30.pth", "kind": "file"}
@@ -128,10 +128,10 @@
         "checkpoint_sha256": null
       },
       "blockers": [
-        "No baseline runner, Hydra config/loader, argparse choice, or formal wrapper is committed for M2D-CLAP.",
-        "[MISSING] Exact upstream source commit and checkpoint identity."
+        "The dedicated main wrapper exists; the older baseline runner and Hydra entrypoints remain absent.",
+        "The remote resource lock must bind the extracted checkpoint to the pinned release archive before evaluation."
       ],
-      "next_action": "Pin source/checkpoint identities before adding the missing entrypoint and smoke test."
+      "next_action": "Run the archive-bound resource gate and dedicated Clotho smoke before full evaluation."
     },
     {
       "model_id": "vanilla_nemotron_3b",

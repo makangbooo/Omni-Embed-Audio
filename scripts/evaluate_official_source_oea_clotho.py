@@ -155,9 +155,13 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     audio_ids = strings(audio["clip_ids"])
     caption_ids = strings(captions["clip_ids"])
 
-    if audio_embeddings.shape != (1045, 512):
+    if audio_embeddings.ndim != 2 or audio_embeddings.shape[0] != 1045:
         raise ValueError(f"unexpected audio shape: {audio_embeddings.shape}")
-    if caption_embeddings.shape != (5225, 512):
+    if (
+        caption_embeddings.ndim != 2
+        or caption_embeddings.shape[0] != 5225
+        or caption_embeddings.shape[1] != audio_embeddings.shape[1]
+    ):
         raise ValueError(f"unexpected caption shape: {caption_embeddings.shape}")
     if len(set(audio_ids)) != 1045:
         raise ValueError("audio clip IDs are not unique")
@@ -256,7 +260,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             data = load_npz(path)
             embeddings = np.asarray(data["embeddings"])
             raw_ids = strings(data["clip_ids"])
-            if embeddings.shape != (1045, 512):
+            if embeddings.shape != (1045, audio_embeddings.shape[1]):
                 raise ValueError(f"unexpected {query_type} shape: {embeddings.shape}")
             missing = sorted(set(raw_ids) - set(filename_to_audio_id))
             if missing:

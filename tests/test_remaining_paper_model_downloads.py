@@ -13,6 +13,7 @@ TOOLS_REQUIREMENTS = (
 )
 WRAPPER = REPOSITORY_ROOT / "scripts/run_remaining_paper_model_downloads.sh"
 CHECKER = REPOSITORY_ROOT / "scripts/check_remaining_paper_models.sh"
+MGA_CHECKPOINT_WRAPPER = REPOSITORY_ROOT / "scripts/download_mga_clap_checkpoint.sh"
 
 
 class RemainingPaperModelDownloadsTests(unittest.TestCase):
@@ -78,6 +79,16 @@ class RemainingPaperModelDownloadsTests(unittest.TestCase):
         ):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source)
+
+    def test_dedicated_mga_checkpoint_download_is_simple_and_non_destructive(self) -> None:
+        source = MGA_CHECKPOINT_WRAPPER.read_text(encoding="utf-8")
+        self.assertIn("python -m gdown", source)
+        self.assertIn("MGA_CHECKPOINT_STATUS=complete", source)
+        self.assertIn("checkpoint_sha256.txt", source)
+        self.assertIn("failed_finalize", source)
+        self.assertIn("failed_checkpoint_hash", source)
+        for forbidden in ("tmux", "exec bash -i", "rm -rf", "git reset", "git clean"):
+            self.assertNotIn(forbidden, source)
 
 
 if __name__ == "__main__":

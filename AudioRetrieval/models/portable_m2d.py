@@ -558,12 +558,26 @@ class CLIPLTextEncoder(torch.nn.Module):
 class BertXEncoder(torch.nn.Module):
     def __init__(self, clip_weight="google-bert/bert-base-uncased"):
         super().__init__()
-        from transformers import AutoTokenizer, AutoModel
+        from transformers import AutoModel, AutoTokenizer
         import os
         os.environ["TOKENIZERS_PARALLELISM"] = "true"  # To suppress warnings.
 
-        self.tokenizer = AutoTokenizer.from_pretrained(clip_weight)
-        self.text_encoder = AutoModel.from_pretrained(clip_weight)
+        local_tokenizer = os.environ.get("M2D_CLAP_BERT_TOKENIZER_PATH")
+        if local_tokenizer:
+            if clip_weight != "google-bert/bert-base-uncased":
+                raise RuntimeError(
+                    "The local M2D tokenizer path is only valid for BERT base"
+                )
+            from transformers import BertConfig, BertModel
+
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                local_tokenizer, local_files_only=True
+            )
+            self.text_encoder = BertModel(BertConfig())
+            print(f" using local BERT tokenizer from {local_tokenizer}")
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(clip_weight)
+            self.text_encoder = AutoModel.from_pretrained(clip_weight)
 
     def forward(self, batch_text, truncate=True, max_length=512):
         device = next(self.text_encoder.parameters()).device

@@ -29,7 +29,7 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
         "embeddings",
         help="Precompute embeddings for a dataset",
     )
-    embeddings.add_argument("--model", required=True, choices=["laion_clap", "mga_clap", "oea"],
+    embeddings.add_argument("--model", required=True, choices=["laion_clap", "mga_clap", "m2d_clap", "oea"],
                            help="Model to use for embeddings")
     embeddings.add_argument("--audio-dir", type=Path, required=True, help="Audio directory")
     embeddings.add_argument("--captions-csv", type=Path, required=True, help="Captions CSV file")
@@ -81,6 +81,12 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     # MGA-CLAP specific options
     embeddings.add_argument("--mga-repo", type=Path, help="MGA-CLAP repository path")
     embeddings.add_argument("--mga-ckpt", type=Path, help="MGA-CLAP checkpoint path")
+    embeddings.add_argument("--m2d-ckpt", type=Path, help="M2D-CLAP checkpoint path")
+    embeddings.add_argument(
+        "--m2d-bert-tokenizer",
+        type=Path,
+        help="Pinned local BERT-base tokenizer directory",
+    )
 
     # Hard negatives subcommand
     hard_neg = preprocess_sub.add_parser(
@@ -201,6 +207,18 @@ def run_preprocess(args: argparse.Namespace) -> int:
             precomputer = MGAClapEmbeddingPrecomputer(
                 repo_path=str(args.mga_repo) if args.mga_repo else None,
                 ckpt_path=str(args.mga_ckpt) if args.mga_ckpt else None,
+                device=args.device,
+                batch_size_audio=args.batch_size_audio,
+                batch_size_text=args.batch_size_text,
+            )
+        elif args.model == "m2d_clap":
+            from AudioRetrieval.preprocessing.embeddings import M2DClapEmbeddingPrecomputer
+            if not args.m2d_ckpt or not args.m2d_bert_tokenizer:
+                print("Error: M2D-CLAP requires checkpoint and local BERT tokenizer")
+                return 1
+            precomputer = M2DClapEmbeddingPrecomputer(
+                checkpoint=str(args.m2d_ckpt),
+                bert_tokenizer_path=str(args.m2d_bert_tokenizer),
                 device=args.device,
                 batch_size_audio=args.batch_size_audio,
                 batch_size_text=args.batch_size_text,

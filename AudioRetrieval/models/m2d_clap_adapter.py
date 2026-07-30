@@ -5,6 +5,7 @@
 # Repo: https://github.com/nttcslab/m2d
 
 from __future__ import annotations
+import os
 import sys
 import warnings
 from pathlib import Path
@@ -81,6 +82,7 @@ class M2DClapAdapter:
         seconds: float = 10.0,
         device: str = "cuda",
         amp: bool = False,
+        bert_tokenizer_path: str | None = None,
     ):
         """
         Initialize M2D-CLAP adapter.
@@ -98,6 +100,17 @@ class M2DClapAdapter:
 
         self.device = _resolve_device(str(device))
         self.amp = bool(amp)
+        self.bert_tokenizer_path = (
+            None
+            if bert_tokenizer_path is None
+            else str(Path(bert_tokenizer_path).expanduser().resolve())
+        )
+        if self.bert_tokenizer_path is not None and not Path(
+            self.bert_tokenizer_path
+        ).is_dir():
+            raise FileNotFoundError(
+                f"M2D-CLAP BERT tokenizer not found: {self.bert_tokenizer_path}"
+            )
         self.target_sr = 16000  # M2D-CLAP expects 16kHz audio
         self.target_len = int(self.target_sr * float(seconds))
 
@@ -187,7 +200,17 @@ class M2DClapAdapter:
             for i in pbar:
                 batch = texts[i : i + batch_size]
                 # M2D-CLAP encode_clap_text expects list of strings
-                batch_emb = self.model.encode_clap_text(batch)
+                variable = "M2D_CLAP_BERT_TOKENIZER_PATH"
+                previous = os.environ.get(variable)
+                try:
+                    if self.bert_tokenizer_path is not None:
+                        os.environ[variable] = self.bert_tokenizer_path
+                    batch_emb = self.model.encode_clap_text(batch)
+                finally:
+                    if previous is None:
+                        os.environ.pop(variable, None)
+                    else:
+                        os.environ[variable] = previous
 
                 # Convert to numpy
                 if isinstance(batch_emb, torch.Tensor):
