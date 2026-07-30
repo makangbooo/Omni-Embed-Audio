@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_remote_run_terminal_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The returned terminal output fixes the Git commit, checkpoint identity, all stage exits, start/end/elapsed time, smoke/full shapes, four protocol R@k values at six-decimal display precision, and remote paths. The remote artifact SHA256 manifest was created by the wrapper but was not returned and is not invented."
+  },
+  "paper_scope": [
+    "EXP-10 / Table 2 / M2D-CLAP / Clotho / T2A",
+    "EXP-11 / Table 3 / M2D-CLAP / Clotho / T2T"
+  ],
+  "model": {
+    "paper_name": "M2D-CLAP",
+    "paper_group": "CLAP",
+    "source_revision": "3d0c4de9447c404a8d3f9f37e04f53bc902e09b3",
+    "checkpoint": "checkpoint-30.pth",
+    "checkpoint_bytes": 1694677655,
+    "checkpoint_sha256": "238521603c04862ab151cdd80980b591cb36ebe844d43203992fac9ef085c8a1",
+    "text_encoder": "BERT-base weights embedded in checkpoint; pinned local tokenizer",
+    "embedding_dimension": 768
+  },
+  "dataset": {
+    "name": "Clotho v2.1 evaluation",
+    "audio_count": 1045,
+    "caption_count": 5225
+  },
+  "official_source": {
+    "source_files": [
+      "AudioRetrieval/models/portable_m2d.py",
+      "AudioRetrieval/models/m2d_clap_adapter.py",
+      "AudioRetrieval/preprocessing/embeddings/m2d_clap.py",
+      "AudioRetrieval/evaluation/metrics.py"
+    ],
+    "compatibility_boundary": "The pinned upstream release checkpoint is byte-identical to the extracted archive member. Network model loading is disabled; the local tokenizer is used and the checkpoint's embedded text encoder weights are loaded strictly."
+  },
+  "run": {
+    "run_id": "m2d_clap_clotho_main_20260730_234538",
+    "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/m2d_clap_clotho_main_20260730_234538",
+    "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/m2d_clap_clotho_main_20260730_234538/combined.log",
+    "metrics_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/m2d_clap_clotho_main_20260730_234538/metrics/suite_metrics.json",
+    "git_commit": "939da8a7bc397a5c1f07b87a4619d29566307209",
+    "git_status_short": "",
+    "git_status_ignored_ephemeral": "?? scripts/.__dpc00000000a6e18d11000003ce",
+    "started_at": "2026-07-30T23:45:38+08:00",
+    "finished_at": "2026-07-30T23:48:49+08:00",
+    "elapsed_seconds": 191,
+    "final_run_rc": 0,
+    "failed_stage": "none",
+    "gpu_visible_device": 0
+  },
+  "generation": {
+    "smoke": {
+      "status": "complete",
+      "audio_embedding_shape": [5, 768],
+      "caption_embedding_shape": [25, 768]
+    },
+    "full": {
+      "status": "complete",
+      "audio_embedding_shape": [1045, 768],
+      "caption_embedding_shape": [5225, 768]
+    }
+  },
+  "seed": 0,
+  "protocol_count": 4,
+  "protocols": {
+    "t2a_public_code_default_joint_all_captions": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {"R@1": 16.421053, "R@5": 40.708134, "R@10": 53.703349}
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {"R@1": 17.129187, "R@5": 40.478469, "R@10": 53.779904}
+    },
+    "t2t_public_code_default_seed0": {
+      "task": "t2t",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {"R@1": 52.918660, "R@5": 67.272727, "R@10": 73.014354}
+    },
+    "t2t_all_captions_sensitivity": {
+      "task": "t2t",
+      "protocol_source": "INFERRED",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {"R@1": 53.167464, "R@5": 67.980861, "R@10": 73.799043}
+    }
+  },
+  "paper_values": {
+    "Table 2": {"R@1": 17.55, "R@5": 42.91, "R@10": 55.54},
+    "Table 3": {"R@1": 55.85, "R@5": 69.05, "R@10": 74.76}
+  },
+  "paper_protocol_limitations": [
+    "PAPER does not disclose the Clotho caption-selection protocol for T2A.",
+    "PAPER does not disclose T2T caption selection, self-exclusion, or tie handling.",
+    "Both predeclared protocols remain reported; no protocol is selected post hoc."
+  ]
+}

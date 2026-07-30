@@ -15,7 +15,7 @@ EXP-10,Table 2,LAION-CLAP,AudioCaps,T2A,PAPER,TODO,3,0,,"Paper value is transcri
 EXP-10,Table 2,LAION-CLAP,Clotho,T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/laion_clap_clotho_main_eval_20260730.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-10,Table 2,LAION-CLAP,MECAT,T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-10,Table 2,M2D-CLAP,AudioCaps,T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-10,Table 2,M2D-CLAP,Clotho,T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-10,Table 2,M2D-CLAP,Clotho,T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/m2d_clap_clotho_main_eval_20260730.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-10,Table 2,M2D-CLAP,MECAT,T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-10,Table 2,MGA-CLAP,AudioCaps,T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-10,Table 2,MGA-CLAP,Clotho,T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
@@ -54,7 +54,7 @@ EXP-11,Table 3,LAION-CLAP,AudioCaps,T2T,PAPER,TODO,3,0,,"Paper value is transcri
 EXP-11,Table 3,LAION-CLAP,Clotho,T2T,PAPER,REPRODUCED_CLOSE,3,3,results/audits/laion_clap_clotho_main_eval_20260730.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-11,Table 3,LAION-CLAP,MECAT,T2T,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-11,Table 3,M2D-CLAP,AudioCaps,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-11,Table 3,M2D-CLAP,Clotho,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-11,Table 3,M2D-CLAP,Clotho,T2T,PAPER,REPRODUCED_CLOSE,3,3,results/audits/m2d_clap_clotho_main_eval_20260730.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-11,Table 3,M2D-CLAP,MECAT,T2T,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-11,Table 3,MGA-CLAP,AudioCaps,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-11,Table 3,MGA-CLAP,Clotho,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."

@@ -31,7 +31,7 @@
 | 0 项目审计 | 完整阅读论文正文/附录/表/图/脚注 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 固定 inventory |
 | 0 项目审计 | 审计 README、依赖、训练/评测、数据、UIQ、HN、指标 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认审计结论 |
 | 0 项目审计 | 31 条实验/图/派生分析 inventory | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认复现边界 |
-| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | `23bf6ee`；批准/主机证据见 `results/audits/takeover_approvals_20260729.json` | 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`，整行完成度=`4/31 = 12.9%`；910 个论文指标聚合为 374 个可审计单元；当前 cell 状态=`34 REPRODUCED_CLOSE/4 CONTROLLED_ONLY/15 PARTIAL/159 TODO/162 BLOCKED`；FIG-02 方法/张量契约及三种 OEA backbone runtime 均已核验；扩展实验明确排除 | 外部端点仍由用户通过 Bitahub Web 控制台操作，Codex 未直接连接；共享目录盘点不等于逐文件完整性校验 | 正文 Table 2/3 优先，继续处理 AudioCaps/MECAT 和缺失 baseline |
+| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | `23bf6ee`；批准/主机证据见 `results/audits/takeover_approvals_20260729.json` | 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`，整行完成度=`4/31 = 12.9%`；910 个论文指标聚合为 374 个可审计单元；当前 cell 状态=`38 REPRODUCED_CLOSE/4 CONTROLLED_ONLY/15 PARTIAL/155 TODO/162 BLOCKED`；FIG-02 方法/张量契约及三种 OEA backbone runtime 均已核验；扩展实验明确排除 | 外部端点仍由用户通过 Bitahub Web 控制台操作，Codex 未直接连接；共享目录盘点不等于逐文件完整性校验 | 正文 Table 2/3 优先，继续处理 AudioCaps/MECAT 和缺失 baseline |
 | 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `48d7a50` | 本地与 fork 分支均存在 | 无 | 后续提交仅推送该分支 |
 | 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
 | 0 编排 | 统一复现入口与 CPU/GPU 阶段门禁 | COMPLETED | `d13b115` | 公共入口、精确阶段注册表、默认只规划/显式执行、长任务确认和干净 worktree 门禁已实现；baseline 计划已展开为 vanilla CPU 模型锁 → A100 smoke → A100 full → CPU 四协议 metrics 与独立 CLAP blocker | 无；入口完成不代表任何 blocked 实验已解锁或产生复现值 | DATA-04/05、DATA-06/07、DATA-08/09、DATA-11 已完成；继续只读模型资源审计 |
@@ -131,14 +131,14 @@
 | 3 数据 | DATA-13D：SQuTR `en/fiqa` + `en/nq` 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；四个退出码均为 0；16,400/16,400 音频通过；manifest SHA256 `e5053d30...15e93`；FiQA count/ID/text/leakage 无 violations | 无；4,100 条 24 kHz 与 12,300 条 16 kHz 是真实源数据分布 | 主实验数据门禁解除；后续模型输入显式重采样并记录 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | 三个 vanilla backbone × Clotho Table 2/3 | COMPLETED | Nemotron run=`74325cb`；Qwen3B run=`a435585`；Qwen7B run=`5110a4f`；三个小型审计均在 `results/audits/` | 三个 vanilla backbone 的 RTX 4090 smoke/full 和 CPU 四协议均 complete、RC=`0`，明确未加载 checkpoint/LoRA/head；Qwen7B 直接观测 full shape=`1045×3584/5225×3584`，Table 2 all-caption=`0.0957/0.6507/1.2440`，Table 3 seed0=`40.7656/54.1627/59.8086` | 论文 caption selection、T2T self/tie 与 audio `passage:` 冲突仍 `[MISSING]`；四个 CLAP 仍需固定 source/checkpoint | 保持主实验优先，转向可运行的下一组 Table 2/3 baseline/data cell |
-| 5 基线 | LAION/Robust/MGA/M2D-CLAP | IN_PROGRESS | LAION run=`ad920ee`；审计=`results/audits/laion_clap_clotho_main_eval_20260730.json` | LAION-CLAP × Clotho smoke/full/四协议均 complete、RC=`0`、elapsed=`359s`；full shape=`1045x512/5225x512`；Table 2/3 共 12 个 R@k 观测已绑定；官方 checkpoint 1,863,587,645 bytes 和 SHA256 已固定 | Robust checkpoint 未公开；MGA/M2D 仍需完成资源与运行门禁；论文 caption/self/tie 口径未公开 | 保持主实验优先，检查 MGA/M2D 已下载资源并启动下一组 Clotho Table 2/3 |
+| 5 基线 | LAION/Robust/MGA/M2D-CLAP | IN_PROGRESS | LAION run=`ad920ee`；M2D run=`939da8a`；审计见 `results/audits/laion_clap_clotho_main_eval_20260730.json` 与 `results/audits/m2d_clap_clotho_main_eval_20260730.json` | LAION 与 M2D 的 Clotho smoke/full/四协议均 complete、RC=`0`；M2D elapsed=`191s`、full shape=`1045x768/5225x768`，checkpoint SHA256=`23852160...8a1`；两模型各 12 个 Table 2/3 R@k 观测已绑定 | Robust checkpoint 未公开；MGA checkpoint 仍在下载；论文 caption/self/tie 口径未公开 | MGA checkpoint 完成后直接运行 `CUDA_VISIBLE_DEVICES=0 bash scripts/run_mga_clap_clotho_main.sh` |
 | 6 扩展 | 人工/闭源 API、效率、token-length、派生图表 | TODO | N/A | 未开始 | 按阶段后置 | 核心训练评测完成后执行 |
 
 ## 当前焦点
 
 - 当前阶段：官方源码优先推进 OEA 论文原实验复现；先运行 upstream example/precomputer/evaluator，保存其原始输出或错误，仅在实际阻塞时做最小兼容补丁。SpeechXBT、FiQA、NQ、SQuTR、ASR reranker 与 A2T 仅保留为历史记录，不计入本轮完成度，也不继续启动。训练在官方 checkpoint 评测矩阵完成前继续暂停。
 - 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
-- 正文 Table 2/3 模型×数据集×任务覆盖为 `20/78 = 25.6%`；其中 Clotho 为 `20/26 = 76.9%`，三个 vanilla backbone 的 Clotho 两任务为 `6/6 = 100%`。这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
-- 最近完成：LAION-CLAP 的官方源码 Clotho Table 2/3 闭环；run commit=`ad920ee`，smoke/full/四协议均 complete、RC=`0`，耗时 359 秒，full embedding 为 `1045x512/5225x512`。Table 3 all-caption sensitivity=`50.0478/65.8756/72.6699`，与 PAPER=`50.05/65.88/72.67` 的最大绝对差为 `0.004402` pp；该敏感性协议不因数值接近而被事后提升。
-- 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开；MGA/M2D 仍需完成资源门禁。
-- 下一步：正文 Table 2/3 优先；检查 MGA/M2D 下载结果并启动下一个可运行的 Clotho baseline；附录 UIQ、效率、训练及全部扩展继续后移。
+- 正文 Table 2/3 模型×数据集×任务覆盖为 `22/78 = 28.2%`；其中 Clotho 为 `22/26 = 84.6%`，三个 vanilla backbone 的 Clotho 两任务为 `6/6 = 100%`。这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
+- 最近完成：M2D-CLAP 的官方源码 Clotho Table 2/3 闭环；run commit=`939da8a`，smoke/full/四协议均 complete、RC=`0`，耗时 191 秒，full embedding 为 `1045x768/5225x768`。Table 2 all-caption=`16.4211/40.7081/53.7033`，相对 PAPER=`17.55/42.91/55.54` 的差为 `-1.1289/-2.2019/-1.8367` pp；Table 3 seed-0=`52.9187/67.2727/73.0144`，相对 PAPER=`55.85/69.05/74.76` 的差为 `-2.9313/-1.7773/-1.7456` pp。
+- 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开；MGA checkpoint 仍在下载。
+- 下一步：正文 Table 2/3 优先；MGA checkpoint 完成后启动 MGA-CLAP × Clotho 主实验；附录 UIQ、效率、训练及全部扩展继续后移。

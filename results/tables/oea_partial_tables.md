@@ -8,6 +8,8 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 |---|---|---|---:|---:|---:|
 | LAION-CLAP | Clotho | [CODE] all-caption | 13.34 / 33.49 / 46.22 | 14.0478 / 37.2057 / 49.8182 | 3.715742 |
 | LAION-CLAP | Clotho | [CODE] seed-0 one-caption | 13.34 / 33.49 / 46.22 | 13.6842 / 38.5646 / 49.9522 | 5.074593 |
+| M2D-CLAP | Clotho | [CODE] all-caption | 17.55 / 42.91 / 55.54 | 16.4211 / 40.7081 / 53.7033 | 2.201866 |
+| M2D-CLAP | Clotho | [CODE] seed-0 one-caption | 17.55 / 42.91 / 55.54 | 17.1292 / 40.4785 / 53.7799 | 2.431531 |
 | Nemotron-3B | Clotho | [CODE] all-caption | 7.20 / 21.57 / 30.12 | 7.2536 / 21.3014 / 30.1818 | 0.268565 |
 | Nemotron-3B | Clotho | [CODE] seed-0 one-caption | 7.20 / 21.57 / 30.12 | 7.4641 / 21.2440 / 31.4833 | 1.363254 |
 | OEA-Nemo3B | Clotho | [CODE] all-caption | 19.04 / 40.57 / 54.24 | 18.2775 / 41.3206 / 54.2010 | 0.762488 |
@@ -33,6 +35,8 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 |---|---|---|---:|---:|---:|
 | LAION-CLAP | Clotho | [INFERRED] all-caption sensitivity | 50.05 / 65.88 / 72.67 | 50.0478 / 65.8756 / 72.6699 | 0.004402 |
 | LAION-CLAP | Clotho | [CODE] seed-0 one-caption/self-exclusion | 50.05 / 65.88 / 72.67 | 49.3780 / 64.8804 / 72.2488 | 0.999617 |
+| M2D-CLAP | Clotho | [INFERRED] all-caption sensitivity | 55.85 / 69.05 / 74.76 | 53.1675 / 67.9809 / 73.7990 | 2.682536 |
+| M2D-CLAP | Clotho | [CODE] seed-0 one-caption/self-exclusion | 55.85 / 69.05 / 74.76 | 52.9187 / 67.2727 / 73.0144 | 2.931340 |
 | Nemotron-3B | Clotho | [INFERRED] all-caption sensitivity | 57.84 / 69.36 / 74.26 | 57.8947 / 69.2823 / 74.2010 | 0.077703 |
 | Nemotron-3B | Clotho | [CODE] seed-0 one-caption/self-exclusion | 57.84 / 69.36 / 74.26 | 57.1292 / 69.3780 / 74.3541 | 0.710813 |
 | OEA-Nemo3B | Clotho | [INFERRED] all-caption sensitivity | 62.79 / 74.12 / 78.91 | 64.6316 / 74.9856 / 79.2536 | 1.841579 |
