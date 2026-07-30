@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_base_only_remote_run_compact_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The returned evidence fixes the clean Git identity, start/end/elapsed time, final exit status, complete four-protocol metrics, base-only model-load boundary, artifact hashes, GPU identity, workload counts, and remote paths. The compact query used candidate_shape/query_shape instead of the actual candidate_embedding_shape/query_embedding_shape keys, so exact array shapes are retained as DERIVED from the successful fixed-workload smoke/full gates plus the observed runtime hidden size rather than misrepresented as directly printed fields."
+  },
+  "paper_scope": [
+    "EXP-10 / Table 2 / Qwen2.5-Omni-3B / Clotho / T2A",
+    "EXP-11 / Table 3 / Qwen2.5-Omni-3B / Clotho / T2T"
+  ],
+  "model": {
+    "paper_name": "Qwen2.5-Omni-3B",
+    "paper_group": "Vanilla LALMs (No Retrieval Training)",
+    "base_model": "Qwen/Qwen2.5-Omni-3B@f75b40e3da2003cdd6e1829b1f420ca70797c34e",
+    "model_lock": "results/model_locks/vanilla_qwen2_5_omni_3b.json#sha256:9c73f0489ffcbc41b4126d2c2329569dd0f4c58ac8c13207aa41257f266a84e2",
+    "parameter_count": 4703464448,
+    "hidden_size": 2048,
+    "hidden_size_runtime_source": "model.config.text_config.hidden_size",
+    "projection_head_loaded": false,
+    "lora_loaded": false,
+    "oea_checkpoint_loaded": false
+  },
+  "dataset": {
+    "name": "Clotho v2.1 evaluation",
+    "audio_count": 1045,
+    "caption_count": 5225
+  },
+  "official_source": {
+    "upstream_commit": "b261ad0743dbfac67cb6b20016fd951a366b3f35",
+    "source_files": [
+      "AudioRetrieval/models/omni_embed_adapter.py",
+      "AudioRetrieval/evaluation/metrics.py"
+    ],
+    "reproduction_orchestration": [
+      "scripts/run_vanilla_backbone_embeddings.sh",
+      "scripts/generate_vanilla_backbone_embeddings.py",
+      "scripts/run_vanilla_clotho_retrieval_suite.sh"
+    ]
+  },
+  "run": {
+    "smoke_run_id": "vanilla_qwen2_5_omni_3b_clotho_smoke_seed42_20260730_105035",
+    "full_run_id": "vanilla_qwen2_5_omni_3b_clotho_embeddings_seed42_20260730_105035",
+    "suite_id": "vanilla_qwen2_5_omni_3b_clotho_retrieval_suite_seed42_20260730_105035",
+    "smoke_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_3b_clotho_smoke_seed42_20260730_105035",
+    "full_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_3b_clotho_embeddings_seed42_20260730_105035",
+    "suite_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_3b_clotho_retrieval_suite_seed42_20260730_105035",
+    "log_path": "/home/jg525/Omni-Embed-Audio/logs/vanilla_qwen3b_main_20260730_105035/combined.log",
+    "git_commit": "a435585136c1bb7a98688c0a9998ce20166fe461",
+    "git_status_short": "",
+    "started_at": "2026-07-30T10:50:37+08:00",
+    "finished_at": "2026-07-30T11:02:48+08:00",
+    "elapsed_seconds": 731,
+    "final_run_rc": 0,
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_total_memory_bytes": 25250627584,
+    "directory_sizes": {
+      "smoke": "828K",
+      "full": "149M",
+      "suite": "721M",
+      "log": "112K"
+    }
+  },
+  "generation": {
+    "shape_source": "DERIVED from successful fixed-workload gates, observed 2,048 hidden size, and completed suite workload counts; direct compact output queried the wrong JSON keys",
+    "smoke": {
+      "status": "complete",
+      "candidate_embedding_shape": [5, 2048],
+      "query_embedding_shape": [25, 2048]
+    },
+    "full": {
+      "status": "complete",
+      "candidate_embedding_shape": [1045, 2048],
+      "query_embedding_shape": [5225, 2048]
+    },
+    "load_warnings": []
+  },
+  "artifacts": {
+    "smoke_generation_metrics.json": "758d7c8a26b89d01ef8736e673f8874008a1a97992909c394599de510113066b",
+    "full_generation_metrics.json": "2d9ef14bd3d0a7909adcbffe35b9cffe1781c84d02da7af900f5a776035d3f9e",
+    "candidate_embeddings.npy": "2d3f54268380e1552c012bc361371e4c61e8dfef6f51745f80b64623727019ff",
+    "query_embeddings.npy": "873cef0f4d729bd789c1d9fa93d927d1eb66f9114c6ede6f97100232520c9f2e",
+    "suite_metrics.json": "636a47a581536324b8f9a658811068ce6e2a2c726cac11f71fc2de7c917d0ab9",
+    "retrieval_summary.csv": "8e9ff0e10fd49b76023ac04e5a665f7474a213f4e455bc8127e12859d4939589",
+    "combined.log": "6ac9f7b0e01469c97194085c2eb28d5d0eef794681d0d46fffc52249853e1dd3"
+  },
+  "seed": 42,
+  "protocol_count": 4,
+  "protocols": {
+    "t2a_public_code_default_joint_all_captions": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {
+        "R@1": 0.17224880382775118,
+        "R@5": 0.631578947368421,
+        "R@10": 1.1483253588516746,
+        "MRR": 0.00967335637155218,
+        "DCG": 0.13026624304401357
+      }
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 0.09569377990430622,
+        "R@5": 0.5741626794258373,
+        "R@10": 1.1483253588516746,
+        "MRR": 0.00928808972275459,
+        "DCG": 0.1300051408253012
+      }
+    },
+    "t2t_public_code_default_seed0": {
+      "task": "t2t",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {
+        "R@1": 39.52153110047847,
+        "R@5": 52.2488038277512,
+        "R@10": 59.04306220095694,
+        "MRR": 0.457387809443007,
+        "DCG": 0.5486676873729878
+      }
+    },
+    "t2t_all_captions_sensitivity": {
+      "task": "t2t",
+      "protocol_source": "INFERRED",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {
+        "R@1": 38.41148325358852,
+        "R@5": 51.13875598086124,
+        "R@10": 57.110047846889955,
+        "MRR": 0.44740845342037966,
+        "DCG": 0.5390835082425652
+      }
+    }
+  },
+  "paper_values": {
+    "Table 2": {"R@1": 0.17, "R@5": 0.63, "R@10": 1.13},
+    "Table 3": {"R@1": 38.35, "R@5": 51.14, "R@10": 57.07}
+  },
+  "paper_protocol_limitations": [
+    "PAPER does not disclose the Clotho caption-selection protocol for T2A.",
+    "PAPER does not disclose T2T caption selection, self-exclusion, or tie handling.",
+    "PAPER states an audio passage prefix, while the public source path used here omits that prefix.",
+    "Both predeclared protocols remain reported; no protocol is selected post hoc."
+  ]
+}

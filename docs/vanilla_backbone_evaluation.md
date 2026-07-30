@@ -102,8 +102,8 @@ overwrites a non-complete protocol directory.
 
 The current protocol fixes Clotho evaluation at 1,045 candidates and all 5,225
 captions. Batch size 1 and seed 42 are explicitly `[INFERRED]`; the paper does
-not publish vanilla evaluation values for them. Nemotron-3B now has four
-committed reproduced protocol groups in
-`results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json`.
-Qwen2.5-Omni-3B is lock-ready and awaits GPU smoke/full evaluation;
-Qwen2.5-Omni-7B still needs its base-only lock.
+not publish vanilla evaluation values for them. Nemotron-3B and
+Qwen2.5-Omni-3B now each have four committed reproduced protocol groups in
+`results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json` and
+`results/audits/vanilla_qwen2_5_omni_3b_clotho_main_eval_20260730.json`.
+Qwen2.5-Omni-7B still needs its base-only lock and separate GPU approval.

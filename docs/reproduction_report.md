@@ -61,6 +61,19 @@ sensitivity is `57.8947/69.2823/74.2010`, versus PAPER
 fixed in `results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json`;
 the exact wall-clock elapsed time was not returned and remains `[MISSING]`.
 
+The vanilla Qwen2.5-Omni-3B Clotho main-table run completed at commit
+`a435585` with a clean worktree and `FINAL_RUN_RC=0` in 731 seconds on one
+RTX 4090. The base-only runtime recorded a 2,048 hidden size and explicitly
+recorded `projection_head_loaded=false`, `lora_loaded=false`, and
+`oea_checkpoint_loaded=false`. `[CODE]` all-caption and seed-0 T2A are
+`0.1722/0.6316/1.1483` and `0.0957/0.5742/1.1483`, versus PAPER
+`0.17/0.63/1.13`. `[CODE]` seed-0 T2T is
+`39.5215/52.2488/59.0431`, while the separate `[INFERRED]` all-caption
+sensitivity is `38.4115/51.1388/57.1100`, versus PAPER
+`38.35/51.14/57.07`. Both protocols remain visible without post-hoc selection;
+the compact audit and seven top-level artifact hashes are fixed in
+`results/audits/vanilla_qwen2_5_omni_3b_clotho_main_eval_20260730.json`.
+
 OEA-Nemo3B-AC previously completed official-source GPU precomputation and CPU
 finalization at run commits `effe67d` and `1f991ab`. The finalizer returned
 `FINAL_RUN_RC=0` in 7 seconds and fixed eight protocols in

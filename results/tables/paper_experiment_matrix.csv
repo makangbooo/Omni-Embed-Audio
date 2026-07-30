@@ -42,7 +42,7 @@ EXP-10,Table 2,OEA-Qwen7B (+Cl),AudioCaps,T2A,PAPER,TODO,3,0,,"Paper value is tr
 EXP-10,Table 2,OEA-Qwen7B (+Cl),Clotho,T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_cl_clotho_official_source_eval_20260730.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-10,Table 2,OEA-Qwen7B (+Cl),MECAT,T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-10,Table 2,Qwen2.5-Omni-3B,AudioCaps,T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-10,Table 2,Qwen2.5-Omni-3B,Clotho,T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-10,Table 2,Qwen2.5-Omni-3B,Clotho,T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/vanilla_qwen2_5_omni_3b_clotho_main_eval_20260730.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-10,Table 2,Qwen2.5-Omni-3B,MECAT,T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-10,Table 2,Qwen2.5-Omni-7B,AudioCaps,T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-10,Table 2,Qwen2.5-Omni-7B,Clotho,T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
@@ -81,7 +81,7 @@ EXP-11,Table 3,OEA-Qwen7B (+Cl),AudioCaps,T2T,PAPER,TODO,3,0,,"Paper value is tr
 EXP-11,Table 3,OEA-Qwen7B (+Cl),Clotho,T2T,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_cl_clotho_official_source_eval_20260730.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-11,Table 3,OEA-Qwen7B (+Cl),MECAT,T2T,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-11,Table 3,Qwen2.5-Omni-3B,AudioCaps,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-11,Table 3,Qwen2.5-Omni-3B,Clotho,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-11,Table 3,Qwen2.5-Omni-3B,Clotho,T2T,PAPER,REPRODUCED_CLOSE,3,3,results/audits/vanilla_qwen2_5_omni_3b_clotho_main_eval_20260730.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-11,Table 3,Qwen2.5-Omni-3B,MECAT,T2T,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-11,Table 3,Qwen2.5-Omni-7B,AudioCaps,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-11,Table 3,Qwen2.5-Omni-7B,Clotho,T2T,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
