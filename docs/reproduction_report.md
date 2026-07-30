@@ -27,13 +27,13 @@ experiment-model-dataset-task cells in
 separate from `REPRODUCED_CLOSE`, `CONTROLLED_ONLY`, `PARTIAL`, `TODO`, and
 `BLOCKED`; the generation audit records all input/output hashes. The compact
 paper-only partial Tables 2/3/12-15 are in
-`results/tables/oea_partial_tables.md`. They contain 44 predeclared protocol
+`results/tables/oea_partial_tables.md`. They contain 48 predeclared protocol
 groups and do not select a protocol after comparing it with the paper value.
 
-Committed value evidence currently covers seven Clotho T2A cells, seven Clotho
-T2T cells, and sixteen Clotho positive-UIQ cells. OEA-Qwen7B-AC and
-OEA-Qwen7B-Cl are the newest complete main-table cells. Both official-source
-runs completed on an RTX 4090 at commit `9c080c7`, each in `00:07:36`, with
+Committed value evidence currently covers ten Clotho T2A cells, ten Clotho
+T2T cells, and sixteen Clotho positive-UIQ cells. LAION-CLAP is the newest
+complete main-table baseline. The OEA-Qwen7B-AC and OEA-Qwen7B-Cl
+official-source runs completed on an RTX 4090 at commit `9c080c7`, each in `00:07:36`, with
 clean worktrees, successful 5-clip smoke tests, 1,045 audio embeddings, 5,225
 caption embeddings, four finalized protocols, and fixed checkpoint/artifact
 SHA256 identities. Qwen7B `[CODE]` all-caption T2A is
@@ -87,6 +87,20 @@ sensitivity is `39.4067/52.9761/59.1005`, versus PAPER
 `40.23/54.26/60.27`. Both protocols remain visible without post-hoc selection;
 the compact audit and seven top-level artifact hashes are fixed in
 `results/audits/vanilla_qwen2_5_omni_7b_clotho_main_eval_20260730.json`.
+
+The LAION-CLAP Clotho main-table run completed at commit `ad920ee` with
+`FINAL_RUN_RC=0` in 359 seconds on visible CUDA device 0. The SHA256-verified
+1,863,587,645-byte official `630k-audioset-best.pt` checkpoint produced
+`5x512/25x512` smoke and `1045x512/5225x512` full embeddings. `[CODE]`
+all-caption and seed-0 T2A are `14.0478/37.2057/49.8182` and
+`13.6842/38.5646/49.9522`, versus PAPER `13.34/33.49/46.22`. `[CODE]`
+seed-0 T2T is `49.3780/64.8804/72.2488`; the separate `[INFERRED]`
+all-caption sensitivity is `50.0478/65.8756/72.6699`, versus PAPER
+`50.05/65.88/72.67`, with maximum absolute difference `0.004402` percentage
+points. Both protocols remain visible without post-hoc selection. The compact
+evidence is `results/audits/laion_clap_clotho_main_eval_20260730.json`; Git
+dirty status and output artifact hashes were not returned and remain
+unobserved rather than inferred.
 
 OEA-Nemo3B-AC previously completed official-source GPU precomputation and CPU
 finalization at run commits `effe67d` and `1f991ab`. The finalizer returned

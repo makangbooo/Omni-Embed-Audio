@@ -15,8 +15,8 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
         self.assertEqual(
             Counter(group["paper_table"] for group in self.groups),
             {
-                "Table 2": 18,
-                "Table 3": 18,
+                "Table 2": 20,
+                "Table 3": 20,
                 "Table 12": 4,
                 "Table 13": 4,
                 "Table 14": 4,
