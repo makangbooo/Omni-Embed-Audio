@@ -87,6 +87,9 @@ class RemainingPaperModelDownloadsTests(unittest.TestCase):
         self.assertIn("checkpoint_sha256.txt", source)
         self.assertIn("failed_finalize", source)
         self.assertIn("failed_checkpoint_hash", source)
+        self.assertIn("--require-hashes", source)
+        self.assertIn("DOWNLOAD_TOOLS_STATUS=installed", source)
+        self.assertIn("failed_download_tools_identity", source)
         for forbidden in ("tmux", "exec bash -i", "rm -rf", "git reset", "git clean"):
             self.assertNotIn(forbidden, source)
 

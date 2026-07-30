@@ -9,6 +9,7 @@ source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 MODEL_ROOT="${MODEL_ROOT:-/home/jg525/models/oea}"
 OVERLAY="${MODEL_ROOT}/python/paper-model-download-tools-2"
+TOOLS_REQUIREMENTS="${ROOT_DIR}/configs/resources/paper_model_download_tools.requirements.txt"
 DESTINATION="${MODEL_ROOT}/mga-clap/pretrained_models/models/model.pt"
 STAMP="$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/mga_clap_checkpoint_${STAMP}"
@@ -44,16 +45,36 @@ if [[ -s "${DESTINATION}" ]]; then
   fi
   finish 0 complete
 fi
-if [[ ! -d "${OVERLAY}/gdown" ]]; then
-  echo "[ERROR] Download-tool overlay is missing: ${OVERLAY}" >&2
-  finish 2 failed_missing_download_tools
-fi
-
 CONDA_BASE="$(resolve_conda_base)"
 # shellcheck disable=SC1091
 source "${CONDA_BASE}/etc/profile.d/conda.sh"
 conda activate oea-repro
 export CUDA_VISIBLE_DEVICES=""
+
+EXPECTED_TOOLS_SHA="$(sha256sum "${TOOLS_REQUIREMENTS}" | awk '{print $1}')"
+TOOLS_MARKER="${OVERLAY}/.oea_requirements_sha256"
+if [[ -d "${OVERLAY}/gdown" ]] \
+   && [[ -f "${TOOLS_MARKER}" ]] \
+   && [[ "$(<"${TOOLS_MARKER}")" == "${EXPECTED_TOOLS_SHA}" ]]; then
+  echo "DOWNLOAD_TOOLS_STATUS=reused"
+elif [[ -e "${OVERLAY}" ]]; then
+  echo "[ERROR] Existing download-tool overlay has an unexpected identity: ${OVERLAY}" >&2
+  finish 2 failed_download_tools_identity
+else
+  TOOLS_ATTEMPT="${OVERLAY}.attempt-${STAMP}"
+  mkdir -p "$(dirname "${TOOLS_ATTEMPT}")"
+  python -m pip install --no-deps --require-hashes \
+    --target "${TOOLS_ATTEMPT}" --requirement "${TOOLS_REQUIREMENTS}"
+  RC=$?
+  if [[ "${RC}" -ne 0 ]]; then
+    finish "${RC}" failed_download_tools_install
+  fi
+  printf '%s\n' "${EXPECTED_TOOLS_SHA}" > "${TOOLS_ATTEMPT}/.oea_requirements_sha256"
+  if ! mv "${TOOLS_ATTEMPT}" "${OVERLAY}"; then
+    finish 2 failed_download_tools_finalize
+  fi
+  echo "DOWNLOAD_TOOLS_STATUS=installed"
+fi
 
 PYTHONPATH="${OVERLAY}${PYTHONPATH:+:${PYTHONPATH}}" \
   python -m gdown 1RWTuVMEPy-L0uK6WYIX2wwxHjD1YSQFz --output "${ATTEMPT}"
