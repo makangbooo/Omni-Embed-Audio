@@ -106,4 +106,5 @@ not publish vanilla evaluation values for them. Nemotron-3B and
 Qwen2.5-Omni-3B now each have four committed reproduced protocol groups in
 `results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json` and
 `results/audits/vanilla_qwen2_5_omni_3b_clotho_main_eval_20260730.json`.
-Qwen2.5-Omni-7B still needs its base-only lock and separate GPU approval.
+Qwen2.5-Omni-7B has a committed 20-file, 22.38 GB base-only lock and awaits
+separate GPU approval for its smoke/full evaluation.

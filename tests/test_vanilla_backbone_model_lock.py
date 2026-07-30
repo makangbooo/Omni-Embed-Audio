@@ -214,6 +214,33 @@ class VanillaBackboneModelLockTest(unittest.TestCase):
             inherited["sha256"], hashlib.sha256(oea_path.read_bytes()).hexdigest()
         )
 
+    def test_committed_qwen7b_vanilla_lock_has_full_audited_base(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        lock_path = (
+            repository_root
+            / "results/model_locks/vanilla_qwen2_5_omni_7b.json"
+        )
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        validated = validate_model_lock(lock)
+
+        self.assertEqual(validated["backbone_id"], "vanilla_qwen2_5_omni_7b")
+        self.assertEqual(
+            validated["base_model"]["revision"],
+            "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+        )
+        files = validated["base_model"]["files"]
+        self.assertEqual(len(files), 20)
+        self.assertEqual(
+            sum(item["size_bytes"] for item in files.values()),
+            22379297323,
+        )
+        self.assertEqual(validated["embedding_output"]["projection_head"], "none")
+        self.assertNotIn("checkpoint", lock)
+        self.assertEqual(
+            lock["evidence"]["portable_model_lock"]["sha256"],
+            "79ab00f180cec1078979c0524a98c254fea298d3cb18a24ed8bdf8162c970014",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

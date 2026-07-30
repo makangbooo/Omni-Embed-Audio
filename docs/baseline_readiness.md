@@ -39,7 +39,7 @@ it imports no model library, downloads nothing, and uses no GPU.
 | M2D-CLAP | Adapter and vendored portable model only | `[MISSING]`; no checkpoint revision/SHA256 | `BLOCKED` |
 | Nemotron-3B | Base-lock pipeline, fixed Clotho protocol, resumable base-only generator/wrapper, and four-protocol CPU finalizer | Base snapshot is pinned by MODEL-03; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
 | Qwen2.5-Omni-3B | Base-lock pipeline, fixed Clotho protocol, resumable base-only generator/wrapper, and four-protocol CPU finalizer | Base snapshot is pinned by MODEL-01; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
-| Qwen2.5-Omni-7B | Base-lock pipeline, fixed Clotho protocol, resumable base-only generator/wrapper, and four-protocol CPU finalizer | Base snapshot is pinned by MODEL-04; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
+| Qwen2.5-Omni-7B | Base-lock pipeline, fixed Clotho protocol, resumable base-only generator/wrapper, and four-protocol CPU finalizer | Complete 20-file/22.38-GB base-only lock is committed from the clean `f861314` remote audit | `READY` pending separate GPU approval |
 
 No row is currently formal-ready. This is not solely a checkpoint-download
 problem: Robust-CLAP and M2D-CLAP lack normal baseline entrypoints; MGA-CLAP's
