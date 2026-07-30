@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "scope": "remaining public model resources required by OEA paper experiments",
+  "model_root": "/home/jg525/models/oea",
+  "assets": [
+    {
+      "model": "Robust-CLAP",
+      "kind": "source",
+      "repository": "ramaneswaran/linguistic_robust_clap",
+      "revision": "d08d0e3c545fa22df0930fc0d090741aaa9e2cc1",
+      "local_subdir": "robust-clap/source",
+      "claim_boundary": "The official repository publishes no Robust-CLAP checkpoint; source download alone does not unblock evaluation."
+    },
+    {
+      "model": "MGA-CLAP",
+      "kind": "source",
+      "repository": "Ming-er/MGA-CLAP",
+      "revision": "48ca5a5cd22cd34427e118bd8cf332090ec54770",
+      "local_subdir": "mga-clap/source"
+    },
+    {
+      "model": "MGA-CLAP",
+      "kind": "checkpoint",
+      "source": "https://drive.google.com/file/d/1RWTuVMEPy-L0uK6WYIX2wwxHjD1YSQFz/view",
+      "google_drive_file_id": "1RWTuVMEPy-L0uK6WYIX2wwxHjD1YSQFz",
+      "local_path": "mga-clap/pretrained_models/models/model.pt",
+      "claim_boundary": "The official README supplies the file but no size or checksum; the first download is evidence collection, not an immutable lock."
+    },
+    {
+      "model": "M2D-CLAP",
+      "kind": "source",
+      "repository": "nttcslab/m2d",
+      "revision": "3d0c4de9447c404a8d3f9f37e04f53bc902e09b3",
+      "local_subdir": "m2d-clap/source"
+    },
+    {
+      "model": "M2D-CLAP",
+      "kind": "checkpoint_archive",
+      "source": "https://github.com/nttcslab/m2d/releases/download/v0.5.0/m2d_clap_vit_base-80x1001p16x16p16kpBpTI-2025.zip",
+      "size_bytes": 1469703420,
+      "sha256": "fd193ae591720df7f1e27ed728ce127e0309b8bd427f0f4b3e5cd17d7ee5e1e1",
+      "local_subdir": "m2d-clap/m2d_clap_vit_base-80x1001p16x16p16kpBpTI-2025",
+      "required_file": "checkpoint-30.pth"
+    },
+    {
+      "model": "BGE-large-en-v1.5",
+      "kind": "huggingface_snapshot",
+      "repository": "BAAI/bge-large-en-v1.5",
+      "revision": "d4aa6901d3a41ba39fb536a557fa166f842b0e09",
+      "local_subdir": "bge-large-en-v1.5",
+      "purpose": "paper hard-negative semantic filtering; not required for Table 2 or Table 3"
+    }
+  ],
+  "known_blockers": [
+    {
+      "model": "Robust-CLAP",
+      "missing": "paper-matching checkpoint",
+      "reason": "No checkpoint release or download URL is present in the cited official repository."
+    }
+  ]
+}

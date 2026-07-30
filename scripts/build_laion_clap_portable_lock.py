@@ -26,6 +26,7 @@ from AudioRetrieval.models.laion_clap_tokenizers import local_tokenizer_redirect
 EXPECTED_DISTRIBUTIONS = {
     "braceexpand": "0.1.7",
     "ftfy": "6.1.1",
+    "h5py": "3.14.0",
     "laion_clap": "1.1.6",
     "progressbar": "2.5",
     "torchlibrosa": "0.1.0",

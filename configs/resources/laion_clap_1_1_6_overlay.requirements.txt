@@ -1,6 +1,7 @@
 laion-clap==1.1.6 --hash=sha256:8bfdad75cd13d900b229e9d7a918f1f0aa5f027b6dfdec58b94508a49ce892fc
 braceexpand==0.1.7 --hash=sha256:91332d53de7828103dcae5773fb43bc34950b0c8160e35e0f44c4427a3b85014
 ftfy==6.1.1 --hash=sha256:0ffd33fce16b54cccaec78d6ec73d95ad370e5df5a25255c8966a6147bd667ca
+h5py==3.14.0 --hash=sha256:723a40ee6505bd354bfd26385f2dae7bbfa87655f4e61bab175a49d72ebfc06b
 progressbar==2.5 --hash=sha256:5d81cb529da2e223b53962afd6c8ca0f05c6670e40309a7219eacc36af9b6c63
 torchlibrosa==0.1.0 --hash=sha256:89b65fd28b833ceb6bc74a3d0d87e2924ddc5a845d0a246b194952a4e12a38cb
 webdataset==0.2.48 --hash=sha256:e6d06895720afdef5cbf03cbb316434d67d9fb578e1bd9815fbd47ced4bcc731
