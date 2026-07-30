@@ -34,7 +34,11 @@ exec > >(tee -a "${LOG_FILE}") 2> >(tee -a "${LOG_FILE}" >&2)
 START_TIME="$(date -Is)"
 START_EPOCH="$(date +%s)"
 GIT_COMMIT="$(git rev-parse HEAD)"
-GIT_STATUS="$(git status --short)"
+GIT_STATUS_RAW="$(git status --short)"
+GIT_STATUS="$(printf '%s\n' "${GIT_STATUS_RAW}" | \
+  sed -E '/^\?\? scripts\/\.__dpc[[:xdigit:]]+$/d')"
+GIT_STATUS_IGNORED="$(printf '%s\n' "${GIT_STATUS_RAW}" | \
+  sed -nE '/^\?\? scripts\/\.__dpc[[:xdigit:]]+$/p')"
 
 format_duration() {
   local total="${1:-0}"
@@ -73,6 +77,10 @@ done
 
 printf '%s\n' "${GIT_COMMIT}" > "${RESULT_ROOT}/git_commit.txt"
 printf '%s\n' "${GIT_STATUS}" > "${RESULT_ROOT}/git_status.txt"
+printf '%s\n' "${GIT_STATUS_IGNORED}" > "${RESULT_ROOT}/git_status_ignored.txt"
+if [[ -n "${GIT_STATUS_IGNORED}" ]]; then
+  printf 'IGNORED_EPHEMERAL_GIT_STATUS=%s\n' "${GIT_STATUS_IGNORED}"
+fi
 nvidia-smi --query-gpu=index,uuid,name,memory.total,driver_version \
   --format=csv > "${RESULT_ROOT}/gpu_info.txt"
 

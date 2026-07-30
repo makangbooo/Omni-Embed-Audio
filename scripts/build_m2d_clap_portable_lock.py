@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import zipfile
 
@@ -48,6 +49,15 @@ def identity(path: Path) -> dict[str, object]:
         "size_bytes": path.stat().st_size,
         "sha256": digest,
     }
+
+
+def partition_git_status(status: str) -> tuple[str, str]:
+    ignored_pattern = re.compile(r"\?\? scripts/\.__dpc[0-9a-f]+")
+    meaningful = []
+    ignored = []
+    for line in status.splitlines():
+        (ignored if ignored_pattern.fullmatch(line) else meaningful).append(line)
+    return "\n".join(meaningful), "\n".join(ignored)
 
 
 def main() -> int:
@@ -98,9 +108,10 @@ def main() -> int:
     git_commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=REPOSITORY_ROOT, text=True
     ).strip()
-    git_status = subprocess.check_output(
+    git_status_raw = subprocess.check_output(
         ["git", "status", "--short"], cwd=REPOSITORY_ROOT, text=True
     ).strip()
+    git_status, git_status_ignored = partition_git_status(git_status_raw)
     if git_status:
         raise RuntimeError("M2D model lock requires a clean Git worktree")
 
@@ -110,6 +121,7 @@ def main() -> int:
         "created_at": datetime.now(timezone.utc).isoformat(),
         "git_commit": git_commit,
         "git_status_short": git_status,
+        "git_status_ignored_ephemeral": git_status_ignored,
         "model": "M2D-CLAP",
         "source_revision": EXPECTED_SOURCE_REVISION,
         "source_path": str(source.resolve()),

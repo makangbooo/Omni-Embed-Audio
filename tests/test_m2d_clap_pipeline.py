@@ -10,8 +10,12 @@ from scripts.build_m2d_clap_portable_lock import (
     EXPECTED_ARCHIVE_SHA256,
     EXPECTED_ARCHIVE_SIZE,
     EXPECTED_SOURCE_REVISION,
+    partition_git_status as partition_lock_git_status,
 )
-from scripts.validate_m2d_clap_embeddings import load_embeddings
+from scripts.validate_m2d_clap_embeddings import (
+    load_embeddings,
+    partition_git_status as partition_validation_git_status,
+)
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -70,6 +74,25 @@ class M2DClapPipelineTests(unittest.TestCase):
             self.assertIn(marker, source)
         for forbidden in ("tmux", "exec bash -i", "--uiq-dir", "positive_uiq"):
             self.assertNotIn(forbidden, source)
+
+    def test_only_ephemeral_dpc_status_is_ignored(self) -> None:
+        raw = "\n".join(
+            (
+                "?? scripts/.__dpc00000000a6e18d11000003ce",
+                " M AudioRetrieval/cli/main.py",
+                "?? real-untracked.txt",
+            )
+        )
+        for partition in (partition_lock_git_status, partition_validation_git_status):
+            meaningful, ignored = partition(raw)
+            self.assertEqual(
+                meaningful,
+                " M AudioRetrieval/cli/main.py\n?? real-untracked.txt",
+            )
+            self.assertEqual(ignored, "?? scripts/.__dpc00000000a6e18d11000003ce")
+        wrapper = MAIN_WRAPPER.read_text(encoding="utf-8")
+        self.assertIn("git_status_ignored.txt", wrapper)
+        self.assertIn("IGNORED_EPHEMERAL_GIT_STATUS", wrapper)
 
     def test_evaluator_requires_matching_shared_dimension(self) -> None:
         source = EVALUATOR.read_text(encoding="utf-8")
