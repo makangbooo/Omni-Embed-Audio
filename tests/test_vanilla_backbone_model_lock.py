@@ -12,6 +12,7 @@ from scripts.build_vanilla_backbone_lock import (
     build_vanilla_lock,
     validate_output_path,
 )
+from scripts.build_vanilla_backbone_eval_config import validate_model_lock
 from scripts.vanilla_backbone_registry import (
     DEFAULT_REGISTRY,
     EXPECTED_BACKBONE_IDS,
@@ -191,6 +192,27 @@ class VanillaBackboneModelLockTest(unittest.TestCase):
                 backbone_id="vanilla_nemotron_3b",
                 portable_lock_evidence=True,
             )
+
+    def test_committed_qwen3b_vanilla_lock_inherits_exact_audited_base(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        vanilla_path = (
+            repository_root
+            / "results/model_locks/vanilla_qwen2_5_omni_3b.json"
+        )
+        oea_path = repository_root / "results/model_locks/oea_qwen3b.json"
+        vanilla = json.loads(vanilla_path.read_text(encoding="utf-8"))
+        oea = json.loads(oea_path.read_text(encoding="utf-8"))
+
+        locked = validate_model_lock(vanilla)
+        self.assertEqual(locked["base_model"], oea["base_model"])
+        self.assertEqual(locked["backbone_id"], "vanilla_qwen2_5_omni_3b")
+        self.assertEqual(locked["embedding_output"]["projection_head"], "none")
+        self.assertNotIn("checkpoint", vanilla)
+        inherited = vanilla["evidence"]["inherited_base_model_lock"]
+        self.assertEqual(inherited["size_bytes"], oea_path.stat().st_size)
+        self.assertEqual(
+            inherited["sha256"], hashlib.sha256(oea_path.read_bytes()).hexdigest()
+        )
 
 
 if __name__ == "__main__":

@@ -130,7 +130,7 @@
 | 3 数据 | DATA-13C lock owner provenance patch | COMPLETED | 待本提交 | lock 改为非截断打开；成功后记录 hostname/PID/PPID/commit/run dir，失败时打印最后记录；4 项专项测试通过 | 只改善后续审计，不解除当前远端锁 | 当前锁安全释放后拉取补丁，再启动恢复 |
 | 3 数据 | DATA-13D：SQuTR `en/fiqa` + `en/nq` 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；四个退出码均为 0；16,400/16,400 音频通过；manifest SHA256 `e5053d30...15e93`；FiQA count/ID/text/leakage 无 violations | 无；4,100 条 24 kHz 与 12,300 条 16 kHz 是真实源数据分布 | 主实验数据门禁解除；后续模型输入显式重采样并记录 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
-| 5 基线 | 三个 vanilla backbone × Clotho Table 2/3 | IN_PROGRESS | Nemotron run=`74325cb`；审计=`results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json`；Qwen base load=`9c080c7` | Nemotron RTX 4090 smoke/full 与 CPU 四协议均 complete、RC=`0`；shape=`1045×2048/5225×2048`，明确未加载 checkpoint/LoRA/head；Table 2 all-caption=`7.2536/21.3014/30.1818`，Table 3 seed0=`57.1292/69.3780/74.3541`。Qwen 3B/7B base 已成功加载，但两份 base-only lock 尚未生成 | 论文 caption selection、T2T self/tie 与 audio `passage:` 冲突仍 `[MISSING]`；Qwen 两变体缺小型 base-only lock；四个 CLAP 仍需固定 source/checkpoint | 直接生成 Qwen2.5-Omni-3B base-only lock，随后申请同一正文 smoke→full→CPU metrics |
+| 5 基线 | 三个 vanilla backbone × Clotho Table 2/3 | IN_PROGRESS | Nemotron run=`74325cb`；审计=`results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json`；Qwen3B base-only lock=`本提交` | Nemotron RTX 4090 smoke/full 与 CPU 四协议均 complete、RC=`0`；shape=`1045×2048/5225×2048`，明确未加载 checkpoint/LoRA/head；Table 2 all-caption=`7.2536/21.3014/30.1818`，Table 3 seed0=`57.1292/69.3780/74.3541`。Qwen3B vanilla lock 已逐字段继承既有完整资源审计，未加载 OEA checkpoint；Qwen7B base 已成功加载但 lock 尚未生成 | 论文 caption selection、T2T self/tie 与 audio `passage:` 冲突仍 `[MISSING]`；Qwen3B 待 GPU smoke/full；Qwen7B 缺小型 base-only lock；四个 CLAP 仍需固定 source/checkpoint | 申请 Qwen2.5-Omni-3B 同一正文 smoke→full→CPU metrics，完成后再处理 Qwen7B vanilla |
 | 5 基线 | LAION/Robust/MGA/M2D-CLAP | BLOCKED | N/A | 未开始 | checkpoint revision/统一入口不完整 | 官方 OEA 评测完成后逐个固定资源 |
 | 6 扩展 | 人工/闭源 API、效率、token-length、派生图表 | TODO | N/A | 未开始 | 按阶段后置 | 核心训练评测完成后执行 |
 
@@ -140,4 +140,4 @@
 - 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
 - 最近完成：vanilla Nemotron-3B 的官方源码 Clotho Table 2/3 闭环；run commit=`74325cb`，smoke/full/四协议均 complete、RC=`0`，1,045 audio 与 5,225 captions 为 2,048 维 base-only embedding，七个顶层工件 SHA256 已固定。Clotho vanilla 覆盖达到 `1/3`。
 - 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；CLAP/checkpoint 资源与若干论文协议细节仍未固定。
-- 下一步：正文 Table 2/3 优先；生成 Qwen2.5-Omni-3B 的小型 base-only lock并继续其 Clotho smoke→full→CPU metrics，再处理 Qwen7B vanilla；附录 UIQ、效率、训练及全部扩展继续后移。
+- 下一步：正文 Table 2/3 优先；Qwen2.5-Omni-3B base-only lock 已就绪，获批后直接执行 Clotho smoke→full→CPU metrics，再处理 Qwen7B vanilla；附录 UIQ、效率、训练及全部扩展继续后移。

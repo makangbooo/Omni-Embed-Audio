@@ -26,8 +26,11 @@ The pipeline disables GPU visibility, refuses dirty Git state, refuses to overwr
 
 ## Lock-bound embedding path
 
-The formal generator and wrapper are committed but have not been run on a real
-base lock:
+The formal generator and wrapper are committed. Nemotron-3B has completed its
+real lock-bound smoke, full Clotho generation, and four-protocol finalization;
+Qwen2.5-Omni-3B has a committed base-only lock inherited byte-for-byte from the
+independently audited base inventory in `results/model_locks/oea_qwen3b.json`.
+Its GPU smoke is the next pending gate:
 
 ```bash
 bash scripts/run_vanilla_backbone_embeddings.sh vanilla_nemotron_3b --smoke
@@ -99,6 +102,8 @@ overwrites a non-complete protocol directory.
 
 The current protocol fixes Clotho evaluation at 1,045 candidates and all 5,225
 captions. Batch size 1 and seed 42 are explicitly `[INFERRED]`; the paper does
-not publish vanilla evaluation values for them. A real model lock, a small GPU
-fixture, the full embedding pass, and execution of the committed CPU retrieval
-suite are still pending. No reproduced vanilla metric exists yet.
+not publish vanilla evaluation values for them. Nemotron-3B now has four
+committed reproduced protocol groups in
+`results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json`.
+Qwen2.5-Omni-3B is lock-ready and awaits GPU smoke/full evaluation;
+Qwen2.5-Omni-7B still needs its base-only lock.

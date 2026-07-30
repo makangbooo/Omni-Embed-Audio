@@ -119,7 +119,7 @@
 | Robust-CLAP | adapter 文件存在 | 无 config/统一 CLI；外部 repo、旧 torchlibrosa、checkpoint revision `[MISSING]` |
 | MGA-CLAP | adapter +占位路径 | `mga-clap.pt` 的官方下载/revision/checksum `[MISSING]` |
 | M2D-CLAP | portable adapter 存在 | 预期 `checkpoint-30.pth`，但无 config/统一 CLI/下载说明 |
-| Vanilla backbones | 三个 base revision、base-only 锁流水线和 Clotho 正式生成器已固定 | 真实 base 锁尚未远程生成/提交；GPU fixture 尚未运行；AudioCaps/MECAT 候选集仍缺 |
+| Vanilla backbones | 三个 base revision、base-only 锁流水线和 Clotho 正式生成器已固定；Nemotron 正式评测完成；Qwen3B 锁复用已审计 base inventory | Qwen3B GPU smoke/full 待批准；Qwen7B base-only 锁仍缺；AudioCaps/MECAT 候选集仍缺 |
 
 在基线阶段开始前，先向作者仓库/模型卡核对 checkpoint，不能仅凭本地占位文件名下载近似模型。
 
