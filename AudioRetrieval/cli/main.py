@@ -41,6 +41,11 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     embeddings.add_argument("--batch-size-audio", type=int, default=64)
     embeddings.add_argument("--batch-size-text", type=int, default=256)
 
+    embeddings.add_argument("--laion-ckpt", type=Path)
+    embeddings.add_argument("--laion-bert-tokenizer", type=Path)
+    embeddings.add_argument("--laion-roberta-tokenizer", type=Path)
+    embeddings.add_argument("--laion-bart-tokenizer", type=Path)
+
     # OEA-specific options
     embeddings.add_argument("--checkpoint", type=Path, help="OEA checkpoint path")
     embeddings.add_argument("--repo-id", default="nvidia/omni-embed-nemotron-3b",
@@ -174,10 +179,22 @@ def run_preprocess(args: argparse.Namespace) -> int:
     if args.preprocess_cmd == "embeddings":
         if args.model == "laion_clap":
             from AudioRetrieval.preprocessing.embeddings import LaionClapEmbeddingPrecomputer
+            if not all((
+                args.laion_ckpt,
+                args.laion_bert_tokenizer,
+                args.laion_roberta_tokenizer,
+                args.laion_bart_tokenizer,
+            )):
+                print("Error: LAION-CLAP requires checkpoint and three local tokenizers")
+                return 1
             precomputer = LaionClapEmbeddingPrecomputer(
+                ckpt_path=str(args.laion_ckpt),
                 device=args.device,
                 batch_size_audio=args.batch_size_audio,
                 batch_size_text=args.batch_size_text,
+                bert_tokenizer_path=str(args.laion_bert_tokenizer),
+                roberta_tokenizer_path=str(args.laion_roberta_tokenizer),
+                bart_tokenizer_path=str(args.laion_bart_tokenizer),
             )
         elif args.model == "mga_clap":
             from AudioRetrieval.preprocessing.embeddings import MGAClapEmbeddingPrecomputer

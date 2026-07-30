@@ -47,12 +47,27 @@ class LaionClapEmbeddingPrecomputer(BaseEmbeddingPrecomputer):
         device: str = "cuda",
         batch_size_audio: int = 64,
         batch_size_text: int = 256,
+        bert_tokenizer_path: Optional[str] = None,
+        roberta_tokenizer_path: Optional[str] = None,
+        bart_tokenizer_path: Optional[str] = None,
     ):
         super().__init__(device, batch_size_audio, batch_size_text)
         self.ckpt_path = ckpt_path
         self.amodel = amodel
         self.tmodel = tmodel
         self.enable_fusion = enable_fusion
+        tokenizer_values = (
+            bert_tokenizer_path,
+            roberta_tokenizer_path,
+            bart_tokenizer_path,
+        )
+        if any(tokenizer_values) and not all(tokenizer_values):
+            raise ValueError("all three local tokenizer paths must be provided together")
+        self.tokenizer_paths = None if not all(tokenizer_values) else {
+            "bert-base-uncased": str(bert_tokenizer_path),
+            "roberta-base": str(roberta_tokenizer_path),
+            "facebook/bart-base": str(bart_tokenizer_path),
+        }
 
     def _load_model(self) -> Any:
         """Load LAION-CLAP adapter."""
@@ -63,6 +78,7 @@ class LaionClapEmbeddingPrecomputer(BaseEmbeddingPrecomputer):
             amodel=self.amodel,
             tmodel=self.tmodel,
             enable_fusion=self.enable_fusion,
+            tokenizer_paths=self.tokenizer_paths,
         )
 
     def _encode_audio_batch(self, audio_paths: List[str]) -> np.ndarray:

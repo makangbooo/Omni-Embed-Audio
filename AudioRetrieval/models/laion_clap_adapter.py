@@ -2,6 +2,7 @@
 import warnings, numpy as np
 from typing import List, Optional
 from AudioRetrieval.eval_core import BaseRetrievalModel, l2norm
+from AudioRetrieval.models.laion_clap_tokenizers import local_tokenizer_redirect
 
 def _safe_import_sound_loader():
     try:
@@ -51,11 +52,16 @@ def _center_crop_or_pad(wav: np.ndarray, target_len: int) -> np.ndarray:
     right = pad_total - left
     return np.pad(wav, (left, right), mode="constant")
 
+
 class LaionClapAdapter(BaseRetrievalModel):
     def __init__(self, ckpt_path=None, amodel='HTSAT-tiny', tmodel='roberta',
-                 enable_fusion=False, resample_sr=48000, audio_duration_sec=10.0, audio_crop="center"):
-        from laion_clap import CLAP_Module
-        self.model = CLAP_Module(enable_fusion=enable_fusion, amodel=amodel, tmodel=tmodel)
+                 enable_fusion=False, resample_sr=48000, audio_duration_sec=10.0,
+                 audio_crop="center", tokenizer_paths=None):
+        with local_tokenizer_redirect(tokenizer_paths):
+            from laion_clap import CLAP_Module
+            self.model = CLAP_Module(
+                enable_fusion=enable_fusion, amodel=amodel, tmodel=tmodel
+            )
         self.model.load_ckpt(ckpt_path); self.model.eval()
         self.target_sr = int(resample_sr)
         self.target_len = int(self.target_sr * float(audio_duration_sec))

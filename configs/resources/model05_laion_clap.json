@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "resource_id": "MODEL-05",
+  "description": "Immutable public-code LAION-CLAP 1.1.6 checkpoint and eager tokenizer resources",
+  "source_tags": {
+    "package": "[CODE] requirements.txt declares laion-clap>=1.1.6; this controlled run fixes the minimum published version and exact PyPI artifact hash",
+    "checkpoint": "[CODE] non-fusion load_ckpt(None) in laion-clap 1.1.6 selects 630k-audioset-best.pt",
+    "tokenizers": "[CODE] laion-clap 1.1.6 eagerly loads BERT, RoBERTa, and BART tokenizers; immutable current revisions are fixed for offline execution",
+    "claim_boundary": "[MISSING] the OEA paper and public repository do not publish exact LAION package, checkpoint revision, or tokenizer revisions; report as a controlled public-code reproduction"
+  },
+  "assets": [
+    {
+      "name": "laion_clap_630k_audioset_best",
+      "repo_id": "lukewys/laion_clap",
+      "repo_type": "model",
+      "revision": "b3708341862f581175dba5c356a4ebf74a9b6651",
+      "local_subdir": "laion-clap",
+      "allow_patterns": ["630k-audioset-best.pt"],
+      "required_files": ["630k-audioset-best.pt"],
+      "expected_primary_file": {
+        "path": "630k-audioset-best.pt",
+        "size_bytes": 1863587645,
+        "lfs_sha256": "8053c9775516af2f4902e1e8281e356cc1bf7a85e8b761908170767b77c3f037"
+      }
+    },
+    {
+      "name": "laion_clap_bert_tokenizer",
+      "repo_id": "google-bert/bert-base-uncased",
+      "repo_type": "model",
+      "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+      "local_subdir": "laion-clap-tokenizers/bert-base-uncased",
+      "allow_patterns": ["tokenizer.json", "tokenizer_config.json", "vocab.txt"],
+      "required_files": ["tokenizer.json", "tokenizer_config.json", "vocab.txt"],
+      "expected_files": [
+        {"path": "tokenizer.json", "size_bytes": 466062},
+        {"path": "tokenizer_config.json", "size_bytes": 48},
+        {"path": "vocab.txt", "size_bytes": 231508}
+      ]
+    },
+    {
+      "name": "laion_clap_roberta_tokenizer",
+      "repo_id": "FacebookAI/roberta-base",
+      "repo_type": "model",
+      "revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+      "local_subdir": "laion-clap-tokenizers/roberta-base",
+      "allow_patterns": ["merges.txt", "tokenizer.json", "tokenizer_config.json", "vocab.json"],
+      "required_files": ["merges.txt", "tokenizer.json", "tokenizer_config.json", "vocab.json"],
+      "expected_files": [
+        {"path": "merges.txt", "size_bytes": 456318},
+        {"path": "tokenizer.json", "size_bytes": 1355863},
+        {"path": "tokenizer_config.json", "size_bytes": 25},
+        {"path": "vocab.json", "size_bytes": 898823}
+      ]
+    },
+    {
+      "name": "laion_clap_bart_tokenizer",
+      "repo_id": "facebook/bart-base",
+      "repo_type": "model",
+      "revision": "aadd2ab0ae0c8268c7c9693540e9904811f36177",
+      "local_subdir": "laion-clap-tokenizers/bart-base",
+      "allow_patterns": ["merges.txt", "tokenizer.json", "vocab.json"],
+      "required_files": ["merges.txt", "tokenizer.json", "vocab.json"],
+      "expected_files": [
+        {"path": "merges.txt", "size_bytes": 456318},
+        {"path": "tokenizer.json", "size_bytes": 1355863},
+        {"path": "vocab.json", "size_bytes": 898823}
+      ]
+    }
+  ]
+}
