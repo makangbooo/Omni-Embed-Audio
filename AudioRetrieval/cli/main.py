@@ -81,6 +81,8 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     # MGA-CLAP specific options
     embeddings.add_argument("--mga-repo", type=Path, help="MGA-CLAP repository path")
     embeddings.add_argument("--mga-ckpt", type=Path, help="MGA-CLAP checkpoint path")
+    embeddings.add_argument("--mga-bert-tokenizer", type=Path)
+    embeddings.add_argument("--mga-checkpoint-sha256")
     embeddings.add_argument("--m2d-ckpt", type=Path, help="M2D-CLAP checkpoint path")
     embeddings.add_argument(
         "--m2d-bert-tokenizer",
@@ -204,9 +206,19 @@ def run_preprocess(args: argparse.Namespace) -> int:
             )
         elif args.model == "mga_clap":
             from AudioRetrieval.preprocessing.embeddings import MGAClapEmbeddingPrecomputer
+            if not all((
+                args.mga_repo,
+                args.mga_ckpt,
+                args.mga_bert_tokenizer,
+                args.mga_checkpoint_sha256,
+            )):
+                print("Error: MGA-CLAP requires source, checkpoint, tokenizer, and SHA256")
+                return 1
             precomputer = MGAClapEmbeddingPrecomputer(
-                repo_path=str(args.mga_repo) if args.mga_repo else None,
-                ckpt_path=str(args.mga_ckpt) if args.mga_ckpt else None,
+                repo_path=str(args.mga_repo),
+                ckpt_path=str(args.mga_ckpt),
+                bert_tokenizer_path=str(args.mga_bert_tokenizer),
+                checkpoint_sha256=args.mga_checkpoint_sha256,
                 device=args.device,
                 batch_size_audio=args.batch_size_audio,
                 batch_size_text=args.batch_size_text,

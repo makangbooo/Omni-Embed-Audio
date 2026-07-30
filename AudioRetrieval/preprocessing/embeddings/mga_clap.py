@@ -42,6 +42,8 @@ class MGAClapEmbeddingPrecomputer(BaseEmbeddingPrecomputer):
         self,
         repo_path: str = "AudioRetrieval/models/mga_clap",
         ckpt_path: str = "ModelCheckpoint/mga_clap/mga-clap.pt",
+        bert_tokenizer_path: str | None = None,
+        checkpoint_sha256: str | None = None,
         seconds: float = 10.0,
         device: str = "cuda",
         batch_size_audio: int = 64,
@@ -50,6 +52,8 @@ class MGAClapEmbeddingPrecomputer(BaseEmbeddingPrecomputer):
         super().__init__(device, batch_size_audio, batch_size_text)
         self.repo_path = repo_path
         self.ckpt_path = ckpt_path
+        self.bert_tokenizer_path = bert_tokenizer_path
+        self.checkpoint_sha256 = checkpoint_sha256
         self.seconds = seconds
 
     def _load_model(self) -> Any:
@@ -61,6 +65,8 @@ class MGAClapEmbeddingPrecomputer(BaseEmbeddingPrecomputer):
             ckpt_path=self.ckpt_path,
             seconds=self.seconds,
             device=self.device,
+            bert_tokenizer_path=self.bert_tokenizer_path,
+            expected_checkpoint_sha256=self.checkpoint_sha256,
         )
 
     def _encode_audio_batch(self, audio_paths: List[str]) -> np.ndarray:
@@ -103,6 +109,9 @@ class MGAClapEmbeddingPrecomputer(BaseEmbeddingPrecomputer):
         """
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
+        for name in ("audio_embeddings.npz", "caption_embeddings.npz"):
+            if (output_dir / name).exists():
+                raise FileExistsError(f"refusing to overwrite {output_dir / name}")
 
         print("=" * 60)
         print(f"MGA-CLAP Embedding Precomputation ({dataset_type})")
@@ -125,7 +134,7 @@ class MGAClapEmbeddingPrecomputer(BaseEmbeddingPrecomputer):
         # Precompute audio and caption embeddings
         self.precompute_dataset(entries, output_dir)
 
-        # Precompute UIQ embeddings if provided
+        # Preserve the generic UIQ route; the Table 2/3 wrapper does not use it.
         if uiq_jsonl and uiq_jsonl.exists():
             if uiq_categories is None:
                 uiq_categories = [
@@ -138,29 +147,24 @@ class MGAClapEmbeddingPrecomputer(BaseEmbeddingPrecomputer):
 
             uiq_data = self.load_uiq_queries(uiq_jsonl)
             valid_clip_ids = {e.clip_id for e in entries if e.audio_path}
-
             for category in uiq_categories:
                 if category not in uiq_data:
                     print(f"Warning: UIQ category '{category}' not found")
                     continue
-
-                category_queries = uiq_data[category]
                 texts = []
                 clip_ids = []
-                for clip_id, query in sorted(category_queries.items()):
+                for clip_id, query in sorted(uiq_data[category].items()):
                     if clip_id in valid_clip_ids:
                         texts.append(query)
                         clip_ids.append(clip_id)
-
                 if not texts:
                     print(f"Warning: No UIQ queries for '{category}'")
                     continue
-
-                print(f"Computing UIQ embeddings for '{category}' ({len(texts)} queries)...")
                 embeddings = self.encode_text(texts)
-
                 bucket_safe = category.lower().replace("/", "_").replace("-", "_")
                 output_path = output_dir / f"uiq_{bucket_safe}_embeddings.npz"
+                if output_path.exists():
+                    raise FileExistsError(f"refusing to overwrite {output_path}")
                 np.savez_compressed(
                     output_path,
                     embeddings=embeddings,

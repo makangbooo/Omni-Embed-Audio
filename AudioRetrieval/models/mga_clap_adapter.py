@@ -7,13 +7,14 @@
 # (See example.py in their repo.)  # :contentReference[oaicite:1]{index=1}
 
 from __future__ import annotations
-import os, sys, warnings
+import importlib
+import sys
+import warnings
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 import numpy as np
+import hashlib
 
-# --- add near the imports ---
-import re
 import torch
 
 def _extract_state_dict(obj):
@@ -77,6 +78,14 @@ def _resolve_device(requested: str) -> torch.device:
             )
             return torch.device("cpu")
     return torch.device("cpu")
+
+def _checkpoint_sha256(path: str | Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        while chunk := stream.read(8 * 1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
+
 
 def _load_mga_ckpt(ckpt_path: str | Path, device="cpu"):
     """
@@ -183,22 +192,45 @@ class MGAClapAdapter:
       - MGA_CLAP_CKPT: path to the provided checkpoint (Google Drive link in README)
     README: checkpoint goes under pretrained_models/models; example demonstrates encode & pooling.  # :contentReference[oaicite:4]{index=4}
     """
-    def __init__(self, repo_path: str, ckpt_path: str, seconds: float = 10.0, device: str = "cuda", amp: bool = False):
+    def __init__(
+        self,
+        repo_path: str,
+        ckpt_path: str,
+        seconds: float = 10.0,
+        device: str = "cuda",
+        amp: bool = False,
+        bert_tokenizer_path: str | None = None,
+        expected_checkpoint_sha256: str | None = None,
+    ):
         self.repo_root = Path(repo_path).expanduser().resolve()
         self.ckpt_path = str(Path(ckpt_path).expanduser().resolve())
         if not Path(self.ckpt_path).exists():
             raise FileNotFoundError(f"MGA-CLAP checkpoint not found: {self.ckpt_path}")
 
-        # Add parent.parent directory to sys.path so imports like "models.mga_clap.models.X" work
-        # repo_path is "AudioRetrieval/models/mga_clap", we need "AudioRetrieval"
-        # So from "AudioRetrieval/models/mga_clap" -> parent is "AudioRetrieval/models" -> parent.parent is "AudioRetrieval"
-        grandparent_path = str(self.repo_root.parent.parent)
-        if grandparent_path not in sys.path:
-            sys.path.insert(0, grandparent_path)
+        for required in (
+            self.repo_root / "models/ase_model.py",
+            self.repo_root / "settings/inference_example.yaml",
+        ):
+            if not required.is_file():
+                raise FileNotFoundError(f"MGA-CLAP source file not found: {required}")
+        tokenizer_path = Path(bert_tokenizer_path or "").expanduser().resolve()
+        if not tokenizer_path.is_dir():
+            raise FileNotFoundError(f"MGA-CLAP BERT tokenizer not found: {tokenizer_path}")
+        actual_sha256 = _checkpoint_sha256(self.ckpt_path)
+        if not expected_checkpoint_sha256 or actual_sha256 != expected_checkpoint_sha256:
+            raise RuntimeError("MGA-CLAP checkpoint does not match the trusted SHA256")
 
-        import torch
-        from ruamel import yaml
-        from models.mga_clap.models.ase_model import ASE
+        source_path = str(self.repo_root)
+        if source_path not in sys.path:
+            sys.path.insert(0, source_path)
+
+        ase_module = importlib.import_module("models.ase_model")
+        text_encoder_module = importlib.import_module("models.text_encoder")
+        ase_source = Path(ase_module.__file__).resolve()
+        if not ase_source.is_relative_to(self.repo_root):
+            raise RuntimeError(f"MGA source module resolved outside the lock: {ase_source}")
+        ASE = ase_module.ASE
+        from transformers import BertConfig, BertModel, BertTokenizer
 
         # Use their inference config shape; device + ckpt come from args
         # If you keep a YAML, you can load it here; we only need minimal fields.
@@ -216,15 +248,41 @@ class MGAClapAdapter:
         else:
             self.cfg = {"device": str(self.device), "eval": {"ckpt": self.ckpt_path}}
 
-        # init model
-        self.model = ASE(self.cfg).to(self.device).eval()
-        state_dict = _load_mga_ckpt(self.ckpt_path, device=self.device)
-        missing, unexpected = self.model.load_state_dict(state_dict, strict=False)
-        if missing:
-            print("[WARN] Missing keys:", missing)
-        if unexpected:
-            print("[WARN] Unexpected keys:", unexpected)
-        self.model.eval()
+        original_bert = text_encoder_module.MODELS["bert-base-uncased"]
+
+        class LocalBertTokenizer:
+            @classmethod
+            def from_pretrained(cls, *_args, **_kwargs):
+                return BertTokenizer.from_pretrained(
+                    tokenizer_path, local_files_only=True
+                )
+
+        class CheckpointInitializedBertModel:
+            @classmethod
+            def from_pretrained(cls, *_args, **kwargs):
+                return BertModel(
+                    BertConfig(),
+                    add_pooling_layer=kwargs.get("add_pooling_layer", True),
+                )
+
+        text_encoder_module.MODELS["bert-base-uncased"] = (
+            CheckpointInitializedBertModel,
+            LocalBertTokenizer,
+            768,
+        )
+        try:
+            self.model = ASE(self.cfg)
+        finally:
+            text_encoder_module.MODELS["bert-base-uncased"] = original_bert
+        state_dict = _load_mga_ckpt(
+            self.ckpt_path,
+            device="cpu",
+        )
+        self.model.load_state_dict(state_dict, strict=True)
+        self.model = self.model.to(self.device).eval()
+        print(f"[INFO] MGA-CLAP checkpoint SHA256={actual_sha256}")
+        print(f"[INFO] MGA-CLAP source={self.repo_root}")
+        print(f"[INFO] MGA-CLAP local BERT tokenizer={tokenizer_path}")
 
         self._loader = _safe_import_sound_loader()
         self.target_sr = TARGET_SR
