@@ -14,11 +14,12 @@ completion.
 At the current committed-evidence snapshot, the 31-row inventory remains
 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`, or `4/31 = 12.9%`
 complete under the whole-row inventory definition.
-FIG-02 is now complete as a method and tensor-contract verification: independent
-Qwen3B and Nemo3B lock-bound runs loaded the LoRA and dual-head contract and
-produced 512-dimensional audio/text embeddings. This does not claim Qwen7B
-runtime completion. The exact boundary and file hashes are recorded in
-`results/audits/fig02_architecture_verification_20260728.json`.
+FIG-02 is complete as a method and tensor-contract verification: independent
+Qwen3B and Nemo3B lock-bound runs plus the two official-source Qwen7B runs
+loaded the LoRA and dual-head contract and produced 512-dimensional audio/text
+embeddings. The original method boundary is recorded in
+`results/audits/fig02_architecture_verification_20260728.json`; the Qwen7B
+runtime evidence is fixed in the two 2026-07-30 audits below.
 
 The 910 visually audited paper metrics are aggregated into 374
 experiment-model-dataset-task cells in
@@ -26,13 +27,27 @@ experiment-model-dataset-task cells in
 separate from `REPRODUCED_CLOSE`, `CONTROLLED_ONLY`, `PARTIAL`, `TODO`, and
 `BLOCKED`; the generation audit records all input/output hashes. The compact
 paper-only partial Tables 2/3/12-15 are in
-`results/tables/oea_partial_tables.md`. They contain 32 predeclared protocol
+`results/tables/oea_partial_tables.md`. They contain 40 predeclared protocol
 groups and do not select a protocol after comparing it with the paper value.
 
-Committed value evidence currently covers four Clotho T2A cells, four Clotho
-T2T cells, and sixteen Clotho positive-UIQ cells. OEA-Nemo3B-AC is the newest
-complete paper cell: its official-source GPU precomputation and CPU finalizer
-completed at run commits `effe67d` and `1f991ab`. The finalizer returned
+Committed value evidence currently covers six Clotho T2A cells, six Clotho
+T2T cells, and sixteen Clotho positive-UIQ cells. OEA-Qwen7B-AC and
+OEA-Qwen7B-Cl are the newest complete main-table cells. Both official-source
+runs completed on an RTX 4090 at commit `9c080c7`, each in `00:07:36`, with
+clean worktrees, successful 5-clip smoke tests, 1,045 audio embeddings, 5,225
+caption embeddings, four finalized protocols, and fixed checkpoint/artifact
+SHA256 identities. Qwen7B `[CODE]` all-caption T2A is
+`19.8852/44.6890/57.0909`; Qwen7B(+Cl) is
+`22.0287/48.5359/61.6459`. Their `[CODE]` seed-0 T2T results are
+`60.8612/72.6316/78.7560` and `60.8612/72.8230/78.4689`; the separate
+`[INFERRED]` all-caption sensitivities are `62.6603/74.1053/79.2153` and
+`63.2344/74.9856/79.6555`. The two compact audits are
+`results/audits/oea_qwen7b_ac_clotho_official_source_eval_20260730.json` and
+`results/audits/oea_qwen7b_cl_clotho_official_source_eval_20260730.json`.
+No protocol is promoted after observing proximity to PAPER.
+
+OEA-Nemo3B-AC previously completed official-source GPU precomputation and CPU
+finalization at run commits `effe67d` and `1f991ab`. The finalizer returned
 `FINAL_RUN_RC=0` in 7 seconds and fixed eight protocols in
 `results/audits/oea_nemo3b_ac_clotho_official_source_eval_20260729.json`.
 The `[CODE]` all-caption/seed-0 T2A results are

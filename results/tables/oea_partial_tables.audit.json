@@ -2,10 +2,10 @@
   "schema_version": 1,
   "status": "complete",
   "scope": "OEA paper Tables 2, 3 and 12-15 only; extension experiments excluded",
-  "protocol_group_count": 32,
+  "protocol_group_count": 40,
   "table_protocol_counts": {
-    "Table 2": 8,
-    "Table 3": 8,
+    "Table 2": 12,
+    "Table 3": 12,
     "Table 12": 4,
     "Table 13": 4,
     "Table 14": 4,
@@ -13,12 +13,12 @@
   },
   "input": {
     "path": "results/tables/reproduction_summary.csv",
-    "size_bytes": 66119,
-    "sha256": "bfa9bdffa8ae1bdb20d4df979c15efd49313b7264080211e71ab91f65bd6b648"
+    "size_bytes": 77708,
+    "sha256": "4fa9fec1fa7f8af4ecef09d323acdb829883a7589b4d7fc0dca81fb1d3cbaa88"
   },
   "output": {
     "path": "results/tables/oea_partial_tables.md",
-    "size_bytes": 5450,
-    "sha256": "0c91b47c3aa812c2af8119040c38e3ac739c4b084d62fad3eb07c70c7ef2c9cb"
+    "size_bytes": 6444,
+    "sha256": "1866dccccfa86c24959fcd71d5f1b5771afd31caf74e0d2e70ee038bfc6a3ddf"
   }
 }

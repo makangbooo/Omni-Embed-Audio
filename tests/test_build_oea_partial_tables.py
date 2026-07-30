@@ -15,8 +15,8 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
         self.assertEqual(
             Counter(group["paper_table"] for group in self.groups),
             {
-                "Table 2": 8,
-                "Table 3": 8,
+                "Table 2": 12,
+                "Table 3": 12,
                 "Table 12": 4,
                 "Table 13": 4,
                 "Table 14": 4,
@@ -91,6 +91,19 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
                 "Table 14": 1,
                 "Table 15": 1,
             },
+        )
+
+    def test_qwen7b_official_source_cells_are_present(self) -> None:
+        matches = [
+            group
+            for group in self.groups
+            if group["model"] in {"OEA-Qwen7B", "OEA-Qwen7B (+Cl)"}
+            and group["dataset"] == "Clotho"
+        ]
+        self.assertEqual(len(matches), 8)
+        self.assertEqual(
+            Counter(group["paper_table"] for group in matches),
+            {"Table 2": 4, "Table 3": 4},
         )
 
     def test_no_extension_tasks_are_present(self) -> None:
