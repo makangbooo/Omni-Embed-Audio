@@ -13,12 +13,22 @@ from scripts.validate_mga_clap_embeddings import load_embeddings
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 MAIN_WRAPPER = REPOSITORY_ROOT / "scripts/run_mga_clap_clotho_main.sh"
+DEPENDENCY_INSTALLER = (
+    REPOSITORY_ROOT / "scripts/install_mga_clap_runtime_dependencies.sh"
+)
+DEPENDENCY_REQUIREMENTS = (
+    REPOSITORY_ROOT / "configs/resources/mga_clap_runtime_overlay.requirements.txt"
+)
 CLI = REPOSITORY_ROOT / "AudioRetrieval/cli/main.py"
 ADAPTER = REPOSITORY_ROOT / "AudioRetrieval/models/mga_clap_adapter.py"
 PRECOMPUTER = REPOSITORY_ROOT / "AudioRetrieval/preprocessing/embeddings/mga_clap.py"
 FAILURE_AUDIT = (
     REPOSITORY_ROOT
     / "results/audits/mga_clap_clotho_smoke_failure_20260731.json"
+)
+RUAMEL_FAILURE_AUDIT = (
+    REPOSITORY_ROOT
+    / "results/audits/mga_clap_clotho_ruamel_failure_20260731.json"
 )
 
 
@@ -67,6 +77,9 @@ class MGAClapPipelineTests(unittest.TestCase):
             "from torchlibrosa.augmentation import SpecAugmentation",
             "--runtime-overlay",
             "--runtime-requirements",
+            "--dependency-overlay",
+            "--dependency-requirements",
+            "RUAMEL_YAML_VERSION=0.18.10",
         ):
             self.assertIn(marker, source)
         for forbidden in ("tmux", "exec bash -i", "--uiq-dir", "positive_uiq"):
@@ -79,9 +92,14 @@ class MGAClapPipelineTests(unittest.TestCase):
         for marker in (
             "--runtime-overlay",
             "--runtime-requirements",
+            "--dependency-overlay",
+            "--dependency-requirements",
             "MGA runtime overlay marker mismatch",
+            "MGA dependency overlay marker mismatch",
             "torchlibrosa-0.1.0.dist-info",
             '"torchlibrosa_version": "0.1.0"',
+            "ruamel.yaml-0.18.10.dist-info",
+            '"ruamel_yaml_version": "0.18.10"',
         ):
             self.assertIn(marker, lock_builder)
 
@@ -94,6 +112,33 @@ class MGAClapPipelineTests(unittest.TestCase):
         self.assertEqual(audit["failure"]["missing_module"], "torchlibrosa")
         self.assertIsNone(audit["results"]["retrieval_metrics"])
         self.assertFalse(audit["preservation"]["checkpoint_redownload_required"])
+
+        ruamel_audit = json.loads(
+            RUAMEL_FAILURE_AUDIT.read_text(encoding="utf-8")
+        )
+        self.assertEqual(ruamel_audit["failure"]["missing_module"], "ruamel")
+        self.assertTrue(ruamel_audit["execution"]["gpu_used"])
+        self.assertTrue(ruamel_audit["execution"]["oea_official_source_used"])
+        self.assertIsNone(ruamel_audit["results"]["retrieval_metrics"])
+
+    def test_dependency_installer_is_pinned_direct_and_cpu_only(self) -> None:
+        source = DEPENDENCY_INSTALLER.read_text(encoding="utf-8")
+        for marker in (
+            "MGA-CLAP runtime dependency installation",
+            "GPU_USED=no",
+            "OEA_OFFICIAL_SOURCE_USED=yes",
+            "--no-deps --require-hashes",
+            "RUAMEL_YAML_IMPORT=complete",
+            "COMPLETION_STATUS=complete",
+        ):
+            self.assertIn(marker, source)
+        for forbidden in ("tmux", "exec bash -i", "CUDA_VISIBLE_DEVICES=0"):
+            self.assertNotIn(forbidden, source)
+        self.assertEqual(
+            DEPENDENCY_REQUIREMENTS.read_text(encoding="utf-8").strip(),
+            "ruamel.yaml==0.18.10 "
+            "--hash=sha256:30f22513ab2301b3d2b577adc121c6471f28734d3d9728581245f1e76468b4f1",
+        )
 
     def test_precomputer_refuses_main_artifact_overwrite(self) -> None:
         source = PRECOMPUTER.read_text(encoding="utf-8")

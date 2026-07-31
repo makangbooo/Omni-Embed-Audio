@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "evidence_type": "user_returned_remote_terminal_output",
+  "experiment": "MGA-CLAP Clotho main Tables 2 and 3",
+  "run": {
+    "run_id": "mga_clap_clotho_main_20260731_104442",
+    "git_commit": "b778e117f23bd3f9126a8efd8d37b830cc2c9ea0",
+    "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/mga_clap_clotho_main_20260731_104442",
+    "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/mga_clap_clotho_main_20260731_104442/combined.log",
+    "started_at": "2026-07-31T10:44:42+08:00",
+    "finished_at": "2026-07-31T10:45:37+08:00",
+    "elapsed_seconds": 55,
+    "final_run_rc": 1,
+    "failed_stage": "gpu_smoke_embeddings"
+  },
+  "execution": {
+    "gpu_used": true,
+    "cuda_visible_devices": "0",
+    "oea_official_source_used": true
+  },
+  "model": {
+    "name": "MGA-CLAP",
+    "checkpoint_bytes": 1711356348,
+    "checkpoint_sha256": "8703740b738e973a5b4d8a18a074ad56880e98f8ba21cd618d7d7ee5422d6e26",
+    "resource_lock_status": "complete",
+    "torchlibrosa_version": "0.1.0"
+  },
+  "failure": {
+    "exception": "ModuleNotFoundError",
+    "missing_module": "ruamel",
+    "import_site": "official MGA-CLAP models/htsat.py",
+    "summary": "The torchlibrosa fix passed; MGA smoke then stopped on the next missing official-source dependency."
+  },
+  "results": {
+    "smoke_embeddings": null,
+    "full_embeddings": null,
+    "retrieval_metrics": null,
+    "paper_comparison_available": false
+  },
+  "preservation": {
+    "failed_result_directory_retained": true,
+    "failed_log_directory_retained": true,
+    "checkpoint_redownload_required": false
+  }
+}

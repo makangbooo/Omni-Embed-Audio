@@ -29,6 +29,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--runtime-overlay", type=Path, required=True)
     parser.add_argument("--runtime-requirements", type=Path, required=True)
+    parser.add_argument("--dependency-overlay", type=Path, required=True)
+    parser.add_argument("--dependency-requirements", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args()
 
@@ -120,6 +122,18 @@ def main() -> int:
         raise RuntimeError("MGA runtime overlay lacks torchlibrosa 0.1.0 metadata")
     torchlibrosa = tree_identity(torchlibrosa_root)
 
+    dependency_overlay = args.dependency_overlay.resolve()
+    dependency_requirements = identity(args.dependency_requirements.resolve())
+    dependency_marker = dependency_overlay / ".oea_requirements_sha256"
+    dependency_marker_value = dependency_marker.read_text(encoding="utf-8").strip()
+    if dependency_marker_value != dependency_requirements["sha256"]:
+        raise RuntimeError("MGA dependency overlay marker mismatch")
+    ruamel_root = dependency_overlay / "ruamel"
+    ruamel_metadata = dependency_overlay / "ruamel.yaml-0.18.10.dist-info"
+    if not ruamel_metadata.is_dir():
+        raise RuntimeError("MGA dependency overlay lacks ruamel.yaml 0.18.10 metadata")
+    ruamel = tree_identity(ruamel_root)
+
     git_commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=REPOSITORY_ROOT, text=True
     ).strip()
@@ -151,6 +165,11 @@ def main() -> int:
             "requirements_marker": identity(runtime_marker),
             "torchlibrosa_version": "0.1.0",
             "torchlibrosa": torchlibrosa,
+            "dependency_overlay_path": str(dependency_overlay),
+            "dependency_requirements": dependency_requirements,
+            "dependency_requirements_marker": identity(dependency_marker),
+            "ruamel_yaml_version": "0.18.10",
+            "ruamel_yaml": ruamel,
         },
         "protocol_status": "controlled_public_code_reproduction",
     }
