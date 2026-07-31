@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_remote_run_terminal_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The returned terminal output fixes the Git commit, checkpoint identity, stage exits, elapsed time, smoke/full shapes, four protocol R@k values, and remote paths. Git dirty status and the wrapper-created artifact hash manifest were not returned and are not invented."
+  },
+  "paper_scope": [
+    "EXP-10 / Table 2 / MGA-CLAP / Clotho / T2A",
+    "EXP-11 / Table 3 / MGA-CLAP / Clotho / T2T"
+  ],
+  "model": {
+    "paper_name": "MGA-CLAP",
+    "paper_group": "CLAP",
+    "source_revision": "48ca5a5cd22cd34427e118bd8cf332090ec54770",
+    "checkpoint": "model.pt",
+    "checkpoint_bytes": 1711356348,
+    "checkpoint_sha256": "8703740b738e973a5b4d8a18a074ad56880e98f8ba21cd618d7d7ee5422d6e26",
+    "text_encoder": "BERT-base weights embedded in checkpoint; pinned local tokenizer",
+    "embedding_dimension": 1024
+  },
+  "dataset": {
+    "name": "Clotho v2.1 evaluation",
+    "audio_count": 1045,
+    "caption_count": 5225
+  },
+  "execution": {
+    "gpu_used": true,
+    "gpu_visible_device": 0,
+    "oea_official_source_used": true,
+    "mga_official_source_used": true
+  },
+  "run": {
+    "run_id": "mga_clap_clotho_main_20260731_124003",
+    "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/mga_clap_clotho_main_20260731_124003",
+    "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/mga_clap_clotho_main_20260731_124003/combined.log",
+    "metrics_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/mga_clap_clotho_main_20260731_124003/metrics/suite_metrics.json",
+    "git_commit": "f623b153e0892223378b5b2110880d42f729dba4",
+    "git_status_short": null,
+    "started_at": "2026-07-31T12:40:03+08:00",
+    "finished_at": "2026-07-31T12:44:56+08:00",
+    "elapsed_seconds": 293,
+    "final_run_rc": 0,
+    "failed_stage": "none"
+  },
+  "generation": {
+    "smoke": {
+      "status": "complete",
+      "audio_embedding_shape": [5, 1024],
+      "caption_embedding_shape": [25, 1024]
+    },
+    "full": {
+      "status": "complete",
+      "audio_embedding_shape": [1045, 1024],
+      "caption_embedding_shape": [5225, 1024]
+    }
+  },
+  "seed": 0,
+  "protocol_count": 4,
+  "protocols": {
+    "t2a_public_code_default_joint_all_captions": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {"R@1": 21.110048, "R@5": 46.947368, "R@10": 60.076555}
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "task": "t2a",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {"R@1": 21.435407, "R@5": 46.507177, "R@10": 59.712919}
+    },
+    "t2t_public_code_default_seed0": {
+      "task": "t2t",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "query_selection_seed": 0,
+      "evaluated_queries": 1045,
+      "metrics": {"R@1": 62.009569, "R@5": 73.110048, "R@10": 77.224880}
+    },
+    "t2t_all_captions_sensitivity": {
+      "task": "t2t",
+      "protocol_source": "INFERRED",
+      "query_selection": "all",
+      "evaluated_queries": 5225,
+      "metrics": {"R@1": 63.272727, "R@5": 74.698565, "R@10": 78.794258}
+    }
+  },
+  "paper_values": {
+    "Table 2": {"R@1": 18.78, "R@5": 43.79, "R@10": 56.63},
+    "Table 3": {"R@1": 63.27, "R@5": 74.70, "R@10": 78.79}
+  },
+  "paper_protocol_limitations": [
+    "PAPER does not disclose the Clotho caption-selection protocol for T2A.",
+    "PAPER does not disclose T2T caption selection, self-exclusion, or tie handling.",
+    "Both predeclared protocols remain reported; no protocol is selected post hoc."
+  ]
+}

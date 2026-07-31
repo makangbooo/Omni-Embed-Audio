@@ -131,14 +131,14 @@
 | 3 数据 | DATA-13D：SQuTR `en/fiqa` + `en/nq` 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；四个退出码均为 0；16,400/16,400 音频通过；manifest SHA256 `e5053d30...15e93`；FiQA count/ID/text/leakage 无 violations | 无；4,100 条 24 kHz 与 12,300 条 16 kHz 是真实源数据分布 | 主实验数据门禁解除；后续模型输入显式重采样并记录 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | 三个 vanilla backbone × Clotho Table 2/3 | COMPLETED | Nemotron run=`74325cb`；Qwen3B run=`a435585`；Qwen7B run=`5110a4f`；三个小型审计均在 `results/audits/` | 三个 vanilla backbone 的 RTX 4090 smoke/full 和 CPU 四协议均 complete、RC=`0`，明确未加载 checkpoint/LoRA/head；Qwen7B 直接观测 full shape=`1045×3584/5225×3584`，Table 2 all-caption=`0.0957/0.6507/1.2440`，Table 3 seed0=`40.7656/54.1627/59.8086` | 论文 caption selection、T2T self/tie 与 audio `passage:` 冲突仍 `[MISSING]`；四个 CLAP 仍需固定 source/checkpoint | 保持主实验优先，转向可运行的下一组 Table 2/3 baseline/data cell |
-| 5 基线 | LAION/Robust/MGA/M2D-CLAP | IN_PROGRESS | LAION run=`ad920ee`；M2D run=`939da8a`；MGA failures=`266c271/b778e11`；审计见 LAION/M2D 成功审计及 `results/audits/mga_clap_clotho_smoke_failure_20260731.json`、`results/audits/mga_clap_clotho_ruamel_failure_20260731.json` | LAION 与 M2D 的 Clotho smoke/full/四协议均 complete、RC=`0`；MGA checkpoint 已完成并锁定为 1,711,356,348 bytes、SHA256=`8703740b...6e26`；两次 smoke 依次暴露 `torchlibrosa` 与 `ruamel.yaml` 缺失，均未产生指标 | Robust checkpoint 未公开；MGA 固定哈希依赖安装与远端复跑待完成；论文 caption/self/tie 口径未公开 | 先运行 `bash scripts/install_mga_clap_runtime_dependencies.sh`，再重跑 MGA 主实验 |
+| 5 基线 | LAION/Robust/MGA/M2D-CLAP | IN_PROGRESS | LAION run=`ad920ee`；M2D run=`939da8a`；MGA run=`f623b153`；成功审计见三份 `*_clotho_main_eval_*` JSON，失败尝试继续保留 | LAION、M2D、MGA 的 Clotho smoke/full/四协议均 complete、RC=`0`；MGA checkpoint 为 1,711,356,348 bytes、SHA256=`8703740b...6e26` | Robust checkpoint 未公开；论文 caption/self/tie 口径未公开 | 优先推进剩余可运行的正文 Table 2/3；等待 Robust checkpoint 发布证据 |
 | 6 扩展 | 人工/闭源 API、效率、token-length、派生图表 | TODO | N/A | 未开始 | 按阶段后置 | 核心训练评测完成后执行 |
 
 ## 当前焦点
 
 - 当前阶段：官方源码优先推进 OEA 论文原实验复现；先运行 upstream example/precomputer/evaluator，保存其原始输出或错误，仅在实际阻塞时做最小兼容补丁。SpeechXBT、FiQA、NQ、SQuTR、ASR reranker 与 A2T 仅保留为历史记录，不计入本轮完成度，也不继续启动。训练在官方 checkpoint 评测矩阵完成前继续暂停。
 - 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
-- 正文 Table 2/3 模型×数据集×任务覆盖为 `22/78 = 28.2%`；其中 Clotho 为 `22/26 = 84.6%`，三个 vanilla backbone 的 Clotho 两任务为 `6/6 = 100%`。这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
-- 最近完成：M2D-CLAP 的官方源码 Clotho Table 2/3 闭环；run commit=`939da8a`，smoke/full/四协议均 complete、RC=`0`，耗时 191 秒，full embedding 为 `1045x768/5225x768`。Table 2 all-caption=`16.4211/40.7081/53.7033`，相对 PAPER=`17.55/42.91/55.54` 的差为 `-1.1289/-2.2019/-1.8367` pp；Table 3 seed-0=`52.9187/67.2727/73.0144`，相对 PAPER=`55.85/69.05/74.76` 的差为 `-2.9313/-1.7773/-1.7456` pp。
-- 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开；MGA 第二次 smoke 已通过 `torchlibrosa` 门禁但暴露 `ruamel.yaml` 缺失，固定哈希安装脚本待远端执行。
-- 下一步：正文 Table 2/3 优先；安装 MGA 固定依赖后重新启动 MGA-CLAP × Clotho 主实验；附录 UIQ、效率、训练及全部扩展继续后移。
+- 正文 Table 2/3 模型×数据集×任务覆盖为 `24/78 = 30.8%`；其中 Clotho 为 `24/26 = 92.3%`，三个 vanilla backbone 的 Clotho 两任务为 `6/6 = 100%`。这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
+- 最近完成：MGA-CLAP 的官方源码 Clotho Table 2/3 闭环；run commit=`f623b153`，GPU_USED=`yes`，OEA_OFFICIAL_SOURCE_USED=`yes`，smoke/full/四协议均 complete、RC=`0`，耗时 293 秒，full embedding 为 `1045x1024/5225x1024`。Table 2 all-caption=`21.1100/46.9474/60.0766`，相对 PAPER=`18.78/43.79/56.63` 的差为 `+2.3300/+3.1574/+3.4466` pp；Table 3 seed-0=`62.0096/73.1100/77.2249`，相对 PAPER=`63.27/74.70/78.79` 的差为 `-1.2604/-1.5900/-1.5651` pp。另列 `[INFERRED]` all-caption=`63.2727/74.6986/78.7943`，不按接近度择优。
+- 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开；论文 caption/self/tie 口径未公开。
+- 下一步：正文 Table 2/3 优先推进剩余可运行单元；附录 UIQ、效率、训练及全部扩展继续后移。

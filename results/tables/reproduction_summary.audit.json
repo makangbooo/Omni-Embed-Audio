@@ -7,8 +7,8 @@
   "inputs": {
     "observations": {
       "path": "results/observations/reproduction_observations.jsonl",
-      "sha256": "2a05fd747f0a1e9ecd67bc969d8bf2adb419ef6227abd848c5bacaaa5d3cfd3a",
-      "size_bytes": 178531
+      "sha256": "b22c3a8e0805119847e18a3f9e9e5f7d6132e21a989d926bcc67030cf0b8b031",
+      "size_bytes": 188260
     },
     "paper_registry": {
       "path": "configs/results/paper_reported_metrics.jsonl",
@@ -16,20 +16,20 @@
       "size_bytes": 386143
     }
   },
-  "observation_count": 203,
+  "observation_count": 215,
   "output": {
     "path": "results/tables/reproduction_summary.csv",
-    "sha256": "51982a0550fda47c750b25a0d7ed42f40d8998580d9439abfda2cc435d42de6b",
-    "size_bytes": 107795
+    "sha256": "c718091c0715399db34c0ab8e575edc6843c6d912a7dc905cd3c25ab719158c9",
+    "size_bytes": 113249
   },
   "paper_metric_count": 910,
   "schema_version": 1,
   "status": "complete",
   "status_counts": {
     "blocked": 23,
-    "close": 180
+    "close": 192
   },
-  "summary_row_count": 203,
+  "summary_row_count": 215,
   "unit_counts": {
     "count": 6,
     "gigabytes": 12,
@@ -40,7 +40,7 @@
     "score_1_to_5": 36,
     "score_standard_deviation": 18
   },
-  "unobserved_paper_metric_count": 788,
+  "unobserved_paper_metric_count": 782,
   "unobserved_paper_metric_ids": [
     "table11_laion_clap_three_dataset_mean_t2a_r1",
     "table11_laion_clap_three_dataset_mean_t2a_r10",
@@ -561,9 +561,6 @@
     "table2_mga_clap_audiocaps_t2a_r1",
     "table2_mga_clap_audiocaps_t2a_r10",
     "table2_mga_clap_audiocaps_t2a_r5",
-    "table2_mga_clap_clotho_t2a_r1",
-    "table2_mga_clap_clotho_t2a_r10",
-    "table2_mga_clap_clotho_t2a_r5",
     "table2_mga_clap_mecat_t2a_r1",
     "table2_mga_clap_mecat_t2a_r10",
     "table2_mga_clap_mecat_t2a_r5",
@@ -645,9 +642,6 @@
     "table3_mga_clap_audiocaps_t2t_r1",
     "table3_mga_clap_audiocaps_t2t_r10",
     "table3_mga_clap_audiocaps_t2t_r5",
-    "table3_mga_clap_clotho_t2t_r1",
-    "table3_mga_clap_clotho_t2t_r10",
-    "table3_mga_clap_clotho_t2t_r5",
     "table3_mga_clap_mecat_t2t_r1",
     "table3_mga_clap_mecat_t2t_r10",
     "table3_mga_clap_mecat_t2t_r5",

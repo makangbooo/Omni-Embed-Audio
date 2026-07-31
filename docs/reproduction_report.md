@@ -27,11 +27,11 @@ experiment-model-dataset-task cells in
 separate from `REPRODUCED_CLOSE`, `CONTROLLED_ONLY`, `PARTIAL`, `TODO`, and
 `BLOCKED`; the generation audit records all input/output hashes. The compact
 paper-only partial Tables 2/3/12-15 are in
-`results/tables/oea_partial_tables.md`. They contain 48 predeclared protocol
+`results/tables/oea_partial_tables.md`. They contain 64 predeclared protocol
 groups and do not select a protocol after comparing it with the paper value.
 
-Committed value evidence currently covers ten Clotho T2A cells, ten Clotho
-T2T cells, and sixteen Clotho positive-UIQ cells. LAION-CLAP is the newest
+Committed value evidence currently covers twelve Clotho T2A cells, twelve Clotho
+T2T cells, and sixteen Clotho positive-UIQ cells. MGA-CLAP is the newest
 complete main-table baseline. The OEA-Qwen7B-AC and OEA-Qwen7B-Cl
 official-source runs completed on an RTX 4090 at commit `9c080c7`, each in `00:07:36`, with
 clean worktrees, successful 5-clip smoke tests, 1,045 audio embeddings, 5,225
@@ -101,6 +101,27 @@ points. Both protocols remain visible without post-hoc selection. The compact
 evidence is `results/audits/laion_clap_clotho_main_eval_20260730.json`; Git
 dirty status and output artifact hashes were not returned and remain
 unobserved rather than inferred.
+
+The M2D-CLAP Clotho main-table run completed at commit `939da8a` with
+`FINAL_RUN_RC=0` in 191 seconds on visible CUDA device 0. The pinned official
+source and checkpoint produced `5x768/25x768` smoke and
+`1045x768/5225x768` full embeddings. `[CODE]` all-caption T2A is
+`16.4211/40.7081/53.7033` versus PAPER `17.55/42.91/55.54`; `[CODE]` seed-0
+T2T is `52.9187/67.2727/73.0144` versus PAPER `55.85/69.05/74.76`. Evidence
+is fixed in `results/audits/m2d_clap_clotho_main_eval_20260730.json`.
+
+The MGA-CLAP Clotho main-table run completed at commit `f623b153` with
+`FINAL_RUN_RC=0` in 293 seconds on visible CUDA device 0. It used the OEA
+official adapter path, pinned MGA official source, and the 1,711,356,348-byte
+checkpoint at SHA256 `8703740b...6e26`. Smoke/full embeddings were
+`5x1024/25x1024` and `1045x1024/5225x1024`. `[CODE]` all-caption T2A is
+`21.1100/46.9474/60.0766` versus PAPER `18.78/43.79/56.63`; `[CODE]` seed-0
+T2T is `62.0096/73.1100/77.2249` versus PAPER `63.27/74.70/78.79`. The
+separate `[INFERRED]` all-caption T2T sensitivity is
+`63.2727/74.6986/78.7943`, within `0.004258` percentage points of PAPER, but
+is not promoted post hoc because the paper protocol is undisclosed. Evidence
+is fixed in `results/audits/mga_clap_clotho_main_eval_20260731.json`; Git dirty
+status and the artifact hash manifest were not returned and remain unobserved.
 
 OEA-Nemo3B-AC previously completed official-source GPU precomputation and CPU
 finalization at run commits `effe67d` and `1f991ab`. The finalizer returned
