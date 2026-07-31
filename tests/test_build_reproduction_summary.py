@@ -275,17 +275,39 @@ class BuildReproductionSummaryTests(unittest.TestCase):
         )
         with DEFAULT_OUTPUT.open(encoding="utf-8", newline="") as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(len(rows), 215)
-        self.assertEqual({row["status"] for row in rows}, {"blocked", "close"})
+        self.assertEqual(len(rows), 227)
+        self.assertEqual(
+            {row["status"] for row in rows},
+            {"blocked", "close", "trend_reproduced"},
+        )
         blocked = [row for row in rows if row["status"] == "blocked"]
         close = [row for row in rows if row["status"] == "close"]
+        trend = [row for row in rows if row["status"] == "trend_reproduced"]
         self.assertEqual(len(blocked), 23)
         self.assertEqual(len(close), 192)
+        self.assertEqual(len(trend), 12)
         self.assertTrue(all(row["reproduced_value"] == "" for row in blocked))
         self.assertTrue(all(row["reproduced_value"] != "" for row in close))
+        self.assertTrue(all(row["reproduced_value"] != "" for row in trend))
         self.assertEqual(result["paper_metric_count"], 910)
-        self.assertEqual(result["unobserved_paper_metric_count"], 782)
-        self.assertEqual(result["status_counts"], {"blocked": 23, "close": 192})
+        self.assertEqual(result["unobserved_paper_metric_count"], 770)
+        self.assertEqual(
+            result["status_counts"],
+            {"blocked": 23, "close": 192, "trend_reproduced": 12},
+        )
+
+        mga_uiq = [
+            row
+            for row in rows
+            if row["experiment"].startswith(
+                "official_source_mga_clap_clotho_"
+            )
+            and "released_uiq" in row["experiment"]
+        ]
+        self.assertEqual(len(mga_uiq), 12)
+        self.assertEqual(
+            {row["status"] for row in mga_uiq}, {"trend_reproduced"}
+        )
 
         nemo_t2t = [
             row

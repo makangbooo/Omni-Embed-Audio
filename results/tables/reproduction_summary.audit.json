@@ -7,8 +7,8 @@
   "inputs": {
     "observations": {
       "path": "results/observations/reproduction_observations.jsonl",
-      "sha256": "b22c3a8e0805119847e18a3f9e9e5f7d6132e21a989d926bcc67030cf0b8b031",
-      "size_bytes": 188260
+      "sha256": "79fafaebec4537a57c84b0dc858794e450c22c579b8e9603ba227a746e3f92ec",
+      "size_bytes": 198613
     },
     "paper_registry": {
       "path": "configs/results/paper_reported_metrics.jsonl",
@@ -16,20 +16,21 @@
       "size_bytes": 386143
     }
   },
-  "observation_count": 215,
+  "observation_count": 227,
   "output": {
     "path": "results/tables/reproduction_summary.csv",
-    "sha256": "c718091c0715399db34c0ab8e575edc6843c6d912a7dc905cd3c25ab719158c9",
-    "size_bytes": 113249
+    "sha256": "4e482447ed3785055f3f7c62379b210599667ad519b07a422645d22f950d8486",
+    "size_bytes": 119449
   },
   "paper_metric_count": 910,
   "schema_version": 1,
   "status": "complete",
   "status_counts": {
     "blocked": 23,
-    "close": 192
+    "close": 192,
+    "trend_reproduced": 12
   },
-  "summary_row_count": 215,
+  "summary_row_count": 227,
   "unit_counts": {
     "count": 6,
     "gigabytes": 12,
@@ -40,7 +41,7 @@
     "score_1_to_5": 36,
     "score_standard_deviation": 18
   },
-  "unobserved_paper_metric_count": 782,
+  "unobserved_paper_metric_count": 770,
   "unobserved_paper_metric_ids": [
     "table11_laion_clap_three_dataset_mean_t2a_r1",
     "table11_laion_clap_three_dataset_mean_t2a_r10",
@@ -141,9 +142,6 @@
     "table12_mga_clap_audiocaps_question_r1",
     "table12_mga_clap_audiocaps_question_r10",
     "table12_mga_clap_audiocaps_question_r5",
-    "table12_mga_clap_clotho_question_r1",
-    "table12_mga_clap_clotho_question_r10",
-    "table12_mga_clap_clotho_question_r5",
     "table12_mga_clap_mecat_question_r1",
     "table12_mga_clap_mecat_question_r10",
     "table12_mga_clap_mecat_question_r5",
@@ -219,9 +217,6 @@
     "table13_mga_clap_audiocaps_imperative_r1",
     "table13_mga_clap_audiocaps_imperative_r10",
     "table13_mga_clap_audiocaps_imperative_r5",
-    "table13_mga_clap_clotho_imperative_r1",
-    "table13_mga_clap_clotho_imperative_r10",
-    "table13_mga_clap_clotho_imperative_r5",
     "table13_mga_clap_mecat_imperative_r1",
     "table13_mga_clap_mecat_imperative_r10",
     "table13_mga_clap_mecat_imperative_r5",
@@ -297,9 +292,6 @@
     "table14_mga_clap_audiocaps_paraphrase_r1",
     "table14_mga_clap_audiocaps_paraphrase_r10",
     "table14_mga_clap_audiocaps_paraphrase_r5",
-    "table14_mga_clap_clotho_paraphrase_r1",
-    "table14_mga_clap_clotho_paraphrase_r10",
-    "table14_mga_clap_clotho_paraphrase_r5",
     "table14_mga_clap_mecat_paraphrase_r1",
     "table14_mga_clap_mecat_paraphrase_r10",
     "table14_mga_clap_mecat_paraphrase_r5",
@@ -375,9 +367,6 @@
     "table15_mga_clap_audiocaps_keyphrase_r1",
     "table15_mga_clap_audiocaps_keyphrase_r10",
     "table15_mga_clap_audiocaps_keyphrase_r5",
-    "table15_mga_clap_clotho_keyphrase_r1",
-    "table15_mga_clap_clotho_keyphrase_r10",
-    "table15_mga_clap_clotho_keyphrase_r5",
     "table15_mga_clap_mecat_keyphrase_r1",
     "table15_mga_clap_mecat_keyphrase_r10",
     "table15_mga_clap_mecat_keyphrase_r5",

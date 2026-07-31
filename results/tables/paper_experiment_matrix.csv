@@ -218,7 +218,7 @@ EXP-12,Table 12,M2D-CLAP,AudioCaps,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value
 EXP-12,Table 12,M2D-CLAP,Clotho,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-12,Table 12,M2D-CLAP,MECAT,UIQ Question T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-12,Table 12,MGA-CLAP,AudioCaps,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-12,Table 12,MGA-CLAP,Clotho,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-12,Table 12,MGA-CLAP,Clotho,UIQ Question T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/mga_clap_clotho_positive_uiq_eval_20260731.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-12,Table 12,MGA-CLAP,MECAT,UIQ Question T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-12,Table 12,OEA-Nemo3B,AudioCaps,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-12,Table 12,OEA-Nemo3B,Clotho,UIQ Question T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_nemo3b_ac_clotho_official_source_eval_20260729.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
@@ -248,7 +248,7 @@ EXP-13,Table 13,M2D-CLAP,AudioCaps,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper val
 EXP-13,Table 13,M2D-CLAP,Clotho,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-13,Table 13,M2D-CLAP,MECAT,UIQ Imperative T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-13,Table 13,MGA-CLAP,AudioCaps,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-13,Table 13,MGA-CLAP,Clotho,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-13,Table 13,MGA-CLAP,Clotho,UIQ Imperative T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/mga_clap_clotho_positive_uiq_eval_20260731.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-13,Table 13,MGA-CLAP,MECAT,UIQ Imperative T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-13,Table 13,OEA-Nemo3B,AudioCaps,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-13,Table 13,OEA-Nemo3B,Clotho,UIQ Imperative T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_nemo3b_ac_clotho_official_source_eval_20260729.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
@@ -278,7 +278,7 @@ EXP-14,Table 14,M2D-CLAP,AudioCaps,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper val
 EXP-14,Table 14,M2D-CLAP,Clotho,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-14,Table 14,M2D-CLAP,MECAT,UIQ Paraphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-14,Table 14,MGA-CLAP,AudioCaps,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-14,Table 14,MGA-CLAP,Clotho,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-14,Table 14,MGA-CLAP,Clotho,UIQ Paraphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/mga_clap_clotho_positive_uiq_eval_20260731.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-14,Table 14,MGA-CLAP,MECAT,UIQ Paraphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-14,Table 14,OEA-Nemo3B,AudioCaps,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-14,Table 14,OEA-Nemo3B,Clotho,UIQ Paraphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_nemo3b_ac_clotho_official_source_eval_20260729.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
@@ -308,7 +308,7 @@ EXP-15,Table 15,M2D-CLAP,AudioCaps,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper valu
 EXP-15,Table 15,M2D-CLAP,Clotho,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-15,Table 15,M2D-CLAP,MECAT,UIQ Keyphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-15,Table 15,MGA-CLAP,AudioCaps,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-15,Table 15,MGA-CLAP,Clotho,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-15,Table 15,MGA-CLAP,Clotho,UIQ Keyphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/mga_clap_clotho_positive_uiq_eval_20260731.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-15,Table 15,MGA-CLAP,MECAT,UIQ Keyphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-15,Table 15,OEA-Nemo3B,AudioCaps,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-15,Table 15,OEA-Nemo3B,Clotho,UIQ Keyphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_nemo3b_ac_clotho_official_source_eval_20260729.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.

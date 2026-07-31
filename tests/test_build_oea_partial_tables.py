@@ -17,10 +17,10 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
             {
                 "Table 2": 24,
                 "Table 3": 24,
-                "Table 12": 4,
-                "Table 13": 4,
-                "Table 14": 4,
-                "Table 15": 4,
+                "Table 12": 5,
+                "Table 13": 5,
+                "Table 14": 5,
+                "Table 15": 5,
             },
         )
 
@@ -62,6 +62,24 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
             for group in self.groups
             if group["model"] == "OEA-Nemo3B (+Cl)"
             and group["paper_table"] in {"Table 12", "Table 13", "Table 14", "Table 15"}
+        ]
+        self.assertEqual(len(matches), 4)
+        self.assertEqual(
+            {group["paper_table"] for group in matches},
+            {"Table 12", "Table 13", "Table 14", "Table 15"},
+        )
+        self.assertEqual(
+            {group["protocol"] for group in matches},
+            {"[CODE] released positive UIQ"},
+        )
+
+    def test_mga_positive_uiq_protocols_are_present(self) -> None:
+        matches = [
+            group
+            for group in self.groups
+            if group["model"] == "MGA-CLAP"
+            and group["paper_table"]
+            in {"Table 12", "Table 13", "Table 14", "Table 15"}
         ]
         self.assertEqual(len(matches), 4)
         self.assertEqual(

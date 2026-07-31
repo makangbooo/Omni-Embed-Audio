@@ -147,6 +147,22 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
                 "results/audits/mga_clap_clotho_main_eval_20260731.json",
             )
 
+    def test_mga_clap_clotho_positive_uiq_cells_are_reproduced(self) -> None:
+        for inventory, table, task in (
+            ("EXP-12", "Table 12", "UIQ Question T2A"),
+            ("EXP-13", "Table 13", "UIQ Imperative T2A"),
+            ("EXP-14", "Table 14", "UIQ Paraphrase T2A"),
+            ("EXP-15", "Table 15", "UIQ Keyphrase T2A"),
+        ):
+            key = (inventory, table, "MGA-CLAP", "Clotho", task)
+            row = self.by_key[key]
+            self.assertEqual(row["reproduction_status"], "REPRODUCED_CLOSE")
+            self.assertEqual(row["observed_metric_count"], 3)
+            self.assertEqual(
+                row["evidence"],
+                "results/audits/mga_clap_clotho_positive_uiq_eval_20260731.json",
+            )
+
     def test_status_vocabulary_is_closed(self) -> None:
         counts = Counter(row["reproduction_status"] for row in self.rows)
         self.assertEqual(
