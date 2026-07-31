@@ -132,6 +132,7 @@
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | 三个 vanilla backbone × Clotho Table 2/3 | COMPLETED | Nemotron run=`74325cb`；Qwen3B run=`a435585`；Qwen7B run=`5110a4f`；三个小型审计均在 `results/audits/` | 三个 vanilla backbone 的 RTX 4090 smoke/full 和 CPU 四协议均 complete、RC=`0`，明确未加载 checkpoint/LoRA/head；Qwen7B 直接观测 full shape=`1045×3584/5225×3584`，Table 2 all-caption=`0.0957/0.6507/1.2440`，Table 3 seed0=`40.7656/54.1627/59.8086` | 论文 caption selection、T2T self/tie 与 audio `passage:` 冲突仍 `[MISSING]`；四个 CLAP 仍需固定 source/checkpoint | 保持主实验优先，转向可运行的下一组 Table 2/3 baseline/data cell |
 | 5 基线 | LAION/Robust/MGA/M2D-CLAP | IN_PROGRESS | LAION run=`ad920ee`；M2D run=`939da8a`；MGA run=`f623b153`；成功审计见三份 `*_clotho_main_eval_*` JSON，失败尝试继续保留 | LAION、M2D、MGA 的 Clotho smoke/full/四协议均 complete、RC=`0`；MGA checkpoint 为 1,711,356,348 bytes、SHA256=`8703740b...6e26` | Robust checkpoint 未公开；论文 caption/self/tie 口径未公开 | 优先推进剩余可运行的正文 Table 2/3；等待 Robust checkpoint 发布证据 |
+| 5 正向 UIQ | MGA-CLAP × Clotho Tables 12–15 | WAITING_USER | runner=`cd348a4` | 前台直跑脚本、pinned MGA UIQ CLI 和 21 项相关测试已完成并推送；远程评测尚未启动 | 需要用户在 GPU 服务器拉取 runner，并以已完成的 `mga_clap_clotho_main_20260731_124003` 结果目录启动；无代码、模型或数据缺口 | 运行 `CUDA_VISIBLE_DEVICES=0 bash scripts/run_mga_clap_clotho_positive_uiq.sh .../mga_clap_clotho_main_20260731_124003`，收到完整输出后登记四张表结果 |
 | 6 扩展 | 人工/闭源 API、效率、token-length、派生图表 | TODO | N/A | 未开始 | 按阶段后置 | 核心训练评测完成后执行 |
 
 ## 当前焦点
@@ -141,4 +142,4 @@
 - 正文 Table 2/3 模型×数据集×任务覆盖为 `24/78 = 30.8%`；其中 Clotho 为 `24/26 = 92.3%`，三个 vanilla backbone 的 Clotho 两任务为 `6/6 = 100%`。这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
 - 最近完成：MGA-CLAP 的官方源码 Clotho Table 2/3 闭环；run commit=`f623b153`，GPU_USED=`yes`，OEA_OFFICIAL_SOURCE_USED=`yes`，smoke/full/四协议均 complete、RC=`0`，耗时 293 秒，full embedding 为 `1045x1024/5225x1024`。Table 2 all-caption=`21.1100/46.9474/60.0766`，相对 PAPER=`18.78/43.79/56.63` 的差为 `+2.3300/+3.1574/+3.4466` pp；Table 3 seed-0=`62.0096/73.1100/77.2249`，相对 PAPER=`63.27/74.70/78.79` 的差为 `-1.2604/-1.5900/-1.5651` pp。另列 `[INFERRED]` all-caption=`63.2727/74.6986/78.7943`，不按接近度择优。
 - 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开；论文 caption/self/tie 口径未公开。
-- 下一步：正文 Table 2/3 优先推进剩余可运行单元；附录 UIQ、效率、训练及全部扩展继续后移。
+- 下一步：等待用户启动 MGA-CLAP Clotho 正向 UIQ Table 12–15 前台评测；完成后立即审计四协议 metrics、与论文值逐项比较并更新统一观察、矩阵和状态。正文 Table 2/3 的 Clotho 可运行单元已完成，Robust-CLAP 继续因 checkpoint 未发布而阻塞；AudioCaps/MECAT 缺口保持不变。
