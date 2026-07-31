@@ -133,6 +133,20 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
             )
             self.assertEqual(self.by_key[key]["observed_metric_count"], 3)
 
+    def test_mga_clap_clotho_main_cells_are_reproduced(self) -> None:
+        for inventory, table, task in (
+            ("EXP-10", "Table 2", "T2A"),
+            ("EXP-11", "Table 3", "T2T"),
+        ):
+            key = (inventory, table, "MGA-CLAP", "Clotho", task)
+            row = self.by_key[key]
+            self.assertEqual(row["reproduction_status"], "REPRODUCED_CLOSE")
+            self.assertEqual(row["observed_metric_count"], 3)
+            self.assertEqual(
+                row["evidence"],
+                "results/audits/mga_clap_clotho_main_eval_20260731.json",
+            )
+
     def test_status_vocabulary_is_closed(self) -> None:
         counts = Counter(row["reproduction_status"] for row in self.rows)
         self.assertEqual(

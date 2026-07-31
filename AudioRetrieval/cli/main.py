@@ -59,7 +59,9 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
         "uiq-embeddings",
         help="Precompute released UIQ text embeddings",
     )
-    uiq_embeddings.add_argument("--model", choices=["oea"], default="oea")
+    uiq_embeddings.add_argument(
+        "--model", choices=["oea", "mga_clap"], default="oea"
+    )
     uiq_embeddings.add_argument(
         "--uiq-jsonl",
         type=Path,
@@ -71,12 +73,16 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     uiq_embeddings.add_argument("--dataset", default="unknown")
     uiq_embeddings.add_argument("--device", default="cuda")
     uiq_embeddings.add_argument("--batch-size-text", type=int, default=16)
-    uiq_embeddings.add_argument("--checkpoint", type=Path, required=True)
+    uiq_embeddings.add_argument("--checkpoint", type=Path)
     uiq_embeddings.add_argument(
         "--repo-id",
         default="nvidia/omni-embed-nemotron-3b",
     )
     uiq_embeddings.add_argument("--local-path", type=Path)
+    uiq_embeddings.add_argument("--mga-repo", type=Path)
+    uiq_embeddings.add_argument("--mga-ckpt", type=Path)
+    uiq_embeddings.add_argument("--mga-bert-tokenizer", type=Path)
+    uiq_embeddings.add_argument("--mga-checkpoint-sha256")
 
     # MGA-CLAP specific options
     embeddings.add_argument("--mga-repo", type=Path, help="MGA-CLAP repository path")
@@ -267,6 +273,23 @@ def run_preprocess(args: argparse.Namespace) -> int:
 
         from AudioRetrieval.preprocessing.embeddings import UIQTextEmbeddingPrecomputer
 
+        if args.model == "oea" and not args.checkpoint:
+            print("Error: OEA UIQ embeddings require --checkpoint")
+            return 1
+        if args.model == "mga_clap" and not all(
+            (
+                args.mga_repo,
+                args.mga_ckpt,
+                args.mga_bert_tokenizer,
+                args.mga_checkpoint_sha256,
+            )
+        ):
+            print(
+                "Error: MGA-CLAP UIQ embeddings require source, checkpoint, "
+                "tokenizer, and SHA256"
+            )
+            return 1
+
         if args.output_dir.exists() and any(args.output_dir.iterdir()):
             print(f"Error: UIQ output directory is not empty: {args.output_dir}")
             return 2
@@ -278,6 +301,12 @@ def run_preprocess(args: argparse.Namespace) -> int:
             oea_checkpoint=str(args.checkpoint),
             oea_repo_id=args.repo_id,
             oea_local_path=str(args.local_path) if args.local_path else None,
+            mga_repo=str(args.mga_repo) if args.mga_repo else None,
+            mga_ckpt=str(args.mga_ckpt) if args.mga_ckpt else None,
+            mga_bert_tokenizer=(
+                str(args.mga_bert_tokenizer) if args.mga_bert_tokenizer else None
+            ),
+            mga_checkpoint_sha256=args.mga_checkpoint_sha256,
         )
 
         summaries = {}

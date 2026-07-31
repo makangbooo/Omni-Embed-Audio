@@ -13,6 +13,7 @@ from scripts.validate_mga_clap_embeddings import load_embeddings
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 MAIN_WRAPPER = REPOSITORY_ROOT / "scripts/run_mga_clap_clotho_main.sh"
+UIQ_WRAPPER = REPOSITORY_ROOT / "scripts/run_mga_clap_clotho_positive_uiq.sh"
 DEPENDENCY_INSTALLER = (
     REPOSITORY_ROOT / "scripts/install_mga_clap_runtime_dependencies.sh"
 )
@@ -144,6 +145,39 @@ class MGAClapPipelineTests(unittest.TestCase):
         source = PRECOMPUTER.read_text(encoding="utf-8")
         self.assertIn("refusing to overwrite", source)
         self.assertIn("Preserve the generic UIQ route", source)
+
+    def test_positive_uiq_wrapper_is_direct_and_reuses_main_embeddings(self) -> None:
+        source = UIQ_WRAPPER.read_text(encoding="utf-8")
+        for marker in (
+            "MGA-CLAP Clotho positive UIQ Tables 12-15",
+            "GPU_USED=yes",
+            "OEA_OFFICIAL_SOURCE_USED=yes",
+            "gpu_uiq_embeddings",
+            "cpu_table12_table15_metrics",
+            "--model mga_clap",
+            "--mga-bert-tokenizer",
+            "--mga-checkpoint-sha256",
+            "--baseline-dir",
+            "--uiq-dir",
+        ):
+            self.assertIn(marker, source)
+        for forbidden in ("tmux", "exec bash -i"):
+            self.assertNotIn(forbidden, source)
+
+    def test_uiq_cli_passes_pinned_mga_resources(self) -> None:
+        source = CLI.read_text(encoding="utf-8")
+        precomputer = (
+            REPOSITORY_ROOT
+            / "AudioRetrieval/preprocessing/embeddings/uiq_text.py"
+        ).read_text(encoding="utf-8")
+        for marker in (
+            'choices=["oea", "mga_clap"]',
+            "mga_bert_tokenizer",
+            "mga_checkpoint_sha256",
+        ):
+            self.assertIn(marker, source)
+        self.assertIn("bert_tokenizer_path", precomputer)
+        self.assertIn("expected_checkpoint_sha256", precomputer)
 
     def test_validator_accepts_shared_dynamic_dimension(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

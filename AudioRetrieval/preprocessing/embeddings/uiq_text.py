@@ -107,6 +107,10 @@ class UIQTextEmbeddingPrecomputer:
                 ckpt_path=self.model_kwargs.get("mga_ckpt", "ModelCheckpoint/mga_clap/mga-clap.pt"),
                 seconds=self.model_kwargs.get("mga_seconds", 10.0),
                 device=self.device,
+                bert_tokenizer_path=self.model_kwargs.get("mga_bert_tokenizer"),
+                expected_checkpoint_sha256=self.model_kwargs.get(
+                    "mga_checkpoint_sha256"
+                ),
             )
 
             def _encode(batch: List[str]) -> np.ndarray:
