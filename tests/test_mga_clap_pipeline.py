@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import tempfile
 import unittest
 
@@ -15,6 +16,10 @@ MAIN_WRAPPER = REPOSITORY_ROOT / "scripts/run_mga_clap_clotho_main.sh"
 CLI = REPOSITORY_ROOT / "AudioRetrieval/cli/main.py"
 ADAPTER = REPOSITORY_ROOT / "AudioRetrieval/models/mga_clap_adapter.py"
 PRECOMPUTER = REPOSITORY_ROOT / "AudioRetrieval/preprocessing/embeddings/mga_clap.py"
+FAILURE_AUDIT = (
+    REPOSITORY_ROOT
+    / "results/audits/mga_clap_clotho_smoke_failure_20260731.json"
+)
 
 
 class MGAClapPipelineTests(unittest.TestCase):
@@ -58,10 +63,37 @@ class MGAClapPipelineTests(unittest.TestCase):
             "--expected-audio 1045",
             "--expected-captions 5225",
             "evaluate_official_source_oea_clotho.py",
+            "MGA_RUNTIME_OVERLAY",
+            "from torchlibrosa.augmentation import SpecAugmentation",
+            "--runtime-overlay",
+            "--runtime-requirements",
         ):
             self.assertIn(marker, source)
         for forbidden in ("tmux", "exec bash -i", "--uiq-dir", "positive_uiq"):
             self.assertNotIn(forbidden, source)
+
+    def test_runtime_dependency_is_lock_bound(self) -> None:
+        lock_builder = (
+            REPOSITORY_ROOT / "scripts/build_mga_clap_portable_lock.py"
+        ).read_text(encoding="utf-8")
+        for marker in (
+            "--runtime-overlay",
+            "--runtime-requirements",
+            "MGA runtime overlay marker mismatch",
+            "torchlibrosa-0.1.0.dist-info",
+            '"torchlibrosa_version": "0.1.0"',
+        ):
+            self.assertIn(marker, lock_builder)
+
+    def test_first_remote_failure_is_preserved(self) -> None:
+        audit = json.loads(FAILURE_AUDIT.read_text(encoding="utf-8"))
+        self.assertEqual(audit["status"], "failed")
+        self.assertEqual(audit["run"]["failed_stage"], "gpu_smoke_embeddings")
+        self.assertTrue(audit["execution"]["gpu_used"])
+        self.assertTrue(audit["execution"]["oea_official_source_used"])
+        self.assertEqual(audit["failure"]["missing_module"], "torchlibrosa")
+        self.assertIsNone(audit["results"]["retrieval_metrics"])
+        self.assertFalse(audit["preservation"]["checkpoint_redownload_required"])
 
     def test_precomputer_refuses_main_artifact_overwrite(self) -> None:
         source = PRECOMPUTER.read_text(encoding="utf-8")

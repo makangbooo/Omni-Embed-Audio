@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "evidence_type": "user_returned_remote_terminal_output",
+  "experiment": "MGA-CLAP Clotho main Tables 2 and 3",
+  "paper_experiments": [
+    "EXP-10 Table 2 T2A",
+    "EXP-11 Table 3 T2T"
+  ],
+  "run": {
+    "run_id": "mga_clap_clotho_main_20260731_102102",
+    "git_commit": "266c271c27aba04d49493ce6137e742acd2f7ed2",
+    "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/mga_clap_clotho_main_20260731_102102",
+    "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/mga_clap_clotho_main_20260731_102102/combined.log",
+    "started_at": "2026-07-31T10:21:02+08:00",
+    "finished_at": "2026-07-31T10:21:42+08:00",
+    "elapsed_seconds": 40,
+    "final_run_rc": 1,
+    "completion_status": "failed",
+    "failed_stage": "gpu_smoke_embeddings"
+  },
+  "execution": {
+    "gpu_used": true,
+    "cuda_visible_devices": "0",
+    "oea_official_source_used": true,
+    "protocol_status": "controlled public-code reproduction"
+  },
+  "model": {
+    "name": "MGA-CLAP",
+    "checkpoint_bytes": 1711356348,
+    "checkpoint_sha256": "8703740b738e973a5b4d8a18a074ad56880e98f8ba21cd618d7d7ee5422d6e26",
+    "resource_lock_status": "complete"
+  },
+  "failure": {
+    "exception": "ModuleNotFoundError",
+    "missing_module": "torchlibrosa",
+    "import_site": "official MGA-CLAP models/cnns.py",
+    "summary": "MGA smoke embedding generation failed before producing embeddings."
+  },
+  "results": {
+    "smoke_embeddings": null,
+    "full_embeddings": null,
+    "retrieval_metrics": null,
+    "paper_comparison_available": false
+  },
+  "preservation": {
+    "failed_result_directory_retained": true,
+    "failed_log_directory_retained": true,
+    "checkpoint_redownload_required": false
+  }
+}

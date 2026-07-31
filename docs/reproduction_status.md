@@ -131,7 +131,7 @@
 | 3 数据 | DATA-13D：SQuTR `en/fiqa` + `en/nq` 目标子集门禁 | COMPLETED | `730e0fc` | run=`data13d_squtr_fiqa_nq_validation_20260726_224653`；四个退出码均为 0；16,400/16,400 音频通过；manifest SHA256 `e5053d30...15e93`；FiQA count/ID/text/leakage 无 violations | 无；4,100 条 24 kHz 与 12,300 条 16 kHz 是真实源数据分布 | 主实验数据门禁解除；后续模型输入显式重采样并记录 |
 | 4 训练 | 首个 3B 过拟合/单卡/DDP/全量闭环 | BLOCKED | N/A | 未开始 | DDP、seed、早停、stage LR 等不完整 | 评测闭环后再补最小训练基础设施 |
 | 5 基线 | 三个 vanilla backbone × Clotho Table 2/3 | COMPLETED | Nemotron run=`74325cb`；Qwen3B run=`a435585`；Qwen7B run=`5110a4f`；三个小型审计均在 `results/audits/` | 三个 vanilla backbone 的 RTX 4090 smoke/full 和 CPU 四协议均 complete、RC=`0`，明确未加载 checkpoint/LoRA/head；Qwen7B 直接观测 full shape=`1045×3584/5225×3584`，Table 2 all-caption=`0.0957/0.6507/1.2440`，Table 3 seed0=`40.7656/54.1627/59.8086` | 论文 caption selection、T2T self/tie 与 audio `passage:` 冲突仍 `[MISSING]`；四个 CLAP 仍需固定 source/checkpoint | 保持主实验优先，转向可运行的下一组 Table 2/3 baseline/data cell |
-| 5 基线 | LAION/Robust/MGA/M2D-CLAP | IN_PROGRESS | LAION run=`ad920ee`；M2D run=`939da8a`；审计见 `results/audits/laion_clap_clotho_main_eval_20260730.json` 与 `results/audits/m2d_clap_clotho_main_eval_20260730.json` | LAION 与 M2D 的 Clotho smoke/full/四协议均 complete、RC=`0`；M2D elapsed=`191s`、full shape=`1045x768/5225x768`，checkpoint SHA256=`23852160...8a1`；两模型各 12 个 Table 2/3 R@k 观测已绑定 | Robust checkpoint 未公开；MGA checkpoint 仍在下载；论文 caption/self/tie 口径未公开 | MGA checkpoint 完成后直接运行 `CUDA_VISIBLE_DEVICES=0 bash scripts/run_mga_clap_clotho_main.sh` |
+| 5 基线 | LAION/Robust/MGA/M2D-CLAP | IN_PROGRESS | LAION run=`ad920ee`；M2D run=`939da8a`；MGA failed run=`266c271`；审计见 `results/audits/laion_clap_clotho_main_eval_20260730.json`、`results/audits/m2d_clap_clotho_main_eval_20260730.json` 与 `results/audits/mga_clap_clotho_smoke_failure_20260731.json` | LAION 与 M2D 的 Clotho smoke/full/四协议均 complete、RC=`0`；MGA checkpoint 已完成并锁定为 1,711,356,348 bytes、SHA256=`8703740b...6e26`，首次 run 在 smoke 导入官方源码时因缺少 `torchlibrosa` 失败，未产生指标 | Robust checkpoint 未公开；MGA 固定运行依赖修复待远端复跑；论文 caption/self/tie 口径未公开 | 拉取修复后直接重跑 `CUDA_VISIBLE_DEVICES=0 bash scripts/run_mga_clap_clotho_main.sh` |
 | 6 扩展 | 人工/闭源 API、效率、token-length、派生图表 | TODO | N/A | 未开始 | 按阶段后置 | 核心训练评测完成后执行 |
 
 ## 当前焦点
@@ -140,5 +140,5 @@
 - 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
 - 正文 Table 2/3 模型×数据集×任务覆盖为 `22/78 = 28.2%`；其中 Clotho 为 `22/26 = 84.6%`，三个 vanilla backbone 的 Clotho 两任务为 `6/6 = 100%`。这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
 - 最近完成：M2D-CLAP 的官方源码 Clotho Table 2/3 闭环；run commit=`939da8a`，smoke/full/四协议均 complete、RC=`0`，耗时 191 秒，full embedding 为 `1045x768/5225x768`。Table 2 all-caption=`16.4211/40.7081/53.7033`，相对 PAPER=`17.55/42.91/55.54` 的差为 `-1.1289/-2.2019/-1.8367` pp；Table 3 seed-0=`52.9187/67.2727/73.0144`，相对 PAPER=`55.85/69.05/74.76` 的差为 `-2.9313/-1.7773/-1.7456` pp。
-- 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开；MGA checkpoint 仍在下载。
-- 下一步：正文 Table 2/3 优先；MGA checkpoint 完成后启动 MGA-CLAP × Clotho 主实验；附录 UIQ、效率、训练及全部扩展继续后移。
+- 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开；MGA 首次 smoke 因未绑定 `torchlibrosa` 失败，修复已完成但尚待远端复跑。
+- 下一步：正文 Table 2/3 优先；拉取修复后重新启动 MGA-CLAP × Clotho 主实验；附录 UIQ、效率、训练及全部扩展继续后移。

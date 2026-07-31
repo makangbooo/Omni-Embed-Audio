@@ -12,6 +12,9 @@ DATA_ROOT="${DATA_ROOT:-/home/jg525/datasets/oea}"
 SOURCE_DIR="${MODEL_ROOT}/mga-clap/source"
 CHECKPOINT="${MODEL_ROOT}/mga-clap/pretrained_models/models/model.pt"
 BERT_TOKENIZER="${MODEL_ROOT}/laion-clap-tokenizers/bert-base-uncased"
+RUNTIME_REQUIREMENTS="${ROOT_DIR}/configs/resources/laion_clap_1_1_6_overlay.requirements.txt"
+RUNTIME_OVERLAY="${MGA_RUNTIME_OVERLAY:-${MODEL_ROOT}/python/laion-clap-1.1.6-overlay-v3}"
+RUNTIME_MARKER="${RUNTIME_OVERLAY}/.oea_requirements_sha256"
 AUDIO_DIR="${DATA_ROOT}/clotho_v2.1/extracted/evaluation"
 CAPTIONS_CSV="${DATA_ROOT}/clotho_v2.1/source/clotho_captions_evaluation.csv"
 
@@ -70,12 +73,17 @@ if [[ -n "${GIT_STATUS}" ]]; then
   finish 3 failed preflight "Git worktree is not clean"
 fi
 for required in "${SOURCE_DIR}" "${CHECKPOINT}" "${BERT_TOKENIZER}" \
+  "${RUNTIME_REQUIREMENTS}" "${RUNTIME_OVERLAY}" "${RUNTIME_MARKER}" \
   "${AUDIO_DIR}" "${CAPTIONS_CSV}"; do
   if [[ ! -e "${required}" ]]; then
     echo "[ERROR] Required resource is missing: ${required}" >&2
     finish 4 failed preflight "Required resource is missing"
   fi
 done
+EXPECTED_RUNTIME_MARKER="$(sha256sum "${RUNTIME_REQUIREMENTS}" | awk '{print $1}')"
+if [[ "$(<"${RUNTIME_MARKER}")" != "${EXPECTED_RUNTIME_MARKER}" ]]; then
+  finish 4 failed preflight "MGA runtime overlay marker mismatch"
+fi
 
 printf '%s\n' "${GIT_COMMIT}" > "${RESULT_ROOT}/git_commit.txt"
 printf '%s\n' "${GIT_STATUS}" > "${RESULT_ROOT}/git_status.txt"
@@ -90,7 +98,7 @@ CONDA_BASE="$(resolve_conda_base)"
 # shellcheck disable=SC1091
 source "${CONDA_BASE}/etc/profile.d/conda.sh"
 conda activate oea-repro
-export PYTHONPATH="${ROOT_DIR}${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONPATH="${RUNTIME_OVERLAY}:${ROOT_DIR}${PYTHONPATH:+:${PYTHONPATH}}"
 export HF_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
@@ -102,6 +110,11 @@ RC=$?
 if [[ "${RC}" -ne 0 ]]; then
   finish "${RC}" failed preflight "Exactly one visible CUDA GPU is required"
 fi
+python -c 'from torchlibrosa.augmentation import SpecAugmentation'
+RC=$?
+if [[ "${RC}" -ne 0 ]]; then
+  finish "${RC}" failed preflight "Pinned torchlibrosa runtime is unavailable"
+fi
 
 echo "EXPERIMENT_NAME=MGA-CLAP Clotho main Tables 2 and 3"
 echo "PAPER_EXPERIMENTS=EXP-10 Table 2 T2A; EXP-11 Table 3 T2T"
@@ -111,6 +124,8 @@ echo "PROTOCOL_STATUS=controlled public-code reproduction"
 echo "DATASET=Clotho v2.1 evaluation; 1,045 audio; 5,225 captions"
 echo "GPU_USED=yes; CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
 echo "OEA_OFFICIAL_SOURCE_USED=yes"
+echo "MGA_RUNTIME_OVERLAY=${RUNTIME_OVERLAY}"
+echo "TORCHLIBROSA_VERSION=0.1.0"
 echo "TOTAL_WORKLOAD=5 audio/25 captions smoke + 1,045 audio + 5,225 captions + 4 protocols"
 echo "ESTIMATED_TOTAL_TIME=10-30 minutes"
 echo "RESULT_DIRECTORY=${RESULT_ROOT}"
@@ -141,7 +156,10 @@ run_stage() {
 
 run_stage resource_lock 180 \
   python scripts/build_mga_clap_portable_lock.py \
-    --model-root "${MODEL_ROOT}" --output "${MODEL_LOCK}"
+    --model-root "${MODEL_ROOT}" \
+    --runtime-overlay "${RUNTIME_OVERLAY}" \
+    --runtime-requirements "${RUNTIME_REQUIREMENTS}" \
+    --output "${MODEL_LOCK}"
 RC=$?
 if [[ "${RC}" -ne 0 ]]; then
   finish "${RC}" failed resource_lock "MGA resource locking failed"

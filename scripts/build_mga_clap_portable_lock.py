@@ -27,6 +27,8 @@ TOKENIZER_FILES = {
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model-root", type=Path, required=True)
+    parser.add_argument("--runtime-overlay", type=Path, required=True)
+    parser.add_argument("--runtime-requirements", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args()
 
@@ -106,6 +108,18 @@ def main() -> int:
             raise RuntimeError(f"BERT tokenizer size mismatch: {name}")
         tokenizer[name] = item
 
+    runtime_overlay = args.runtime_overlay.resolve()
+    runtime_requirements = identity(args.runtime_requirements.resolve())
+    runtime_marker = runtime_overlay / ".oea_requirements_sha256"
+    marker_value = runtime_marker.read_text(encoding="utf-8").strip()
+    if marker_value != runtime_requirements["sha256"]:
+        raise RuntimeError("MGA runtime overlay marker mismatch")
+    torchlibrosa_root = runtime_overlay / "torchlibrosa"
+    torchlibrosa_metadata = runtime_overlay / "torchlibrosa-0.1.0.dist-info"
+    if not torchlibrosa_metadata.is_dir():
+        raise RuntimeError("MGA runtime overlay lacks torchlibrosa 0.1.0 metadata")
+    torchlibrosa = tree_identity(torchlibrosa_root)
+
     git_commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=REPOSITORY_ROOT, text=True
     ).strip()
@@ -131,6 +145,13 @@ def main() -> int:
         "checkpoint_identity_status": "observed_official_download_no_published_hash",
         "bert_tokenizer_path": str(tokenizer_root.resolve()),
         "bert_tokenizer": tokenizer,
+        "runtime": {
+            "overlay_path": str(runtime_overlay),
+            "requirements": runtime_requirements,
+            "requirements_marker": identity(runtime_marker),
+            "torchlibrosa_version": "0.1.0",
+            "torchlibrosa": torchlibrosa,
+        },
         "protocol_status": "controlled_public_code_reproduction",
     }
     output.parent.mkdir(parents=True, exist_ok=True)
