@@ -275,7 +275,7 @@ class BuildReproductionSummaryTests(unittest.TestCase):
         )
         with DEFAULT_OUTPUT.open(encoding="utf-8", newline="") as handle:
             rows = list(csv.DictReader(handle))
-        self.assertEqual(len(rows), 251)
+        self.assertEqual(len(rows), 275)
         self.assertEqual(
             {row["status"] for row in rows},
             {"blocked", "close", "trend_reproduced"},
@@ -284,16 +284,16 @@ class BuildReproductionSummaryTests(unittest.TestCase):
         close = [row for row in rows if row["status"] == "close"]
         trend = [row for row in rows if row["status"] == "trend_reproduced"]
         self.assertEqual(len(blocked), 23)
-        self.assertEqual(len(close), 204)
+        self.assertEqual(len(close), 228)
         self.assertEqual(len(trend), 24)
         self.assertTrue(all(row["reproduced_value"] == "" for row in blocked))
         self.assertTrue(all(row["reproduced_value"] != "" for row in close))
         self.assertTrue(all(row["reproduced_value"] != "" for row in trend))
         self.assertEqual(result["paper_metric_count"], 910)
-        self.assertEqual(result["unobserved_paper_metric_count"], 746)
+        self.assertEqual(result["unobserved_paper_metric_count"], 722)
         self.assertEqual(
             result["status_counts"],
-            {"blocked": 23, "close": 204, "trend_reproduced": 24},
+            {"blocked": 23, "close": 228, "trend_reproduced": 24},
         )
 
         mga_uiq = [
@@ -364,7 +364,7 @@ class BuildReproductionSummaryTests(unittest.TestCase):
             for row in rows
             if row["experiment"].startswith("official_source_oea_qwen7b_")
         ]
-        self.assertEqual(len(qwen7b), 24)
+        self.assertEqual(len(qwen7b), 48)
         self.assertEqual({row["status"] for row in qwen7b}, {"close"})
 
         vanilla_nemotron = [

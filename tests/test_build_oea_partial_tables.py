@@ -17,10 +17,10 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
             {
                 "Table 2": 24,
                 "Table 3": 24,
-                "Table 12": 7,
-                "Table 13": 7,
-                "Table 14": 7,
-                "Table 15": 7,
+                "Table 12": 9,
+                "Table 13": 9,
+                "Table 14": 9,
+                "Table 15": 9,
             },
         )
 
@@ -154,10 +154,17 @@ class BuildOeaPartialTablesTests(unittest.TestCase):
             if group["model"] in {"OEA-Qwen7B", "OEA-Qwen7B (+Cl)"}
             and group["dataset"] == "Clotho"
         ]
-        self.assertEqual(len(matches), 8)
+        self.assertEqual(len(matches), 16)
         self.assertEqual(
             Counter(group["paper_table"] for group in matches),
-            {"Table 2": 4, "Table 3": 4},
+            {
+                "Table 2": 4,
+                "Table 3": 4,
+                "Table 12": 2,
+                "Table 13": 2,
+                "Table 14": 2,
+                "Table 15": 2,
+            },
         )
 
     def test_vanilla_nemotron_main_table_cells_are_present(self) -> None:

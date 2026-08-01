@@ -233,10 +233,10 @@ EXP-12,Table 12,OEA-Qwen3B (+Cl),AudioCaps,UIQ Question T2A,PAPER,TODO,3,0,,"Pap
 EXP-12,Table 12,OEA-Qwen3B (+Cl),Clotho,UIQ Question T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/qwen3b_cl_clotho_positive_uiq_eval_20260719.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-12,Table 12,OEA-Qwen3B (+Cl),MECAT,UIQ Question T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-12,Table 12,OEA-Qwen7B,AudioCaps,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-12,Table 12,OEA-Qwen7B,Clotho,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-12,Table 12,OEA-Qwen7B,Clotho,UIQ Question T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_ac_clotho_positive_uiq_eval_20260802.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-12,Table 12,OEA-Qwen7B,MECAT,UIQ Question T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-12,Table 12,OEA-Qwen7B (+Cl),AudioCaps,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-12,Table 12,OEA-Qwen7B (+Cl),Clotho,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-12,Table 12,OEA-Qwen7B (+Cl),Clotho,UIQ Question T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_cl_clotho_positive_uiq_eval_20260802.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-12,Table 12,OEA-Qwen7B (+Cl),MECAT,UIQ Question T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-12,Table 12,Robust-CLAP,AudioCaps,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-12,Table 12,Robust-CLAP,Clotho,UIQ Question T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
@@ -263,10 +263,10 @@ EXP-13,Table 13,OEA-Qwen3B (+Cl),AudioCaps,UIQ Imperative T2A,PAPER,TODO,3,0,,"P
 EXP-13,Table 13,OEA-Qwen3B (+Cl),Clotho,UIQ Imperative T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/qwen3b_cl_clotho_positive_uiq_eval_20260719.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-13,Table 13,OEA-Qwen3B (+Cl),MECAT,UIQ Imperative T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-13,Table 13,OEA-Qwen7B,AudioCaps,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-13,Table 13,OEA-Qwen7B,Clotho,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-13,Table 13,OEA-Qwen7B,Clotho,UIQ Imperative T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_ac_clotho_positive_uiq_eval_20260802.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-13,Table 13,OEA-Qwen7B,MECAT,UIQ Imperative T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-13,Table 13,OEA-Qwen7B (+Cl),AudioCaps,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-13,Table 13,OEA-Qwen7B (+Cl),Clotho,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-13,Table 13,OEA-Qwen7B (+Cl),Clotho,UIQ Imperative T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_cl_clotho_positive_uiq_eval_20260802.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-13,Table 13,OEA-Qwen7B (+Cl),MECAT,UIQ Imperative T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-13,Table 13,Robust-CLAP,AudioCaps,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-13,Table 13,Robust-CLAP,Clotho,UIQ Imperative T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
@@ -293,10 +293,10 @@ EXP-14,Table 14,OEA-Qwen3B (+Cl),AudioCaps,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"P
 EXP-14,Table 14,OEA-Qwen3B (+Cl),Clotho,UIQ Paraphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/qwen3b_cl_clotho_positive_uiq_eval_20260719.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-14,Table 14,OEA-Qwen3B (+Cl),MECAT,UIQ Paraphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-14,Table 14,OEA-Qwen7B,AudioCaps,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-14,Table 14,OEA-Qwen7B,Clotho,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-14,Table 14,OEA-Qwen7B,Clotho,UIQ Paraphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_ac_clotho_positive_uiq_eval_20260802.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-14,Table 14,OEA-Qwen7B,MECAT,UIQ Paraphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-14,Table 14,OEA-Qwen7B (+Cl),AudioCaps,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-14,Table 14,OEA-Qwen7B (+Cl),Clotho,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-14,Table 14,OEA-Qwen7B (+Cl),Clotho,UIQ Paraphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_cl_clotho_positive_uiq_eval_20260802.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-14,Table 14,OEA-Qwen7B (+Cl),MECAT,UIQ Paraphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-14,Table 14,Robust-CLAP,AudioCaps,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-14,Table 14,Robust-CLAP,Clotho,UIQ Paraphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
@@ -323,10 +323,10 @@ EXP-15,Table 15,OEA-Qwen3B (+Cl),AudioCaps,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Pa
 EXP-15,Table 15,OEA-Qwen3B (+Cl),Clotho,UIQ Keyphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/qwen3b_cl_clotho_positive_uiq_eval_20260719.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-15,Table 15,OEA-Qwen3B (+Cl),MECAT,UIQ Keyphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-15,Table 15,OEA-Qwen7B,AudioCaps,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-15,Table 15,OEA-Qwen7B,Clotho,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-15,Table 15,OEA-Qwen7B,Clotho,UIQ Keyphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_ac_clotho_positive_uiq_eval_20260802.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-15,Table 15,OEA-Qwen7B,MECAT,UIQ Keyphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-15,Table 15,OEA-Qwen7B (+Cl),AudioCaps,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
-EXP-15,Table 15,OEA-Qwen7B (+Cl),Clotho,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
+EXP-15,Table 15,OEA-Qwen7B (+Cl),Clotho,UIQ Keyphrase T2A,PAPER,REPRODUCED_CLOSE,3,3,results/audits/oea_qwen7b_cl_clotho_positive_uiq_eval_20260802.json,Predeclared public-code or sensitivity protocol has value evidence; missing paper protocol remains separately blocked.
 EXP-15,Table 15,OEA-Qwen7B (+Cl),MECAT,UIQ Keyphrase T2A,PAPER,BLOCKED,3,0,docs/mecat_data_audit.md,PAPER uses 847 items while the public release has 848; excluded ID and caption construction are missing.
 EXP-15,Table 15,Robust-CLAP,AudioCaps,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
 EXP-15,Table 15,Robust-CLAP,Clotho,UIQ Keyphrase T2A,PAPER,TODO,3,0,,"Paper value is transcribed, but no qualifying reproduction observation is committed for this cell."
