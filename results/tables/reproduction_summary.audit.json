@@ -7,8 +7,8 @@
   "inputs": {
     "observations": {
       "path": "results/observations/reproduction_observations.jsonl",
-      "sha256": "b2a3bed888a261d774108f4746bf4ab75a99f1e4373241ffe58cbee6636d9dbd",
-      "size_bytes": 208573
+      "sha256": "0bf78240a093dfadfa9e1ec2e05b97c0e056b66f3f28d0261db0adb60036b0cb",
+      "size_bytes": 218794
     },
     "paper_registry": {
       "path": "configs/results/paper_reported_metrics.jsonl",
@@ -16,11 +16,11 @@
       "size_bytes": 386143
     }
   },
-  "observation_count": 239,
+  "observation_count": 251,
   "output": {
     "path": "results/tables/reproduction_summary.csv",
-    "sha256": "a1026f06b4709b3eb814e745581b6f58c11d69d519b460ba2866e77414dff0d1",
-    "size_bytes": 125257
+    "sha256": "0edf710ef4df35ab2838b5c1e46fead65f7a4e94866978388368140711dcd5ee",
+    "size_bytes": 131283
   },
   "paper_metric_count": 910,
   "schema_version": 1,
@@ -28,9 +28,9 @@
   "status_counts": {
     "blocked": 23,
     "close": 204,
-    "trend_reproduced": 12
+    "trend_reproduced": 24
   },
-  "summary_row_count": 239,
+  "summary_row_count": 251,
   "unit_counts": {
     "count": 6,
     "gigabytes": 12,
@@ -41,7 +41,7 @@
     "score_1_to_5": 36,
     "score_standard_deviation": 18
   },
-  "unobserved_paper_metric_count": 758,
+  "unobserved_paper_metric_count": 746,
   "unobserved_paper_metric_ids": [
     "table11_laion_clap_three_dataset_mean_t2a_r1",
     "table11_laion_clap_three_dataset_mean_t2a_r10",
@@ -124,9 +124,6 @@
     "table12_laion_clap_audiocaps_question_r1",
     "table12_laion_clap_audiocaps_question_r10",
     "table12_laion_clap_audiocaps_question_r5",
-    "table12_laion_clap_clotho_question_r1",
-    "table12_laion_clap_clotho_question_r10",
-    "table12_laion_clap_clotho_question_r5",
     "table12_laion_clap_mecat_question_r1",
     "table12_laion_clap_mecat_question_r10",
     "table12_laion_clap_mecat_question_r5",
@@ -196,9 +193,6 @@
     "table13_laion_clap_audiocaps_imperative_r1",
     "table13_laion_clap_audiocaps_imperative_r10",
     "table13_laion_clap_audiocaps_imperative_r5",
-    "table13_laion_clap_clotho_imperative_r1",
-    "table13_laion_clap_clotho_imperative_r10",
-    "table13_laion_clap_clotho_imperative_r5",
     "table13_laion_clap_mecat_imperative_r1",
     "table13_laion_clap_mecat_imperative_r10",
     "table13_laion_clap_mecat_imperative_r5",
@@ -268,9 +262,6 @@
     "table14_laion_clap_audiocaps_paraphrase_r1",
     "table14_laion_clap_audiocaps_paraphrase_r10",
     "table14_laion_clap_audiocaps_paraphrase_r5",
-    "table14_laion_clap_clotho_paraphrase_r1",
-    "table14_laion_clap_clotho_paraphrase_r10",
-    "table14_laion_clap_clotho_paraphrase_r5",
     "table14_laion_clap_mecat_paraphrase_r1",
     "table14_laion_clap_mecat_paraphrase_r10",
     "table14_laion_clap_mecat_paraphrase_r5",
@@ -340,9 +331,6 @@
     "table15_laion_clap_audiocaps_keyphrase_r1",
     "table15_laion_clap_audiocaps_keyphrase_r10",
     "table15_laion_clap_audiocaps_keyphrase_r5",
-    "table15_laion_clap_clotho_keyphrase_r1",
-    "table15_laion_clap_clotho_keyphrase_r10",
-    "table15_laion_clap_clotho_keyphrase_r5",
     "table15_laion_clap_mecat_keyphrase_r1",
     "table15_laion_clap_mecat_keyphrase_r10",
     "table15_laion_clap_mecat_keyphrase_r5",

@@ -64,6 +64,7 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| LAION-CLAP | Clotho | [CODE] released positive UIQ | 16.17 / 39.33 / 53.30 | 18.3732 / 43.1579 / 57.9904 | 4.690431 |
 | M2D-CLAP | Clotho | [CODE] released positive UIQ | 20.00 / 46.60 / 58.66 | 18.7560 / 45.0718 / 57.2249 | 1.528230 |
 | MGA-CLAP | Clotho | [CODE] released positive UIQ | 18.18 / 44.98 / 57.70 | 21.0526 / 48.3254 / 62.7751 | 5.075120 |
 | OEA-Nemo3B | Clotho | [CODE] released positive UIQ | 19.81 / 43.54 / 57.61 | 18.9474 / 43.6364 / 56.3636 | 1.246364 |
@@ -75,6 +76,7 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| LAION-CLAP | Clotho | [CODE] released positive UIQ | 14.45 / 37.99 / 51.29 | 17.0335 / 42.6794 / 56.1722 | 4.882249 |
 | M2D-CLAP | Clotho | [CODE] released positive UIQ | 20.29 / 46.22 / 60.00 | 19.7129 / 46.0287 / 59.0431 | 0.956938 |
 | MGA-CLAP | Clotho | [CODE] released positive UIQ | 17.99 / 44.59 / 55.79 | 22.2967 / 48.6124 / 62.2967 | 6.506651 |
 | OEA-Nemo3B | Clotho | [CODE] released positive UIQ | 18.85 / 43.25 / 57.03 | 19.0431 / 43.3493 / 56.8421 | 0.193062 |
@@ -86,6 +88,7 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| LAION-CLAP | Clotho | [CODE] released positive UIQ | 15.98 / 39.14 / 52.73 | 18.2775 / 44.5933 / 55.5981 | 5.453301 |
 | M2D-CLAP | Clotho | [CODE] released positive UIQ | 21.63 / 50.72 / 60.67 | 19.2344 / 47.2727 / 61.5311 | 3.447273 |
 | MGA-CLAP | Clotho | [CODE] released positive UIQ | 19.62 / 47.56 / 59.71 | 23.1579 / 50.9091 / 63.8278 | 4.117751 |
 | OEA-Nemo3B | Clotho | [CODE] released positive UIQ | 20.96 / 44.50 / 57.22 | 20.7656 / 44.3062 / 56.6507 | 0.569282 |
@@ -97,6 +100,7 @@ This view includes only committed value evidence for paper Tables 2, 3 and 12-15
 
 | Model | Dataset | Protocol | Paper R@1 / R@5 / R@10 | Reproduced R@1 / R@5 / R@10 | Max abs delta (pp) |
 |---|---|---|---:|---:|---:|
+| LAION-CLAP | Clotho | [CODE] released positive UIQ | 17.51 / 41.63 / 55.02 | 20.3828 / 46.7943 / 63.3493 | 8.329282 |
 | M2D-CLAP | Clotho | [CODE] released positive UIQ | 22.11 / 48.52 / 62.49 | 19.6172 / 46.4115 / 63.0622 | 2.492775 |
 | MGA-CLAP | Clotho | [CODE] released positive UIQ | 22.11 / 50.43 / 63.64 | 27.1770 / 56.5550 / 69.8565 | 6.216459 |
 | OEA-Nemo3B | Clotho | [CODE] released positive UIQ | 21.53 / 45.45 / 59.14 | 21.5311 / 45.8373 / 60.1914 | 1.051388 |
