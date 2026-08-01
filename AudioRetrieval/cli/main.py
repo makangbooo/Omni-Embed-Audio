@@ -60,7 +60,9 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
         help="Precompute released UIQ text embeddings",
     )
     uiq_embeddings.add_argument(
-        "--model", choices=["oea", "mga_clap", "m2d_clap"], default="oea"
+        "--model",
+        choices=["oea", "laion_clap", "mga_clap", "m2d_clap"],
+        default="oea",
     )
     uiq_embeddings.add_argument(
         "--uiq-jsonl",
@@ -79,6 +81,10 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
         default="nvidia/omni-embed-nemotron-3b",
     )
     uiq_embeddings.add_argument("--local-path", type=Path)
+    uiq_embeddings.add_argument("--laion-ckpt", type=Path)
+    uiq_embeddings.add_argument("--laion-bert-tokenizer", type=Path)
+    uiq_embeddings.add_argument("--laion-roberta-tokenizer", type=Path)
+    uiq_embeddings.add_argument("--laion-bart-tokenizer", type=Path)
     uiq_embeddings.add_argument("--mga-repo", type=Path)
     uiq_embeddings.add_argument("--mga-ckpt", type=Path)
     uiq_embeddings.add_argument("--mga-bert-tokenizer", type=Path)
@@ -278,6 +284,19 @@ def run_preprocess(args: argparse.Namespace) -> int:
         if args.model == "oea" and not args.checkpoint:
             print("Error: OEA UIQ embeddings require --checkpoint")
             return 1
+        if args.model == "laion_clap" and not all(
+            (
+                args.laion_ckpt,
+                args.laion_bert_tokenizer,
+                args.laion_roberta_tokenizer,
+                args.laion_bart_tokenizer,
+            )
+        ):
+            print(
+                "Error: LAION-CLAP UIQ embeddings require checkpoint and "
+                "local BERT, RoBERTa, and BART tokenizers"
+            )
+            return 1
         if args.model == "mga_clap" and not all(
             (
                 args.mga_repo,
@@ -310,6 +329,24 @@ def run_preprocess(args: argparse.Namespace) -> int:
             oea_checkpoint=str(args.checkpoint),
             oea_repo_id=args.repo_id,
             oea_local_path=str(args.local_path) if args.local_path else None,
+            laion_ckpt=(
+                str(args.laion_ckpt) if args.laion_ckpt else None
+            ),
+            laion_bert_tokenizer=(
+                str(args.laion_bert_tokenizer)
+                if args.laion_bert_tokenizer
+                else None
+            ),
+            laion_roberta_tokenizer=(
+                str(args.laion_roberta_tokenizer)
+                if args.laion_roberta_tokenizer
+                else None
+            ),
+            laion_bart_tokenizer=(
+                str(args.laion_bart_tokenizer)
+                if args.laion_bart_tokenizer
+                else None
+            ),
             mga_repo=str(args.mga_repo) if args.mga_repo else None,
             mga_ckpt=str(args.mga_ckpt) if args.mga_ckpt else None,
             mga_bert_tokenizer=(

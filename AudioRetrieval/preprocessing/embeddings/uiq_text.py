@@ -70,11 +70,29 @@ class UIQTextEmbeddingPrecomputer:
         if self.model_name == "laion_clap":
             from AudioRetrieval.models.laion_clap_adapter import LaionClapAdapter
 
+            checkpoint = self.model_kwargs.get("laion_ckpt")
+            tokenizer_paths = {
+                "bert-base-uncased": self.model_kwargs.get(
+                    "laion_bert_tokenizer"
+                ),
+                "roberta-base": self.model_kwargs.get(
+                    "laion_roberta_tokenizer"
+                ),
+                "facebook/bart-base": self.model_kwargs.get(
+                    "laion_bart_tokenizer"
+                ),
+            }
+            if not checkpoint or not all(tokenizer_paths.values()):
+                raise ValueError(
+                    "LAION-CLAP requires 'laion_ckpt' and local BERT, "
+                    "RoBERTa, and BART tokenizer paths"
+                )
             adapter = LaionClapAdapter(
-                ckpt_path=self.model_kwargs.get("laion_ckpt", "ModelCheckpoint/laion-clap/630k-audioset-best.pt"),
+                ckpt_path=checkpoint,
                 amodel=self.model_kwargs.get("laion_amodel", "HTSAT-tiny"),
                 tmodel=self.model_kwargs.get("laion_tmodel", "roberta"),
                 enable_fusion=False,
+                tokenizer_paths=tokenizer_paths,
             )
 
             def _encode(batch: List[str]) -> np.ndarray:

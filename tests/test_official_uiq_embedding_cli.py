@@ -70,6 +70,42 @@ class OfficialUiqEmbeddingCliTests(unittest.TestCase):
         self.assertEqual(args.mga_bert_tokenizer, Path("bert-base-uncased"))
         self.assertEqual(args.mga_checkpoint_sha256, "a" * 64)
 
+    def test_laion_clap_pinned_resources_are_accepted(self):
+        parser = argparse.ArgumentParser()
+        subparsers = parser.add_subparsers(dest="command")
+        add_preprocess_subparsers(subparsers)
+
+        args = parser.parse_args(
+            [
+                "preprocess",
+                "uiq-embeddings",
+                "--model",
+                "laion_clap",
+                "--uiq-jsonl",
+                "question.jsonl",
+                "--output-dir",
+                "output",
+                "--laion-ckpt",
+                "630k-audioset-best.pt",
+                "--laion-bert-tokenizer",
+                "bert-base-uncased",
+                "--laion-roberta-tokenizer",
+                "roberta-base",
+                "--laion-bart-tokenizer",
+                "bart-base",
+            ]
+        )
+
+        self.assertEqual(args.model, "laion_clap")
+        self.assertEqual(args.laion_ckpt, Path("630k-audioset-best.pt"))
+        self.assertEqual(
+            args.laion_bert_tokenizer, Path("bert-base-uncased")
+        )
+        self.assertEqual(
+            args.laion_roberta_tokenizer, Path("roberta-base")
+        )
+        self.assertEqual(args.laion_bart_tokenizer, Path("bart-base"))
+
     def test_m2d_clap_pinned_resources_are_accepted(self):
         parser = argparse.ArgumentParser()
         subparsers = parser.add_subparsers(dest="command")

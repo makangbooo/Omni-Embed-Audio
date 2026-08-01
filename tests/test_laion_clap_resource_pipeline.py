@@ -31,6 +31,13 @@ REQUIREMENTS = (
 )
 WRAPPER = REPOSITORY_ROOT / "scripts/run_laion_clap_resource_pipeline.sh"
 MAIN_WRAPPER = REPOSITORY_ROOT / "scripts/run_laion_clap_clotho_main.sh"
+UIQ_WRAPPER = (
+    REPOSITORY_ROOT / "scripts/run_laion_clap_clotho_positive_uiq.sh"
+)
+UIQ_PRECOMPUTER = (
+    REPOSITORY_ROOT
+    / "AudioRetrieval/preprocessing/embeddings/uiq_text.py"
+)
 
 
 class LaionClapResourcePipelineTests(unittest.TestCase):
@@ -273,6 +280,40 @@ class LaionClapResourcePipelineTests(unittest.TestCase):
         self.assertIn("torch.cuda.device_count() == 1", source)
         self.assertNotIn("tmux", source)
         self.assertNotIn("exec bash -i", source)
+
+    def test_positive_uiq_wrapper_is_direct_and_reuses_main_embeddings(self) -> None:
+        source = UIQ_WRAPPER.read_text(encoding="utf-8")
+        for marker in (
+            "LAION-CLAP Clotho positive UIQ Tables 12-15",
+            "GPU_USED=yes",
+            "OEA_OFFICIAL_SOURCE_USED=yes",
+            "gpu_uiq_embeddings",
+            "cpu_table12_table15_metrics",
+            "--model laion_clap",
+            "--laion-ckpt",
+            "--laion-bert-tokenizer",
+            "--laion-roberta-tokenizer",
+            "--laion-bart-tokenizer",
+            "--baseline-dir",
+            "--uiq-dir",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+        for forbidden in ("tmux", "exec bash -i"):
+            self.assertNotIn(forbidden, source)
+
+    def test_uiq_precomputer_binds_all_pinned_laion_resources(self) -> None:
+        source = UIQ_PRECOMPUTER.read_text(encoding="utf-8")
+        for marker in (
+            '"laion_clap"',
+            "LaionClapAdapter",
+            '"bert-base-uncased"',
+            '"roberta-base"',
+            '"facebook/bart-base"',
+            "tokenizer_paths=tokenizer_paths",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
 
     def test_embedding_gate_requires_shape_finite_norm_and_new_output(self) -> None:
         source = (
