@@ -107,6 +107,7 @@
 | 2 指标 | Figure 3 / Table 17 指标单元测试 | COMPLETED | `88a7d1f` | R@k、Δ-Rank、HNSR、HNSR@k、TFR、TFR-HN@k 已按论文公式实现；7 个合成测试及完整 24 项测试通过 | 无；正式表 17 仍缺 target-HN audio ID | 保留为 canonical negative evaluator 的公式回归测试 |
 | 2 指标 | 显式 target/HN 的可审计 negative embedding evaluator | COMPLETED | `cd4d00b` | 严格 query/target/HN ID 覆盖、optimistic rank、确定性完整排序、per-query 证据、输入/输出 SHA256、失败保留和 CPU wrapper 已实现；完整 116 项测试通过 | 工具完成不等于表 17 已解锁；发布数据仍无 HN audio ID | 获得作者 pairing 后才运行正式表 17；否则仅运行单独标记的重建协议 |
 | 2 UIQ | Tables 12–15 正向 UIQ | IN_PROGRESS | 本提交 | Clotho 上六个 OEA 变体及 LAION/MGA/M2D-CLAP 已完成，共 `9/10` 个论文模型；两个 Qwen7B 新增 24 个 `[CODE] close`，全组 12 项最大绝对差分别为 `0.9618/1.0559` pp | Clotho 仅 Robust-CLAP 因 checkpoint 未发布而阻塞；完整 Tables 12–15 仍缺 AudioCaps/MECAT，且 MECAT 847/848 口径未决 | AudioCaps 音频到位后优先扩展同一评测闭环；MECAT 保持公开 848 与论文 847 分栏 |
+| 2 UIQ | MECAT 公开 848-row 正向 UIQ Tables 12–15 | WAITING_USER | 本提交 | 已实现 LAION-CLAP、MGA-CLAP、M2D-CLAP、OEA-Qwen7B、OEA-Qwen7B (+Cl) 五个前台 runner 变体；固定 DATA-05 manifest SHA256、逐音频 size/SHA256/decode 门禁、四类 UIQ ID-set 闭包、checkpoint 身份和 canonical R@k；无 tmux、无下载、时间戳目录且拒绝覆盖 | 需要 RTX 4090 远程运行产生真实 embedding/metrics；论文 847 条排除 ID 未发布，因此只能报告 `controlled public 848-row`，不得写成严格论文复现 | 先运行 LAION-CLAP 变体并返回完整输出与 suite metrics；成功后依次复用同一入口推进其余四个模型 |
 | 2 UIQ | Qwen3B-AC/Clotho 正向 UIQ embedding | COMPLETED | `98af9d4` | RTX 4090 运行 `...positive_uiq_embeddings_seed42_20260720_010106`：4,180 条四类查询全部完成、形状 4,180×512、pending=0、exit 0、43 MB；峰值 allocated 9.0 GiB/reserved 9.3 GiB；六个核心工件 SHA256 已固定 | 无；顶层紧凑摘要的 `gpu_name=None` 仅因字段位于 `model_load`，GPU preflight 与模型加载记录均为 RTX 4090 | 大型 embedding 保留远程路径与哈希，供 CPU 四协议套件复用 |
 | 2 UIQ | Qwen3B-AC/Clotho 正向 UIQ 四协议 CPU 套件 | COMPLETED | `c44a7d5` | CPU suite `...positive_uiq_suite_seed42_20260720_011600`：wrapper 与四协议共五个 exit 全为 0、100 MB；Question=`21.5311/44.4976/59.5215`、Imperative=`22.4880/46.2201/59.1388`、Paraphrase=`20.9569/46.7943/60.0957`、Keyphrase=`24.3062/49.6651/61.7225`；suite/CSV SHA256 已固定 | 无；公开代码音频候选无论文所述 `passage:` 前缀，因此标为 `[CODE] close` 而非严格论文协议 | 将 12 个 R@k 写入统一汇总；大型排名保留远程路径与哈希 |
 | 2 Negative | Tables 4/17 否定查询 | BLOCKED | N/A | 未开始 | 发布文件无 HN audio ID | 请求作者 pairing 或审计式重建 |
@@ -140,11 +141,11 @@
 
 ## 当前焦点
 
-- 当前阶段：官方源码优先推进 OEA 论文原实验复现；先运行 upstream example/precomputer/evaluator，保存其原始输出或错误，仅在实际阻塞时做最小兼容补丁。SpeechXBT、FiQA、NQ、SQuTR、ASR reranker 与 A2T 仅保留为历史记录，不计入本轮完成度，也不继续启动。训练在官方 checkpoint 评测矩阵完成前继续暂停。
+- 当前阶段：官方源码优先推进 OEA 论文原实验复现；MECAT 公开 848-row 正向 UIQ 五模型 runner 已实现，等待先运行 LAION-CLAP。SpeechXBT、FiQA、NQ、SQuTR、ASR reranker 与 A2T 仅保留为历史记录，不计入本轮完成度，也不继续启动。训练在官方 checkpoint 评测矩阵完成前继续暂停。
 - 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
 - 正文 Table 2/3 模型×数据集×任务覆盖为 `24/78 = 30.8%`；其中 Clotho 为 `24/26 = 92.3%`，三个 vanilla backbone 的 Clotho 两任务为 `6/6 = 100%`。这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
 - 最近完成：MGA-CLAP 的官方源码 Clotho Table 2/3 闭环；run commit=`f623b153`，GPU_USED=`yes`，OEA_OFFICIAL_SOURCE_USED=`yes`，smoke/full/四协议均 complete、RC=`0`，耗时 293 秒，full embedding 为 `1045x1024/5225x1024`。Table 2 all-caption=`21.1100/46.9474/60.0766`，相对 PAPER=`18.78/43.79/56.63` 的差为 `+2.3300/+3.1574/+3.4466` pp；Table 3 seed-0=`62.0096/73.1100/77.2249`，相对 PAPER=`63.27/74.70/78.79` 的差为 `-1.2604/-1.5900/-1.5651` pp。另列 `[INFERRED]` all-caption=`63.2727/74.6986/78.7943`，不按接近度择优。
 - 最新远程完成：OEA-Qwen7B 与 OEA-Qwen7B (+Cl) 的 Clotho 正向 UIQ Tables 12–15 在 RTX 4090 上均 complete、RC=`0`，耗时 `130/102` 秒，GPU_USED=`yes`，OEA_OFFICIAL_SOURCE_USED=`yes`。两组共 24 个 R@k 与 PAPER 的最大绝对差仅 `0.9618/1.0559` pp，全部作为 `[CODE] close` 固化；Clotho 正向 UIQ 可运行模型覆盖达到 `9/10`。
-- 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 论文 847-row 排除 ID 与 caption 组合规则缺失；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开；论文 caption/self/tie 口径未公开。
-- 当前等待：AudioCaps 实际评测音频压缩包下载完成；Qwen7B 两个 Clotho UIQ 远程任务不再等待用户。
-- 下一步：AudioCaps 音频到位后先做安全解压、ID/解码/候选集门禁，再并行推进可用模型的 Tables 2/3 与 12–15；Robust-CLAP 继续因 checkpoint 未发布而阻塞，MECAT 严格 847/caption 口径仍缺失。
+- 当前阻塞：AudioCaps 实际评测音频缺失；MECAT 严格论文协议缺 847-row 排除 ID 与 caption 组合规则；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开；论文 caption/self/tie 口径未公开。
+- 当前等待：MECAT 公开 848-row LAION-CLAP 正向 UIQ 远程运行；AudioCaps 实际评测音频压缩包下载完成。
+- 下一步：先完成 MECAT 公开 848-row 的五个可运行模型 Tables 12–15，并始终与论文 847 条协议分栏；AudioCaps 音频到位后做安全解压、ID/解码/候选集门禁，再扩展 Tables 2/3 与 12–15。
