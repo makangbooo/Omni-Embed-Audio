@@ -20,7 +20,8 @@ class UIQTextEmbeddingPrecomputer:
     """
     UIQ text embedding precomputer.
 
-    Supports multiple backends: laion_clap, mga_clap, oea, robust_clap.
+    Supports multiple backends: laion_clap, mga_clap, m2d_clap, oea,
+    robust_clap.
 
     Args:
         model: Model backend to use
@@ -40,7 +41,13 @@ class UIQTextEmbeddingPrecomputer:
         ... )
     """
 
-    SUPPORTED_MODELS = ["laion_clap", "mga_clap", "oea", "robust_clap"]
+    SUPPORTED_MODELS = [
+        "laion_clap",
+        "mga_clap",
+        "m2d_clap",
+        "oea",
+        "robust_clap",
+    ]
 
     def __init__(
         self,
@@ -111,6 +118,31 @@ class UIQTextEmbeddingPrecomputer:
                 expected_checkpoint_sha256=self.model_kwargs.get(
                     "mga_checkpoint_sha256"
                 ),
+            )
+
+            def _encode(batch: List[str]) -> np.ndarray:
+                return adapter.encode_text(
+                    batch,
+                    batch_size=min(self.batch_size_text, len(batch)),
+                    device=self.device,
+                )
+
+            return _encode
+
+        elif self.model_name == "m2d_clap":
+            from AudioRetrieval.models.m2d_clap_adapter import M2DClapAdapter
+
+            checkpoint = self.model_kwargs.get("m2d_ckpt")
+            tokenizer = self.model_kwargs.get("m2d_bert_tokenizer")
+            if not checkpoint or not tokenizer:
+                raise ValueError(
+                    "M2D-CLAP requires 'm2d_ckpt' and "
+                    "'m2d_bert_tokenizer' parameters"
+                )
+            adapter = M2DClapAdapter(
+                weight_file=checkpoint,
+                device=self.device,
+                bert_tokenizer_path=tokenizer,
             )
 
             def _encode(batch: List[str]) -> np.ndarray:

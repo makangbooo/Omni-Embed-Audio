@@ -171,7 +171,7 @@ class MGAClapPipelineTests(unittest.TestCase):
             / "AudioRetrieval/preprocessing/embeddings/uiq_text.py"
         ).read_text(encoding="utf-8")
         for marker in (
-            'choices=["oea", "mga_clap"]',
+            'choices=["oea", "mga_clap", "m2d_clap"]',
             "mga_bert_tokenizer",
             "mga_checkpoint_sha256",
         ):

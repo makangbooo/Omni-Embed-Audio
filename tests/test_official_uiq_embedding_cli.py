@@ -70,6 +70,34 @@ class OfficialUiqEmbeddingCliTests(unittest.TestCase):
         self.assertEqual(args.mga_bert_tokenizer, Path("bert-base-uncased"))
         self.assertEqual(args.mga_checkpoint_sha256, "a" * 64)
 
+    def test_m2d_clap_pinned_resources_are_accepted(self):
+        parser = argparse.ArgumentParser()
+        subparsers = parser.add_subparsers(dest="command")
+        add_preprocess_subparsers(subparsers)
+
+        args = parser.parse_args(
+            [
+                "preprocess",
+                "uiq-embeddings",
+                "--model",
+                "m2d_clap",
+                "--uiq-jsonl",
+                "question.jsonl",
+                "--output-dir",
+                "output",
+                "--m2d-ckpt",
+                "checkpoint-30.pth",
+                "--m2d-bert-tokenizer",
+                "bert-base-uncased",
+            ]
+        )
+
+        self.assertEqual(args.model, "m2d_clap")
+        self.assertEqual(args.m2d_ckpt, Path("checkpoint-30.pth"))
+        self.assertEqual(
+            args.m2d_bert_tokenizer, Path("bert-base-uncased")
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

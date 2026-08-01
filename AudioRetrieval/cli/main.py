@@ -60,7 +60,7 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
         help="Precompute released UIQ text embeddings",
     )
     uiq_embeddings.add_argument(
-        "--model", choices=["oea", "mga_clap"], default="oea"
+        "--model", choices=["oea", "mga_clap", "m2d_clap"], default="oea"
     )
     uiq_embeddings.add_argument(
         "--uiq-jsonl",
@@ -83,6 +83,8 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     uiq_embeddings.add_argument("--mga-ckpt", type=Path)
     uiq_embeddings.add_argument("--mga-bert-tokenizer", type=Path)
     uiq_embeddings.add_argument("--mga-checkpoint-sha256")
+    uiq_embeddings.add_argument("--m2d-ckpt", type=Path)
+    uiq_embeddings.add_argument("--m2d-bert-tokenizer", type=Path)
 
     # MGA-CLAP specific options
     embeddings.add_argument("--mga-repo", type=Path, help="MGA-CLAP repository path")
@@ -289,6 +291,13 @@ def run_preprocess(args: argparse.Namespace) -> int:
                 "tokenizer, and SHA256"
             )
             return 1
+        if args.model == "m2d_clap" and not all(
+            (args.m2d_ckpt, args.m2d_bert_tokenizer)
+        ):
+            print(
+                "Error: M2D-CLAP UIQ embeddings require checkpoint and tokenizer"
+            )
+            return 1
 
         if args.output_dir.exists() and any(args.output_dir.iterdir()):
             print(f"Error: UIQ output directory is not empty: {args.output_dir}")
@@ -307,6 +316,12 @@ def run_preprocess(args: argparse.Namespace) -> int:
                 str(args.mga_bert_tokenizer) if args.mga_bert_tokenizer else None
             ),
             mga_checkpoint_sha256=args.mga_checkpoint_sha256,
+            m2d_ckpt=str(args.m2d_ckpt) if args.m2d_ckpt else None,
+            m2d_bert_tokenizer=(
+                str(args.m2d_bert_tokenizer)
+                if args.m2d_bert_tokenizer
+                else None
+            ),
         )
 
         summaries = {}
