@@ -122,6 +122,7 @@ class UIQTextEmbeddingPrecomputer:
                 bart_tokenizer_path=self.model_kwargs.get(
                     "robust_bart_tokenizer"
                 ),
+                bpe_vocab_path=self.model_kwargs.get("robust_bpe_vocab"),
             )
 
             def _encode(batch: List[str]) -> np.ndarray:

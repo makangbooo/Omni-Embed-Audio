@@ -18,6 +18,9 @@ BERT_TOKENIZER="${MODEL_ROOT}/laion-clap-tokenizers/bert-base-uncased"
 ROBERTA_TOKENIZER="${MODEL_ROOT}/laion-clap-tokenizers/roberta-base"
 BART_TOKENIZER="${MODEL_ROOT}/laion-clap-tokenizers/bart-base"
 RUNTIME_OVERLAY="${MODEL_ROOT}/python/laion-clap-1.1.6-overlay-v3"
+BPE_VOCAB="${RUNTIME_OVERLAY}/laion_clap/clap_module/bpe_simple_vocab_16e6.txt.gz"
+BPE_VOCAB_BYTES=1356917
+BPE_VOCAB_SHA256="924691ac288e54409236115652ad4aa250f48203de50a9e4722a6ecd48d6804a"
 AUDIO_DIR="${DATA_ROOT}/clotho_v2.1/extracted/evaluation"
 CAPTIONS_CSV="${DATA_ROOT}/clotho_v2.1/source/clotho_captions_evaluation.csv"
 
@@ -116,7 +119,7 @@ GIT_STATUS="$(git status --short | sed -E '/^\?\? scripts\/\.__dpc[[:xdigit:]]+$
 [[ -z "${GIT_STATUS}" ]] || fail 3 "Git worktree is not clean"
 for required in "${SOURCE_DIR}" "${CHECKPOINT}" "${BERT_TOKENIZER}" \
   "${ROBERTA_TOKENIZER}" "${BART_TOKENIZER}" \
-  "${RUNTIME_OVERLAY}" "${AUDIO_DIR}" "${CAPTIONS_CSV}"; do
+  "${RUNTIME_OVERLAY}" "${BPE_VOCAB}" "${AUDIO_DIR}" "${CAPTIONS_CSV}"; do
   [[ -e "${required}" ]] || fail 4 "Required resource is missing: ${required}"
 done
 python scripts/validate_robust_clap_source.py \
@@ -126,6 +129,10 @@ python scripts/validate_robust_clap_source.py \
   || fail 4 "Checkpoint byte size mismatch"
 [[ "$(sha256sum "${CHECKPOINT}" | awk '{print $1}')" == "${CHECKPOINT_SHA256}" ]] \
   || fail 4 "Checkpoint SHA256 mismatch"
+[[ "$(stat -c %s "${BPE_VOCAB}")" == "${BPE_VOCAB_BYTES}" ]] \
+  || fail 4 "BPE vocabulary byte size mismatch"
+[[ "$(sha256sum "${BPE_VOCAB}" | awk '{print $1}')" == "${BPE_VOCAB_SHA256}" ]] \
+  || fail 4 "BPE vocabulary SHA256 mismatch"
 
 CONDA_BASE="$(resolve_conda_base)"
 # shellcheck disable=SC1091
@@ -151,6 +158,7 @@ ROBUST_ARGS=(
   --robust-bert-tokenizer "${BERT_TOKENIZER}"
   --robust-roberta-tokenizer "${ROBERTA_TOKENIZER}"
   --robust-bart-tokenizer "${BART_TOKENIZER}"
+  --robust-bpe-vocab "${BPE_VOCAB}"
 )
 
 CURRENT_STAGE="gpu_smoke_embeddings"

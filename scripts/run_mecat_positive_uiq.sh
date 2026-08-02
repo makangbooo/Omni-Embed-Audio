@@ -61,13 +61,15 @@ case "${VARIANT_ID}" in
     ROBERTA_TOKENIZER="${MODEL_ROOT}/laion-clap-tokenizers/roberta-base"
     BART_TOKENIZER="${MODEL_ROOT}/laion-clap-tokenizers/bart-base"
     PYTHON_PREFIX="${MODEL_ROOT}/python/laion-clap-1.1.6-overlay-v3"
-    REQUIRED_RESOURCES=("${SOURCE_DIR}" "${BERT_TOKENIZER}" "${ROBERTA_TOKENIZER}" "${BART_TOKENIZER}" "${PYTHON_PREFIX}")
+    BPE_VOCAB="${PYTHON_PREFIX}/laion_clap/clap_module/bpe_simple_vocab_16e6.txt.gz"
+    REQUIRED_RESOURCES=("${SOURCE_DIR}" "${BERT_TOKENIZER}" "${ROBERTA_TOKENIZER}" "${BART_TOKENIZER}" "${PYTHON_PREFIX}" "${BPE_VOCAB}")
     AUDIO_MODEL_ARGS=(
       --robust-ckpt "${CHECKPOINT}"
       --robust-repo "${SOURCE_DIR}"
       --robust-bert-tokenizer "${BERT_TOKENIZER}"
       --robust-roberta-tokenizer "${ROBERTA_TOKENIZER}"
       --robust-bart-tokenizer "${BART_TOKENIZER}"
+      --robust-bpe-vocab "${BPE_VOCAB}"
     )
     UIQ_MODEL_ARGS=("${AUDIO_MODEL_ARGS[@]}")
     PRECHECK_IMPORT="import laion_clap, torch"
@@ -334,6 +336,10 @@ if [[ "${VARIANT_ID}" == "robust_clap" ]]; then
   python scripts/validate_robust_clap_source.py \
     --source-dir "${SOURCE_DIR}" --output "${RESULT_DIR}/source_identity.json" \
     || fail 4 "Robust-CLAP source identity mismatch"
+  [[ "$(stat -c %s "${BPE_VOCAB}")" == "1356917" ]] \
+    || fail 4 "Robust-CLAP BPE vocabulary byte size mismatch"
+  [[ "$(sha256sum "${BPE_VOCAB}" | awk '{print $1}')" == "924691ac288e54409236115652ad4aa250f48203de50a9e4722a6ecd48d6804a" ]] \
+    || fail 4 "Robust-CLAP BPE vocabulary SHA256 mismatch"
 fi
 
 printf '%s\n' "${GIT_COMMIT}" > "${RESULT_DIR}/git_commit.txt"

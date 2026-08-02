@@ -63,6 +63,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--robust-bert-tokenizer", type=Path)
     parser.add_argument("--robust-roberta-tokenizer", type=Path)
     parser.add_argument("--robust-bart-tokenizer", type=Path)
+    parser.add_argument("--robust-bpe-vocab", type=Path)
     return parser.parse_args()
 
 
@@ -207,11 +208,12 @@ def build_precomputer(args: argparse.Namespace):
                 args.robust_bert_tokenizer,
                 args.robust_roberta_tokenizer,
                 args.robust_bart_tokenizer,
+                args.robust_bpe_vocab,
             )
         ):
             raise ValueError(
                 "Robust-CLAP requires source, checkpoint, and local BERT, "
-                "RoBERTa, and BART tokenizers"
+                "RoBERTa, and BART tokenizers plus BPE vocabulary"
             )
         return RobustClapEmbeddingPrecomputer(
             ckpt_path=str(args.robust_ckpt),
@@ -219,6 +221,7 @@ def build_precomputer(args: argparse.Namespace):
             bert_tokenizer_path=str(args.robust_bert_tokenizer),
             roberta_tokenizer_path=str(args.robust_roberta_tokenizer),
             bart_tokenizer_path=str(args.robust_bart_tokenizer),
+            bpe_vocab_path=str(args.robust_bpe_vocab),
             enable_fusion=False,
             device=args.device,
             batch_size_audio=args.batch_size_audio,

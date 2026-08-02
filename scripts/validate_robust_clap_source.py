@@ -23,6 +23,10 @@ EXPECTED_FILES = {
         33776,
         "5da5fbc2bf7acd516814f92b628e1e2711fd0fa4d4ea41d4bb5589bc45727850",
     ),
+    "src/laion_clap/clap_module/tokenizer.py": (
+        6204,
+        "badc1e522a939e145faab2aea60c5d0a015761e69175ace432dfb3fc31ecb896",
+    ),
 }
 
 

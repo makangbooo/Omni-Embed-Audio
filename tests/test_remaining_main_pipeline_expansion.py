@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import gzip
 import tempfile
 import sys
 import types
@@ -17,6 +18,7 @@ from scripts.export_vanilla_audiocaps_npz import export
 from AudioRetrieval.models.robust_clap_adapter import (
     _local_robust_tokenizer_redirect,
 )
+from AudioRetrieval.models import robust_clap_adapter
 from scripts import validate_robust_clap_source
 
 
@@ -175,12 +177,30 @@ class RobustClapExpansionTests(unittest.TestCase):
             paths = [root / name for name in ("bert", "roberta", "bart")]
             for path in paths:
                 path.mkdir()
-            with mock.patch.dict(sys.modules, {"transformers": fake_transformers}):
-                with _local_robust_tokenizer_redirect(*paths) as local_roberta:
+            bpe_path = root / "audited-bpe.txt.gz"
+            with gzip.open(bpe_path, "wb") as stream:
+                stream.write(b"audited vocabulary")
+            requested_bpe = root / "missing" / "bpe_simple_vocab_16e6.txt.gz"
+            with mock.patch.dict(
+                sys.modules, {"transformers": fake_transformers}
+            ), mock.patch.object(
+                robust_clap_adapter,
+                "TRUSTED_BPE_VOCAB_BYTES",
+                bpe_path.stat().st_size,
+            ), mock.patch.object(
+                robust_clap_adapter,
+                "TRUSTED_BPE_VOCAB_SHA256",
+                hashlib.sha256(bpe_path.read_bytes()).hexdigest(),
+            ):
+                with _local_robust_tokenizer_redirect(
+                    *paths, bpe_path, requested_bpe
+                ) as local_roberta:
                     self.assertEqual(
                         T5Tokenizer.from_pretrained("google/flan-t5-large"),
                         local_roberta,
                     )
+                    with gzip.open(requested_bpe, "rb") as stream:
+                        self.assertEqual(stream.read(), b"audited vocabulary")
                     with self.assertRaisesRegex(RuntimeError, "unexpected"):
                         T5Tokenizer.from_pretrained("unapproved/remote-tokenizer")
 
@@ -213,6 +233,8 @@ class RobustClapExpansionTests(unittest.TestCase):
             "--robust-bert-tokenizer",
             "--robust-roberta-tokenizer",
             "--robust-bart-tokenizer",
+            "--robust-bpe-vocab",
+            "924691ac288e54409236115652ad4aa250f48203de50a9e4722a6ecd48d6804a",
         ):
             self.assertIn(fragment, source)
         for forbidden in ("curl ", "wget ", "gdown ", "rm ", "tmux "):

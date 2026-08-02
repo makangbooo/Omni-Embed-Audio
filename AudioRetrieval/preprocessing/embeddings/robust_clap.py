@@ -20,6 +20,7 @@ class RobustClapEmbeddingPrecomputer(LaionClapEmbeddingPrecomputer):
         bert_tokenizer_path: str,
         roberta_tokenizer_path: str,
         bart_tokenizer_path: str,
+        bpe_vocab_path: str,
         *,
         enable_fusion: bool = False,
         device: str = "cuda",
@@ -34,6 +35,7 @@ class RobustClapEmbeddingPrecomputer(LaionClapEmbeddingPrecomputer):
         self.bert_tokenizer_path = bert_tokenizer_path
         self.roberta_tokenizer_path = roberta_tokenizer_path
         self.bart_tokenizer_path = bart_tokenizer_path
+        self.bpe_vocab_path = bpe_vocab_path
         self.enable_fusion = enable_fusion
 
     def _load_model(self) -> Any:
@@ -45,6 +47,7 @@ class RobustClapEmbeddingPrecomputer(LaionClapEmbeddingPrecomputer):
             bert_tokenizer_path=self.bert_tokenizer_path,
             roberta_tokenizer_path=self.roberta_tokenizer_path,
             bart_tokenizer_path=self.bart_tokenizer_path,
+            bpe_vocab_path=self.bpe_vocab_path,
             enable_fusion=self.enable_fusion,
         )
 

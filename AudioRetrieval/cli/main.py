@@ -50,6 +50,7 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     embeddings.add_argument("--robust-bert-tokenizer", type=Path)
     embeddings.add_argument("--robust-roberta-tokenizer", type=Path)
     embeddings.add_argument("--robust-bart-tokenizer", type=Path)
+    embeddings.add_argument("--robust-bpe-vocab", type=Path)
 
     # OEA-specific options
     embeddings.add_argument("--checkpoint", type=Path, help="OEA checkpoint path")
@@ -95,6 +96,7 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     uiq_embeddings.add_argument("--robust-bert-tokenizer", type=Path)
     uiq_embeddings.add_argument("--robust-roberta-tokenizer", type=Path)
     uiq_embeddings.add_argument("--robust-bart-tokenizer", type=Path)
+    uiq_embeddings.add_argument("--robust-bpe-vocab", type=Path)
     uiq_embeddings.add_argument("--mga-repo", type=Path)
     uiq_embeddings.add_argument("--mga-ckpt", type=Path)
     uiq_embeddings.add_argument("--mga-bert-tokenizer", type=Path)
@@ -257,10 +259,11 @@ def run_preprocess(args: argparse.Namespace) -> int:
                 args.robust_bert_tokenizer,
                 args.robust_roberta_tokenizer,
                 args.robust_bart_tokenizer,
+                args.robust_bpe_vocab,
             )):
                 print(
                     "Error: Robust-CLAP requires source, checkpoint, and local "
-                    "BERT, RoBERTa, and BART tokenizers"
+                    "BERT, RoBERTa, and BART tokenizers plus BPE vocabulary"
                 )
                 return 1
             precomputer = RobustClapEmbeddingPrecomputer(
@@ -269,6 +272,7 @@ def run_preprocess(args: argparse.Namespace) -> int:
                 bert_tokenizer_path=str(args.robust_bert_tokenizer),
                 roberta_tokenizer_path=str(args.robust_roberta_tokenizer),
                 bart_tokenizer_path=str(args.robust_bart_tokenizer),
+                bpe_vocab_path=str(args.robust_bpe_vocab),
                 enable_fusion=False,
                 device=args.device,
                 batch_size_audio=args.batch_size_audio,
@@ -361,11 +365,12 @@ def run_preprocess(args: argparse.Namespace) -> int:
                 args.robust_bert_tokenizer,
                 args.robust_roberta_tokenizer,
                 args.robust_bart_tokenizer,
+                args.robust_bpe_vocab,
             )
         ):
             print(
                 "Error: Robust-CLAP UIQ embeddings require source, checkpoint, "
-                "and local BERT, RoBERTa, and BART tokenizers"
+                "and local BERT, RoBERTa, and BART tokenizers plus BPE vocabulary"
             )
             return 1
 
@@ -426,6 +431,9 @@ def run_preprocess(args: argparse.Namespace) -> int:
                 str(args.robust_bart_tokenizer)
                 if args.robust_bart_tokenizer
                 else None
+            ),
+            robust_bpe_vocab=(
+                str(args.robust_bpe_vocab) if args.robust_bpe_vocab else None
             ),
             robust_disable_fusion=True,
         )

@@ -70,6 +70,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--robust-bert-tokenizer", type=Path)
     parser.add_argument("--robust-roberta-tokenizer", type=Path)
     parser.add_argument("--robust-bart-tokenizer", type=Path)
+    parser.add_argument("--robust-bpe-vocab", type=Path)
     return parser.parse_args()
 
 

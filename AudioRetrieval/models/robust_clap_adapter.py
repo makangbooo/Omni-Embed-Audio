@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import gzip
 import hashlib
 import sys
 import warnings
@@ -16,6 +17,10 @@ from AudioRetrieval.eval_core import BaseRetrievalModel, l2norm
 
 TRUSTED_CHECKPOINT_SHA256 = (
     "8053c9775516af2f4902e1e8281e356cc1bf7a85e8b761908170767b77c3f037"
+)
+TRUSTED_BPE_VOCAB_BYTES = 1356917
+TRUSTED_BPE_VOCAB_SHA256 = (
+    "924691ac288e54409236115652ad4aa250f48203de50a9e4722a6ecd48d6804a"
 )
 
 
@@ -62,6 +67,8 @@ def _local_robust_tokenizer_redirect(
     bert_tokenizer_path: str | Path,
     roberta_tokenizer_path: str | Path,
     bart_tokenizer_path: str | Path,
+    bpe_vocab_path: str | Path,
+    requested_bpe_path: str | Path,
 ):
     """Keep all eager upstream tokenizer construction offline and pinned."""
     from transformers import RobertaTokenizer, T5Tokenizer
@@ -70,6 +77,13 @@ def _local_robust_tokenizer_redirect(
     local_roberta = RobertaTokenizer.from_pretrained(
         str(roberta_path), local_files_only=True
     )
+    bpe_path = Path(bpe_vocab_path).expanduser().resolve()
+    if (
+        bpe_path.stat().st_size != TRUSTED_BPE_VOCAB_BYTES
+        or _sha256_file(bpe_path) != TRUSTED_BPE_VOCAB_SHA256
+    ):
+        raise RuntimeError("Robust-CLAP BPE vocabulary differs from the pinned artifact")
+    missing_bpe_path = Path(requested_bpe_path).expanduser().resolve()
     tokenizer_paths = {
         "bert-base-uncased": str(Path(bert_tokenizer_path).expanduser().resolve()),
         "roberta-base": str(roberta_path),
@@ -80,6 +94,7 @@ def _local_robust_tokenizer_redirect(
 
     sentinel = object()
     previous = T5Tokenizer.__dict__.get("from_pretrained", sentinel)
+    original_gzip_open = gzip.open
 
     def redirect_t5(requested, *args, **kwargs):
         if requested != "google/flan-t5-large":
@@ -88,11 +103,18 @@ def _local_robust_tokenizer_redirect(
             )
         return local_roberta
 
+    def redirect_bpe(filename, *args, **kwargs):
+        if Path(filename).expanduser().resolve() == missing_bpe_path:
+            filename = bpe_path
+        return original_gzip_open(filename, *args, **kwargs)
+
     with local_tokenizer_redirect(tokenizer_paths):
         setattr(T5Tokenizer, "from_pretrained", staticmethod(redirect_t5))
+        gzip.open = redirect_bpe
         try:
             yield local_roberta
         finally:
+            gzip.open = original_gzip_open
             if previous is sentinel:
                 delattr(T5Tokenizer, "from_pretrained")
             else:
@@ -112,15 +134,21 @@ class RobustClapAdapter(BaseRetrievalModel):
         bert_tokenizer_path: Optional[str | Path] = None,
         roberta_tokenizer_path: Optional[str | Path] = None,
         bart_tokenizer_path: Optional[str | Path] = None,
+        bpe_vocab_path: Optional[str | Path] = None,
     ) -> None:
         if repo_root is None:
             raise ValueError("Robust-CLAP requires a pinned upstream source tree")
         if not all(
-            (bert_tokenizer_path, roberta_tokenizer_path, bart_tokenizer_path)
+            (
+                bert_tokenizer_path,
+                roberta_tokenizer_path,
+                bart_tokenizer_path,
+                bpe_vocab_path,
+            )
         ):
             raise ValueError(
                 "Robust-CLAP requires pinned local BERT, RoBERTa, and BART "
-                "tokenizers"
+                "tokenizers and a pinned local BPE vocabulary"
             )
         self.repo_path = _add_repo_to_path(repo_root)
 
@@ -128,6 +156,9 @@ class RobustClapAdapter(BaseRetrievalModel):
             bert_tokenizer_path,
             roberta_tokenizer_path,
             bart_tokenizer_path,
+            bpe_vocab_path,
+            Path(self.repo_path)
+            / "laion_clap/clap_module/bpe_simple_vocab_16e6.txt.gz",
         ) as local_roberta:
             from laion_clap import CLAP_Module
 
