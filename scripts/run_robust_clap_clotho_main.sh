@@ -98,6 +98,7 @@ echo "EXPERIMENT_NAME=Robust-CLAP Clotho Tables 2/3/12-15 controlled binding"
 echo "PAPER_EXPERIMENTS=EXP-10 Table 2; EXP-11 Table 3; EXP-12-15 positive UIQ"
 echo "GIT_COMMIT=${GIT_COMMIT}"
 echo "MODEL=Robust-CLAP upstream source with SHA256-locked standard LAION checkpoint; HTSAT-tiny; RoBERTa; non-fusion"
+echo "SOURCE_REVISION=${SOURCE_REVISION}"
 echo "PROTOCOL_STATUS=controlled public-code reproduction; strict Robust-specific paper checkpoint identity not claimed"
 echo "DATASET=Clotho v2.1 evaluation; 1,045 audio; 5,225 captions; 4,180 released UIQ queries"
 echo "GPU_USED=yes; CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}"
@@ -118,8 +119,9 @@ for required in "${SOURCE_DIR}" "${CHECKPOINT}" "${BERT_TOKENIZER}" \
   "${RUNTIME_OVERLAY}" "${AUDIO_DIR}" "${CAPTIONS_CSV}"; do
   [[ -e "${required}" ]] || fail 4 "Required resource is missing: ${required}"
 done
-[[ "$(git -C "${SOURCE_DIR}" rev-parse HEAD)" == "${SOURCE_REVISION}" ]] \
-  || fail 4 "Robust-CLAP source revision mismatch"
+python scripts/validate_robust_clap_source.py \
+  --source-dir "${SOURCE_DIR}" --output "${RESULT_DIR}/source_identity.json" \
+  || fail 4 "Robust-CLAP source identity mismatch"
 [[ "$(stat -c %s "${CHECKPOINT}")" == "${CHECKPOINT_BYTES}" ]] \
   || fail 4 "Checkpoint byte size mismatch"
 [[ "$(sha256sum "${CHECKPOINT}" | awk '{print $1}')" == "${CHECKPOINT_SHA256}" ]] \

@@ -320,6 +320,11 @@ done
   || fail 4 "Checkpoint SHA256 mismatch"
 [[ "$(sha256sum "${MANIFEST}" | awk '{print $1}')" == "${MANIFEST_SHA256}" ]] \
   || fail 4 "AudioCaps manifest SHA256 mismatch"
+if [[ "${VARIANT_ID}" == "robust_clap" ]]; then
+  python scripts/validate_robust_clap_source.py \
+    --source-dir "${SOURCE_DIR}" --output "${RESULT_DIR}/source_identity.json" \
+    || fail 4 "Robust-CLAP source identity mismatch"
+fi
 
 printf '%s\n' "${GIT_COMMIT}" > "${RESULT_DIR}/git_commit.txt"
 printf '%s\n' "${GIT_STATUS}" > "${RESULT_DIR}/git_status.txt"

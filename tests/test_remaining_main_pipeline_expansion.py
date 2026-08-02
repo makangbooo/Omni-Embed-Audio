@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import tempfile
 import sys
 import types
@@ -16,6 +17,7 @@ from scripts.export_vanilla_audiocaps_npz import export
 from AudioRetrieval.models.robust_clap_adapter import (
     _local_robust_tokenizer_redirect,
 )
+from scripts import validate_robust_clap_source
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -118,6 +120,30 @@ class VanillaAudioCapsExpansionTests(unittest.TestCase):
 
 
 class RobustClapExpansionTests(unittest.TestCase):
+    def test_archive_source_identity_uses_marker_and_file_hashes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / ".source_revision").write_text("fixed-revision\n", encoding="utf-8")
+            source_file = root / "src/laion_clap/hook.py"
+            source_file.parent.mkdir(parents=True)
+            source_file.write_bytes(b"pinned source")
+            expected = {
+                "src/laion_clap/hook.py": (
+                    len(b"pinned source"),
+                    hashlib.sha256(b"pinned source").hexdigest(),
+                )
+            }
+            with mock.patch.object(
+                validate_robust_clap_source,
+                "EXPECTED_SOURCE_REVISION",
+                "fixed-revision",
+            ), mock.patch.object(
+                validate_robust_clap_source, "EXPECTED_FILES", expected
+            ):
+                report = validate_robust_clap_source.validate_source(root)
+            self.assertEqual(report["status"], "complete")
+            self.assertEqual(report["revision"], "fixed-revision")
+
     def test_flan_t5_request_is_redirected_without_network_access(self) -> None:
         calls = []
 
@@ -191,6 +217,8 @@ class RobustClapExpansionTests(unittest.TestCase):
             self.assertIn(fragment, source)
         for forbidden in ("curl ", "wget ", "gdown ", "rm ", "tmux "):
             self.assertNotIn(forbidden, source)
+        self.assertIn("validate_robust_clap_source.py", source)
+        self.assertNotIn('git -C "${SOURCE_DIR}"', source)
 
 
 if __name__ == "__main__":

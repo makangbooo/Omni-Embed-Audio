@@ -4,8 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
-import subprocess
 from pathlib import Path
 import sys
 
@@ -16,9 +14,9 @@ if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from scripts.precompute_mecat_audio_embeddings import identity, write_json
+from scripts.validate_robust_clap_source import validate_source
 
 
-EXPECTED_SOURCE_REVISION = "d08d0e3c545fa22df0930fc0d090741aaa9e2cc1"
 EXPECTED_CHECKPOINT_SHA256 = (
     "8053c9775516af2f4902e1e8281e356cc1bf7a85e8b761908170767b77c3f037"
 )
@@ -36,12 +34,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def validate(args: argparse.Namespace) -> dict:
-    source = args.source_dir.resolve()
-    revision = subprocess.check_output(
-        ["git", "-C", str(source), "rev-parse", "HEAD"], text=True
-    ).strip()
-    if revision != EXPECTED_SOURCE_REVISION:
-        raise ValueError(f"Robust-CLAP source revision mismatch: {revision}")
+    source_identity = validate_source(args.source_dir)
     checkpoint = identity(args.checkpoint.resolve())
     if checkpoint["sha256"] != EXPECTED_CHECKPOINT_SHA256:
         raise ValueError("Robust-CLAP checkpoint SHA256 mismatch")
@@ -69,7 +62,7 @@ def validate(args: argparse.Namespace) -> dict:
         "status": "complete",
         "model": "Robust-CLAP controlled standard-checkpoint binding",
         "strict_paper_checkpoint_reproduction": False,
-        "source_revision": revision,
+        "source_identity": source_identity,
         "checkpoint": checkpoint,
         "enable_fusion": False,
         "audio_shape": list(audio.shape),
