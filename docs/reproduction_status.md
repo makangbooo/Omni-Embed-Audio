@@ -133,6 +133,7 @@
 | 3 数据 | DATA-10：Clotho development/validation 安全解压与全量校验 | TODO | `f04128d` | 本地四 CSV 全量审计和 97 项测试通过；远程 4,884 WAV 尚未解压/解码 | 等待 DATA-03 两个归档完成；论文 early-stopping split `[MISSING]` | DATA-03 完整性确认后再安排 CPU 远程执行；公开代码与 clean-validation 路线分栏 |
 | 3 数据 | DATA-04：固定并下载 MECAT `00A/test` | COMPLETED | run commit=`febfbe4`；审计=`results/audits/data04_data05_mecat_remote_20260729.json` | wrapper=`oea_takeover_data04_20260729_121242`；下载/wrapper=`0/0`；173,168,424-byte archive 的本地/LFS SHA256 均为 `644cf75e...122c4` | 无；现有资产经固定 revision 校验后复用 | 不重复下载；保留远程原始日志与 manifest |
 | 3 数据 | DATA-05：MECAT 848 条安全解压/解码/UIQ ID 校验 | COMPLETED | run commit=`febfbe4`；同上审计 | validation/wrapper=`0/0`；848 manifest rows、848 FLAC 全解码、四类正向 UIQ 精确 ID 对齐；manifest SHA256=`b4c4d8c1...94a6` | `[PAPER][MISSING]` 847-row 子集、排除 ID与 T2A/T2T caption 字段；严格主表仍 BLOCKED | DATA-11 已完成；如做公开 848 替代实验须单独标记 |
+| 3 数据 | MECAT public-848 Table 2/3 caption 口径门禁 | WAITING_USER | 待本提交 | 已实现只读、manifest SHA256 绑定的六字段 multiplicity 审计；尚未读取远程 848-row 实际统计 | 需确认 `short[0]`、`short` 全量和六字段合并中哪些具备完整 T2A/T2T 正样本；论文协议仍 `[MISSING]` | 用户在远程 CPU 执行审计；收到 JSON 后固定受控协议并生成 13 模型 runner |
 | 3 数据 | MECAT 论文 847 条子集与检索 caption 口径 | BLOCKED | `87dbe32` | 官方 `00A/test` 与发布正向 UIQ 均为 848；审计文档已完成 | `[MISSING]` 被排除 ID、过滤规则、caption 字段/组合均未公开 | 不擅自删样本；先报告 848 条公开口径，继续请求作者证据 |
 | 3 数据 | DATA-11：MECAT–WavCaps 来源视频候选审计 | COMPLETED | run commit=`e415c1d`；审计=`results/audits/data11_mecat_wavcaps_remote_20260729.json` | run=`data11_mecat_wavcaps_provenance_20260729_130758`；call/audit/wrapper=`0/0/0`；848 samples、807 唯一来源视频、4 个同源视频候选；统计和候选 JSONL SHA256 已固定 | 工具任务完成不解除 EXP-09：论文音频/embedding 阈值、人工复核候选与 847-row 子集仍 `[MISSING]` | 不删样本、不生成 blocklist；EXP-09 保持 IN_PROGRESS |
 | 3 数据 | DATA-12：固定并下载 SQuTR 官方归档 | COMPLETED | `faf5faa` | 远程运行 `data12_squtr_download_20260726_130854` 使用 HTTP/1.1 从 16,524,500,992 bytes 成功续传；wrapper/download exit 均为 0，最终 21,069,841,248 bytes，SHA256 `8956bf93...c6997c`，manifest status=`complete`、Git 状态为空 | 无；续传补丁已在真实链路验证 | DATA-13A 已完成；进入 DATA-13B 安全解压和内容校验 |
@@ -156,5 +157,5 @@
 - 正文 Table 2/3 模型×数据集×任务覆盖为 `52/78 = 66.7%`；其中 Clotho 与 AudioCaps 均为 `26/26 = 100%`，MECAT 严格协议仍为 `0/26`。Tables 2/3/12–15 核心默认行总覆盖为 `172/198 = 86.9%`；这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
 - 最近完成：Robust-CLAP 在 RTX 4090 上完成 AudioCaps 与 MECAT public-848 两项受控运行，RC 均为 `0`、耗时 `206/128s`。AudioCaps Table 2/3 默认协议最大差=`0.0428/2.7310` pp，四类 UIQ 最大差=`0.1044/0.1041/0.1005/0.2026` pp；MECAT 四类 public-848 最大差=`1.7664/0.9438/0.9411/1.1766` pp。全部为 controlled close，不声明严格 paper-checkpoint 或 847-row 复现。
 - 当前阻塞：严格论文 caption selection、T2T self/tie 未发布；MECAT 严格协议缺 847-row 排除 ID 与六个 caption 字段的选择/组合规则；negative UIQ 缺 target-HN audio pairing；Robust 缺论文行与具体 checkpoint 的严格绑定证据。
-- 当前等待：没有远程主实验正在运行；公开可执行的 Tables 2/3/12–15 核心矩阵已完成，不再要求重复 GPU 运行。
-- 下一步：转入非公开信息依赖阶段：继续请求 MECAT 847-row 排除 ID/caption 规则与 negative UIQ target-HN pairing；并行准备训练闭环和后置扩展实验，但不把受控公开结果冒充严格论文复现。
+- 当前等待：没有远程主实验正在运行；MECAT public-848 Table 2/3 caption 口径门禁等待用户返回一次只读 CPU 审计结果。
+- 下一步：根据六字段实际 multiplicity 固定不事后择优的 public-848 T2A/T2T 协议并生成 13 模型 runner；严格 MECAT 847-row 与 negative UIQ target-HN pairing blocker 继续分栏。
