@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_remote_run_terminal_and_suite_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The evidence includes a retained RTX 4090 OOM attempt and a complete A100-SXM4-80GB rerun with suite JSON, artifact hashes, stage exits, and official-source paths."
+  },
+  "paper_scope": [
+    "EXP-10 / Table 2 / OEA-Qwen7B / AudioCaps / T2A",
+    "EXP-11 / Table 3 / OEA-Qwen7B / AudioCaps / T2T",
+    "EXP-12 / Table 12 / OEA-Qwen7B / AudioCaps / Question UIQ",
+    "EXP-13 / Table 13 / OEA-Qwen7B / AudioCaps / Imperative UIQ",
+    "EXP-14 / Table 14 / OEA-Qwen7B / AudioCaps / Paraphrase UIQ",
+    "EXP-15 / Table 15 / OEA-Qwen7B / AudioCaps / Keyphrase UIQ"
+  ],
+  "model": {
+    "paper_name": "OEA-Qwen7B",
+    "released_name": "OEA-Qwen7B-AC",
+    "base_model": "Qwen/Qwen2.5-Omni-7B@ae9e1690543ffd5c0221dc27f79834d0294cba00",
+    "checkpoint": "OEA-Qwen7B-AC/step_300.pt",
+    "checkpoint_bytes": 17940602533,
+    "checkpoint_sha256": "cd751e3a71f0b47b9ecbbc0f5a11e4673097f0ebdbd80f610387f5778dd70a46",
+    "embedding_dimension": 512
+  },
+  "dataset": {
+    "name": "AudioCaps v2 test",
+    "candidate_audio_count": 975,
+    "caption_count": 4875,
+    "positive_uiq_query_count": 3900,
+    "audio_manifest_sha256": "a341c9dfcb1b2cbe69675e8f1338edb502ce03f8984bf5882dc4d107b72144b4"
+  },
+  "official_source": {
+    "oea_official_source_used": true,
+    "source_files": [
+      "AudioRetrieval/preprocessing/embeddings/oea.py",
+      "AudioRetrieval/preprocessing/embeddings/uiq_text.py",
+      "AudioRetrieval/evaluation/metrics.py"
+    ],
+    "compatibility_layer": "AudioRetrieval/evaluation/canonical.py"
+  },
+  "attempts": [
+    {
+      "run_id": "oea_qwen7b_audiocaps_main_20260802_123622",
+      "gpu_name": "NVIDIA GeForce RTX 4090",
+      "gpu_memory_mib": 24564,
+      "driver_version": "580.76.05",
+      "started_at": "2026-08-02T12:36:22+08:00",
+      "finished_at": "2026-08-02T12:39:49+08:00",
+      "elapsed_seconds": 207,
+      "final_run_rc": 1,
+      "completion_status": "failed",
+      "failed_stage": "gpu_audio_caption_embeddings",
+      "error_type": "torch.OutOfMemoryError",
+      "oom_requested_gib": 2.33,
+      "oom_process_memory_in_use_gib": 22.45,
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen7b_audiocaps_main_20260802_123622",
+      "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/oea_qwen7b_audiocaps_main_20260802_123622/combined.log",
+      "artifacts_retained": true
+    },
+    {
+      "run_id": "oea_qwen7b_audiocaps_main_20260802_125210",
+      "gpu_name": "NVIDIA A100-SXM4-80GB",
+      "gpu_memory_mib": 81920,
+      "driver_version": "580.95.05",
+      "started_at": "2026-08-02T12:52:10+08:00",
+      "finished_at": "2026-08-02T13:00:34+08:00",
+      "elapsed_seconds": 504,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "failed_stage": "none"
+    }
+  ],
+  "run": {
+    "run_id": "oea_qwen7b_audiocaps_main_20260802_125210",
+    "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen7b_audiocaps_main_20260802_125210",
+    "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/oea_qwen7b_audiocaps_main_20260802_125210/combined.log",
+    "metrics_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen7b_audiocaps_main_20260802_125210/metrics/suite_metrics.json",
+    "git_commit": "272d96ff3666acdd8a16656e15c619da9baace8b",
+    "git_status_short": "",
+    "started_at": "2026-08-02T12:52:10+08:00",
+    "finished_at": "2026-08-02T13:00:34+08:00",
+    "elapsed_seconds": 504,
+    "final_run_rc": 0,
+    "completion_status": "complete",
+    "failed_stage": "none",
+    "gpu_used": true,
+    "gpu_visible_device": 0,
+    "gpu_name": "NVIDIA A100-SXM4-80GB",
+    "gpu_memory_mib": 81920,
+    "driver_version": "580.95.05",
+    "cuda_version": "13.0",
+    "downloads_required": false,
+    "overwrite_or_delete_risk": "none"
+  },
+  "generation": {
+    "status": "complete",
+    "audio_embedding_shape": [975, 512],
+    "caption_embedding_shape": [4875, 512],
+    "uiq_embedding_shapes": {
+      "question": [975, 512],
+      "imperative": [975, 512],
+      "paraphrase": [975, 512],
+      "tagging": [975, 512]
+    }
+  },
+  "returned_artifacts": {
+    "generation_metrics_sha256": "4e19d9b27b1284772afc39cabd6e419e9c444c8f40e1803d3b8d6b024073d14e",
+    "audio_embeddings_sha256": "27ce560e237c1ae3baf40d4f3a18ad4643fcf7021bcbdbc559cca8c26cac2f2f",
+    "caption_embeddings_sha256": "5ef3cbb0f1b311b35b5af93720204c2f6a2a81112f5da61cd6087e68883e076f",
+    "uiq_question_embeddings_sha256": "fcd82b5f9f01e67d4972b8e80e454be77777fca59ca8022a0747e8e2216a433a",
+    "uiq_imperative_embeddings_sha256": "baef15901cb1dd63a47d9bc757dbbf20288d6e7f6017f402c63eb1626923638f",
+    "uiq_paraphrase_embeddings_sha256": "28af0af1a2cfb2dafb47532869c9fa35ef2d1e67eda7205c37886c89be944809",
+    "uiq_tagging_embeddings_sha256": "e8418480566ab7d73259752e2b55870bdd984f5d6956aae764c8fb6ec3c9e903",
+    "suite_metrics_sha256": "a832f985c8ae617e2c1c440a3f6879e0017a150080b2216f8be8c1989c54d17c",
+    "combined_log_sha256": "01993a6f7c5b54e0522643addf3601ce2b2332bc590055d442a1390ad99dff68"
+  },
+  "protocols": {
+    "t2a_public_code_default_joint_all_captions": {
+      "paper_table": "Table 2",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 37.005128, "R@5": 71.876923, "R@10": 84.164103}
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "paper_table": "Table 2 sensitivity",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 38.256410, "R@5": 70.051282, "R@10": 83.897436}
+    },
+    "t2t_public_code_default_seed0": {
+      "paper_table": "Table 3",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 49.435897, "R@5": 72.923077, "R@10": 82.051282}
+    },
+    "t2t_all_captions_sensitivity": {
+      "paper_table": "Table 3 sensitivity",
+      "protocol_source": "INFERRED",
+      "metrics": {"R@1": 49.435897, "R@5": 72.758974, "R@10": 81.641026}
+    },
+    "question_released_uiq": {
+      "paper_table": "Table 12",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 35.897436, "R@5": 70.769231, "R@10": 84.000000}
+    },
+    "imperative_released_uiq": {
+      "paper_table": "Table 13",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 43.076923, "R@5": 73.948718, "R@10": 85.435897}
+    },
+    "paraphrase_released_uiq": {
+      "paper_table": "Table 14",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 42.153846, "R@5": 76.717949, "R@10": 87.692308}
+    },
+    "tagging_released_uiq": {
+      "paper_table": "Table 15",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 42.051282, "R@5": 76.102564, "R@10": 87.487179}
+    }
+  },
+  "paper_values": {
+    "table2_t2a": {"R@1": 38.03, "R@5": 72.25, "R@10": 84.53},
+    "table3_t2t": {"R@1": 50.30, "R@5": 72.31, "R@10": 82.05},
+    "table12_question": {"R@1": 36.92, "R@5": 70.26, "R@10": 84.72},
+    "table13_imperative": {"R@1": 42.15, "R@5": 74.77, "R@10": 84.82},
+    "table14_paraphrase": {"R@1": 42.67, "R@5": 75.90, "R@10": 87.69},
+    "table15_keyphrase": {"R@1": 43.79, "R@5": 74.87, "R@10": 88.00}
+  },
+  "comparison": {
+    "t2a_public_code_default_joint_all_captions": {
+      "signed_delta_percentage_points": {"R@1": -1.024872, "R@5": -0.373077, "R@10": -0.365897},
+      "maximum_absolute_delta_percentage_points": 1.024872,
+      "status": "close"
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "signed_delta_percentage_points": {"R@1": 0.226410, "R@5": -2.198718, "R@10": -0.632564},
+      "maximum_absolute_delta_percentage_points": 2.198718,
+      "status": "sensitivity_close"
+    },
+    "t2t_public_code_default_seed0": {
+      "signed_delta_percentage_points": {"R@1": -0.864103, "R@5": 0.613077, "R@10": 0.001282},
+      "maximum_absolute_delta_percentage_points": 0.864103,
+      "status": "close"
+    },
+    "t2t_all_captions_sensitivity": {
+      "signed_delta_percentage_points": {"R@1": -0.864103, "R@5": 0.448974, "R@10": -0.408974},
+      "maximum_absolute_delta_percentage_points": 0.864103,
+      "status": "sensitivity_close"
+    },
+    "question_released_uiq": {
+      "signed_delta_percentage_points": {"R@1": -1.022564, "R@5": 0.509231, "R@10": -0.720000},
+      "maximum_absolute_delta_percentage_points": 1.022564,
+      "status": "close"
+    },
+    "imperative_released_uiq": {
+      "signed_delta_percentage_points": {"R@1": 0.926923, "R@5": -0.821282, "R@10": 0.615897},
+      "maximum_absolute_delta_percentage_points": 0.926923,
+      "status": "close"
+    },
+    "paraphrase_released_uiq": {
+      "signed_delta_percentage_points": {"R@1": -0.516154, "R@5": 0.817949, "R@10": 0.002308},
+      "maximum_absolute_delta_percentage_points": 0.817949,
+      "status": "close"
+    },
+    "tagging_released_uiq": {
+      "signed_delta_percentage_points": {"R@1": -1.738718, "R@5": 1.232564, "R@10": -0.512821},
+      "maximum_absolute_delta_percentage_points": 1.738718,
+      "status": "close"
+    }
+  },
+  "protocol_boundary": {
+    "status": "CONTROLLED_PUBLIC_CODE_REPRODUCTION",
+    "strict_paper_reproduction": false,
+    "reason": "PAPER does not publish byte-bound caption selection, T2T self/tie handling, or a complete baseline UIQ command. All predeclared CODE and INFERRED protocols are retained without post-hoc selection.",
+    "no_post_hoc_selection": true
+  }
+}
