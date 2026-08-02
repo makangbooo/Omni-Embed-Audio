@@ -34,7 +34,7 @@ it imports no model library, downloads nothing, and uses no GPU.
 | Model | Committed code path | Immutable resource identity | Current result |
 |---|---|---|---|
 | LAION-CLAP | Adapter, baseline runner, Hydra config/loader, CLI choice | `[MISSING]`; config delegates to the installed package default | `BLOCKED` |
-| Robust-CLAP | Adapter and UIQ text precomputer only | `[MISSING]`; local checkpoint/source trees are named but not identified | `BLOCKED` |
+| Robust-CLAP | Dedicated locked CLI/precomputer plus Clotho smoke/full/UIQ runner | Upstream source revision and standard LAION checkpoint are fixed; strict paper row-to-checkpoint binding remains `[MISSING]` | `BLOCKED` for strict reproduction; controlled run ready |
 | MGA-CLAP | Adapter, runner, Hydra config/loader, CLI choice | `[MISSING]`; source tree/checkpoint are untracked | `BLOCKED` |
 | M2D-CLAP | Adapter and vendored portable model only | `[MISSING]`; no checkpoint revision/SHA256 | `BLOCKED` |
 | Nemotron-3B | Base-lock pipeline, fixed Clotho protocol, resumable base-only generator/wrapper, and four-protocol CPU finalizer | Base snapshot is pinned by MODEL-03; real lock not yet generated | `BLOCKED` pending committed lock and GPU fixture |
@@ -42,7 +42,8 @@ it imports no model library, downloads nothing, and uses no GPU.
 | Qwen2.5-Omni-7B | Base-lock pipeline, fixed Clotho protocol, resumable base-only generator/wrapper, and four-protocol CPU finalizer | Complete 20-file/22.38-GB base-only lock is committed from the clean `f861314` remote audit | `READY` pending separate GPU approval |
 
 No row is currently formal-ready. This is not solely a checkpoint-download
-problem: Robust-CLAP and M2D-CLAP lack normal baseline entrypoints; MGA-CLAP's
+problem: M2D-CLAP lacks a normal baseline entrypoint; Robust-CLAP now has a
+dedicated controlled runner but still lacks strict paper checkpoint binding; MGA-CLAP's
 argparse route does not pass the required repository/checkpoint paths; and all
 three vanilla rows still lack a real committed base lock and successful GPU
 fixture. The committed CPU pipeline can produce those locks and the formal
@@ -56,10 +57,14 @@ remote stage has run.
    `eval_hydra.py` is a separate entrypoint.
 2. `[CODE]` argparse advertises an `oea` model choice, while
    `BaselineRunner._load_adapter()` has no `oea`/`omni_embed` branch.
-3. `[CODE]` Robust-CLAP assumes untracked `_linguistic_robust_clap-master` and
-   `torchlibrosa` trees and applies tokenizer/STFT compatibility changes. The
-   original failure, upstream commit, and exact checkpoint are not committed,
-   so this cannot yet be presented as a verified minimal bug fix.
+3. `[CODE]` Robust-CLAP now requires upstream commit
+   `d08d0e3c545fa22df0930fc0d090741aaa9e2cc1`, local BERT, RoBERTa, and BART
+   tokenizer trees, non-fusion mode, and the SHA256-locked standard LAION
+   checkpoint. The upstream source eagerly requests `google/flan-t5-large`
+   despite its RoBERTa text tower; construction redirects that request to the
+   already loaded local RoBERTa tokenizer and rejects unexpected requests.
+   This enables a controlled offline run, not a strict claim about the OEA
+   paper's undisclosed model binding.
 4. `[CODE]` the common `OmniEmbedAdapter` implements attention-mask-aware mean
    pooling and L2 normalization, but the exact audio-prefix behavior conflicts
    with the paper statement. The formal vanilla wrapper now fixes and labels
@@ -72,8 +77,8 @@ remote stage has run.
    can be loaded but cannot be compared fairly across all paper datasets.
 2. Pin each CLAP source revision, dependency environment, checkpoint file,
    byte size, and SHA256. Record access/license requirements separately.
-3. For Robust-CLAP, first preserve the original load error, then assess the
-   existing compatibility changes as an independent minimal patch.
+3. For Robust-CLAP, run the 5-audio/25-caption Clotho smoke first. Continue to
+   full evaluation only if the strict resource and shape gates pass.
 4. Run the non-overwriting vanilla base-lock pipeline for each complete base
    snapshot and commit only the small locks. Then run a lock-bound GPU fixture
    before full Clotho embedding generation.

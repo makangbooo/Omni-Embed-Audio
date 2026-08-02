@@ -1,18 +1,9 @@
-# -*- coding: utf-8 -*-
-"""Adapter for the linguistic robust-CLAP checkpoint (fusion) we downloaded locally.
-
-IMPORTANT FIXES (2024-12):
-1. Custom torchlibrosa: The checkpoint was trained with an old torchlibrosa version
-   that used conv-based STFT keys (stft.conv_real.weight, stft.conv_imag.weight, melW).
-   Modern torchlibrosa uses transform.window and mel.fb. We inject our custom
-   torchlibrosa/stft.py before importing laion_clap to match checkpoint keys.
-
-2. RoBERTa tokenizer: The hook.py in robust-clap uses T5Tokenizer but the text model
-   is RoBERTa. This produces completely wrong token IDs. We replace with RobertaTokenizer.
-"""
+"""Adapter for the controlled Robust-CLAP standard-checkpoint binding."""
 
 from __future__ import annotations
 
+import contextlib
+import hashlib
 import sys
 import warnings
 from pathlib import Path
@@ -21,53 +12,38 @@ from typing import List, Optional
 import numpy as np
 
 from AudioRetrieval.eval_core import BaseRetrievalModel, l2norm
-from AudioRetrieval.models.laion_clap_adapter import _center_crop_or_pad, _safe_import_sound_loader
-
-# Default to the checked-out repo if present (same level as this project root).
-DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[2] / "_linguistic_robust_clap-master"
-# Custom torchlibrosa with old key format (conv-based STFT)
-CUSTOM_TORCHLIBROSA_ROOT = Path(__file__).resolve().parents[2]
 
 
-def _inject_custom_torchlibrosa():
-    """Inject custom torchlibrosa BEFORE any laion_clap imports.
-
-    The robust-clap checkpoint was trained with an old torchlibrosa that used:
-    - stft.conv_real.weight, stft.conv_imag.weight (conv-based STFT)
-    - melW (mel filter bank)
-
-    Modern torchlibrosa uses:
-    - transform.window (transform-based STFT)
-    - mel.fb (mel filter bank)
-
-    Our custom torchlibrosa/stft.py matches the checkpoint's key structure.
-    """
-    custom_path = str(CUSTOM_TORCHLIBROSA_ROOT.resolve())
-    torchlibrosa_path = CUSTOM_TORCHLIBROSA_ROOT / "torchlibrosa"
-
-    if torchlibrosa_path.exists() and custom_path not in sys.path:
-        # Insert at the very beginning to override installed torchlibrosa
-        sys.path.insert(0, custom_path)
+TRUSTED_CHECKPOINT_SHA256 = (
+    "8053c9775516af2f4902e1e8281e356cc1bf7a85e8b761908170767b77c3f037"
+)
 
 
-def _maybe_add_repo_to_path(repo_root: Optional[str | Path]) -> Optional[str]:
-    """Prepend the robust-clap repo (or its src dir) to sys.path if it exists."""
-    if repo_root is None:
-        return None
-    root = Path(repo_root).expanduser()
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while chunk := handle.read(8 * 1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _add_repo_to_path(repo_root: str | Path) -> str:
+    root = Path(repo_root).expanduser().resolve()
     for candidate in (root / "src", root):
-        if candidate.exists() and candidate.is_dir():
-            path_str = str(candidate.resolve())
-            if path_str not in sys.path:
-                sys.path.insert(0, path_str)
-            return path_str
-    return None
+        if candidate.is_dir():
+            value = str(candidate)
+            if value not in sys.path:
+                sys.path.insert(0, value)
+            return value
+    raise FileNotFoundError(root)
 
 
-def _create_roberta_tokenizer():
-    """Create proper RoBERTa tokenizer (instead of T5 used in buggy hook.py)."""
+def _create_roberta_tokenizer(tokenizer_path: str | Path):
     from transformers import RobertaTokenizer
-    tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+
+    tokenizer = RobertaTokenizer.from_pretrained(
+        str(Path(tokenizer_path).expanduser().resolve()), local_files_only=True
+    )
 
     def tokenize_fn(texts):
         return tokenizer(
@@ -77,103 +53,122 @@ def _create_roberta_tokenizer():
             max_length=77,
             return_tensors="pt",
         )
+
     return tokenize_fn
 
 
+@contextlib.contextmanager
+def _local_robust_tokenizer_redirect(
+    bert_tokenizer_path: str | Path,
+    roberta_tokenizer_path: str | Path,
+    bart_tokenizer_path: str | Path,
+):
+    """Keep all eager upstream tokenizer construction offline and pinned."""
+    from transformers import RobertaTokenizer, T5Tokenizer
+
+    roberta_path = Path(roberta_tokenizer_path).expanduser().resolve()
+    local_roberta = RobertaTokenizer.from_pretrained(
+        str(roberta_path), local_files_only=True
+    )
+    tokenizer_paths = {
+        "bert-base-uncased": str(Path(bert_tokenizer_path).expanduser().resolve()),
+        "roberta-base": str(roberta_path),
+        "facebook/bart-base": str(Path(bart_tokenizer_path).expanduser().resolve()),
+    }
+
+    from AudioRetrieval.models.laion_clap_tokenizers import local_tokenizer_redirect
+
+    sentinel = object()
+    previous = T5Tokenizer.__dict__.get("from_pretrained", sentinel)
+
+    def redirect_t5(requested, *args, **kwargs):
+        if requested != "google/flan-t5-large":
+            raise RuntimeError(
+                f"unexpected Robust-CLAP T5 tokenizer request: {requested!r}"
+            )
+        return local_roberta
+
+    with local_tokenizer_redirect(tokenizer_paths):
+        setattr(T5Tokenizer, "from_pretrained", staticmethod(redirect_t5))
+        try:
+            yield local_roberta
+        finally:
+            if previous is sentinel:
+                delattr(T5Tokenizer, "from_pretrained")
+            else:
+                setattr(T5Tokenizer, "from_pretrained", previous)
+
+
 class RobustClapAdapter(BaseRetrievalModel):
-    """
-    Thin wrapper around the robust CLAP checkpoint; mirrors the LaionClapAdapter API.
-
-    IMPORTANT: This adapter includes critical fixes for the robust-CLAP checkpoint:
-    1. Custom torchlibrosa with matching key names (conv-based STFT)
-    2. RoBERTa tokenizer instead of T5 (bug fix for hook.py)
-
-    Without these fixes, retrieval R@1 is ~0-2% instead of expected 25-30%.
-    """
+    """Load the pinned upstream source with an explicit standard checkpoint."""
 
     def __init__(
         self,
         ckpt_path: str,
         amodel: str = "HTSAT-tiny",
         tmodel: str = "roberta",
-        enable_fusion: bool = False,  # Changed default: use non-fusion for 630k-audioset-best.pt
+        enable_fusion: bool = False,
         repo_root: Optional[str | Path] = None,
-        resample_sr: int = 48000,
-        audio_duration_sec: float = 10.0,
-        audio_crop: str = "center",
-    ):
-        # FIX 1: Inject custom torchlibrosa BEFORE importing laion_clap
-        # This ensures checkpoint keys match (stft.conv_real.weight vs transform.window)
-        _inject_custom_torchlibrosa()
+        bert_tokenizer_path: Optional[str | Path] = None,
+        roberta_tokenizer_path: Optional[str | Path] = None,
+        bart_tokenizer_path: Optional[str | Path] = None,
+    ) -> None:
+        if repo_root is None:
+            raise ValueError("Robust-CLAP requires a pinned upstream source tree")
+        if not all(
+            (bert_tokenizer_path, roberta_tokenizer_path, bart_tokenizer_path)
+        ):
+            raise ValueError(
+                "Robust-CLAP requires pinned local BERT, RoBERTa, and BART "
+                "tokenizers"
+            )
+        self.repo_path = _add_repo_to_path(repo_root)
 
-        # Prefer the local robust-clap repo if present; otherwise fall back to any installed laion_clap.
-        repo_root = repo_root or (DEFAULT_REPO_ROOT if DEFAULT_REPO_ROOT.exists() else None)
-        self.repo_path = _maybe_add_repo_to_path(repo_root)
-
-        try:
+        with _local_robust_tokenizer_redirect(
+            bert_tokenizer_path,
+            roberta_tokenizer_path,
+            bart_tokenizer_path,
+        ) as local_roberta:
             from laion_clap import CLAP_Module
-        except ImportError as exc:
-            raise ImportError(
-                "Could not import laion_clap for robust-CLAP. "
-                "Install dependencies or point repo_root to _linguistic_robust_clap-master."
-            ) from exc
 
-        self.model = CLAP_Module(enable_fusion=enable_fusion, amodel=amodel, tmodel=tmodel)
+            self.model = CLAP_Module(
+                enable_fusion=enable_fusion, amodel=amodel, tmodel=tmodel
+            )
+        self.model.tokenize = local_roberta
+        self.model.tokenizer = _create_roberta_tokenizer(roberta_tokenizer_path)
 
-        # FIX 2: Replace T5 tokenizer with RoBERTa tokenizer
-        # The hook.py uses T5Tokenizer but text model is RoBERTa - completely wrong token IDs!
-        self.model.tokenizer = _create_roberta_tokenizer()
+        checkpoint = Path(ckpt_path).expanduser().resolve()
+        if _sha256_file(checkpoint) != TRUSTED_CHECKPOINT_SHA256:
+            raise RuntimeError("Robust-CLAP checkpoint differs from the pinned artifact")
+        from AudioRetrieval.models.laion_clap_adapter import _load_checkpoint
 
-        # Load checkpoint with relaxed strictness to accommodate key mismatches between fusion/non-fusion variants.
-        try:
-            from laion_clap.clap_module.factory import load_state_dict as _robust_load_state_dict
-            state = _robust_load_state_dict(ckpt_path, skip_params=True)
-            # Note: self.model is CLAP_Module, self.model.model is the actual CLAP model
-            result = self.model.model.load_state_dict(state, strict=False)
-            if result.missing_keys or result.unexpected_keys:
-                print(f"[RobustClapAdapter] Load state dict: "
-                      f"missing={len(result.missing_keys)}, unexpected={len(result.unexpected_keys)}")
-        except Exception:
-            # Fallback to the module's own loader
-            self.model.load_ckpt(ckpt_path)
+        _load_checkpoint(self.model, checkpoint)
         self.model.eval()
 
-        self.target_sr = int(resample_sr)
-        self.target_len = int(self.target_sr * float(audio_duration_sec))
-        self.audio_crop = audio_crop
-        self._loader = _safe_import_sound_loader()
-
-    def encode_audio(self, paths: List[str], batch_size: int = 64, device: str = "cuda"):
-        try:
-            import torch
-
-            self.model.to(device)
-        except Exception:
-            pass
-
-        # Use get_audio_embedding_from_filelist to let CLAP handle audio preprocessing
-        # This avoids double-preprocessing (pre-cropping + internal random truncation)
-        embs = []
-        for i in range(0, len(paths), batch_size):
-            batch_paths = paths[i : i + batch_size]
+    def encode_audio(
+        self, paths: List[str], batch_size: int = 64, device: str = "cuda"
+    ) -> np.ndarray:
+        self.model.to(device)
+        embeddings = []
+        for index in range(0, len(paths), batch_size):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                e = self.model.get_audio_embedding_from_filelist(batch_paths, use_tensor=False)
-            embs.append(np.asarray(e, dtype=np.float32))
-        return l2norm(np.concatenate(embs, axis=0))
+                value = self.model.get_audio_embedding_from_filelist(
+                    paths[index : index + batch_size], use_tensor=False
+                )
+            embeddings.append(np.asarray(value, dtype=np.float32))
+        return l2norm(np.concatenate(embeddings, axis=0))
 
-    def encode_text(self, texts: List[str], batch_size: int = 256, device: str = "cuda"):
-        try:
-            import torch
-
-            self.model.to(device)
-        except Exception:
-            pass
-        embs = []
-        for i in range(0, len(texts), batch_size):
-            chunk = texts[i : i + batch_size]
+    def encode_text(
+        self, texts: List[str], batch_size: int = 256, device: str = "cuda"
+    ) -> np.ndarray:
+        self.model.to(device)
+        embeddings = []
+        for index in range(0, len(texts), batch_size):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                e = self.model.get_text_embedding(chunk, use_tensor=False)
-            embs.append(np.asarray(e, dtype=np.float32))
-        return l2norm(np.concatenate(embs, axis=0))
+                value = self.model.get_text_embedding(
+                    texts[index : index + batch_size], use_tensor=False
+                )
+            embeddings.append(np.asarray(value, dtype=np.float32))
+        return l2norm(np.concatenate(embeddings, axis=0))

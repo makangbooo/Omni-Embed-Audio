@@ -177,11 +177,16 @@ class AudioCapsMainRunnerTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.source = RUNNER.read_text(encoding="utf-8")
 
-    def test_runner_has_five_models_and_all_main_tables(self) -> None:
+    def test_runner_has_ten_models_and_all_main_tables(self) -> None:
         for variant in (
             "laion_clap",
+            "robust_clap",
             "mga_clap",
             "m2d_clap",
+            "oea_nemo3b",
+            "oea_nemo3b_cl",
+            "oea_qwen3b",
+            "oea_qwen3b_cl",
             "oea_qwen7b",
             "oea_qwen7b_cl",
         ):
@@ -194,6 +199,19 @@ class AudioCapsMainRunnerTests(unittest.TestCase):
             "--expected-captions 4875",
             "GPU_USED=yes",
             "OEA_OFFICIAL_SOURCE_USED=yes",
+        ):
+            self.assertIn(fragment, self.source)
+
+    def test_runner_locks_new_checkpoint_identities(self) -> None:
+        for fragment in (
+            "step_400_best.pt",
+            "55579dfbd4f6621b5d842c5e731d6a1d37dbfd04b26b1c55bf8cdea980e67d25",
+            "step_450_best_inference_only.pt",
+            "2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+            "step_350_inference_only.pt",
+            "b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101",
+            "step_40_inference_only.pt",
+            "f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a",
         ):
             self.assertIn(fragment, self.source)
 

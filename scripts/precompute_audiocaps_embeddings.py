@@ -41,7 +41,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model",
         required=True,
-        choices=("laion_clap", "mga_clap", "m2d_clap", "oea"),
+        choices=("laion_clap", "robust_clap", "mga_clap", "m2d_clap", "oea"),
     )
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--manifest-sha256", required=True)
@@ -65,6 +65,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mga-checkpoint-sha256")
     parser.add_argument("--m2d-ckpt", type=Path)
     parser.add_argument("--m2d-bert-tokenizer", type=Path)
+    parser.add_argument("--robust-ckpt", type=Path)
+    parser.add_argument("--robust-repo", type=Path)
+    parser.add_argument("--robust-bert-tokenizer", type=Path)
+    parser.add_argument("--robust-roberta-tokenizer", type=Path)
+    parser.add_argument("--robust-bart-tokenizer", type=Path)
     return parser.parse_args()
 
 

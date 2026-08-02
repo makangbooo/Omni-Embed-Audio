@@ -55,7 +55,7 @@
         {"surface_id": "baseline_runner", "path": "AudioRetrieval/evaluation/runners/baseline.py", "needle": "self.model_name == \"robust_clap\"", "expected_present": false, "required_for_formal": true},
         {"surface_id": "hydra_config", "path": "AudioRetrieval/conf/model/robust_clap.yaml", "expected_present": false, "required_for_formal": true},
         {"surface_id": "hydra_loader", "path": "AudioRetrieval/eval_hydra.py", "needle": "model_name == \"robust_clap\"", "expected_present": false, "required_for_formal": true},
-        {"surface_id": "argparse_cli", "path": "AudioRetrieval/cli/main.py", "needle": "\"robust_clap\"", "expected_present": false, "required_for_formal": true},
+        {"surface_id": "argparse_cli", "path": "AudioRetrieval/cli/main.py", "needle": "\"robust_clap\"", "expected_present": true, "required_for_formal": true},
         {"surface_id": "uiq_text_precomputer", "path": "AudioRetrieval/preprocessing/embeddings/uiq_text.py", "needle": "self.model_name == \"robust_clap\"", "expected_present": true, "required_for_formal": false}
       ],
       "required_local_resources": [

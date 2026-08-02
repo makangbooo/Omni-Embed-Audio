@@ -46,6 +46,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--expected-candidates", type=int, default=975)
     parser.add_argument("--captions-per-audio", type=int, default=5)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument(
+        "--skip-uiq",
+        action="store_true",
+        help="Evaluate Tables 2/3 only (used by vanilla backbones).",
+    )
     return parser.parse_args()
 
 
@@ -194,7 +199,8 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     )
 
     uiq_inputs: dict[str, dict[str, Any]] = {}
-    for query_type in QUERY_TYPES:
+    query_types = () if getattr(args, "skip_uiq", False) else QUERY_TYPES
+    for query_type in query_types:
         path = args.uiq_dir / f"uiq_{query_type}_embeddings.npz"
         data = load_npz(path)
         embeddings = np.asarray(data["embeddings"])

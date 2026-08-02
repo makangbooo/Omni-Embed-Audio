@@ -150,11 +150,16 @@ class MecatPositiveUiqRunnerTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.source = RUNNER.read_text(encoding="utf-8")
 
-    def test_runner_has_five_variants_and_protocol_boundary(self) -> None:
+    def test_runner_has_ten_variants_and_protocol_boundary(self) -> None:
         for variant in (
             "laion_clap",
+            "robust_clap",
             "mga_clap",
             "m2d_clap",
+            "oea_nemo3b",
+            "oea_nemo3b_cl",
+            "oea_qwen3b",
+            "oea_qwen3b_cl",
             "oea_qwen7b",
             "oea_qwen7b_cl",
         ):

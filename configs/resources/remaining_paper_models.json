@@ -9,7 +9,7 @@
       "repository": "ramaneswaran/linguistic_robust_clap",
       "revision": "d08d0e3c545fa22df0930fc0d090741aaa9e2cc1",
       "local_subdir": "robust-clap/source",
-      "claim_boundary": "The official repository publishes no Robust-CLAP checkpoint; source download alone does not unblock evaluation."
+      "claim_boundary": "The pinned upstream README points to the standard LAION 630k-audioset-best.pt non-fusion checkpoint, but publishes no independently identified Robust-specific checkpoint. The controlled runner binds that standard checkpoint and does not claim strict paper-checkpoint identity."
     },
     {
       "model": "MGA-CLAP",
@@ -54,8 +54,8 @@
   "known_blockers": [
     {
       "model": "Robust-CLAP",
-      "missing": "paper-matching checkpoint",
-      "reason": "No checkpoint release or download URL is present in the cited official repository."
+      "missing": "strict paper model-to-checkpoint binding",
+      "reason": "The upstream README exposes the standard LAION checkpoint, now runnable as a controlled binding, but does not prove that this exact artifact is the Robust-CLAP row evaluated in the OEA paper."
     }
   ]
 }

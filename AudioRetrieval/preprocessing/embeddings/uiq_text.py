@@ -113,6 +113,15 @@ class UIQTextEmbeddingPrecomputer:
                 tmodel=self.model_kwargs.get("robust_tmodel", "roberta"),
                 enable_fusion=not self.model_kwargs.get("robust_disable_fusion", False),
                 repo_root=self.model_kwargs.get("robust_repo", None),
+                bert_tokenizer_path=self.model_kwargs.get(
+                    "robust_bert_tokenizer"
+                ),
+                roberta_tokenizer_path=self.model_kwargs.get(
+                    "robust_roberta_tokenizer"
+                ),
+                bart_tokenizer_path=self.model_kwargs.get(
+                    "robust_bart_tokenizer"
+                ),
             )
 
             def _encode(batch: List[str]) -> np.ndarray:

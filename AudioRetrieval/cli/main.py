@@ -29,7 +29,7 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
         "embeddings",
         help="Precompute embeddings for a dataset",
     )
-    embeddings.add_argument("--model", required=True, choices=["laion_clap", "mga_clap", "m2d_clap", "oea"],
+    embeddings.add_argument("--model", required=True, choices=["laion_clap", "robust_clap", "mga_clap", "m2d_clap", "oea"],
                            help="Model to use for embeddings")
     embeddings.add_argument("--audio-dir", type=Path, required=True, help="Audio directory")
     embeddings.add_argument("--captions-csv", type=Path, required=True, help="Captions CSV file")
@@ -45,6 +45,11 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     embeddings.add_argument("--laion-bert-tokenizer", type=Path)
     embeddings.add_argument("--laion-roberta-tokenizer", type=Path)
     embeddings.add_argument("--laion-bart-tokenizer", type=Path)
+    embeddings.add_argument("--robust-ckpt", type=Path)
+    embeddings.add_argument("--robust-repo", type=Path)
+    embeddings.add_argument("--robust-bert-tokenizer", type=Path)
+    embeddings.add_argument("--robust-roberta-tokenizer", type=Path)
+    embeddings.add_argument("--robust-bart-tokenizer", type=Path)
 
     # OEA-specific options
     embeddings.add_argument("--checkpoint", type=Path, help="OEA checkpoint path")
@@ -61,7 +66,7 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     )
     uiq_embeddings.add_argument(
         "--model",
-        choices=["oea", "laion_clap", "mga_clap", "m2d_clap"],
+        choices=["oea", "laion_clap", "robust_clap", "mga_clap", "m2d_clap"],
         default="oea",
     )
     uiq_embeddings.add_argument(
@@ -85,6 +90,11 @@ def add_preprocess_subparsers(subparsers: argparse._SubParsersAction) -> None:
     uiq_embeddings.add_argument("--laion-bert-tokenizer", type=Path)
     uiq_embeddings.add_argument("--laion-roberta-tokenizer", type=Path)
     uiq_embeddings.add_argument("--laion-bart-tokenizer", type=Path)
+    uiq_embeddings.add_argument("--robust-ckpt", type=Path)
+    uiq_embeddings.add_argument("--robust-repo", type=Path)
+    uiq_embeddings.add_argument("--robust-bert-tokenizer", type=Path)
+    uiq_embeddings.add_argument("--robust-roberta-tokenizer", type=Path)
+    uiq_embeddings.add_argument("--robust-bart-tokenizer", type=Path)
     uiq_embeddings.add_argument("--mga-repo", type=Path)
     uiq_embeddings.add_argument("--mga-ckpt", type=Path)
     uiq_embeddings.add_argument("--mga-bert-tokenizer", type=Path)
@@ -237,6 +247,33 @@ def run_preprocess(args: argparse.Namespace) -> int:
                 batch_size_audio=args.batch_size_audio,
                 batch_size_text=args.batch_size_text,
             )
+        elif args.model == "robust_clap":
+            from AudioRetrieval.preprocessing.embeddings import (
+                RobustClapEmbeddingPrecomputer,
+            )
+            if not all((
+                args.robust_ckpt,
+                args.robust_repo,
+                args.robust_bert_tokenizer,
+                args.robust_roberta_tokenizer,
+                args.robust_bart_tokenizer,
+            )):
+                print(
+                    "Error: Robust-CLAP requires source, checkpoint, and local "
+                    "BERT, RoBERTa, and BART tokenizers"
+                )
+                return 1
+            precomputer = RobustClapEmbeddingPrecomputer(
+                ckpt_path=str(args.robust_ckpt),
+                repo_root=str(args.robust_repo),
+                bert_tokenizer_path=str(args.robust_bert_tokenizer),
+                roberta_tokenizer_path=str(args.robust_roberta_tokenizer),
+                bart_tokenizer_path=str(args.robust_bart_tokenizer),
+                enable_fusion=False,
+                device=args.device,
+                batch_size_audio=args.batch_size_audio,
+                batch_size_text=args.batch_size_text,
+            )
         elif args.model == "m2d_clap":
             from AudioRetrieval.preprocessing.embeddings import M2DClapEmbeddingPrecomputer
             if not args.m2d_ckpt or not args.m2d_bert_tokenizer:
@@ -317,6 +354,20 @@ def run_preprocess(args: argparse.Namespace) -> int:
                 "Error: M2D-CLAP UIQ embeddings require checkpoint and tokenizer"
             )
             return 1
+        if args.model == "robust_clap" and not all(
+            (
+                args.robust_ckpt,
+                args.robust_repo,
+                args.robust_bert_tokenizer,
+                args.robust_roberta_tokenizer,
+                args.robust_bart_tokenizer,
+            )
+        ):
+            print(
+                "Error: Robust-CLAP UIQ embeddings require source, checkpoint, "
+                "and local BERT, RoBERTa, and BART tokenizers"
+            )
+            return 1
 
         if args.output_dir.exists() and any(args.output_dir.iterdir()):
             print(f"Error: UIQ output directory is not empty: {args.output_dir}")
@@ -359,6 +410,24 @@ def run_preprocess(args: argparse.Namespace) -> int:
                 if args.m2d_bert_tokenizer
                 else None
             ),
+            robust_ckpt=str(args.robust_ckpt) if args.robust_ckpt else None,
+            robust_repo=str(args.robust_repo) if args.robust_repo else None,
+            robust_bert_tokenizer=(
+                str(args.robust_bert_tokenizer)
+                if args.robust_bert_tokenizer
+                else None
+            ),
+            robust_roberta_tokenizer=(
+                str(args.robust_roberta_tokenizer)
+                if args.robust_roberta_tokenizer
+                else None
+            ),
+            robust_bart_tokenizer=(
+                str(args.robust_bart_tokenizer)
+                if args.robust_bart_tokenizer
+                else None
+            ),
+            robust_disable_fusion=True,
         )
 
         summaries = {}

@@ -8,7 +8,7 @@ cd "${ROOT_DIR}"
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
 if [[ "$#" -ne 1 ]]; then
-  echo "Usage: $0 <laion_clap|mga_clap|m2d_clap|oea_qwen7b|oea_qwen7b_cl>" >&2
+  echo "Usage: $0 <laion_clap|robust_clap|mga_clap|m2d_clap|oea_nemo3b|oea_nemo3b_cl|oea_qwen3b|oea_qwen3b_cl|oea_qwen7b|oea_qwen7b_cl>" >&2
   exit 2
 fi
 
@@ -48,6 +48,31 @@ case "${VARIANT_ID}" in
     PRECHECK_IMPORT="import laion_clap, torch"
     OEA_SOURCE_FILES="AudioRetrieval/models/laion_clap_adapter.py; AudioRetrieval/preprocessing/embeddings/laion_clap.py; AudioRetrieval/preprocessing/embeddings/uiq_text.py"
     ;;
+  robust_clap)
+    PAPER_MODEL="Robust-CLAP"
+    BACKEND="robust_clap"
+    EXPECTED_DIM=512
+    BATCH_AUDIO=32
+    BATCH_TEXT=128
+    SOURCE_DIR="${MODEL_ROOT}/robust-clap/source"
+    CHECKPOINT="${MODEL_ROOT}/laion-clap/630k-audioset-best.pt"
+    CHECKPOINT_BYTES=1863587645
+    CHECKPOINT_SHA256="8053c9775516af2f4902e1e8281e356cc1bf7a85e8b761908170767b77c3f037"
+    ROBERTA_TOKENIZER="${MODEL_ROOT}/laion-clap-tokenizers/roberta-base"
+    BART_TOKENIZER="${MODEL_ROOT}/laion-clap-tokenizers/bart-base"
+    PYTHON_PREFIX="${MODEL_ROOT}/python/laion-clap-1.1.6-overlay-v3"
+    REQUIRED_RESOURCES=("${SOURCE_DIR}" "${BERT_TOKENIZER}" "${ROBERTA_TOKENIZER}" "${BART_TOKENIZER}" "${PYTHON_PREFIX}")
+    AUDIO_MODEL_ARGS=(
+      --robust-ckpt "${CHECKPOINT}"
+      --robust-repo "${SOURCE_DIR}"
+      --robust-bert-tokenizer "${BERT_TOKENIZER}"
+      --robust-roberta-tokenizer "${ROBERTA_TOKENIZER}"
+      --robust-bart-tokenizer "${BART_TOKENIZER}"
+    )
+    UIQ_MODEL_ARGS=("${AUDIO_MODEL_ARGS[@]}")
+    PRECHECK_IMPORT="import laion_clap, torch"
+    OEA_SOURCE_FILES="AudioRetrieval/models/robust_clap_adapter.py; AudioRetrieval/preprocessing/embeddings/robust_clap.py; AudioRetrieval/preprocessing/embeddings/uiq_text.py"
+    ;;
   mga_clap)
     PAPER_MODEL="MGA-CLAP"
     BACKEND="mga_clap"
@@ -85,6 +110,66 @@ case "${VARIANT_ID}" in
     AUDIO_MODEL_ARGS=(--m2d-ckpt "${CHECKPOINT}" --m2d-bert-tokenizer "${BERT_TOKENIZER}")
     UIQ_MODEL_ARGS=("${AUDIO_MODEL_ARGS[@]}")
     OEA_SOURCE_FILES="AudioRetrieval/models/m2d_clap_adapter.py; AudioRetrieval/preprocessing/embeddings/m2d_clap.py; AudioRetrieval/preprocessing/embeddings/uiq_text.py"
+    ;;
+  oea_nemo3b)
+    PAPER_MODEL="OEA-Nemo3B"
+    BACKEND="oea"
+    EXPECTED_DIM=512
+    BATCH_AUDIO=16
+    BATCH_TEXT=16
+    BASE_MODEL_DIR="${MODEL_ROOT}/omni-embed-nemotron-3b"
+    CHECKPOINT="${MODEL_ROOT}/OEA-Nemo3B-AC/step_400_best.pt"
+    CHECKPOINT_BYTES=9466826153
+    CHECKPOINT_SHA256="55579dfbd4f6621b5d842c5e731d6a1d37dbfd04b26b1c55bf8cdea980e67d25"
+    REQUIRED_RESOURCES=("${BASE_MODEL_DIR}")
+    AUDIO_MODEL_ARGS=(--checkpoint "${CHECKPOINT}" --repo-id nvidia/omni-embed-nemotron-3b --local-path "${BASE_MODEL_DIR}")
+    UIQ_MODEL_ARGS=("${AUDIO_MODEL_ARGS[@]}")
+    OEA_SOURCE_FILES="AudioRetrieval/preprocessing/embeddings/oea.py; AudioRetrieval/preprocessing/embeddings/uiq_text.py"
+    ;;
+  oea_nemo3b_cl)
+    PAPER_MODEL="OEA-Nemo3B (+Cl)"
+    BACKEND="oea"
+    EXPECTED_DIM=512
+    BATCH_AUDIO=16
+    BATCH_TEXT=16
+    BASE_MODEL_DIR="${MODEL_ROOT}/omni-embed-nemotron-3b"
+    CHECKPOINT="${MODEL_ROOT}/OEA-Nemo3B-Cl/step_450_best_inference_only.pt"
+    CHECKPOINT_BYTES=59072047
+    CHECKPOINT_SHA256="2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4"
+    REQUIRED_RESOURCES=("${BASE_MODEL_DIR}")
+    AUDIO_MODEL_ARGS=(--checkpoint "${CHECKPOINT}" --repo-id nvidia/omni-embed-nemotron-3b --local-path "${BASE_MODEL_DIR}")
+    UIQ_MODEL_ARGS=("${AUDIO_MODEL_ARGS[@]}")
+    OEA_SOURCE_FILES="AudioRetrieval/preprocessing/embeddings/oea.py; AudioRetrieval/preprocessing/embeddings/uiq_text.py"
+    ;;
+  oea_qwen3b)
+    PAPER_MODEL="OEA-Qwen3B"
+    BACKEND="oea"
+    EXPECTED_DIM=512
+    BATCH_AUDIO=16
+    BATCH_TEXT=16
+    BASE_MODEL_DIR="${MODEL_ROOT}/Qwen2.5-Omni-3B"
+    CHECKPOINT="${MODEL_ROOT}/OEA-Qwen3B-AC/step_350_inference_only.pt"
+    CHECKPOINT_BYTES=59069203
+    CHECKPOINT_SHA256="b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101"
+    REQUIRED_RESOURCES=("${BASE_MODEL_DIR}")
+    AUDIO_MODEL_ARGS=(--checkpoint "${CHECKPOINT}" --repo-id Qwen/Qwen2.5-Omni-3B --local-path "${BASE_MODEL_DIR}")
+    UIQ_MODEL_ARGS=("${AUDIO_MODEL_ARGS[@]}")
+    OEA_SOURCE_FILES="AudioRetrieval/preprocessing/embeddings/oea.py; AudioRetrieval/preprocessing/embeddings/uiq_text.py"
+    ;;
+  oea_qwen3b_cl)
+    PAPER_MODEL="OEA-Qwen3B (+Cl)"
+    BACKEND="oea"
+    EXPECTED_DIM=512
+    BATCH_AUDIO=16
+    BATCH_TEXT=16
+    BASE_MODEL_DIR="${MODEL_ROOT}/Qwen2.5-Omni-3B"
+    CHECKPOINT="${MODEL_ROOT}/OEA-Qwen3B-Cl/step_40_inference_only.pt"
+    CHECKPOINT_BYTES=59068647
+    CHECKPOINT_SHA256="f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a"
+    REQUIRED_RESOURCES=("${BASE_MODEL_DIR}")
+    AUDIO_MODEL_ARGS=(--checkpoint "${CHECKPOINT}" --repo-id Qwen/Qwen2.5-Omni-3B --local-path "${BASE_MODEL_DIR}")
+    UIQ_MODEL_ARGS=("${AUDIO_MODEL_ARGS[@]}")
+    OEA_SOURCE_FILES="AudioRetrieval/preprocessing/embeddings/oea.py; AudioRetrieval/preprocessing/embeddings/uiq_text.py"
     ;;
   oea_qwen7b)
     PAPER_MODEL="OEA-Qwen7B"
@@ -204,7 +289,11 @@ echo "EXPERIMENT_NAME=${PAPER_MODEL} MECAT positive UIQ Tables 12-15 public 848-
 echo "PAPER_EXPERIMENTS=EXP-12 Table 12 Question; EXP-13 Table 13 Imperative; EXP-14 Table 14 Paraphrase; EXP-15 Table 15 Keyphrase"
 echo "GIT_COMMIT=${GIT_COMMIT}"
 echo "MODEL=${PAPER_MODEL}"
-echo "PROTOCOL_STATUS=controlled public 848-row reproduction; PAPER reports 847"
+if [[ "${VARIANT_ID}" == "robust_clap" ]]; then
+  echo "PROTOCOL_STATUS=controlled public 848-row reproduction with pinned upstream source and standard LAION checkpoint; PAPER reports 847; strict paper checkpoint identity not claimed"
+else
+  echo "PROTOCOL_STATUS=controlled public 848-row reproduction; PAPER reports 847"
+fi
 echo "STRICT_PAPER_REPRODUCTION=no"
 echo "PUBLIC_CANDIDATES=848"
 echo "PAPER_CANDIDATES=847"
