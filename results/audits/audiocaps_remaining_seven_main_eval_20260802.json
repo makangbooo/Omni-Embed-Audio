@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_remote_batch_terminal_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_combined_log_excerpts",
+    "note": "The returned excerpts fix all seven run IDs, Git commit, stage exits, elapsed times, embedding shapes, protocol metrics, and remote result paths. artifact_sha256.txt contents were not returned and are not invented."
+  },
+  "git_commit": "c55bf682fc72663f1272e7646090e6b31cc2b82d",
+  "dataset": {
+    "name": "AudioCaps v2 test",
+    "candidate_audio_count": 975,
+    "caption_count": 4875,
+    "positive_uiq_query_count_per_oea_model": 3900
+  },
+  "execution": {
+    "gpu_used": true,
+    "gpu_visible_device": 0,
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "oea_official_source_used": true,
+    "downloads_required": false,
+    "overwrite_or_delete_risk": "none",
+    "batch_started_at": "2026-08-02T18:15:37+08:00",
+    "batch_finished_at": "2026-08-02T19:08:41+08:00",
+    "batch_elapsed_seconds": 3184
+  },
+  "official_source_files": [
+    "AudioRetrieval/models/omni_embed_adapter.py",
+    "scripts/generate_vanilla_backbone_embeddings.py",
+    "AudioRetrieval/preprocessing/embeddings/oea.py",
+    "AudioRetrieval/preprocessing/embeddings/uiq_text.py",
+    "AudioRetrieval/evaluation/metrics.py"
+  ],
+  "runs": [
+    {
+      "variant_id": "vanilla_nemotron_3b",
+      "paper_model": "Nemotron-3B",
+      "model_checkpoint_loaded": false,
+      "run_id": "vanilla_nemotron_3b_audiocaps_table2_table3_20260802_181537",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_nemotron_3b_audiocaps_table2_table3_20260802_181537",
+      "elapsed_seconds": 540,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "embedding_shapes": {"audio": [975, 2048], "caption": [4875, 2048]},
+      "protocols": {
+        "t2a_public_code_default_joint_all_captions": [6.133333, 17.641026, 26.564103],
+        "t2a_public_code_t2a_only_seed0": [5.846154, 17.128205, 25.641026],
+        "t2t_public_code_default_seed0": [32.307692, 53.025641, 62.256410],
+        "t2t_all_captions_sensitivity": [33.558974, 52.717949, 62.358974]
+      },
+      "paper_values": {"table2": [3.73, 9.09, 13.11], "table3": [33.17, 52.27, 62.13]},
+      "maximum_absolute_delta_percentage_points": {
+        "table2_default": 13.454103,
+        "table2_sensitivity": 12.531026,
+        "table3_default": 0.862308,
+        "table3_sensitivity": 0.447949
+      },
+      "assessment": {"table2": "trend_reproduced_not_close", "table3": "close"}
+    },
+    {
+      "variant_id": "vanilla_qwen2_5_omni_3b",
+      "paper_model": "Qwen2.5-Omni-3B",
+      "model_checkpoint_loaded": false,
+      "run_id": "vanilla_qwen2_5_omni_3b_audiocaps_table2_table3_20260802_182437",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_3b_audiocaps_table2_table3_20260802_182437",
+      "elapsed_seconds": 522,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "embedding_shapes": {"audio": [975, 2048], "caption": [4875, 2048]},
+      "protocols": {
+        "t2a_public_code_default_joint_all_captions": [0.430769, 1.189744, 1.846154],
+        "t2a_public_code_t2a_only_seed0": [0.410256, 1.128205, 1.846154],
+        "t2t_public_code_default_seed0": [21.128205, 33.846154, 40.000000],
+        "t2t_all_captions_sensitivity": [22.933333, 34.461538, 41.497436]
+      },
+      "paper_values": {"table2": [0.37, 1.19, 1.87], "table3": [22.63, 34.48, 41.39]},
+      "maximum_absolute_delta_percentage_points": {
+        "table2_default": 0.060769,
+        "table2_sensitivity": 0.061795,
+        "table3_default": 1.501795,
+        "table3_sensitivity": 0.303333
+      },
+      "assessment": {"table2": "close", "table3": "close"}
+    },
+    {
+      "variant_id": "vanilla_qwen2_5_omni_7b",
+      "paper_model": "Qwen2.5-Omni-7B",
+      "model_checkpoint_loaded": false,
+      "run_id": "vanilla_qwen2_5_omni_7b_audiocaps_table2_table3_20260802_183319",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_7b_audiocaps_table2_table3_20260802_183319",
+      "elapsed_seconds": 583,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "embedding_shapes": {"audio": [975, 3584], "caption": [4875, 3584]},
+      "protocols": {
+        "t2a_public_code_default_joint_all_captions": [0.287179, 1.292308, 2.358974],
+        "t2a_public_code_t2a_only_seed0": [0.307692, 1.435897, 2.461538],
+        "t2t_public_code_default_seed0": [23.487179, 35.487179, 41.538462],
+        "t2t_all_captions_sensitivity": [23.507692, 36.430769, 43.200000]
+      },
+      "paper_values": {"table2": [0.41, 1.29, 2.34], "table3": [24.06, 37.19, 44.62]},
+      "maximum_absolute_delta_percentage_points": {
+        "table2_default": 0.122821,
+        "table2_sensitivity": 0.145897,
+        "table3_default": 3.081538,
+        "table3_sensitivity": 1.420000
+      },
+      "assessment": {"table2": "close", "table3": "close"}
+    },
+    {
+      "variant_id": "oea_nemo3b",
+      "paper_model": "OEA-Nemo3B",
+      "model_checkpoint_loaded": true,
+      "run_id": "oea_nemo3b_audiocaps_main_20260802_184302",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_audiocaps_main_20260802_184302",
+      "elapsed_seconds": 491,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "embedding_shapes": {"audio": [975, 512], "caption": [4875, 512]},
+      "protocols": {
+        "t2a_public_code_default_joint_all_captions": [37.866667, 71.200000, 83.405128],
+        "t2a_public_code_t2a_only_seed0": [37.743590, 69.948718, 82.666667],
+        "t2t_public_code_default_seed0": [50.564103, 72.000000, 82.358974],
+        "t2t_all_captions_sensitivity": [49.784615, 72.348718, 81.764103],
+        "question_released_uiq": [35.897436, 69.230769, 83.384615],
+        "imperative_released_uiq": [41.025641, 72.615385, 84.717949],
+        "paraphrase_released_uiq": [40.410256, 75.589744, 86.974359],
+        "tagging_released_uiq": [37.948718, 72.307692, 85.025641]
+      },
+      "paper_values": {
+        "table2": [38.87, 72.64, 83.88], "table3": [48.94, 72.62, 82.19],
+        "question": [36.72, 72.00, 83.69], "imperative": [41.33, 75.08, 86.36],
+        "paraphrase": [41.85, 77.85, 88.00], "tagging": [40.51, 73.44, 85.44]
+      },
+      "maximum_absolute_delta_percentage_points": {
+        "table2_default": 1.440000, "table2_sensitivity": 2.691282,
+        "table3_default": 1.624103, "table3_sensitivity": 0.844615,
+        "question": 2.769231, "imperative": 2.464615,
+        "paraphrase": 2.260256, "tagging": 2.561282
+      },
+      "assessment": "all_protocols_close"
+    },
+    {
+      "variant_id": "oea_nemo3b_cl",
+      "paper_model": "OEA-Nemo3B (+Cl)",
+      "model_checkpoint_loaded": true,
+      "run_id": "oea_nemo3b_cl_audiocaps_main_20260802_185113",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_cl_audiocaps_main_20260802_185113",
+      "elapsed_seconds": 404,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "embedding_shapes": {"audio": [975, 512], "caption": [4875, 512]},
+      "protocols": {
+        "t2a_public_code_default_joint_all_captions": [34.994872, 68.369231, 80.000000],
+        "t2a_public_code_t2a_only_seed0": [35.282051, 68.512821, 81.025641],
+        "t2t_public_code_default_seed0": [50.666667, 71.487179, 81.538462],
+        "t2t_all_captions_sensitivity": [49.989744, 71.774359, 81.456410],
+        "question_released_uiq": [34.153846, 65.538462, 79.076923],
+        "imperative_released_uiq": [38.461538, 70.256410, 82.461538],
+        "paraphrase_released_uiq": [38.153846, 73.538462, 84.102564],
+        "tagging_released_uiq": [36.820513, 70.461538, 81.948718]
+      },
+      "paper_values": {
+        "table2": [35.75, 68.64, 81.35], "table3": [48.94, 72.21, 81.64],
+        "question": [34.56, 65.64, 80.31], "imperative": [37.64, 72.51, 83.59],
+        "paraphrase": [38.05, 73.33, 85.13], "tagging": [36.92, 69.64, 83.28]
+      },
+      "maximum_absolute_delta_percentage_points": {
+        "table2_default": 1.350000, "table2_sensitivity": 0.467949,
+        "table3_default": 1.726667, "table3_sensitivity": 1.049744,
+        "question": 1.233077, "imperative": 2.253590,
+        "paraphrase": 1.027436, "tagging": 1.331282
+      },
+      "assessment": "all_protocols_close"
+    },
+    {
+      "variant_id": "oea_qwen3b",
+      "paper_model": "OEA-Qwen3B",
+      "model_checkpoint_loaded": true,
+      "run_id": "oea_qwen3b_audiocaps_main_20260802_185757",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_audiocaps_main_20260802_185757",
+      "elapsed_seconds": 329,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "embedding_shapes": {"audio": [975, 512], "caption": [4875, 512]},
+      "protocols": {
+        "t2a_public_code_default_joint_all_captions": [37.661538, 71.015385, 83.733333],
+        "t2a_public_code_t2a_only_seed0": [37.948718, 70.666667, 83.897436],
+        "t2t_public_code_default_seed0": [50.153846, 72.102564, 82.153846],
+        "t2t_all_captions_sensitivity": [49.353846, 72.328205, 81.682051],
+        "question_released_uiq": [36.717949, 70.358974, 82.769231],
+        "imperative_released_uiq": [39.897436, 72.615385, 85.025641],
+        "paraphrase_released_uiq": [40.102564, 74.666667, 85.948718],
+        "tagging_released_uiq": [39.179487, 73.025641, 85.435897]
+      },
+      "paper_values": {
+        "table2": [37.60, 71.16, 83.73], "table3": [49.42, 72.27, 81.76],
+        "question": [36.72, 70.36, 82.56], "imperative": [40.00, 72.72, 84.92],
+        "paraphrase": [40.10, 74.56, 86.05], "tagging": [38.97, 73.03, 85.85]
+      },
+      "maximum_absolute_delta_percentage_points": {
+        "table2_default": 0.144615, "table2_sensitivity": 0.493333,
+        "table3_default": 0.733846, "table3_sensitivity": 0.077949,
+        "question": 0.209231, "imperative": 0.105641,
+        "paraphrase": 0.106667, "tagging": 0.414103
+      },
+      "assessment": "all_protocols_close"
+    },
+    {
+      "variant_id": "oea_qwen3b_cl",
+      "paper_model": "OEA-Qwen3B (+Cl)",
+      "model_checkpoint_loaded": true,
+      "run_id": "oea_qwen3b_cl_audiocaps_main_20260802_190326",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_cl_audiocaps_main_20260802_190326",
+      "elapsed_seconds": 315,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "embedding_shapes": {"audio": [975, 512], "caption": [4875, 512]},
+      "protocols": {
+        "t2a_public_code_default_joint_all_captions": [36.102564, 69.620513, 82.112821],
+        "t2a_public_code_t2a_only_seed0": [36.820513, 68.512821, 82.256410],
+        "t2t_public_code_default_seed0": [50.564103, 72.820513, 81.743590],
+        "t2t_all_captions_sensitivity": [50.051282, 71.958974, 81.087179],
+        "question_released_uiq": [35.179487, 68.102564, 81.743590],
+        "imperative_released_uiq": [39.179487, 72.820513, 84.307692],
+        "paraphrase_released_uiq": [39.384615, 72.410256, 85.025641],
+        "tagging_released_uiq": [39.076923, 72.615385, 84.307692]
+      },
+      "paper_values": {
+        "table2": [35.96, 69.35, 81.99], "table3": [49.64, 71.94, 81.01],
+        "question": [35.18, 68.31, 81.74], "imperative": [39.49, 72.62, 84.31],
+        "paraphrase": [39.18, 73.03, 84.92], "tagging": [39.08, 72.51, 84.51]
+      },
+      "maximum_absolute_delta_percentage_points": {
+        "table2_default": 0.270513, "table2_sensitivity": 0.860513,
+        "table3_default": 0.924103, "table3_sensitivity": 0.411282,
+        "question": 0.207436, "imperative": 0.310513,
+        "paraphrase": 0.619744, "tagging": 0.202308
+      },
+      "assessment": "all_protocols_close"
+    }
+  ],
+  "protocol_boundary": {
+    "status": "CONTROLLED_PUBLIC_CODE_REPRODUCTION",
+    "strict_paper_reproduction": false,
+    "reason": "PAPER does not publish byte-bound caption selection, T2T self/tie handling, or complete baseline UIQ commands. Both predeclared default and sensitivity protocols are retained without post-hoc selection.",
+    "no_post_hoc_selection": true
+  },
+  "returned_artifact_hashes": null
+}
