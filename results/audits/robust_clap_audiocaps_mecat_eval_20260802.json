@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "controlled_source_remote_terminal_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The returned output fixes GPU identity, source revision, OEA source usage, stage exits, shapes, all protocol metrics, run paths, and completion summaries. Artifact SHA256 output was not returned for these two runs and is not inferred."
+  },
+  "paper_scope": [
+    "EXP-10 / Table 2 / Robust-CLAP / AudioCaps / T2A",
+    "EXP-11 / Table 3 / Robust-CLAP / AudioCaps / T2T",
+    "EXP-12-15 / Tables 12-15 / Robust-CLAP / AudioCaps / positive UIQ",
+    "EXP-12-15 / Tables 12-15 / Robust-CLAP / MECAT / positive UIQ"
+  ],
+  "model": {
+    "paper_name": "Robust-CLAP",
+    "binding_name": "Robust-CLAP upstream source with standard LAION checkpoint",
+    "source_revision": "d08d0e3c545fa22df0930fc0d090741aaa9e2cc1",
+    "checkpoint": "630k-audioset-best.pt",
+    "checkpoint_sha256": "8053c9775516af2f4902e1e8281e356cc1bf7a85e8b761908170767b77c3f037",
+    "bpe_vocab_sha256": "924691ac288e54409236115652ad4aa250f48203de50a9e4722a6ecd48d6804a",
+    "embedding_dimension": 512,
+    "strict_paper_checkpoint_identity": false
+  },
+  "official_source": {
+    "oea_official_source_used": true,
+    "source_files": [
+      "AudioRetrieval/models/robust_clap_adapter.py",
+      "AudioRetrieval/preprocessing/embeddings/robust_clap.py",
+      "AudioRetrieval/preprocessing/embeddings/uiq_text.py",
+      "AudioRetrieval/evaluation/metrics.py"
+    ]
+  },
+  "runs": {
+    "audiocaps": {
+      "run_id": "robust_clap_audiocaps_main_20260802_213911",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/robust_clap_audiocaps_main_20260802_213911",
+      "metrics_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/robust_clap_audiocaps_main_20260802_213911/metrics/suite_metrics.json",
+      "git_commit": "b020f6558446a7d4d9328ecdacd04c81df4d191e",
+      "elapsed_seconds": 206,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "failed_stage": "none",
+      "gpu_name": "NVIDIA GeForce RTX 4090",
+      "audio_embedding_shape": [975, 512],
+      "caption_embedding_shape": [4875, 512],
+      "positive_uiq_query_count": 3900
+    },
+    "mecat_public_848": {
+      "run_id": "robust_clap_mecat_positive_uiq_public848_20260802_214237",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/robust_clap_mecat_positive_uiq_public848_20260802_214237",
+      "metrics_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/robust_clap_mecat_positive_uiq_public848_20260802_214237/metrics/suite_metrics.json",
+      "git_commit": "b020f6558446a7d4d9328ecdacd04c81df4d191e",
+      "elapsed_seconds": 128,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "failed_stage": "none",
+      "gpu_name": "NVIDIA GeForce RTX 4090",
+      "audio_embedding_shape": [848, 512],
+      "positive_uiq_query_count": 3392,
+      "public_candidate_count": 848,
+      "paper_candidate_count": 847,
+      "strict_paper_reproduction": false
+    }
+  },
+  "audiocaps": {
+    "protocols": {
+      "t2a_public_code_default_joint_all_captions": {"paper_table": "Table 2", "protocol_source": "CODE", "metrics": {"R@1": 26.502564, "R@5": 60.123077, "R@10": 75.487179}},
+      "t2a_public_code_t2a_only_seed0": {"paper_table": "Table 2 sensitivity", "protocol_source": "CODE", "metrics": {"R@1": 25.641026, "R@5": 60.615385, "R@10": 75.487179}},
+      "t2t_public_code_default_seed0": {"paper_table": "Table 3", "protocol_source": "CODE", "metrics": {"R@1": 38.358974, "R@5": 62.051282, "R@10": 72.717949}},
+      "t2t_all_captions_sensitivity": {"paper_table": "Table 3 sensitivity", "protocol_source": "INFERRED", "metrics": {"R@1": 42.153846, "R@5": 64.348718, "R@10": 74.564103}},
+      "question_released_uiq": {"paper_table": "Table 12", "protocol_source": "CODE", "metrics": {"R@1": 26.153846, "R@5": 63.282051, "R@10": 77.025641}},
+      "imperative_released_uiq": {"paper_table": "Table 13", "protocol_source": "CODE", "metrics": {"R@1": 26.871795, "R@5": 62.256410, "R@10": 77.435897}},
+      "paraphrase_released_uiq": {"paper_table": "Table 14", "protocol_source": "CODE", "metrics": {"R@1": 30.974359, "R@5": 67.897436, "R@10": 83.179487}},
+      "tagging_released_uiq": {"paper_table": "Table 15", "protocol_source": "CODE", "metrics": {"R@1": 31.282051, "R@5": 68.102564, "R@10": 83.282051}}
+    },
+    "paper_values": {
+      "table2_t2a": {"R@1": 26.48, "R@5": 60.12, "R@10": 75.53},
+      "table3_t2t": {"R@1": 41.09, "R@5": 63.96, "R@10": 74.22},
+      "table12_question": {"R@1": 26.15, "R@5": 63.28, "R@10": 77.13},
+      "table13_imperative": {"R@1": 26.77, "R@5": 62.36, "R@10": 77.54},
+      "table14_paraphrase": {"R@1": 30.97, "R@5": 67.90, "R@10": 83.28},
+      "table15_keyphrase": {"R@1": 31.38, "R@5": 67.90, "R@10": 83.28}
+    },
+    "comparison": {
+      "t2a_public_code_default_joint_all_captions": {"signed_delta_percentage_points": {"R@1": 0.022564, "R@5": 0.003077, "R@10": -0.042821}, "maximum_absolute_delta_percentage_points": 0.042821, "status": "close"},
+      "t2a_public_code_t2a_only_seed0": {"signed_delta_percentage_points": {"R@1": -0.838974, "R@5": 0.495385, "R@10": -0.042821}, "maximum_absolute_delta_percentage_points": 0.838974, "status": "sensitivity_close"},
+      "t2t_public_code_default_seed0": {"signed_delta_percentage_points": {"R@1": -2.731026, "R@5": -1.908718, "R@10": -1.502051}, "maximum_absolute_delta_percentage_points": 2.731026, "status": "close"},
+      "t2t_all_captions_sensitivity": {"signed_delta_percentage_points": {"R@1": 1.063846, "R@5": 0.388718, "R@10": 0.344103}, "maximum_absolute_delta_percentage_points": 1.063846, "status": "sensitivity_close"},
+      "question_released_uiq": {"signed_delta_percentage_points": {"R@1": 0.003846, "R@5": 0.002051, "R@10": -0.104359}, "maximum_absolute_delta_percentage_points": 0.104359, "status": "close"},
+      "imperative_released_uiq": {"signed_delta_percentage_points": {"R@1": 0.101795, "R@5": -0.103590, "R@10": -0.104103}, "maximum_absolute_delta_percentage_points": 0.104103, "status": "close"},
+      "paraphrase_released_uiq": {"signed_delta_percentage_points": {"R@1": 0.004359, "R@5": -0.002564, "R@10": -0.100513}, "maximum_absolute_delta_percentage_points": 0.100513, "status": "close"},
+      "tagging_released_uiq": {"signed_delta_percentage_points": {"R@1": -0.097949, "R@5": 0.202564, "R@10": 0.002051}, "maximum_absolute_delta_percentage_points": 0.202564, "status": "close"}
+    }
+  },
+  "mecat_public_848": {
+    "protocols": {
+      "question_released_uiq_public_848": {"paper_table": "Table 12", "protocol_source": "CODE", "metrics": {"R@1": 8.018868, "R@5": 22.877358, "R@10": 33.726415}},
+      "imperative_released_uiq_public_848": {"paper_table": "Table 13", "protocol_source": "CODE", "metrics": {"R@1": 6.603774, "R@5": 18.396226, "R@10": 28.419811}},
+      "paraphrase_released_uiq_public_848": {"paper_table": "Table 14", "protocol_source": "CODE", "metrics": {"R@1": 6.250000, "R@5": 20.518868, "R@10": 31.603774}},
+      "tagging_released_uiq_public_848": {"paper_table": "Table 15", "protocol_source": "CODE", "metrics": {"R@1": 7.193396, "R@5": 25.235849, "R@10": 36.202830}}
+    },
+    "paper_values": {
+      "table12_question": {"R@1": 7.43, "R@5": 22.41, "R@10": 31.96},
+      "table13_imperative": {"R@1": 5.66, "R@5": 18.28, "R@10": 28.77},
+      "table14_paraphrase": {"R@1": 6.25, "R@5": 21.46, "R@10": 31.37},
+      "table15_keyphrase": {"R@1": 8.37, "R@5": 26.30, "R@10": 36.44}
+    },
+    "comparison": {
+      "question_released_uiq_public_848": {"signed_delta_percentage_points": {"R@1": 0.588868, "R@5": 0.467358, "R@10": 1.766415}, "maximum_absolute_delta_percentage_points": 1.766415, "status": "controlled_close"},
+      "imperative_released_uiq_public_848": {"signed_delta_percentage_points": {"R@1": 0.943774, "R@5": 0.116226, "R@10": -0.350189}, "maximum_absolute_delta_percentage_points": 0.943774, "status": "controlled_close"},
+      "paraphrase_released_uiq_public_848": {"signed_delta_percentage_points": {"R@1": 0.000000, "R@5": -0.941132, "R@10": 0.233774}, "maximum_absolute_delta_percentage_points": 0.941132, "status": "controlled_close"},
+      "tagging_released_uiq_public_848": {"signed_delta_percentage_points": {"R@1": -1.176604, "R@5": -1.064151, "R@10": -0.237170}, "maximum_absolute_delta_percentage_points": 1.176604, "status": "controlled_close"}
+    }
+  },
+  "returned_artifacts": {
+    "sha256_manifest_returned": false,
+    "remote_metrics_paths_recorded": true
+  },
+  "protocol_boundary": {
+    "status": "CONTROLLED_PUBLIC_CODE_REPRODUCTION",
+    "strict_paper_reproduction": false,
+    "no_post_hoc_selection": true,
+    "reason": "The pinned Robust-CLAP upstream revision is evaluated with the SHA256-locked standard LAION checkpoint, but public evidence does not bind that checkpoint to the paper Robust-CLAP row. MECAT public assets contain 848 candidates while PAPER reports 847 without publishing the excluded ID or rule. PAPER also omits byte-bound caption selection and T2T self/tie handling."
+  }
+}
