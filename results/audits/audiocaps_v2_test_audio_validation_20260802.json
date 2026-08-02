@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "user_returned_remote_validation_report",
+  "source": {
+    "label": "OBSERVED",
+    "git_commit": "a348670e7fbdeac0ec29f6c29bfbdceda38a39f1",
+    "git_status_short": "",
+    "remote_report": "/home/jg525/Omni-Embed-Audio/logs/audiocaps_raw_audio_validation_20260802_112418/audiocaps_audio_validation.json",
+    "remote_log": "/home/jg525/Omni-Embed-Audio/logs/audiocaps_raw_audio_validation_20260802_112418/combined.log"
+  },
+  "run": {
+    "started_at": "2026-08-02T03:24:34.744650+00:00",
+    "finished_at": "2026-08-02T03:28:06.261057+00:00",
+    "elapsed_seconds": 212,
+    "final_run_rc": 0,
+    "completion_status": "complete",
+    "gpu_used": false,
+    "oea_official_source_used": false,
+    "downloads_required": false,
+    "overwrite_or_delete_performed": false
+  },
+  "archive_binding": {
+    "archive_size_bytes": 58574587588,
+    "archive_sha256": "27d6edbd623bff6e00bdda53520dd0b77c3b58e39224bc4d75e58a6f8321dcc1",
+    "inventory_files": 101715,
+    "inventory_bytes": 74648530543,
+    "indexed_audio_files": 101694,
+    "unique_audio_stems": 101694,
+    "non_audio_files": {
+      ".part": 11,
+      ".ytdl": 10
+    }
+  },
+  "test_selection": {
+    "source_manifest_sha256": "d87bc8f58c1abe625b4914614461bccb1987e5267b9da211e63925d62695c90a",
+    "candidate_count": 975,
+    "caption_count": 4875,
+    "identical_duplicate_alias_count": 0,
+    "all_finite_and_fully_decoded": true,
+    "sample_rate_counts": {
+      "22050": 975
+    },
+    "channel_counts": {
+      "1": 314,
+      "2": 661
+    },
+    "minimum_duration_seconds": 1.8343764172335602,
+    "maximum_duration_seconds": 10.0
+  },
+  "output_manifest": {
+    "path": "/home/jg525/datasets/oea/audiocaps_v2_d004db3/manifests/audiocaps_v2_test_audio_manifest.jsonl",
+    "rows": 975,
+    "size_bytes": 1268604,
+    "sha256": "a341c9dfcb1b2cbe69675e8f1338edb502ce03f8984bf5882dc4d107b72144b4"
+  },
+  "claim_boundary": {
+    "archive_extraction_complete": true,
+    "test_manifest_binding_complete": true,
+    "selected_test_audio_fully_decoded": true,
+    "main_experiment_authorized": true,
+    "paper_metric_result": false,
+    "note": "This gate authorizes AudioCaps test evaluation but is not itself a paper metric reproduction."
+  }
+}
