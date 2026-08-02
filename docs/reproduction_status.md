@@ -118,7 +118,8 @@
 | 3 数据 | DATA-07：AudioCaps 2.0 metadata/UIQ 全量校验 | COMPLETED | run commit=`febfbe4`；同上审计 | validation/wrapper=`0/0`；statistics 及四个 manifest 行数/bytes/SHA256 已固定；保留 91,256 与 91,254 冲突 | AudioCaps 实际评测音频仍缺 | 不把 metadata 完成写成 AudioCaps 评测可运行 |
 | 3 数据 | 作者提供 AudioCaps raw audio ZIP 安全解压 | COMPLETED | run=`a348670`；审计=`results/audits/audiocaps_raw_audio_extraction_20260802.json` | `[OBSERVED]` 解压 complete；ZIP=`58,574,587,588` bytes、SHA256=`27d6edbd...dcc1`；`101,715` files、`74,648,530,543` extracted bytes；同名包装层已折叠 1 层 | 无；完整 extraction report 已随下一阶段验证结果返回 | 不重复解压或扫描全部数据 |
 | 3 数据 | AudioCaps v2 test 975 条音频绑定与完整解码门禁 | COMPLETED | run=`a348670`；审计=`results/audits/audiocaps_v2_test_audio_validation_20260802.json` | RC=`0`、elapsed=`212s`；975/975 音频、4,875 captions、0 duplicate aliases；全量 finite/full decode；22,050 Hz；314 mono/661 stereo；manifest SHA256=`a341c9df...144b4` | 无；该结果是数据门禁，不是论文指标 | 已授权 AudioCaps 正式 GPU 评测 |
-| 2 主实验 | M2D-CLAP × AudioCaps Table 2/3/12–15 | WAITING_USER | 本提交 | 已实现五模型统一前台 runner；M2D 首轮将固定 975 audio、4,875 captions、3,900 released UIQ，并计算 8 个预声明协议；官方源码、checkpoint SHA256、单 GPU、离线和非覆盖门禁均已实现 | 尚未在远程 GPU 运行 | 远程 RTX 4090 前台运行 `bash scripts/run_audiocaps_main.sh m2d_clap` |
+| 2 主实验 | M2D-CLAP × AudioCaps Table 2/3/12–15 | COMPLETED | run=`1fbb4c1`；审计=`results/audits/m2d_clap_audiocaps_main_eval_20260802.json` | RTX 4090、RC=`0`、elapsed=`144s`；官方源码；shape=`975x768/4875x768`，3,900 UIQ 与 8 协议 complete；suite SHA256=`9fb9fdb8...7580`；默认 Table 2/3 最大绝对差=`1.7592/3.6126` pp，四类 UIQ 最大绝对差=`2.8682/2.4654/3.6933/1.3341` pp | 严格论文 caption selection、T2T self/tie 与 baseline UIQ 完整命令未发布；保留为 controlled public-code close | 大型工件留远程；不重复运行 |
+| 2 主实验 | MGA-CLAP × AudioCaps Table 2/3/12–15 | WAITING_USER | runner=`1fbb4c1` | 与 M2D 同一固定 975/4,875/3,900 数据和 8 协议；MGA 官方源码、固定 checkpoint、runtime overlays 已注册 | 尚未在远程 GPU 运行 | 远程 RTX 4090 前台运行 `bash scripts/run_audiocaps_main.sh mga_clap` |
 | 3 数据 | AudioCaps v2 论文 91,256 train 口径 | BLOCKED | `4ef4f29` | 官方固定 CSV 与公共 loader 已审计；另有 `[CODE]` 91,254 和 `[INFERRED]` 修复 91,254 两套 manifest | `[MISSING]` 能产生 91,256 个有效样本的论文 manifest/loader；实际音频尚未提供 | 请求官方音频；训练前显式选择公开 loader 或修复口径，不冒充 exact |
 | 3 数据 | Clotho v2.1 evaluation 下载与 checksum | COMPLETED | `aff03e4` | DATA-01 首次下载及两次幂等复核完成；3 个 MD5 全部匹配 | 无；两次复核均为 `verified_existing`，未重复下载 | DATA-02 已完成安全解压、1,045 条 WAV/CSV/UIQ ID 校验 |
 | 3 数据 | DATA-02：Clotho evaluation 解压与完整性校验 | COMPLETED | `7a8fb50` | `logs/data02_clotho_validation_20260717_233100`：1,045 WAV 全部解码；5 captions/clip；四类正 UIQ ID 精确对齐；manifest MD5 `253c1b275e3618fa94750150d7962da5` | 无；negative 仅验证了 `[INFERRED]` `.wav` 后缀映射，不含官方 target/HN 配对 | 保留小型审计摘要，待 CPU 数据准备完成后进入 GPU embedding |
@@ -144,11 +145,11 @@
 
 ## 当前焦点
 
-- 当前阶段：AudioCaps 975 条 test 音频绑定与完整解码门禁已完成，正式 Tables 2/3/12–15 GPU 评测已解除数据阻塞；当前等待首个 M2D-CLAP 八协议闭环。MECAT 公开 848-row 正向 UIQ 保持 `3/5`，剩余 OEA-Qwen7B 与 OEA-Qwen7B (+Cl)。训练在官方 checkpoint 评测矩阵完成前继续暂停。
+- 当前阶段：AudioCaps 正式 Tables 2/3/12–15 已完成首个 M2D-CLAP 八协议闭环，当前推进 MGA-CLAP。MECAT 公开 848-row 正向 UIQ 保持 `3/5`，剩余 OEA-Qwen7B 与 OEA-Qwen7B (+Cl)。训练在官方 checkpoint 评测矩阵完成前继续暂停。
 - 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
 - 正文 Table 2/3 模型×数据集×任务覆盖为 `24/78 = 30.8%`；其中 Clotho 为 `24/26 = 92.3%`，三个 vanilla backbone 的 Clotho 两任务为 `6/6 = 100%`。这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
 - 最近完成：MGA-CLAP 的官方源码 Clotho Table 2/3 闭环；run commit=`f623b153`，GPU_USED=`yes`，OEA_OFFICIAL_SOURCE_USED=`yes`，smoke/full/四协议均 complete、RC=`0`，耗时 293 秒，full embedding 为 `1045x1024/5225x1024`。Table 2 all-caption=`21.1100/46.9474/60.0766`，相对 PAPER=`18.78/43.79/56.63` 的差为 `+2.3300/+3.1574/+3.4466` pp；Table 3 seed-0=`62.0096/73.1100/77.2249`，相对 PAPER=`63.27/74.70/78.79` 的差为 `-1.2604/-1.5900/-1.5651` pp。另列 `[INFERRED]` all-caption=`63.2727/74.6986/78.7943`，不按接近度择优。
-- 最新远程完成：M2D-CLAP × MECAT 公开 848-row 正向 UIQ Tables 12–15 在 RTX 4090 上 complete、RC=`0`、耗时 109 秒，GPU_USED=`yes`、OEA_OFFICIAL_SOURCE_USED=`yes`。Question=`9.6698/27.1226/36.5566`、Imperative=`6.6038/19.2217/29.3632`、Paraphrase=`6.8396/23.4670/31.8396`、Keyphrase=`9.0802/28.4198/39.6226`；12 项相对 PAPER 847-row 最大绝对差 `2.7104` pp。由于候选数不同，严格 PAPER 单元保持 BLOCKED，不删除样本做事后对齐。
+- 最新远程完成：M2D-CLAP × AudioCaps Tables 2/3/12–15 在 RTX 4090 上 complete、RC=`0`、耗时 144 秒，GPU_USED=`yes`、OEA_OFFICIAL_SOURCE_USED=`yes`。默认 Table 2=`39.6308/75.5897/87.4051`、Table 3=`43.8974/70.0513/78.2564`；Question=`35.2821/70.8718/84.7179`、Imperative=`31.3846/66.8718/80.1026`、Paraphrase=`38.6667/75.7949/88.5128`、Keyphrase=`45.2308/81.4359/93.1282`。全部 8 个预声明协议保留，最大绝对差 `3.6933` pp，判为 controlled public-code close，不冒充严格复现。
 - 当前阻塞：AudioCaps 数据与已下载模型无阻塞；严格论文 caption selection、T2T self/tie 口径仍未发布。MECAT 严格论文协议缺 847-row 排除 ID 与 caption 组合规则；negative UIQ 缺 target-HN audio pairing；Robust checkpoint 未公开。
-- 当前等待：远程运行 M2D-CLAP × AudioCaps 八协议主实验；MECAT 公开 848-row OEA-Qwen7B 正向 UIQ暂缓，避免与首轮 AudioCaps GPU 任务争用。
-- 下一步：固化 M2D-CLAP AudioCaps 结果并逐项对照论文，然后按 MGA-CLAP、LAION-CLAP、OEA-Qwen7B、OEA-Qwen7B (+Cl) 顺序复用同一 runner。
+- 当前等待：远程运行 MGA-CLAP × AudioCaps 八协议主实验；MECAT 公开 848-row OEA-Qwen7B 正向 UIQ 暂缓，避免 GPU 任务争用。
+- 下一步：固化 MGA-CLAP AudioCaps 结果并逐项对照论文，然后按 LAION-CLAP、OEA-Qwen7B、OEA-Qwen7B (+Cl) 顺序复用同一 runner。

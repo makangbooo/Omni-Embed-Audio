@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_remote_run_terminal_and_suite_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The returned terminal output includes the complete suite JSON, final artifact SHA256 list, stage exits, run summary, GPU identity, and official-source declaration."
+  },
+  "paper_scope": [
+    "EXP-10 / Table 2 / M2D-CLAP / AudioCaps / T2A",
+    "EXP-11 / Table 3 / M2D-CLAP / AudioCaps / T2T",
+    "EXP-12 / Table 12 / M2D-CLAP / AudioCaps / Question UIQ",
+    "EXP-13 / Table 13 / M2D-CLAP / AudioCaps / Imperative UIQ",
+    "EXP-14 / Table 14 / M2D-CLAP / AudioCaps / Paraphrase UIQ",
+    "EXP-15 / Table 15 / M2D-CLAP / AudioCaps / Keyphrase UIQ"
+  ],
+  "model": {
+    "paper_name": "M2D-CLAP",
+    "checkpoint": "checkpoint-30.pth",
+    "checkpoint_bytes": 1694677655,
+    "checkpoint_sha256": "238521603c04862ab151cdd80980b591cb36ebe844d43203992fac9ef085c8a1",
+    "embedding_dimension": 768
+  },
+  "dataset": {
+    "name": "AudioCaps v2 test",
+    "candidate_audio_count": 975,
+    "caption_count": 4875,
+    "positive_uiq_query_count": 3900,
+    "audio_manifest_sha256": "a341c9dfcb1b2cbe69675e8f1338edb502ce03f8984bf5882dc4d107b72144b4"
+  },
+  "official_source": {
+    "oea_official_source_used": true,
+    "source_files": [
+      "AudioRetrieval/models/m2d_clap_adapter.py",
+      "AudioRetrieval/preprocessing/embeddings/m2d_clap.py",
+      "AudioRetrieval/preprocessing/embeddings/uiq_text.py",
+      "AudioRetrieval/evaluation/metrics.py"
+    ],
+    "compatibility_layer": "AudioRetrieval/evaluation/canonical.py"
+  },
+  "run": {
+    "run_id": "m2d_clap_audiocaps_main_20260802_114706",
+    "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/m2d_clap_audiocaps_main_20260802_114706",
+    "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/m2d_clap_audiocaps_main_20260802_114706/combined.log",
+    "metrics_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/m2d_clap_audiocaps_main_20260802_114706/metrics/suite_metrics.json",
+    "git_commit": "1fbb4c1c91aa22d7458ec1ab7792d82f40f95135",
+    "git_status_short": "",
+    "started_at": "2026-08-02T11:47:06+08:00",
+    "finished_at": "2026-08-02T11:49:32+08:00",
+    "elapsed_seconds": 144,
+    "final_run_rc": 0,
+    "completion_status": "complete",
+    "failed_stage": "none",
+    "gpu_used": true,
+    "gpu_visible_device": 0,
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "gpu_memory_mib": 24564,
+    "driver_version": "580.76.05",
+    "cuda_version": "13.0",
+    "downloads_required": false,
+    "overwrite_or_delete_risk": "none"
+  },
+  "generation": {
+    "status": "complete",
+    "audio_embedding_shape": [975, 768],
+    "caption_embedding_shape": [4875, 768],
+    "uiq_embedding_shapes": {
+      "question": [975, 768],
+      "imperative": [975, 768],
+      "paraphrase": [975, 768],
+      "tagging": [975, 768]
+    }
+  },
+  "returned_artifacts": {
+    "generation_metrics_sha256": "d6991705b2c6ca5e1bff96c210418fa5e6b1bb2c5a306108cc700c1d1232f8ad",
+    "audio_embeddings_sha256": "5bfabe220efc365c55507d5dc39777ae316c9f0689d72015e44ff5ac3dba01a2",
+    "caption_embeddings_sha256": "ac288f035a15091a43f73b718a990dbb3c546d220ed9c3ee58c143f8b38ecdd8",
+    "uiq_question_embeddings_sha256": "e407f0016f746ada16cb11b05a3254744f1539091db6413b6b4df025bd95d347",
+    "uiq_imperative_embeddings_sha256": "06ff30c8edc8f86fae08b6d7e7c48017feda7e24b29bead807a3305484ac572e",
+    "uiq_paraphrase_embeddings_sha256": "baf38f9b4040addc392cf16606f61b9a9d20a0f7fe6685a801b18dc3310dd053",
+    "uiq_tagging_embeddings_sha256": "1706eb78a662c667d9eacf764a36415a05e73277ff225a8cfd89ebd9c6a0bee2",
+    "suite_metrics_sha256": "9fb9fdb82f3ac9be0abe296dc738fb9fb84f239931ac941627fb959d35d77580",
+    "combined_log_sha256": "baf08804a1077bbb163e29a722a56410eff17dd0168bef74a0307deb25cedbc8"
+  },
+  "protocols": {
+    "t2a_public_code_default_joint_all_captions": {
+      "paper_table": "Table 2",
+      "protocol_source": "CODE",
+      "query_selection": "all",
+      "metrics": {"R@1": 39.630769, "R@5": 75.589744, "R@10": 87.405128}
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "paper_table": "Table 2 sensitivity",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "metrics": {"R@1": 38.153846, "R@5": 74.461538, "R@10": 87.487179}
+    },
+    "t2t_public_code_default_seed0": {
+      "paper_table": "Table 3",
+      "protocol_source": "CODE",
+      "query_selection": "public_code_seed0_one_per_clip",
+      "metrics": {"R@1": 43.897436, "R@5": 70.051282, "R@10": 78.256410}
+    },
+    "t2t_all_captions_sensitivity": {
+      "paper_table": "Table 3 sensitivity",
+      "protocol_source": "INFERRED",
+      "query_selection": "all",
+      "metrics": {"R@1": 45.271795, "R@5": 69.148718, "R@10": 78.646154}
+    },
+    "question_released_uiq": {
+      "paper_table": "Table 12",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 35.282051, "R@5": 70.871795, "R@10": 84.717949}
+    },
+    "imperative_released_uiq": {
+      "paper_table": "Table 13",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 31.384615, "R@5": 66.871795, "R@10": 80.102564}
+    },
+    "paraphrase_released_uiq": {
+      "paper_table": "Table 14",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 38.666667, "R@5": 75.794872, "R@10": 88.512821}
+    },
+    "tagging_released_uiq": {
+      "paper_table": "Table 15",
+      "protocol_source": "CODE",
+      "metrics": {"R@1": 45.230769, "R@5": 81.435897, "R@10": 93.128205}
+    }
+  },
+  "paper_values": {
+    "table2_t2a": {"R@1": 41.39, "R@5": 77.13, "R@10": 88.27},
+    "table3_t2t": {"R@1": 47.51, "R@5": 70.03, "R@10": 79.96},
+    "table12_question": {"R@1": 37.13, "R@5": 73.74, "R@10": 86.56},
+    "table13_imperative": {"R@1": 33.85, "R@5": 67.49, "R@10": 80.10},
+    "table14_paraphrase": {"R@1": 42.36, "R@5": 76.62, "R@10": 88.92},
+    "table15_keyphrase": {"R@1": 46.46, "R@5": 82.77, "R@10": 93.64}
+  },
+  "comparison": {
+    "t2a_public_code_default_joint_all_captions": {
+      "signed_delta_percentage_points": {"R@1": -1.759231, "R@5": -1.540256, "R@10": -0.864872},
+      "maximum_absolute_delta_percentage_points": 1.759231,
+      "status": "close"
+    },
+    "t2a_public_code_t2a_only_seed0": {
+      "signed_delta_percentage_points": {"R@1": -3.236154, "R@5": -2.668462, "R@10": -0.782821},
+      "maximum_absolute_delta_percentage_points": 3.236154,
+      "status": "sensitivity_close"
+    },
+    "t2t_public_code_default_seed0": {
+      "signed_delta_percentage_points": {"R@1": -3.612564, "R@5": 0.021282, "R@10": -1.703590},
+      "maximum_absolute_delta_percentage_points": 3.612564,
+      "status": "close"
+    },
+    "t2t_all_captions_sensitivity": {
+      "signed_delta_percentage_points": {"R@1": -2.238205, "R@5": -0.881282, "R@10": -1.313846},
+      "maximum_absolute_delta_percentage_points": 2.238205,
+      "status": "sensitivity_close"
+    },
+    "question_released_uiq": {
+      "signed_delta_percentage_points": {"R@1": -1.847949, "R@5": -2.868205, "R@10": -1.842051},
+      "maximum_absolute_delta_percentage_points": 2.868205,
+      "status": "close"
+    },
+    "imperative_released_uiq": {
+      "signed_delta_percentage_points": {"R@1": -2.465385, "R@5": -0.618205, "R@10": 0.002564},
+      "maximum_absolute_delta_percentage_points": 2.465385,
+      "status": "close"
+    },
+    "paraphrase_released_uiq": {
+      "signed_delta_percentage_points": {"R@1": -3.693333, "R@5": -0.825128, "R@10": -0.407179},
+      "maximum_absolute_delta_percentage_points": 3.693333,
+      "status": "close"
+    },
+    "tagging_released_uiq": {
+      "signed_delta_percentage_points": {"R@1": -1.229231, "R@5": -1.334103, "R@10": -0.511795},
+      "maximum_absolute_delta_percentage_points": 1.334103,
+      "status": "close"
+    }
+  },
+  "protocol_boundary": {
+    "status": "CONTROLLED_PUBLIC_CODE_REPRODUCTION",
+    "strict_paper_reproduction": false,
+    "reason": "PAPER does not publish byte-bound caption selection, T2T self/tie handling, or a complete baseline UIQ command. All predeclared CODE and INFERRED protocols are retained without post-hoc selection.",
+    "no_post_hoc_selection": true
+  }
+}
