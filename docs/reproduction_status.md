@@ -24,14 +24,14 @@
 
 `【实验结果与论文对比】` 必须独立展示本轮已经出现的全部实验结果。属于论文实验时，至少逐项列出实验/指标、论文值、复现值、绝对差、协议来源和判定；同一实验存在多个预声明协议时必须全部展示，不得按接近论文数值择优。论文值或严格协议缺失时标记 `[MISSING]`，不得推测或补造。smoke、资源审计、效率诊断等非论文表格实验也必须单独列出实验、结果、结论和证据边界，不得只埋在进度或叙述中。本轮没有新实验结果时，该区块明确写“本轮无新实验结果”。
 
-`【实验进度】` 必须至少报告论文 inventory 的整行完成度、状态分布和计数口径。当前为：已完成 `4/31 = 12.9%`，状态分布为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`。百分比按 `COMPLETED / 31 * 100` 计算并保留一位小数；部分完成的模型×数据集×任务单元不得提前计为整项完成。可以另列 374-cell 矩阵覆盖率，但不能用它替代 31 项论文实验完成率。
+`【实验进度】` 必须至少报告论文 inventory 的整行完成度、状态分布和计数口径。当前为：已完成 `4/31 = 12.9%`，状态分布为 `4 COMPLETED / 11 IN_PROGRESS / 4 TODO / 12 BLOCKED`。百分比按 `COMPLETED / 31 * 100` 计算并保留一位小数；部分完成的模型×数据集×任务单元不得提前计为整项完成。可以另列 374-cell 矩阵覆盖率，但不能用它替代 31 项论文实验完成率。
 
 | 阶段 | 任务 | 状态 | 当前 Commit | 远程状态 | 阻塞原因 | 下一步 |
 |---|---|---|---|---|---|---|
 | 0 项目审计 | 完整阅读论文正文/附录/表/图/脚注 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 固定 inventory |
 | 0 项目审计 | 审计 README、依赖、训练/评测、数据、UIQ、HN、指标 | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认审计结论 |
 | 0 项目审计 | 31 条实验/图/派生分析 inventory | COMPLETED | `48d7a50` | fork 已同步 | 无 | 用户确认复现边界 |
-| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | `23bf6ee`；批准/主机证据见 `results/audits/takeover_approvals_20260729.json` | 31 项=`4 COMPLETED/10 IN_PROGRESS/5 TODO/12 BLOCKED`，整行完成度=`4/31 = 12.9%`；910 个论文指标聚合为 374 个可审计单元；当前 cell 状态=`60 REPRODUCED_CLOSE/4 CONTROLLED_ONLY/15 PARTIAL/133 TODO/162 BLOCKED`；FIG-02 方法/张量契约及三种 OEA backbone runtime 均已核验；扩展实验明确排除 | 外部端点仍由用户通过 Bitahub Web 控制台操作，Codex 未直接连接；共享目录盘点不等于逐文件完整性校验 | 正文 Table 2/3 优先，继续处理 AudioCaps/MECAT 和缺失 baseline |
+| 0 项目审计 | OEA 论文原实验接管重校准、FIG-02 与完整模型×数据集×任务矩阵 | COMPLETED | `23bf6ee`；批准/主机证据见 `results/audits/takeover_approvals_20260729.json` | 31 项=`4 COMPLETED/11 IN_PROGRESS/4 TODO/12 BLOCKED`，整行完成度=`4/31 = 12.9%`；910 个论文指标聚合为 374 个可审计单元；FIG-02 方法/张量契约及三种 OEA backbone runtime 均已核验；扩展实验明确排除 | 外部端点仍由用户通过 Bitahub Web 控制台操作，Codex 未直接连接；严格 MECAT 与 negative UIQ 协议仍缺作者证据 | public controlled 核心矩阵已执行，继续派生表与效率实验 |
 | 0 GitHub | 建立 `repro/oea-full` 分支 | COMPLETED | `48d7a50` | 本地与 fork 分支均存在 | 无 | 后续提交仅推送该分支 |
 | 0 GitHub | commit 并 push 第一阶段审计 | COMPLETED | `48d7a502e279bd9a2a3195352163626fb1781a3b` | `origin/repro/oea-full` 已建立 | 无 | 保持本地与远程实验 commit 一致 |
 | 0 编排 | 统一复现入口与 CPU/GPU 阶段门禁 | COMPLETED | `d13b115` | 公共入口、精确阶段注册表、默认只规划/显式执行、长任务确认和干净 worktree 门禁已实现；baseline 计划已展开为 vanilla CPU 模型锁 → A100 smoke → A100 full → CPU 四协议 metrics 与独立 CLAP blocker | 无；入口完成不代表任何 blocked 实验已解锁或产生复现值 | DATA-04/05、DATA-06/07、DATA-08/09、DATA-11 已完成；继续只读模型资源审计 |
@@ -136,6 +136,7 @@
 | 3 数据 | MECAT public-848 Table 2/3 caption 口径门禁 | COMPLETED | run=`0e97e86`；审计=`results/audits/mecat_retrieval_caption_protocol_20260802.json` | manifest SHA256 门禁通过；848 条均有精确 3 个 `short` captions，共 2,544 条；`short_all` 同时满足 T2A 与 T2T self-exclusion；六字段合并 13,568 条仅保留为 inferred audit | 论文 847-row、caption field 和 T2T self/tie 仍 `[MISSING]` | 受控 public-848 固定 `short_all`，不按模型结果择优 |
 | 2 主实验 | 十个权重模型 × MECAT public-848 Table 2/3 | COMPLETED | run=`163d3e7`；审计=`results/audits/mecat_weighted_table2_table3_public848_short_eval_20260802.json` | RTX 4090 批次 `10/10` complete、missing/failed=`0/0`、audit RC=`0`；每模型固定 848 audio、2,544 `short` captions 与四个预声明协议，suite/caption-generation SHA256 均已返回。T2A `short_all` 最大差范围=`0.2554–8.0230` pp；T2T `short_seed0` 最大差范围=`1.0789–7.9749` pp | 论文 847-row 排除 ID、caption 字段与 T2T self/tie 未发布；Robust 另缺论文行 checkpoint 严格绑定；明显差值必须保留 | 受控结果不按接近度择优；继续三个 vanilla backbone 的同口径 MECAT Table 2/3 |
 | 2 主实验 | 三个 vanilla backbone × MECAT public-848 Table 2/3 | COMPLETED | run=`d22fed1`；审计=`results/audits/mecat_vanilla_table2_table3_public848_short_eval_20260803.json` | RTX 4090 三次顺序运行全部 complete、RC=`0`、工件校验 complete；每模型固定 848 audio、2,544 `short` captions 与四个预声明协议；明确未加载 OEA checkpoint、LoRA 或 projection head。默认 T2A/T2T 最大绝对差：Nemo=`6.4633/3.9068` pp，Qwen3B=`0.0416/3.7138` pp，Qwen7B=`0.2913/2.1579` pp | 论文 847-row 排除 ID、caption 字段与 T2T self/tie 未发布；Nemo T2A 差异明显，必须保留 | public-848 Table 2/3 已执行 `78/78`；不按接近度择优，严格 847-row 单独保持 BLOCKED |
+| 2 主实验 | DER-01 / Table 11 三数据集 T2A/T2T 均值 | IN_PROGRESS | 本地聚合=`scripts/build_table11_public_controlled_means.py`；审计=`results/audits/table11_public_controlled_means_eval_20260803.json` | 13 模型×2 任务×3 指标=`78/78` controlled 均值已生成；输入来自已固定 Table 2/3 审计，采用预声明默认 T2A all-caption、T2T seed0；最大绝对差范围 T2A=`0.0203–3.5738` pp、T2T=`0.5521–3.2051` pp | strict Table 11 继承 MECAT 847-row、caption selection、T2T self/tie 缺口 | 保留 controlled/strict 分栏；转向 EXP-18/19 其余模型效率与参数量 |
 | 3 数据 | MECAT 论文 847 条子集与检索 caption 口径 | BLOCKED | `87dbe32` | 官方 `00A/test` 与发布正向 UIQ 均为 848；审计文档已完成 | `[MISSING]` 被排除 ID、过滤规则、caption 字段/组合均未公开 | 不擅自删样本；先报告 848 条公开口径，继续请求作者证据 |
 | 3 数据 | DATA-11：MECAT–WavCaps 来源视频候选审计 | COMPLETED | run commit=`e415c1d`；审计=`results/audits/data11_mecat_wavcaps_remote_20260729.json` | run=`data11_mecat_wavcaps_provenance_20260729_130758`；call/audit/wrapper=`0/0/0`；848 samples、807 唯一来源视频、4 个同源视频候选；统计和候选 JSONL SHA256 已固定 | 工具任务完成不解除 EXP-09：论文音频/embedding 阈值、人工复核候选与 847-row 子集仍 `[MISSING]` | 不删样本、不生成 blocklist；EXP-09 保持 IN_PROGRESS |
 | 3 数据 | DATA-12：固定并下载 SQuTR 官方归档 | COMPLETED | `faf5faa` | 远程运行 `data12_squtr_download_20260726_130854` 使用 HTTP/1.1 从 16,524,500,992 bytes 成功续传；wrapper/download exit 均为 0，最终 21,069,841,248 bytes，SHA256 `8956bf93...c6997c`，manifest status=`complete`、Git 状态为空 | 无；续传补丁已在真实链路验证 | DATA-13A 已完成；进入 DATA-13B 安全解压和内容校验 |
@@ -155,9 +156,9 @@
 ## 当前焦点
 
 - 当前阶段：十三个模型的 MECAT public-848 Table 2/3 已全部完成。Clotho、AudioCaps 与 MECAT public-848 正向 UIQ 均为 `10/10`。
-- 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
+- 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计为 `4 COMPLETED / 11 IN_PROGRESS / 4 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
 - 正文 Table 2/3 已执行覆盖为 `78/78 = 100%`：Clotho、AudioCaps 与 MECAT public-848 各 `26/26`；其中严格论文口径覆盖仍为 `52/78 = 66.7%`，MECAT strict 847-row 为 `0/26`。Tables 2/3/12–15 核心默认行已执行覆盖为 `198/198 = 100%`；这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
-- 最近完成：三个 vanilla backbone 在 commit `d22fed1` 上完成 MECAT public-848 `short_all` Table 2/3，`3/3` complete、失败/缺失均为 0，工件校验 complete。Qwen3B/Qwen7B 默认 T2A 最大差仅 `0.0416/0.2913` pp；Nemo T2A 最大差 `6.4633` pp；三者默认 T2T 最大差为 `2.1579–3.9068` pp。差值全部按预声明协议保留，不按接近度择优。
+- 最近完成：三个 vanilla MECAT public-848 Table 2/3 运行已在 `a9bca79` 固化；随后本地完成 DER-01 controlled Table 11，26 行、78 个均值指标全部生成。T2A 最大绝对差范围=`0.0203–3.5738` pp，T2T=`0.5521–3.2051` pp；不按接近度择优。
 - 当前阻塞：严格论文 caption selection、T2T self/tie 未发布；MECAT 严格协议缺 847-row 排除 ID 与六个 caption 字段的选择/组合规则；negative UIQ 缺 target-HN audio pairing；Robust 缺论文行与具体 checkpoint 的严格绑定证据。
 - 当前等待：没有远程主实验正在运行，也没有尚未执行的 Table 2/3/12–15 public controlled cell。
-- 下一步：核对 inventory 后推进仍可执行的派生主表/效率实验；严格 MECAT 847-row、negative UIQ target-HN pairing、Robust 论文 checkpoint identity 继续分栏保持 BLOCKED。
+- 下一步：推进 EXP-18/19 中尚未覆盖的 LAION/MGA/M2D/Nemo/Qwen7B 效率与参数量 controlled 测量；严格 MECAT 847-row、negative UIQ target-HN pairing、Robust 论文 checkpoint identity 继续分栏保持 BLOCKED。

@@ -36,8 +36,8 @@ class ReproductionProgressReportingTests(unittest.TestCase):
             self.counts,
             {
                 "COMPLETED": 4,
-                "IN_PROGRESS": 10,
-                "TODO": 5,
+                "IN_PROGRESS": 11,
+                "TODO": 4,
                 "BLOCKED": 12,
             },
         )

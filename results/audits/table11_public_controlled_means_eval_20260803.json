@@ -1,0 +1,1113 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "derived_public_controlled_table11",
+  "paper_scope": "DER-01 / Table 11",
+  "model_count": 13,
+  "task_count": 2,
+  "result_count": 26,
+  "metric_count": 78,
+  "source_artifacts": [
+    {
+      "path": "results/audits/asrur_nemo_clotho_t2a_20260727.json",
+      "size_bytes": 4861,
+      "sha256": "2164d2057f0191acd3fa38049fede9f67ff51d5a9c9beb087db41ca3ec63dae0"
+    },
+    {
+      "path": "results/audits/audiocaps_remaining_seven_main_eval_20260802.json",
+      "size_bytes": 12261,
+      "sha256": "005b3630d682bf0f7a25f7e2eb577f220a3484391c42f2e69b13ffcbf7321119"
+    },
+    {
+      "path": "results/audits/laion_clap_audiocaps_main_eval_20260802.json",
+      "size_bytes": 8495,
+      "sha256": "ed0523cbb2a93db99cd7c0d3b9235a99647ab5a43d3a80af980a4baee283bbca"
+    },
+    {
+      "path": "results/audits/laion_clap_clotho_main_eval_20260730.json",
+      "size_bytes": 4206,
+      "sha256": "a229a9f0cfea989bca95431eecdef2bcee5b018fef0464bcd11a9f675000541f"
+    },
+    {
+      "path": "results/audits/m2d_clap_audiocaps_main_eval_20260802.json",
+      "size_bytes": 8231,
+      "sha256": "e769b6585dfd57d5f9d3d929eec0593dbc3cf70df9a22aed3337554b01d953a5"
+    },
+    {
+      "path": "results/audits/m2d_clap_clotho_main_eval_20260730.json",
+      "size_bytes": 4384,
+      "sha256": "0e61f7e234e3caba04df7f3c4d4e11e4f6663258e298f7cae6ac754c81de4b00"
+    },
+    {
+      "path": "results/audits/mecat_vanilla_table2_table3_public848_short_eval_20260803.json",
+      "size_bytes": 9603,
+      "sha256": "542d975d86717c7142af031b97d699d08388acc4e0c9fe311d753a0853fc461f"
+    },
+    {
+      "path": "results/audits/mecat_weighted_table2_table3_public848_short_eval_20260802.json",
+      "size_bytes": 15979,
+      "sha256": "3e47e09a81b0c3aaddea8e064b59224f7e70fe7602238ae73074696325fa9faf"
+    },
+    {
+      "path": "results/audits/mga_clap_audiocaps_main_eval_20260802.json",
+      "size_bytes": 8384,
+      "sha256": "0736a5c3b67b7413edb24d3ca3c32e4473232e4fc40761b6b91238fc411fd40c"
+    },
+    {
+      "path": "results/audits/mga_clap_clotho_main_eval_20260731.json",
+      "size_bytes": 3854,
+      "sha256": "17af0eb4643b076530b2c8d70e7af4eaa2650c4b4bb6d22d2bb1134705338b56"
+    },
+    {
+      "path": "results/audits/oea_nemo3b_ac_clotho_official_source_eval_20260729.json",
+      "size_bytes": 9533,
+      "sha256": "d0f8d28d642a591fc54644dafb4cb1d3257231ef7bee019c395d3001e4cc0907"
+    },
+    {
+      "path": "results/audits/oea_nemo3b_clotho_t2t_20260729.json",
+      "size_bytes": 5634,
+      "sha256": "271fee8227af2cfcc6a40a912b626bd56733f671b74772e34954512195d7e445"
+    },
+    {
+      "path": "results/audits/oea_qwen7b_ac_clotho_official_source_eval_20260730.json",
+      "size_bytes": 4876,
+      "sha256": "a442a4ab300d65f6a9bbb733f1cf189d3e15275208c53e132a1af8cd197c9cdd"
+    },
+    {
+      "path": "results/audits/oea_qwen7b_audiocaps_main_eval_20260802.json",
+      "size_bytes": 9383,
+      "sha256": "c3de1d271f9f360b8a2334ddb5130ab4fc7cf60a784f22d1fbe274f07e147e11"
+    },
+    {
+      "path": "results/audits/oea_qwen7b_cl_audiocaps_main_eval_20260802.json",
+      "size_bytes": 8183,
+      "sha256": "e318a9d15b846e1b4a3a4e7de0332e123dcbd72adc20c47a80bdadce278ab781"
+    },
+    {
+      "path": "results/audits/oea_qwen7b_cl_clotho_official_source_eval_20260730.json",
+      "size_bytes": 4894,
+      "sha256": "fbf8ecf80fd764850a20e618c20e666229dda1b0d9c9488b172fa31f78fa9219"
+    },
+    {
+      "path": "results/audits/qwen3b_cl_clotho_official_eval_20260719.json",
+      "size_bytes": 4861,
+      "sha256": "37fb82db856f394cb0dc5ccb2af370667ca91986fcee6c54dee8c4b5c0c5a4a0"
+    },
+    {
+      "path": "results/audits/qwen3b_clotho_retrieval_suite_20260720.json",
+      "size_bytes": 4985,
+      "sha256": "e86b7bc4e697c3296629b8420010e4d8009dac31de57ec694f2eb6aad5da37b4"
+    },
+    {
+      "path": "results/audits/robust_clap_audiocaps_mecat_eval_20260802.json",
+      "size_bytes": 9154,
+      "sha256": "29e1f4b6cc2667b183f4707cc1ba74e08269895d06161b6a54323d666f8f4756"
+    },
+    {
+      "path": "results/audits/robust_clap_clotho_main_eval_20260802.json",
+      "size_bytes": 8614,
+      "sha256": "541cb7d127c68949fe9adb257a85da9eee100986c7bac6d9d807a1e937b48b12"
+    },
+    {
+      "path": "results/audits/vanilla_nemotron_3b_clotho_main_eval_20260730.json",
+      "size_bytes": 6205,
+      "sha256": "13e725201921919da2da539a8b31379956241721edda1d20a537c2e4c01ef2dd"
+    },
+    {
+      "path": "results/audits/vanilla_qwen2_5_omni_3b_clotho_main_eval_20260730.json",
+      "size_bytes": 6643,
+      "sha256": "4a4883940965f90396fcb4fa203b7485aed533c090aa24751441152f22936f01"
+    },
+    {
+      "path": "results/audits/vanilla_qwen2_5_omni_7b_clotho_main_eval_20260730.json",
+      "size_bytes": 6037,
+      "sha256": "d16fb90b540f83b03705ea754c9bcf3eb289b3905b9562af68c4071ba995ea77"
+    },
+    {
+      "path": "configs/results/paper_reported_metrics.jsonl",
+      "size_bytes": 386143,
+      "sha256": "5c2cab8c2c7d71f0a7a1677416304f0088ec0ccae2fe7c6cd3249635c8ba1524"
+    }
+  ],
+  "protocol": {
+    "datasets": [
+      "AudioCaps",
+      "Clotho",
+      "MECAT"
+    ],
+    "t2a": "predeclared default all-caption protocol",
+    "t2t": "predeclared default seed0 protocol",
+    "mecat": "controlled public 848-row short-caption protocol",
+    "aggregation": "unweighted arithmetic mean across AudioCaps, Clotho, and MECAT",
+    "no_post_hoc_protocol_selection": true
+  },
+  "results": [
+    {
+      "model": "LAION-CLAP",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 25.784615,
+          "R@5": 59.117949,
+          "R@10": 74.625641
+        },
+        "Clotho": {
+          "R@1": 14.047847,
+          "R@5": 37.205742,
+          "R@10": 49.818182
+        },
+        "MECAT": {
+          "R@1": 7.193396,
+          "R@5": 22.012579,
+          "R@10": 33.097484
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 15.675286,
+        "R@5": 39.445423,
+        "R@10": 52.513769
+      },
+      "paper_mean": {
+        "R@1": 14.1,
+        "R@5": 36.35,
+        "R@10": 48.94
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 1.575286,
+        "R@5": 3.095423,
+        "R@10": 3.573769
+      },
+      "maximum_absolute_delta_percentage_points": 3.573769
+    },
+    {
+      "model": "LAION-CLAP",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 38.358974,
+          "R@5": 62.051282,
+          "R@10": 72.717949
+        },
+        "Clotho": {
+          "R@1": 49.37799,
+          "R@5": 64.880383,
+          "R@10": 72.248804
+        },
+        "MECAT": {
+          "R@1": 16.981132,
+          "R@5": 39.504717,
+          "R@10": 49.764151
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 34.906032,
+        "R@5": 55.478794,
+        "R@10": 64.910301
+      },
+      "paper_mean": {
+        "R@1": 36.41,
+        "R@5": 56.39,
+        "R@10": 65.81
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -1.503968,
+        "R@5": -0.911206,
+        "R@10": -0.899699
+      },
+      "maximum_absolute_delta_percentage_points": 1.503968
+    },
+    {
+      "model": "Robust-CLAP",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 26.502564,
+          "R@5": 60.123077,
+          "R@10": 75.487179
+        },
+        "Clotho": {
+          "R@1": 14.086124,
+          "R@5": 36.842105,
+          "R@10": 49.741627
+        },
+        "MECAT": {
+          "R@1": 6.839623,
+          "R@5": 22.130503,
+          "R@10": 31.996855
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 15.809437,
+        "R@5": 39.698562,
+        "R@10": 52.408554
+      },
+      "paper_mean": {
+        "R@1": 15.94,
+        "R@5": 39.69,
+        "R@10": 52.32
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -0.130563,
+        "R@5": 0.008562,
+        "R@10": 0.088554
+      },
+      "maximum_absolute_delta_percentage_points": 0.130563
+    },
+    {
+      "model": "Robust-CLAP",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 38.358974,
+          "R@5": 62.051282,
+          "R@10": 72.717949
+        },
+        "Clotho": {
+          "R@1": 49.37799,
+          "R@5": 64.880383,
+          "R@10": 72.248804
+        },
+        "MECAT": {
+          "R@1": 16.981132,
+          "R@5": 39.504717,
+          "R@10": 49.764151
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 34.906032,
+        "R@5": 55.478794,
+        "R@10": 64.910301
+      },
+      "paper_mean": {
+        "R@1": 36.4,
+        "R@5": 56.39,
+        "R@10": 65.82
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -1.493968,
+        "R@5": -0.911206,
+        "R@10": -0.909699
+      },
+      "maximum_absolute_delta_percentage_points": 1.493968
+    },
+    {
+      "model": "MGA-CLAP",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 40.758974,
+          "R@5": 75.261538,
+          "R@10": 86.728205
+        },
+        "Clotho": {
+          "R@1": 21.110048,
+          "R@5": 46.947368,
+          "R@10": 60.076555
+        },
+        "MECAT": {
+          "R@1": 8.333333,
+          "R@5": 24.371069,
+          "R@10": 34.90566
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 23.400785,
+        "R@5": 48.859992,
+        "R@10": 60.57014
+      },
+      "paper_mean": {
+        "R@1": 21.06,
+        "R@5": 45.8,
+        "R@10": 57.72
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 2.340785,
+        "R@5": 3.059992,
+        "R@10": 2.85014
+      },
+      "maximum_absolute_delta_percentage_points": 3.059992
+    },
+    {
+      "model": "MGA-CLAP",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 46.871795,
+          "R@5": 72.307692,
+          "R@10": 81.538462
+        },
+        "Clotho": {
+          "R@1": 62.009569,
+          "R@5": 73.110048,
+          "R@10": 77.22488
+        },
+        "MECAT": {
+          "R@1": 14.268868,
+          "R@5": 32.665094,
+          "R@10": 44.929245
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 41.050077,
+        "R@5": 59.360945,
+        "R@10": 67.897529
+      },
+      "paper_mean": {
+        "R@1": 43.52,
+        "R@5": 62.32,
+        "R@10": 70.63
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -2.469923,
+        "R@5": -2.959055,
+        "R@10": -2.732471
+      },
+      "maximum_absolute_delta_percentage_points": 2.959055
+    },
+    {
+      "model": "M2D-CLAP",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 39.630769,
+          "R@5": 75.589744,
+          "R@10": 87.405128
+        },
+        "Clotho": {
+          "R@1": 16.421053,
+          "R@5": 40.708134,
+          "R@10": 53.703349
+        },
+        "MECAT": {
+          "R@1": 7.861635,
+          "R@5": 23.663522,
+          "R@10": 33.765723
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 21.304486,
+        "R@5": 46.6538,
+        "R@10": 58.2914
+      },
+      "paper_mean": {
+        "R@1": 22.1,
+        "R@5": 47.86,
+        "R@10": 59.15
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -0.795514,
+        "R@5": -1.2062,
+        "R@10": -0.8586
+      },
+      "maximum_absolute_delta_percentage_points": 1.2062
+    },
+    {
+      "model": "M2D-CLAP",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 43.897436,
+          "R@5": 70.051282,
+          "R@10": 78.25641
+        },
+        "Clotho": {
+          "R@1": 52.91866,
+          "R@5": 67.272727,
+          "R@10": 73.014354
+        },
+        "MECAT": {
+          "R@1": 14.858491,
+          "R@5": 33.608491,
+          "R@10": 45.872642
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 37.224862,
+        "R@5": 56.9775,
+        "R@10": 65.714469
+      },
+      "paper_mean": {
+        "R@1": 40.43,
+        "R@5": 59.27,
+        "R@10": 68.08
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -3.205138,
+        "R@5": -2.2925,
+        "R@10": -2.365531
+      },
+      "maximum_absolute_delta_percentage_points": 3.205138
+    },
+    {
+      "model": "Nemotron-3B",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 6.133333,
+          "R@5": 17.641026,
+          "R@10": 26.564103
+        },
+        "Clotho": {
+          "R@1": 7.253588516746412,
+          "R@5": 21.301435406698566,
+          "R@10": 30.181818181818183
+        },
+        "MECAT": {
+          "R@1": 1.926101,
+          "R@5": 7.272013,
+          "R@10": 15.52673
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 5.104341,
+        "R@5": 15.404825,
+        "R@10": 24.090884
+      },
+      "paper_mean": {
+        "R@1": 5.0,
+        "R@5": 14.64,
+        "R@10": 21.74
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 0.104341,
+        "R@5": 0.764825,
+        "R@10": 2.350884
+      },
+      "maximum_absolute_delta_percentage_points": 2.350884
+    },
+    {
+      "model": "Nemotron-3B",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 32.307692,
+          "R@5": 53.025641,
+          "R@10": 62.25641
+        },
+        "Clotho": {
+          "R@1": 57.12918660287082,
+          "R@5": 69.377990430622,
+          "R@10": 74.35406698564593
+        },
+        "MECAT": {
+          "R@1": 5.778302,
+          "R@5": 16.863208,
+          "R@10": 26.533019
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 31.738394,
+        "R@5": 46.42228,
+        "R@10": 54.381165
+      },
+      "paper_mean": {
+        "R@1": 32.62,
+        "R@5": 47.47,
+        "R@10": 55.32
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -0.881606,
+        "R@5": -1.04772,
+        "R@10": -0.938835
+      },
+      "maximum_absolute_delta_percentage_points": 1.04772
+    },
+    {
+      "model": "Qwen2.5-Omni-3B",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 0.430769,
+          "R@5": 1.189744,
+          "R@10": 1.846154
+        },
+        "Clotho": {
+          "R@1": 0.17224880382775118,
+          "R@5": 0.631578947368421,
+          "R@10": 1.1483253588516746
+        },
+        "MECAT": {
+          "R@1": 0.117925,
+          "R@5": 0.668239,
+          "R@10": 1.611635
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 0.240314,
+        "R@5": 0.829854,
+        "R@10": 1.535371
+      },
+      "paper_mean": {
+        "R@1": 0.22,
+        "R@5": 0.82,
+        "R@10": 1.52
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 0.020314,
+        "R@5": 0.009854,
+        "R@10": 0.015371
+      },
+      "maximum_absolute_delta_percentage_points": 0.020314
+    },
+    {
+      "model": "Qwen2.5-Omni-3B",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 21.128205,
+          "R@5": 33.846154,
+          "R@10": 40.0
+        },
+        "Clotho": {
+          "R@1": 39.52153110047847,
+          "R@5": 52.2488038277512,
+          "R@10": 59.04306220095694
+        },
+        "MECAT": {
+          "R@1": 4.127358,
+          "R@5": 11.910377,
+          "R@10": 19.103774
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 21.592365,
+        "R@5": 32.668445,
+        "R@10": 39.382279
+      },
+      "paper_mean": {
+        "R@1": 21.39,
+        "R@5": 31.79,
+        "R@10": 37.95
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 0.202365,
+        "R@5": 0.878445,
+        "R@10": 1.432279
+      },
+      "maximum_absolute_delta_percentage_points": 1.432279
+    },
+    {
+      "model": "Qwen2.5-Omni-7B",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 0.287179,
+          "R@5": 1.292308,
+          "R@10": 2.358974
+        },
+        "Clotho": {
+          "R@1": 0.095694,
+          "R@5": 0.650718,
+          "R@10": 1.244019
+        },
+        "MECAT": {
+          "R@1": 0.196541,
+          "R@5": 1.061321,
+          "R@10": 2.240566
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 0.193138,
+        "R@5": 1.001449,
+        "R@10": 1.947853
+      },
+      "paper_mean": {
+        "R@1": 0.22,
+        "R@5": 0.9,
+        "R@10": 2.01
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -0.026862,
+        "R@5": 0.101449,
+        "R@10": -0.062147
+      },
+      "maximum_absolute_delta_percentage_points": 0.101449
+    },
+    {
+      "model": "Qwen2.5-Omni-7B",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 23.487179,
+          "R@5": 35.487179,
+          "R@10": 41.538462
+        },
+        "Clotho": {
+          "R@1": 40.76555,
+          "R@5": 54.162679,
+          "R@10": 59.808612
+        },
+        "MECAT": {
+          "R@1": 3.537736,
+          "R@5": 12.617925,
+          "R@10": 17.806604
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 22.596822,
+        "R@5": 34.089261,
+        "R@10": 39.717893
+      },
+      "paper_mean": {
+        "R@1": 22.49,
+        "R@5": 33.97,
+        "R@10": 40.27
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 0.106822,
+        "R@5": 0.119261,
+        "R@10": -0.552107
+      },
+      "maximum_absolute_delta_percentage_points": 0.552107
+    },
+    {
+      "model": "OEA-Nemo3B",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 37.866667,
+          "R@5": 71.2,
+          "R@10": 83.405128
+        },
+        "Clotho": {
+          "R@1": 18.277511961722485,
+          "R@5": 41.32057416267942,
+          "R@10": 54.20095693779904
+        },
+        "MECAT": {
+          "R@1": 8.058176,
+          "R@5": 25.235849,
+          "R@10": 35.573899
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 21.400785,
+        "R@5": 45.918808,
+        "R@10": 57.726661
+      },
+      "paper_mean": {
+        "R@1": 21.96,
+        "R@5": 45.91,
+        "R@10": 57.98
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -0.559215,
+        "R@5": 0.008808,
+        "R@10": -0.253339
+      },
+      "maximum_absolute_delta_percentage_points": 0.559215
+    },
+    {
+      "model": "OEA-Nemo3B",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 50.564103,
+          "R@5": 72.0,
+          "R@10": 82.358974
+        },
+        "Clotho": {
+          "R@1": 63.34928229665072,
+          "R@5": 74.83253588516746,
+          "R@10": 80.09569377990431
+        },
+        "MECAT": {
+          "R@1": 18.042453,
+          "R@5": 36.20283,
+          "R@10": 48.231132
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 43.985279,
+        "R@5": 61.011789,
+        "R@10": 70.2286
+      },
+      "paper_mean": {
+        "R@1": 44.62,
+        "R@5": 63.36,
+        "R@10": 72.03
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -0.634721,
+        "R@5": -2.348211,
+        "R@10": -1.8014
+      },
+      "maximum_absolute_delta_percentage_points": 2.348211
+    },
+    {
+      "model": "OEA-Nemo3B (+Cl)",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 34.994872,
+          "R@5": 68.369231,
+          "R@10": 80.0
+        },
+        "Clotho": {
+          "R@1": 21.72248803827751,
+          "R@5": 47.119617224880386,
+          "R@10": 60.44019138755981
+        },
+        "MECAT": {
+          "R@1": 7.704403,
+          "R@5": 24.842767,
+          "R@10": 34.669811
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 21.473921,
+        "R@5": 46.777205,
+        "R@10": 58.370001
+      },
+      "paper_mean": {
+        "R@1": 21.43,
+        "R@5": 46.26,
+        "R@10": 58.38
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 0.043921,
+        "R@5": 0.517205,
+        "R@10": -0.009999
+      },
+      "maximum_absolute_delta_percentage_points": 0.517205
+    },
+    {
+      "model": "OEA-Nemo3B (+Cl)",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 50.666667,
+          "R@5": 71.487179,
+          "R@10": 81.538462
+        },
+        "Clotho": {
+          "R@1": 62.96650717703349,
+          "R@5": 75.98086124401914,
+          "R@10": 80.86124401913875
+        },
+        "MECAT": {
+          "R@1": 18.514151,
+          "R@5": 37.028302,
+          "R@10": 50.589623
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 44.049108,
+        "R@5": 61.498781,
+        "R@10": 70.996443
+      },
+      "paper_mean": {
+        "R@1": 45.17,
+        "R@5": 64.05,
+        "R@10": 72.47
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -1.120892,
+        "R@5": -2.551219,
+        "R@10": -1.473557
+      },
+      "maximum_absolute_delta_percentage_points": 2.551219
+    },
+    {
+      "model": "OEA-Qwen3B",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 37.661538,
+          "R@5": 71.015385,
+          "R@10": 83.733333
+        },
+        "Clotho": {
+          "R@1": 19.004784688995215,
+          "R@5": 41.952153110047846,
+          "R@10": 55.961722488038276
+        },
+        "MECAT": {
+          "R@1": 7.272013,
+          "R@5": 22.169811,
+          "R@10": 31.996855
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 21.312779,
+        "R@5": 45.045783,
+        "R@10": 57.230637
+      },
+      "paper_mean": {
+        "R@1": 20.88,
+        "R@5": 43.72,
+        "R@10": 55.17
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 0.432779,
+        "R@5": 1.325783,
+        "R@10": 2.060637
+      },
+      "maximum_absolute_delta_percentage_points": 2.060637
+    },
+    {
+      "model": "OEA-Qwen3B",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 50.153846,
+          "R@5": 72.102564,
+          "R@10": 82.153846
+        },
+        "Clotho": {
+          "R@1": 61.33971291866028,
+          "R@5": 74.16267942583733,
+          "R@10": 79.33014354066987
+        },
+        "MECAT": {
+          "R@1": 19.457547,
+          "R@5": 37.5,
+          "R@10": 49.410377
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 43.650369,
+        "R@5": 61.255081,
+        "R@10": 70.298122
+      },
+      "paper_mean": {
+        "R@1": 44.94,
+        "R@5": 63.8,
+        "R@10": 72.2
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -1.289631,
+        "R@5": -2.544919,
+        "R@10": -1.901878
+      },
+      "maximum_absolute_delta_percentage_points": 2.544919
+    },
+    {
+      "model": "OEA-Qwen3B (+Cl)",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 36.102564,
+          "R@5": 69.620513,
+          "R@10": 82.112821
+        },
+        "Clotho": {
+          "R@1": 22.736842105263158,
+          "R@5": 49.473684210526315,
+          "R@10": 63.311004784689
+        },
+        "MECAT": {
+          "R@1": 6.603774,
+          "R@5": 21.698113,
+          "R@10": 32.783019
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 21.814393,
+        "R@5": 46.93077,
+        "R@10": 59.402282
+      },
+      "paper_mean": {
+        "R@1": 21.54,
+        "R@5": 45.43,
+        "R@10": 56.67
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 0.274393,
+        "R@5": 1.50077,
+        "R@10": 2.732282
+      },
+      "maximum_absolute_delta_percentage_points": 2.732282
+    },
+    {
+      "model": "OEA-Qwen3B (+Cl)",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 50.564103,
+          "R@5": 72.820513,
+          "R@10": 81.74359
+        },
+        "Clotho": {
+          "R@1": 64.40191387559808,
+          "R@5": 76.17224880382774,
+          "R@10": 80.76555023923446
+        },
+        "MECAT": {
+          "R@1": 21.580189,
+          "R@5": 40.09434,
+          "R@10": 51.29717
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 45.515402,
+        "R@5": 63.029034,
+        "R@10": 71.26877
+      },
+      "paper_mean": {
+        "R@1": 46.27,
+        "R@5": 64.47,
+        "R@10": 72.98
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -0.754598,
+        "R@5": -1.440966,
+        "R@10": -1.71123
+      },
+      "maximum_absolute_delta_percentage_points": 1.71123
+    },
+    {
+      "model": "OEA-Qwen7B",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 37.005128,
+          "R@5": 71.876923,
+          "R@10": 84.164103
+        },
+        "Clotho": {
+          "R@1": 19.885167464114833,
+          "R@5": 44.688995215311,
+          "R@10": 57.09090909090909
+        },
+        "MECAT": {
+          "R@1": 7.940252,
+          "R@5": 23.034591,
+          "R@10": 33.569182
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 21.610182,
+        "R@5": 46.533503,
+        "R@10": 58.274731
+      },
+      "paper_mean": {
+        "R@1": 21.85,
+        "R@5": 46.77,
+        "R@10": 58.56
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -0.239818,
+        "R@5": -0.236497,
+        "R@10": -0.285269
+      },
+      "maximum_absolute_delta_percentage_points": 0.285269
+    },
+    {
+      "model": "OEA-Qwen7B",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 49.435897,
+          "R@5": 72.923077,
+          "R@10": 82.051282
+        },
+        "Clotho": {
+          "R@1": 60.86124401913876,
+          "R@5": 72.63157894736842,
+          "R@10": 78.75598086124403
+        },
+        "MECAT": {
+          "R@1": 21.34434,
+          "R@5": 41.745283,
+          "R@10": 53.183962
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 43.880494,
+        "R@5": 62.433313,
+        "R@10": 71.330408
+      },
+      "paper_mean": {
+        "R@1": 46.46,
+        "R@5": 64.6,
+        "R@10": 73.2
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -2.579506,
+        "R@5": -2.166687,
+        "R@10": -1.869592
+      },
+      "maximum_absolute_delta_percentage_points": 2.579506
+    },
+    {
+      "model": "OEA-Qwen7B (+Cl)",
+      "task": "T2A",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 34.358974,
+          "R@5": 68.410256,
+          "R@10": 81.333333
+        },
+        "Clotho": {
+          "R@1": 22.028708133971293,
+          "R@5": 48.535885167464116,
+          "R@10": 61.64593301435407
+        },
+        "MECAT": {
+          "R@1": 7.54717,
+          "R@5": 22.209119,
+          "R@10": 31.68239
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 21.311617,
+        "R@5": 46.385087,
+        "R@10": 58.220552
+      },
+      "paper_mean": {
+        "R@1": 21.27,
+        "R@5": 46.4,
+        "R@10": 58.89
+      },
+      "signed_delta_percentage_points": {
+        "R@1": 0.041617,
+        "R@5": -0.014913,
+        "R@10": -0.669448
+      },
+      "maximum_absolute_delta_percentage_points": 0.669448
+    },
+    {
+      "model": "OEA-Qwen7B (+Cl)",
+      "task": "T2T",
+      "input_values": {
+        "AudioCaps": {
+          "R@1": 49.435897,
+          "R@5": 72.0,
+          "R@10": 81.435897
+        },
+        "Clotho": {
+          "R@1": 60.86124401913876,
+          "R@5": 72.82296650717703,
+          "R@10": 78.4688995215311
+        },
+        "MECAT": {
+          "R@1": 21.34434,
+          "R@5": 41.273585,
+          "R@10": 52.476415
+        }
+      },
+      "reproduced_mean": {
+        "R@1": 43.880494,
+        "R@5": 62.032184,
+        "R@10": 70.793737
+      },
+      "paper_mean": {
+        "R@1": 46.32,
+        "R@5": 64.75,
+        "R@10": 73.21
+      },
+      "signed_delta_percentage_points": {
+        "R@1": -2.439506,
+        "R@5": -2.717816,
+        "R@10": -2.416263
+      },
+      "maximum_absolute_delta_percentage_points": 2.717816
+    }
+  ],
+  "claim_boundary": {
+    "status": "CONTROLLED_PUBLIC_PROTOCOL_DERIVATION",
+    "strict_paper_reproduction": false,
+    "reason": "MECAT PAPER uses an unpublished 847-row subset, and PAPER does not publish caption selection or T2T self/tie handling. The controlled means therefore cannot be promoted to strict Table 11 reproduction."
+  }
+}
