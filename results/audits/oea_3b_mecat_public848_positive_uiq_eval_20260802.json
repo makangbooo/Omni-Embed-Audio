@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_remote_batch_terminal_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_terminal_output",
+    "note": "The complete compact batch summary fixes four run IDs, stage exits, elapsed times, public/paper candidate counts, twelve R@k values per model, and remote result paths. Artifact hashes were not returned and are not invented."
+  },
+  "git_commit": "925291e8aff98aacbb4a5234fd122062ebd9ab7c",
+  "dataset": {
+    "name": "MECAT-Caption 00A/test public release",
+    "public_candidate_count": 848,
+    "paper_candidate_count": 847,
+    "released_positive_uiq_queries_per_model": 3392
+  },
+  "execution": {
+    "gpu_used": true,
+    "gpu_visible_device": 0,
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "gpu_memory_mib": 24564,
+    "driver_version": "580.76.05",
+    "cuda_version": "13.0",
+    "oea_official_source_used": true,
+    "source_files": [
+      "AudioRetrieval/preprocessing/embeddings/oea.py",
+      "AudioRetrieval/preprocessing/embeddings/uiq_text.py",
+      "AudioRetrieval/evaluation/metrics.py"
+    ],
+    "batch_started_at": "2026-08-02T21:06:56+08:00",
+    "batch_finished_at": "2026-08-02T21:27:04+08:00",
+    "batch_elapsed_seconds": 1208
+  },
+  "runs": [
+    {
+      "variant_id": "oea_nemo3b",
+      "paper_model": "OEA-Nemo3B",
+      "run_id": "oea_nemo3b_mecat_positive_uiq_public848_20260802_210656",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_mecat_positive_uiq_public848_20260802_210656",
+      "elapsed_seconds": 403,
+      "final_run_rc": 0,
+      "embedding_shapes": {"audio": [848, 512], "uiq_per_type": [848, 512]},
+      "protocols": {
+        "question": [7.900943, 25.707547, 36.674528],
+        "imperative": [9.669811, 26.650943, 38.207547],
+        "paraphrase": [7.783019, 26.650943, 36.674528],
+        "tagging": [8.962264, 26.768868, 38.679245]
+      },
+      "paper_values": {
+        "question": [7.31, 24.41, 35.14],
+        "imperative": [8.37, 24.41, 36.44],
+        "paraphrase": [7.43, 25.24, 35.85],
+        "tagging": [9.08, 27.71, 39.74]
+      },
+      "maximum_absolute_delta_percentage_points": {
+        "question": 1.534528,
+        "imperative": 2.240943,
+        "paraphrase": 1.410943,
+        "tagging": 1.060755
+      },
+      "assessment": "controlled_public848_close"
+    },
+    {
+      "variant_id": "oea_nemo3b_cl",
+      "paper_model": "OEA-Nemo3B (+Cl)",
+      "run_id": "oea_nemo3b_cl_mecat_positive_uiq_public848_20260802_211339",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_cl_mecat_positive_uiq_public848_20260802_211339",
+      "elapsed_seconds": 298,
+      "final_run_rc": 0,
+      "embedding_shapes": {"audio": [848, 512], "uiq_per_type": [848, 512]},
+      "protocols": {
+        "question": [7.547170, 22.877358, 35.141509],
+        "imperative": [7.429245, 25.589623, 36.792453],
+        "paraphrase": [7.311321, 24.056604, 34.669811],
+        "tagging": [7.547170, 25.471698, 37.735849]
+      },
+      "paper_values": {
+        "question": [6.96, 22.05, 32.43],
+        "imperative": [7.67, 24.41, 34.55],
+        "paraphrase": [7.67, 23.00, 33.96],
+        "tagging": [7.90, 24.88, 37.03]
+      },
+      "maximum_absolute_delta_percentage_points": {
+        "question": 2.711509,
+        "imperative": 2.242453,
+        "paraphrase": 1.056604,
+        "tagging": 0.705849
+      },
+      "assessment": "controlled_public848_close"
+    },
+    {
+      "variant_id": "oea_qwen3b",
+      "paper_model": "OEA-Qwen3B",
+      "run_id": "oea_qwen3b_mecat_positive_uiq_public848_20260802_211837",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_mecat_positive_uiq_public848_20260802_211837",
+      "elapsed_seconds": 284,
+      "final_run_rc": 0,
+      "embedding_shapes": {"audio": [848, 512], "uiq_per_type": [848, 512]},
+      "protocols": {
+        "question": [7.665094, 22.405660, 33.136792],
+        "imperative": [7.783019, 23.702830, 34.433962],
+        "paraphrase": [7.075472, 22.169811, 32.075472],
+        "tagging": [8.490566, 25.353774, 36.556604]
+      },
+      "paper_values": {
+        "question": [7.43, 18.04, 27.12],
+        "imperative": [7.43, 19.34, 27.00],
+        "paraphrase": [6.49, 19.46, 26.89],
+        "tagging": [7.55, 21.82, 29.60]
+      },
+      "maximum_absolute_delta_percentage_points": {
+        "question": 6.016792,
+        "imperative": 7.433962,
+        "paraphrase": 5.185472,
+        "tagging": 6.956604
+      },
+      "assessment": "controlled_public848_trend_not_close"
+    },
+    {
+      "variant_id": "oea_qwen3b_cl",
+      "paper_model": "OEA-Qwen3B (+Cl)",
+      "run_id": "oea_qwen3b_cl_mecat_positive_uiq_public848_20260802_212321",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_qwen3b_cl_mecat_positive_uiq_public848_20260802_212321",
+      "elapsed_seconds": 223,
+      "final_run_rc": 0,
+      "embedding_shapes": {"audio": [848, 512], "uiq_per_type": [848, 512]},
+      "protocols": {
+        "question": [6.603774, 21.698113, 32.547170],
+        "imperative": [7.429245, 21.933962, 32.547170],
+        "paraphrase": [7.075472, 20.872642, 32.429245],
+        "tagging": [7.311321, 23.231132, 34.316038]
+      },
+      "paper_values": {
+        "question": [6.60, 17.57, 24.88],
+        "imperative": [7.19, 17.33, 25.12],
+        "paraphrase": [5.90, 18.63, 25.59],
+        "tagging": [6.25, 19.69, 27.24]
+      },
+      "maximum_absolute_delta_percentage_points": {
+        "question": 7.667170,
+        "imperative": 7.427170,
+        "paraphrase": 6.839245,
+        "tagging": 7.076038
+      },
+      "assessment": "controlled_public848_trend_not_close"
+    }
+  ],
+  "protocol_boundary": {
+    "status": "CONTROLLED_PUBLIC_848_ROW_REPRODUCTION",
+    "strict_paper_reproduction": false,
+    "claim_boundary": "The public MECAT archive and all four released positive UIQ files contain 848 IDs. PAPER reports 847, but does not publish the excluded ID or rule. A one-row denominator difference is not treated as an explanation for the 4-7.7 pp Qwen3B R@5/R@10 deltas.",
+    "no_post_hoc_exclusion": true
+  },
+  "returned_artifact_hashes": null
+}
