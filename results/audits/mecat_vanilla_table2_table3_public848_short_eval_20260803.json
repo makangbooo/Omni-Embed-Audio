@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "official_source_remote_batch_terminal_audit",
+  "source": {
+    "label": "OBSERVED",
+    "kind": "user_returned_remote_compact_batch_summary",
+    "note": "The returned summary fixes all three run paths, exits, shapes, four predeclared protocols, artifact hashes, and artifact verification status."
+  },
+  "git_commit": "d22fed1078351139975b7ae32fad8d235b44d546",
+  "dataset": {
+    "name": "MECAT-Caption 00A/test public release",
+    "public_candidate_count": 848,
+    "paper_candidate_count": 847,
+    "caption_field": "short",
+    "captions_per_candidate": 3,
+    "caption_count": 2544,
+    "projected_manifest_sha256": "491b9c2230650031b5ce07dcb1f7f5d834486670832456c276b49c528ebcfcbb"
+  },
+  "execution": {
+    "gpu_used": true,
+    "gpu_visible_device": 0,
+    "oea_official_source_used": true,
+    "completed_models": 3,
+    "expected_models": 3,
+    "missing_models": 0,
+    "failed_models": 0,
+    "artifact_verify_status": "complete"
+  },
+  "runs": [
+    {
+      "variant_id": "vanilla_nemotron_3b",
+      "paper_model": "Nemotron-3B",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_nemotron_3b_mecat_table2_table3_public848_short_20260802_235113",
+      "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/vanilla_nemotron_3b_mecat_table2_table3_public848_short_20260802_235113/combined.log",
+      "elapsed_seconds": 355,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "failed_stage": "none",
+      "error_summary": "none",
+      "stage_rc": {
+        "manifest_projection": 0,
+        "config_resolution": 0,
+        "gpu_audio_caption_embeddings": 0,
+        "canonical_npz_export": 0,
+        "cpu_table2_table3_metrics": 0
+      },
+      "audio_shape": [848, 2048],
+      "caption_shape": [2544, 2048],
+      "model_checkpoint_loaded": false,
+      "oea_checkpoint_loaded": false,
+      "lora_loaded": false,
+      "projection_head_loaded": false,
+      "artifact_sha256": {
+        "resolved_embedding_config.json": "d5486cd70abe50b234d46812bdecf33d84fab823e83b72e4568f49a62f81c31f",
+        "generation_metrics.json": "e196906cb7d99cb0d1717765682cb0ad5882d925499cbb173d5980d4d8461ab8",
+        "conversion_metrics.json": "ca2e09203f7f73d4794f6a01289cf5f4243bf5a43e4234c983652d2b8cfd350a",
+        "audio_embeddings.npz": "0ae90b7fe450b70ffc915fadd4014a2fb0f33e617d3c79589033caaef3a42310",
+        "caption_embeddings.npz": "1e2aea00b9b4f6487e8c6e50b8a0fe810a070326525db1ce120a2ff0f8f678b0",
+        "suite_metrics.json": "b3148608d1dda496ae330f33fe00f94f9de1915dd51b9352ae6b3075ccd00383",
+        "combined.log": "13cc74eb3018ce24ffb0ad03b430f98e180e43a2279f44244fae6603923fa959"
+      },
+      "comparison": {
+        "t2a_public848_short_all": {"reproduced": [1.926101, 7.272013, 15.526730], "paper": [4.09, 13.27, 21.99], "signed_delta_percentage_points": [-2.163899, -5.997987, -6.463270], "maximum_absolute_delta_percentage_points": 6.463270},
+        "t2a_public848_short_seed0": {"reproduced": [1.533019, 7.547170, 15.919811], "paper": [4.09, 13.27, 21.99], "signed_delta_percentage_points": [-2.556981, -5.722830, -6.070189], "maximum_absolute_delta_percentage_points": 6.070189},
+        "t2t_public848_short_seed0": {"reproduced": [5.778302, 16.863208, 26.533019], "paper": [6.86, 20.77, 29.56], "signed_delta_percentage_points": [-1.081698, -3.906792, -3.026981], "maximum_absolute_delta_percentage_points": 3.906792},
+        "t2t_public848_short_all": {"reproduced": [5.385220, 17.570755, 25.825472], "paper": [6.86, 20.77, 29.56], "signed_delta_percentage_points": [-1.474780, -3.199245, -3.734528], "maximum_absolute_delta_percentage_points": 3.734528}
+      }
+    },
+    {
+      "variant_id": "vanilla_qwen2_5_omni_3b",
+      "paper_model": "Qwen2.5-Omni-3B",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_3b_mecat_table2_table3_public848_short_20260802_235708",
+      "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/vanilla_qwen2_5_omni_3b_mecat_table2_table3_public848_short_20260802_235708/combined.log",
+      "elapsed_seconds": 355,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "failed_stage": "none",
+      "error_summary": "none",
+      "stage_rc": {
+        "manifest_projection": 0,
+        "config_resolution": 0,
+        "gpu_audio_caption_embeddings": 0,
+        "canonical_npz_export": 0,
+        "cpu_table2_table3_metrics": 0
+      },
+      "audio_shape": [848, 2048],
+      "caption_shape": [2544, 2048],
+      "model_checkpoint_loaded": false,
+      "oea_checkpoint_loaded": false,
+      "lora_loaded": false,
+      "projection_head_loaded": false,
+      "artifact_sha256": {
+        "resolved_embedding_config.json": "80bcb6bc820c9d91f78790c7fd0f3b8803e4c160795c38d0f18aa347f73d06c1",
+        "generation_metrics.json": "4328ec386a1d422dad93769ad2cc4ebed0646ea3b9e3d86818f6d53e208e0669",
+        "conversion_metrics.json": "d64c83b6eea7f39f7c0555ec8059a3d63e71918b8ab9e291b107ae1e70a040b9",
+        "audio_embeddings.npz": "1e1978fecad026a134fc1bae9a1c73348a743b05daed9c4da9f85d4fb02b5477",
+        "caption_embeddings.npz": "415e221371a6a45166e149a1dcdb18ce4ff605fd616fe98a7eb0c817061f52d0",
+        "suite_metrics.json": "6a19170cfd00667844875af7b38214cb4549350485f27642a4be111113ae8e72",
+        "combined.log": "51b24cb91b9f3384d92701c5dde77f06bb6e7e3ef83513d43fb7e774cf43a1a3"
+      },
+      "comparison": {
+        "t2a_public848_short_all": {"reproduced": [0.117925, 0.668239, 1.611635], "paper": [0.12, 0.63, 1.57], "signed_delta_percentage_points": [-0.002075, 0.038239, 0.041635], "maximum_absolute_delta_percentage_points": 0.041635},
+        "t2a_public848_short_seed0": {"reproduced": [0.117925, 0.707547, 1.533019], "paper": [0.12, 0.63, 1.57], "signed_delta_percentage_points": [-0.002075, 0.077547, -0.036981], "maximum_absolute_delta_percentage_points": 0.077547},
+        "t2t_public848_short_seed0": {"reproduced": [4.127358, 11.910377, 19.103774], "paper": [3.18, 9.75, 15.39], "signed_delta_percentage_points": [0.947358, 2.160377, 3.713774], "maximum_absolute_delta_percentage_points": 3.713774},
+        "t2t_public848_short_all": {"reproduced": [4.166667, 11.871069, 18.278302], "paper": [3.18, 9.75, 15.39], "signed_delta_percentage_points": [0.986667, 2.121069, 2.888302], "maximum_absolute_delta_percentage_points": 2.888302}
+      }
+    },
+    {
+      "variant_id": "vanilla_qwen2_5_omni_7b",
+      "paper_model": "Qwen2.5-Omni-7B",
+      "result_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/vanilla_qwen2_5_omni_7b_mecat_table2_table3_public848_short_20260803_000304",
+      "log_remote_path": "/home/jg525/Omni-Embed-Audio/logs/vanilla_qwen2_5_omni_7b_mecat_table2_table3_public848_short_20260803_000304/combined.log",
+      "elapsed_seconds": 370,
+      "final_run_rc": 0,
+      "completion_status": "complete",
+      "failed_stage": "none",
+      "error_summary": "none",
+      "stage_rc": {
+        "manifest_projection": 0,
+        "config_resolution": 0,
+        "gpu_audio_caption_embeddings": 0,
+        "canonical_npz_export": 0,
+        "cpu_table2_table3_metrics": 0
+      },
+      "audio_shape": [848, 3584],
+      "caption_shape": [2544, 3584],
+      "model_checkpoint_loaded": false,
+      "oea_checkpoint_loaded": false,
+      "lora_loaded": false,
+      "projection_head_loaded": false,
+      "artifact_sha256": {
+        "resolved_embedding_config.json": "c856b973813b761857d084a0eb42b5588abb5f4c513d0cd78f9e53f70eb00163",
+        "generation_metrics.json": "97c6fb4bfa936af50584855ef1c15a12399cba3b23c5a3ac24dda0b0823c79b2",
+        "conversion_metrics.json": "8ed4e94f5bea30bd12346083f21bc9473a96803b978b5c4fc26c23d1e4a789c7",
+        "audio_embeddings.npz": "6f52699858915a3573de68d77207d845868927178b4b0a5e9dbbed92e4b9181f",
+        "caption_embeddings.npz": "bdda67e59542b9899eaabc3b19f5070295d0cd22c66754b53a108e41811c538e",
+        "suite_metrics.json": "b1ab95c6684d7b21858e9abcabba6f70e4b941b04f614d2e92b44cffe3f79fd8",
+        "combined.log": "ae1e7cf99e9e099ed320bed70a0f46d617b3dfc88b3f01cea750576c6aacb6f4"
+      },
+      "comparison": {
+        "t2a_public848_short_all": {"reproduced": [0.196541, 1.061321, 2.240566], "paper": [0.16, 0.77, 2.38], "signed_delta_percentage_points": [0.036541, 0.291321, -0.139434], "maximum_absolute_delta_percentage_points": 0.291321},
+        "t2a_public848_short_seed0": {"reproduced": [0.235849, 0.943396, 2.240566], "paper": [0.16, 0.77, 2.38], "signed_delta_percentage_points": [0.075849, 0.173396, -0.139434], "maximum_absolute_delta_percentage_points": 0.173396},
+        "t2t_public848_short_seed0": {"reproduced": [3.537736, 12.617925, 17.806604], "paper": [3.16, 10.46, 15.92], "signed_delta_percentage_points": [0.377736, 2.157925, 1.886604], "maximum_absolute_delta_percentage_points": 2.157925},
+        "t2t_public848_short_all": {"reproduced": [3.616352, 12.067610, 17.924528], "paper": [3.16, 10.46, 15.92], "signed_delta_percentage_points": [0.456352, 1.607610, 2.004528], "maximum_absolute_delta_percentage_points": 2.004528}
+      }
+    }
+  ],
+  "protocol_boundary": {
+    "status": "CONTROLLED_PUBLIC_848_ROW_REPRODUCTION",
+    "strict_paper_reproduction": false,
+    "caption_protocol_source": "CODE: AudioRetrieval/scripts/mine_hard_negatives_laion.py:load_mecat_captions",
+    "claim_boundary": "The public archive has 848 candidates while PAPER reports 847 and does not publish the excluded ID, caption field, or T2T self/tie policy.",
+    "no_post_hoc_exclusion": true,
+    "no_post_hoc_protocol_selection": true
+  }
+}

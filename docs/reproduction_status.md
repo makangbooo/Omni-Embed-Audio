@@ -1,6 +1,6 @@
 # Omni-Embed-Audio 复现状态
 
-最后更新：2026-08-02（Asia/Shanghai）
+最后更新：2026-08-03（Asia/Shanghai）
 
 状态值仅使用：`TODO`、`IN_PROGRESS`、`WAITING_USER`、`RUNNING_REMOTE`、`COMPLETED`、`FAILED`、`BLOCKED`。
 
@@ -135,7 +135,7 @@
 | 3 数据 | DATA-05：MECAT 848 条安全解压/解码/UIQ ID 校验 | COMPLETED | run commit=`febfbe4`；同上审计 | validation/wrapper=`0/0`；848 manifest rows、848 FLAC 全解码、四类正向 UIQ 精确 ID 对齐；manifest SHA256=`b4c4d8c1...94a6` | `[PAPER][MISSING]` 847-row 子集、排除 ID与 T2A/T2T caption 字段；严格主表仍 BLOCKED | DATA-11 已完成；如做公开 848 替代实验须单独标记 |
 | 3 数据 | MECAT public-848 Table 2/3 caption 口径门禁 | COMPLETED | run=`0e97e86`；审计=`results/audits/mecat_retrieval_caption_protocol_20260802.json` | manifest SHA256 门禁通过；848 条均有精确 3 个 `short` captions，共 2,544 条；`short_all` 同时满足 T2A 与 T2T self-exclusion；六字段合并 13,568 条仅保留为 inferred audit | 论文 847-row、caption field 和 T2T self/tie 仍 `[MISSING]` | 受控 public-848 固定 `short_all`，不按模型结果择优 |
 | 2 主实验 | 十个权重模型 × MECAT public-848 Table 2/3 | COMPLETED | run=`163d3e7`；审计=`results/audits/mecat_weighted_table2_table3_public848_short_eval_20260802.json` | RTX 4090 批次 `10/10` complete、missing/failed=`0/0`、audit RC=`0`；每模型固定 848 audio、2,544 `short` captions 与四个预声明协议，suite/caption-generation SHA256 均已返回。T2A `short_all` 最大差范围=`0.2554–8.0230` pp；T2T `short_seed0` 最大差范围=`1.0789–7.9749` pp | 论文 847-row 排除 ID、caption 字段与 T2T self/tie 未发布；Robust 另缺论文行 checkpoint 严格绑定；明显差值必须保留 | 受控结果不按接近度择优；继续三个 vanilla backbone 的同口径 MECAT Table 2/3 |
-| 2 主实验 | 三个 vanilla backbone × MECAT public-848 Table 2/3 | WAITING_USER | `30547bf` | base-only runner、三份锁绑定协议、`short_all` manifest 投影与音频 SHA256 门禁已实现；不加载 OEA checkpoint/LoRA/projection head | 等待远程 RTX 4090 顺序运行；严格论文协议仍 BLOCKED | 用户拉取后依次运行 Nemotron-3B、Qwen2.5-Omni-3B、Qwen2.5-Omni-7B |
+| 2 主实验 | 三个 vanilla backbone × MECAT public-848 Table 2/3 | COMPLETED | run=`d22fed1`；审计=`results/audits/mecat_vanilla_table2_table3_public848_short_eval_20260803.json` | RTX 4090 三次顺序运行全部 complete、RC=`0`、工件校验 complete；每模型固定 848 audio、2,544 `short` captions 与四个预声明协议；明确未加载 OEA checkpoint、LoRA 或 projection head。默认 T2A/T2T 最大绝对差：Nemo=`6.4633/3.9068` pp，Qwen3B=`0.0416/3.7138` pp，Qwen7B=`0.2913/2.1579` pp | 论文 847-row 排除 ID、caption 字段与 T2T self/tie 未发布；Nemo T2A 差异明显，必须保留 | public-848 Table 2/3 已执行 `78/78`；不按接近度择优，严格 847-row 单独保持 BLOCKED |
 | 3 数据 | MECAT 论文 847 条子集与检索 caption 口径 | BLOCKED | `87dbe32` | 官方 `00A/test` 与发布正向 UIQ 均为 848；审计文档已完成 | `[MISSING]` 被排除 ID、过滤规则、caption 字段/组合均未公开 | 不擅自删样本；先报告 848 条公开口径，继续请求作者证据 |
 | 3 数据 | DATA-11：MECAT–WavCaps 来源视频候选审计 | COMPLETED | run commit=`e415c1d`；审计=`results/audits/data11_mecat_wavcaps_remote_20260729.json` | run=`data11_mecat_wavcaps_provenance_20260729_130758`；call/audit/wrapper=`0/0/0`；848 samples、807 唯一来源视频、4 个同源视频候选；统计和候选 JSONL SHA256 已固定 | 工具任务完成不解除 EXP-09：论文音频/embedding 阈值、人工复核候选与 847-row 子集仍 `[MISSING]` | 不删样本、不生成 blocklist；EXP-09 保持 IN_PROGRESS |
 | 3 数据 | DATA-12：固定并下载 SQuTR 官方归档 | COMPLETED | `faf5faa` | 远程运行 `data12_squtr_download_20260726_130854` 使用 HTTP/1.1 从 16,524,500,992 bytes 成功续传；wrapper/download exit 均为 0，最终 21,069,841,248 bytes，SHA256 `8956bf93...c6997c`，manifest status=`complete`、Git 状态为空 | 无；续传补丁已在真实链路验证 | DATA-13A 已完成；进入 DATA-13B 安全解压和内容校验 |
@@ -154,10 +154,10 @@
 
 ## 当前焦点
 
-- 当前阶段：十个权重模型的 MECAT public-848 Table 2/3 已全部完成；正在准备三个 vanilla backbone 的同口径 Table 2/3。Clotho、AudioCaps 与 MECAT public-848 正向 UIQ 均为 `10/10`。
+- 当前阶段：十三个模型的 MECAT public-848 Table 2/3 已全部完成。Clotho、AudioCaps 与 MECAT public-848 正向 UIQ 均为 `10/10`。
 - 当前对应论文范围：主表 1–5、附录表 6–17、图 1–3、附录 A–M 的 31 个可审计条目；整行统计仍为 `4 COMPLETED / 10 IN_PROGRESS / 5 TODO / 12 BLOCKED`，已完成 `4/31 = 12.9%`。
-- 正文 Table 2/3 已执行覆盖为 `72/78 = 92.3%`：Clotho 与 AudioCaps 各 `26/26`，MECAT public-848 `20/26`；其中严格论文口径覆盖仍为 `52/78 = 66.7%`，MECAT strict 847-row 为 `0/26`。Tables 2/3/12–15 核心默认行已执行覆盖为 `192/198 = 97.0%`；这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
-- 最近完成：十个权重模型在 commit `163d3e7` 上完成 MECAT public-848 `short_all` Table 2/3 批次，`10/10` complete、失败/缺失均为 0。T2A 中 LAION/MGA/M2D/Robust/Nemo/Qwen7B 多数协议接近论文，Qwen3B 两变体偏高；T2T 中 LAION/Robust 接近，MGA/M2D/OEA 多数低约 5–8 pp。差值全部按预声明协议保留，不按接近度择优。
+- 正文 Table 2/3 已执行覆盖为 `78/78 = 100%`：Clotho、AudioCaps 与 MECAT public-848 各 `26/26`；其中严格论文口径覆盖仍为 `52/78 = 66.7%`，MECAT strict 847-row 为 `0/26`。Tables 2/3/12–15 核心默认行已执行覆盖为 `198/198 = 100%`；这些 cell 覆盖率不替代 31 项论文 inventory 完成率。
+- 最近完成：三个 vanilla backbone 在 commit `d22fed1` 上完成 MECAT public-848 `short_all` Table 2/3，`3/3` complete、失败/缺失均为 0，工件校验 complete。Qwen3B/Qwen7B 默认 T2A 最大差仅 `0.0416/0.2913` pp；Nemo T2A 最大差 `6.4633` pp；三者默认 T2T 最大差为 `2.1579–3.9068` pp。差值全部按预声明协议保留，不按接近度择优。
 - 当前阻塞：严格论文 caption selection、T2T self/tie 未发布；MECAT 严格协议缺 847-row 排除 ID 与六个 caption 字段的选择/组合规则；negative UIQ 缺 target-HN audio pairing；Robust 缺论文行与具体 checkpoint 的严格绑定证据。
-- 当前等待：没有远程主实验正在运行；三个 vanilla backbone 的 MECAT public-848 Table 2/3 runner 已就绪，等待用户在 RTX 4090 顺序执行。
-- 下一步：顺序完成三个 vanilla backbone 的 `short_all` 受控批次，使已执行 Table 2/3 达到 `78/78`；严格 MECAT 847-row 与 negative UIQ target-HN pairing blocker 继续分栏。
+- 当前等待：没有远程主实验正在运行，也没有尚未执行的 Table 2/3/12–15 public controlled cell。
+- 下一步：核对 inventory 后推进仍可执行的派生主表/效率实验；严格 MECAT 847-row、negative UIQ target-HN pairing、Robust 论文 checkpoint identity 继续分栏保持 BLOCKED。
