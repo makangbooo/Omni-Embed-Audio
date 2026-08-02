@@ -5,7 +5,17 @@
   "source": {
     "label": "OBSERVED",
     "kind": "user_returned_remote_terminal_output",
-    "note": "The returned terminal output fixes the commit, GPU, stage exits, candidate/query counts, twelve displayed R@k values, elapsed time, and remote paths. The suite JSON and artifact hashes were not returned and are not invented."
+    "note": "The returned terminal output fixes the commit, GPU, stage exits, candidate/query counts, twelve R@k values, elapsed time, remote paths, complete suite JSON, and final artifact SHA256 list."
+  },
+  "returned_artifacts": {
+    "generation_metrics_sha256": "10538702ea40b34086c83d87f745c7e5a1529427e30d2162320c21c56c9b4169",
+    "audio_embeddings_sha256": "8c7df959b9e60d530b4ae8668128b23305e1004d665c979d6be24905c1360227",
+    "uiq_question_embeddings_sha256": "7f945043a7dd6138a38dab5f63e2a4b6d07db9299a39ce3266c29761fa49f303",
+    "uiq_imperative_embeddings_sha256": "23e69ca92f3b4a42840e591b460becea27233f9f370fe2a38266773d3b3be776",
+    "uiq_paraphrase_embeddings_sha256": "1d9676c3f760ef7001c669088c153559706266906aeaded9c4dda18a6a23c0eb",
+    "uiq_tagging_embeddings_sha256": "af18ac9b169c32d1aec0d2a484267a14ad67e66fa7381ab99d7d7d5e783e25b2",
+    "suite_metrics_sha256": "a8a6b3cb187c411bff7b1f0c9b9b3984216e23659046f04ef0e3c7f01922ee65",
+    "combined_log_sha256": "03590c93884641642023dc2f76591274e3b551b2ae662ba8c5190d4d435e8d8f"
   },
   "paper_scope": [
     "EXP-12 / Table 12 / LAION-CLAP / MECAT / Question UIQ T2A",
