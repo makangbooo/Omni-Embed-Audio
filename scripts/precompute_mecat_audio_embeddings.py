@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Precompute MECAT public-848 audio embeddings from the audited manifest."""
+"""Precompute MECAT public-848 audio and/or caption embeddings."""
 
 from __future__ import annotations
 
@@ -45,6 +45,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--expected-dim", type=int, required=True)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--batch-size-audio", type=int, default=16)
+    parser.add_argument("--batch-size-text", type=int, default=128)
+    parser.add_argument("--skip-audio", action="store_true")
+    parser.add_argument("--compute-captions", action="store_true")
+    parser.add_argument(
+        "--caption-field",
+        choices=("long", "short", "speech", "music", "sound", "environment"),
+    )
+    parser.add_argument("--captions-per-example", type=int)
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--repo-id")
     parser.add_argument("--local-path", type=Path)
@@ -101,6 +109,9 @@ def load_manifest(
     path: Path,
     expected_sha256: str,
     expected_examples: int,
+    *,
+    caption_field: str | None = None,
+    captions_per_example: int | None = None,
 ) -> tuple[list[MecatAudioEntry], list[dict[str, Any]]]:
     if sha256_file(path) != expected_sha256:
         raise ValueError("MECAT manifest SHA256 mismatch")
@@ -134,10 +145,33 @@ def load_manifest(
             raise ValueError(f"MECAT audio SHA256 mismatch for {sample_id}")
         if row.get("decode_ok") is not True or row.get("file_exists") is not True:
             raise ValueError(f"MECAT manifest gate is incomplete for {sample_id}")
+        captions: list[str] = []
+        if caption_field is not None:
+            caption_fields = row.get("caption_fields")
+            if not isinstance(caption_fields, dict):
+                raise TypeError(f"caption_fields is not an object for {sample_id}")
+            raw_captions = caption_fields.get(caption_field)
+            if not isinstance(raw_captions, list):
+                raise TypeError(
+                    f"{caption_field} captions are not a list for {sample_id}"
+                )
+            captions = [
+                value.strip()
+                for value in raw_captions
+                if isinstance(value, str)
+                and value.strip()
+                and value.strip().casefold() != "none"
+            ]
+            if len(captions) != captions_per_example:
+                raise ValueError(
+                    f"{caption_field} caption count mismatch for {sample_id}: "
+                    f"{len(captions)} != {captions_per_example}"
+                )
         entries.append(
             MecatAudioEntry(
                 clip_id=sample_id,
                 audio_path=audio_path,
+                captions=captions,
                 metadata={"manifest_index": index},
             )
         )
@@ -241,6 +275,14 @@ def build_precomputer(args: argparse.Namespace):
 
 def main() -> int:
     args = parse_args()
+    if args.skip_audio and not args.compute_captions:
+        raise ValueError("at least one of audio or caption computation is required")
+    if args.compute_captions and (
+        args.caption_field is None or args.captions_per_example is None
+    ):
+        raise ValueError(
+            "caption computation requires --caption-field and --captions-per-example"
+        )
     output_dir = args.output_dir.resolve()
     metrics_path = output_dir / "generation_metrics.json"
     report: dict[str, Any] = {
@@ -259,30 +301,62 @@ def main() -> int:
             args.manifest.resolve(),
             args.manifest_sha256,
             args.expected_examples,
+            caption_field=args.caption_field,
+            captions_per_example=args.captions_per_example,
         )
         print(f"MECAT_MANIFEST_STATUS=complete rows={len(entries)}")
         precomputer = build_precomputer(args)
+        precomputer.batch_size_text = args.batch_size_text
         precomputer.precompute_dataset(
             entries,
             output_dir,
-            compute_audio=True,
-            compute_captions=False,
+            compute_audio=not args.skip_audio,
+            compute_captions=args.compute_captions,
         )
-        output_path = output_dir / "audio_embeddings.npz"
-        with np.load(output_path, allow_pickle=True) as archive:
-            embeddings = np.asarray(archive["embeddings"])
-            clip_ids = [str(value) for value in archive["clip_ids"].tolist()]
         expected_ids = [str(row["sample_id"]) for row in manifest_rows]
-        expected_shape = (args.expected_examples, args.expected_dim)
-        if embeddings.shape != expected_shape:
-            raise ValueError(
-                f"MECAT audio embedding shape mismatch: "
-                f"{embeddings.shape} != {expected_shape}"
+        generated: dict[str, Any] = {}
+        if not args.skip_audio:
+            audio_path = output_dir / "audio_embeddings.npz"
+            with np.load(audio_path, allow_pickle=True) as archive:
+                audio_embeddings = np.asarray(archive["embeddings"])
+                audio_ids = [str(value) for value in archive["clip_ids"].tolist()]
+            expected_audio_shape = (args.expected_examples, args.expected_dim)
+            if audio_embeddings.shape != expected_audio_shape:
+                raise ValueError(
+                    f"MECAT audio embedding shape mismatch: "
+                    f"{audio_embeddings.shape} != {expected_audio_shape}"
+                )
+            if audio_ids != expected_ids:
+                raise ValueError("MECAT audio embedding IDs differ from manifest order")
+            if not np.isfinite(audio_embeddings).all():
+                raise ValueError("MECAT audio embeddings contain non-finite values")
+            generated["audio_embedding_shape"] = list(audio_embeddings.shape)
+            generated["audio_embeddings"] = identity(audio_path)
+        if args.compute_captions:
+            caption_path = output_dir / "caption_embeddings.npz"
+            with np.load(caption_path, allow_pickle=True) as archive:
+                caption_embeddings = np.asarray(archive["embeddings"])
+                caption_ids = [str(value) for value in archive["clip_ids"].tolist()]
+            expected_caption_ids = [
+                sample_id
+                for sample_id in expected_ids
+                for _ in range(args.captions_per_example)
+            ]
+            expected_caption_shape = (
+                args.expected_examples * args.captions_per_example,
+                args.expected_dim,
             )
-        if clip_ids != expected_ids:
-            raise ValueError("MECAT audio embedding IDs differ from manifest order")
-        if not np.isfinite(embeddings).all():
-            raise ValueError("MECAT audio embeddings contain non-finite values")
+            if caption_embeddings.shape != expected_caption_shape:
+                raise ValueError(
+                    f"MECAT caption embedding shape mismatch: "
+                    f"{caption_embeddings.shape} != {expected_caption_shape}"
+                )
+            if caption_ids != expected_caption_ids:
+                raise ValueError("MECAT caption ownership/order differs from manifest")
+            if not np.isfinite(caption_embeddings).all():
+                raise ValueError("MECAT caption embeddings contain non-finite values")
+            generated["caption_embedding_shape"] = list(caption_embeddings.shape)
+            generated["caption_embeddings"] = identity(caption_path)
         report.update(
             {
                 "status": "complete",
@@ -299,16 +373,32 @@ def main() -> int:
                 ).strip(),
                 "candidate_count": args.expected_examples,
                 "paper_reported_candidate_count": 847,
-                "embedding_shape": list(embeddings.shape),
+                "caption_protocol": (
+                    None
+                    if not args.compute_captions
+                    else {
+                        "field": args.caption_field,
+                        "captions_per_example": args.captions_per_example,
+                        "source": (
+                            "CODE: AudioRetrieval/scripts/"
+                            "mine_hard_negatives_laion.py:load_mecat_captions"
+                        ),
+                    }
+                ),
+                **generated,
                 "manifest": identity(args.manifest.resolve()),
-                "audio_embeddings": identity(output_path),
                 "error": None,
             }
         )
         write_json(metrics_path, report)
-        print("MECAT_AUDIO_EMBEDDING_STATUS=complete")
-        print(f"AUDIO_SHAPE={list(embeddings.shape)}")
-        print(f"OUTPUT={output_path}")
+        if not args.skip_audio:
+            print("MECAT_AUDIO_EMBEDDING_STATUS=complete")
+            print(f"AUDIO_SHAPE={generated['audio_embedding_shape']}")
+        if args.compute_captions:
+            print("MECAT_CAPTION_EMBEDDING_STATUS=complete")
+            print(f"CAPTION_SHAPE={generated['caption_embedding_shape']}")
+            print(f"CAPTION_FIELD={args.caption_field}")
+        print(f"OUTPUT={output_dir}")
         return 0
     except BaseException as exc:
         report.update(

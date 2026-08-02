@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "user_returned_remote_caption_multiplicity_audit",
+  "run": {
+    "git_commit": "0e97e86",
+    "output_remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/mecat_retrieval_caption_audit_20260802_223032.json",
+    "manifest_sha256": "b4c4d8c1c5928ba5b23a25b3169519871cb2438dfed05823610aebeccb8594a6",
+    "public_candidate_count": 848,
+    "paper_candidate_count": 847
+  },
+  "field_statistics": {
+    "long": {"captions_per_sample": 3, "total_captions": 2544, "unique_caption_strings": 2544},
+    "short": {"captions_per_sample": 3, "total_captions": 2544, "unique_caption_strings": 2503},
+    "speech": {"captions_per_sample": 2, "total_captions": 1696, "unique_caption_strings": 138},
+    "music": {"captions_per_sample": 2, "total_captions": 1696, "unique_caption_strings": 226},
+    "sound": {"captions_per_sample": 3, "total_captions": 2544, "unique_caption_strings": 2518},
+    "environment": {"captions_per_sample": 3, "total_captions": 2544, "unique_caption_strings": 2467}
+  },
+  "candidate_protocols": {
+    "short_first": {
+      "source": "CODE: uiq_toolkit.load_examples(dataset='mecat')",
+      "total_captions": 848,
+      "t2a_complete": true,
+      "t2t_self_exclusion_complete": false
+    },
+    "short_all": {
+      "source": "CODE: mine_hard_negatives_laion.load_mecat_captions",
+      "total_captions": 2544,
+      "captions_per_sample": 3,
+      "t2a_complete": true,
+      "t2t_self_exclusion_complete": true
+    },
+    "all_six_fields_flat": {
+      "source": "INFERRED sensitivity only",
+      "total_captions": 13568,
+      "captions_per_sample": 16,
+      "t2a_complete": true,
+      "t2t_self_exclusion_complete": true
+    }
+  },
+  "fixed_controlled_protocol": {
+    "caption_field": "short",
+    "caption_selection": "all three captions per public candidate",
+    "caption_count": 2544,
+    "candidate_count": 848,
+    "protocol_source": "CODE",
+    "selection_reason": "This is the only released multi-caption protocol directly used by the repository's MECAT hard-negative loader and it supports both T2A and T2T self-exclusion.",
+    "no_post_hoc_metric_selection": true
+  },
+  "claim_boundary": {
+    "strict_paper_reproduction": false,
+    "paper_caption_protocol": "[MISSING]",
+    "paper_excluded_candidate_id": "[MISSING]",
+    "all_six_fields_status": "audit-only inferred sensitivity; not selected for formal model runs"
+  }
+}

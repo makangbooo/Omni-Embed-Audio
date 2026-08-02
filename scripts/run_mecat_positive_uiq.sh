@@ -7,8 +7,14 @@ cd "${ROOT_DIR}"
 # shellcheck source=scripts/lib/conda.sh
 source "${ROOT_DIR}/scripts/lib/conda.sh"
 
-if [[ "$#" -ne 1 ]]; then
-  echo "Usage: $0 <laion_clap|robust_clap|mga_clap|m2d_clap|oea_nemo3b|oea_nemo3b_cl|oea_qwen3b|oea_qwen3b_cl|oea_qwen7b|oea_qwen7b_cl>" >&2
+if [[ "$#" -eq 1 ]]; then
+  RUN_MODE="positive_uiq"
+  REUSED_RESULT_DIR=""
+elif [[ "$#" -eq 3 && "$2" == "table2_table3" ]]; then
+  RUN_MODE="table2_table3"
+  REUSED_RESULT_DIR="$3"
+else
+  echo "Usage: $0 <variant> [table2_table3 <completed-positive-uiq-result-dir>]" >&2
   exit 2
 fi
 
@@ -216,10 +222,15 @@ case "${VARIANT_ID}" in
 esac
 
 STAMP="$(date +%Y%m%d_%H%M%S)"
-RUN_ID="${VARIANT_ID}_mecat_positive_uiq_public848_${STAMP}"
+if [[ "${RUN_MODE}" == "table2_table3" ]]; then
+  RUN_ID="${VARIANT_ID}_mecat_table2_table3_public848_short_${STAMP}"
+else
+  RUN_ID="${VARIANT_ID}_mecat_positive_uiq_public848_${STAMP}"
+fi
 RESULT_DIR="${ROOT_DIR}/results/raw/${RUN_ID}"
 AUDIO_DIR="${RESULT_DIR}/audio_embeddings"
 UIQ_DIR="${RESULT_DIR}/uiq_embeddings"
+CAPTION_DIR="${RESULT_DIR}/caption_embeddings"
 METRICS_DIR="${RESULT_DIR}/metrics"
 LOG_DIR="${ROOT_DIR}/logs/${RUN_ID}"
 LOG_FILE="${LOG_DIR}/combined.log"
@@ -228,7 +239,11 @@ if [[ -e "${RESULT_DIR}" || -e "${LOG_DIR}" ]]; then
   echo "[ERROR] Refusing to reuse result or log directory." >&2
   exit 2
 fi
-mkdir -p "${AUDIO_DIR}" "${UIQ_DIR}" "${LOG_DIR}"
+if [[ "${RUN_MODE}" == "table2_table3" ]]; then
+  mkdir -p "${CAPTION_DIR}" "${LOG_DIR}"
+else
+  mkdir -p "${AUDIO_DIR}" "${UIQ_DIR}" "${LOG_DIR}"
+fi
 exec > >(tee -a "${LOG_FILE}") 2> >(tee -a "${LOG_FILE}" >&2)
 
 START_TIME="$(date -Is)"
@@ -287,8 +302,13 @@ run_stage() {
   return "${rc}"
 }
 
-echo "EXPERIMENT_NAME=${PAPER_MODEL} MECAT positive UIQ Tables 12-15 public 848-row protocol"
-echo "PAPER_EXPERIMENTS=EXP-12 Table 12 Question; EXP-13 Table 13 Imperative; EXP-14 Table 14 Paraphrase; EXP-15 Table 15 Keyphrase"
+if [[ "${RUN_MODE}" == "table2_table3" ]]; then
+  echo "EXPERIMENT_NAME=${PAPER_MODEL} MECAT Tables 2/3 public 848-row short-caption protocol"
+  echo "PAPER_EXPERIMENTS=EXP-10 Table 2 T2A; EXP-11 Table 3 T2T"
+else
+  echo "EXPERIMENT_NAME=${PAPER_MODEL} MECAT positive UIQ Tables 12-15 public 848-row protocol"
+  echo "PAPER_EXPERIMENTS=EXP-12 Table 12 Question; EXP-13 Table 13 Imperative; EXP-14 Table 14 Paraphrase; EXP-15 Table 15 Keyphrase"
+fi
 echo "GIT_COMMIT=${GIT_COMMIT}"
 echo "MODEL=${PAPER_MODEL}"
 if [[ "${VARIANT_ID}" == "robust_clap" ]]; then
@@ -299,12 +319,23 @@ fi
 echo "STRICT_PAPER_REPRODUCTION=no"
 echo "PUBLIC_CANDIDATES=848"
 echo "PAPER_CANDIDATES=847"
-echo "DATASET=MECAT-Caption 00A/test; 848 public audio candidates; 3,392 released UIQ queries"
+if [[ "${RUN_MODE}" == "table2_table3" ]]; then
+  echo "DATASET=MECAT-Caption 00A/test; 848 public audio candidates; 2,544 short captions"
+  echo "CAPTION_PROTOCOL=short_all; exactly 3 captions per candidate; fixed before model runs"
+  echo "REUSED_AUDIO_RESULT=${REUSED_RESULT_DIR}"
+else
+  echo "DATASET=MECAT-Caption 00A/test; 848 public audio candidates; 3,392 released UIQ queries"
+fi
 echo "GPU_USED=yes; CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}"
 echo "OEA_OFFICIAL_SOURCE_USED=yes"
 echo "OEA_SOURCE_FILES=${OEA_SOURCE_FILES}; AudioRetrieval/evaluation/metrics.py"
-echo "TOTAL_WORKLOAD=848 audio embeddings + 3,392 UIQ text embeddings + 4 retrieval protocols"
-echo "ESTIMATED_TOTAL_TIME=5-20 minutes"
+if [[ "${RUN_MODE}" == "table2_table3" ]]; then
+  echo "TOTAL_WORKLOAD=2,544 caption embeddings + 4 retrieval protocols; reuses 848 completed audio embeddings"
+  echo "ESTIMATED_TOTAL_TIME=2-10 minutes"
+else
+  echo "TOTAL_WORKLOAD=848 audio embeddings + 3,392 UIQ text embeddings + 4 retrieval protocols"
+  echo "ESTIMATED_TOTAL_TIME=5-20 minutes"
+fi
 echo "DOWNLOADS_REQUIRED=no"
 echo "OVERWRITE_DELETE_RISK=none; timestamped result and log directories"
 echo "RESULT_DIRECTORY=${RESULT_DIR}"
@@ -323,7 +354,18 @@ UIQ_FILES=(
   "${UIQ_ROOT}/mecat_paraphrase_queries.jsonl"
   "${UIQ_ROOT}/mecat_tagging_queries.jsonl"
 )
-for required in "${MANIFEST}" "${CHECKPOINT}" "${UIQ_FILES[@]}" "${REQUIRED_RESOURCES[@]}"; do
+if [[ "${RUN_MODE}" == "table2_table3" ]]; then
+  REQUIRED_INPUTS=(
+    "${MANIFEST}"
+    "${CHECKPOINT}"
+    "${REUSED_RESULT_DIR}/audio_embeddings/generation_metrics.json"
+    "${REUSED_RESULT_DIR}/audio_embeddings/audio_embeddings.npz"
+    "${REQUIRED_RESOURCES[@]}"
+  )
+else
+  REQUIRED_INPUTS=("${MANIFEST}" "${CHECKPOINT}" "${UIQ_FILES[@]}" "${REQUIRED_RESOURCES[@]}")
+fi
+for required in "${REQUIRED_INPUTS[@]}"; do
   [[ -e "${required}" ]] || fail 4 "Required resource is missing: ${required}"
 done
 [[ "$(stat -c %s "${CHECKPOINT}")" == "${CHECKPOINT_BYTES}" ]] \
@@ -362,43 +404,85 @@ python -c 'import torch; assert torch.cuda.is_available() and torch.cuda.device_
   || fail 5 "Exactly one visible CUDA GPU is required"
 python -c "${PRECHECK_IMPORT}" || fail 5 "Pinned runtime dependencies are unavailable"
 
-CURRENT_STAGE="gpu_audio_embeddings"
-run_stage "${CURRENT_STAGE}" 900 \
-  python scripts/precompute_mecat_audio_embeddings.py \
-    --model "${BACKEND}" --manifest "${MANIFEST}" \
-    --manifest-sha256 "${MANIFEST_SHA256}" --output-dir "${AUDIO_DIR}" \
-    --expected-examples 848 --expected-dim "${EXPECTED_DIM}" \
-    --device cuda --batch-size-audio "${BATCH_AUDIO}" \
-    "${AUDIO_MODEL_ARGS[@]}" \
-  || fail $? "${PAPER_MODEL} MECAT audio embedding generation failed"
+if [[ "${RUN_MODE}" == "table2_table3" ]]; then
+  python - "${REUSED_RESULT_DIR}/audio_embeddings/generation_metrics.json" "${BACKEND}" <<'PY' \
+    || fail 4 "Reused MECAT audio generation evidence does not match this variant"
+import json
+import sys
+from pathlib import Path
+value = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+assert value.get("status") == "complete"
+assert value.get("model") == sys.argv[2]
+assert value.get("candidate_count") == 848
+PY
 
-CURRENT_STAGE="gpu_uiq_embeddings"
-UIQ_INPUT_ARGS=()
-for uiq_file in "${UIQ_FILES[@]}"; do
-  UIQ_INPUT_ARGS+=(--uiq-jsonl "${uiq_file}")
-done
-run_stage "${CURRENT_STAGE}" 600 \
-  python -m AudioRetrieval preprocess uiq-embeddings \
-    --model "${BACKEND}" --dataset "MECAT-Caption 00A/test public 848" \
-    --device cuda --batch-size-text "${BATCH_TEXT}" \
-    --output-dir "${UIQ_DIR}" "${UIQ_INPUT_ARGS[@]}" \
-    "${UIQ_MODEL_ARGS[@]}" \
-  || fail $? "${PAPER_MODEL} MECAT UIQ embedding generation failed"
+  CURRENT_STAGE="gpu_short_caption_embeddings"
+  run_stage "${CURRENT_STAGE}" 600 \
+    python scripts/precompute_mecat_audio_embeddings.py \
+      --model "${BACKEND}" --manifest "${MANIFEST}" \
+      --manifest-sha256 "${MANIFEST_SHA256}" --output-dir "${CAPTION_DIR}" \
+      --expected-examples 848 --expected-dim "${EXPECTED_DIM}" \
+      --device cuda --batch-size-audio "${BATCH_AUDIO}" \
+      --batch-size-text "${BATCH_TEXT}" --skip-audio --compute-captions \
+      --caption-field short --captions-per-example 3 \
+      "${UIQ_MODEL_ARGS[@]}" \
+    || fail $? "${PAPER_MODEL} MECAT short-caption embedding generation failed"
 
-CURRENT_STAGE="cpu_table12_table15_metrics"
-export CUDA_VISIBLE_DEVICES=""
-run_stage "${CURRENT_STAGE}" 180 \
-  python scripts/evaluate_mecat_positive_uiq.py \
-    --audio-embedding-dir "${AUDIO_DIR}" --uiq-dir "${UIQ_DIR}" \
-    --output-dir "${METRICS_DIR}" --model "${PAPER_MODEL}" \
-    --expected-candidates 848 --paper-candidates 847 \
-  || fail $? "${PAPER_MODEL} MECAT positive UIQ evaluation failed"
+  CURRENT_STAGE="cpu_table2_table3_metrics"
+  export CUDA_VISIBLE_DEVICES=""
+  run_stage "${CURRENT_STAGE}" 180 \
+    python scripts/evaluate_mecat_table2_table3.py \
+      --audio-embedding-dir "${REUSED_RESULT_DIR}/audio_embeddings" \
+      --caption-embedding-dir "${CAPTION_DIR}" \
+      --output-dir "${METRICS_DIR}" --model "${PAPER_MODEL}" \
+      --expected-candidates 848 --paper-candidates 847 \
+      --captions-per-audio 3 --seed 0 \
+    || fail $? "${PAPER_MODEL} MECAT Table 2/3 evaluation failed"
 
-sha256sum "${AUDIO_DIR}/generation_metrics.json" \
-  "${AUDIO_DIR}/audio_embeddings.npz" \
-  "${UIQ_DIR}"/uiq_*_embeddings.npz \
-  "${METRICS_DIR}/suite_metrics.json" "${LOG_FILE}" \
-  > "${RESULT_DIR}/artifact_sha256.txt" \
-  || fail $? "Final artifact hashing failed"
+  sha256sum "${CAPTION_DIR}/generation_metrics.json" \
+    "${CAPTION_DIR}/caption_embeddings.npz" \
+    "${METRICS_DIR}/suite_metrics.json" "${LOG_FILE}" \
+    > "${RESULT_DIR}/artifact_sha256.txt" \
+    || fail $? "Final artifact hashing failed"
+else
+  CURRENT_STAGE="gpu_audio_embeddings"
+  run_stage "${CURRENT_STAGE}" 900 \
+    python scripts/precompute_mecat_audio_embeddings.py \
+      --model "${BACKEND}" --manifest "${MANIFEST}" \
+      --manifest-sha256 "${MANIFEST_SHA256}" --output-dir "${AUDIO_DIR}" \
+      --expected-examples 848 --expected-dim "${EXPECTED_DIM}" \
+      --device cuda --batch-size-audio "${BATCH_AUDIO}" \
+      "${AUDIO_MODEL_ARGS[@]}" \
+    || fail $? "${PAPER_MODEL} MECAT audio embedding generation failed"
+
+  CURRENT_STAGE="gpu_uiq_embeddings"
+  UIQ_INPUT_ARGS=()
+  for uiq_file in "${UIQ_FILES[@]}"; do
+    UIQ_INPUT_ARGS+=(--uiq-jsonl "${uiq_file}")
+  done
+  run_stage "${CURRENT_STAGE}" 600 \
+    python -m AudioRetrieval preprocess uiq-embeddings \
+      --model "${BACKEND}" --dataset "MECAT-Caption 00A/test public 848" \
+      --device cuda --batch-size-text "${BATCH_TEXT}" \
+      --output-dir "${UIQ_DIR}" "${UIQ_INPUT_ARGS[@]}" \
+      "${UIQ_MODEL_ARGS[@]}" \
+    || fail $? "${PAPER_MODEL} MECAT UIQ embedding generation failed"
+
+  CURRENT_STAGE="cpu_table12_table15_metrics"
+  export CUDA_VISIBLE_DEVICES=""
+  run_stage "${CURRENT_STAGE}" 180 \
+    python scripts/evaluate_mecat_positive_uiq.py \
+      --audio-embedding-dir "${AUDIO_DIR}" --uiq-dir "${UIQ_DIR}" \
+      --output-dir "${METRICS_DIR}" --model "${PAPER_MODEL}" \
+      --expected-candidates 848 --paper-candidates 847 \
+    || fail $? "${PAPER_MODEL} MECAT positive UIQ evaluation failed"
+
+  sha256sum "${AUDIO_DIR}/generation_metrics.json" \
+    "${AUDIO_DIR}/audio_embeddings.npz" \
+    "${UIQ_DIR}"/uiq_*_embeddings.npz \
+    "${METRICS_DIR}/suite_metrics.json" "${LOG_FILE}" \
+    > "${RESULT_DIR}/artifact_sha256.txt" \
+    || fail $? "Final artifact hashing failed"
+fi
 
 finish 0 complete none none
