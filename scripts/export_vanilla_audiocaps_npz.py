@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export locked vanilla backbone artifacts to the canonical AudioCaps NPZ format."""
+"""Export locked vanilla backbone artifacts to the canonical retrieval NPZ format."""
 
 from __future__ import annotations
 
@@ -23,6 +23,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--expected-candidates", type=int, default=975)
     parser.add_argument("--captions-per-audio", type=int, default=5)
+    parser.add_argument("--dataset-name", default="AudioCaps")
     return parser.parse_args()
 
 
@@ -51,20 +52,20 @@ def export(args: argparse.Namespace) -> dict:
     captions = np.load(source / "query_embeddings.npy", allow_pickle=False)
     expected_captions = args.expected_candidates * args.captions_per_audio
     if len(candidates) != args.expected_candidates or len(queries) != expected_captions:
-        raise ValueError("vanilla AudioCaps metadata count mismatch")
+        raise ValueError("vanilla retrieval metadata count mismatch")
     if audio.ndim != 2 or captions.shape != (expected_captions, audio.shape[1]):
-        raise ValueError("vanilla AudioCaps embedding shape mismatch")
+        raise ValueError("vanilla retrieval embedding shape mismatch")
     if not np.isfinite(audio).all() or not np.isfinite(captions).all():
-        raise ValueError("vanilla AudioCaps embeddings contain non-finite values")
+        raise ValueError("vanilla retrieval embeddings contain non-finite values")
 
     audio_ids = [str(row["candidate_id"]) for row in candidates]
     caption_ids = [str(row["target_id"]) for row in queries]
     texts = [str(row["text"]) for row in queries]
     if audio_ids != sorted(audio_ids) or len(set(audio_ids)) != len(audio_ids):
-        raise ValueError("vanilla AudioCaps candidate IDs are not canonical")
+        raise ValueError("vanilla retrieval candidate IDs are not canonical")
     expected_caption_ids = [value for value in audio_ids for _ in range(args.captions_per_audio)]
     if caption_ids != expected_caption_ids:
-        raise ValueError("vanilla AudioCaps caption ownership/order mismatch")
+        raise ValueError("vanilla retrieval caption ownership/order mismatch")
 
     audio_path = output / "audio_embeddings.npz"
     caption_path = output / "caption_embeddings.npz"
@@ -82,7 +83,8 @@ def export(args: argparse.Namespace) -> dict:
     report = {
         "schema_version": 1,
         "status": "complete",
-        "conversion": "locked vanilla NPY/JSONL to canonical AudioCaps NPZ",
+        "conversion": "locked vanilla NPY/JSONL to canonical retrieval NPZ",
+        "dataset": getattr(args, "dataset_name", "AudioCaps"),
         "candidate_count": len(audio_ids),
         "caption_count": len(caption_ids),
         "embedding_dimension": int(audio.shape[1]),
@@ -96,7 +98,7 @@ def export(args: argparse.Namespace) -> dict:
 
 def main() -> int:
     report = export(parse_args())
-    print("VANILLA_AUDIOCAPS_EXPORT_STATUS=complete")
+    print("VANILLA_RETRIEVAL_EXPORT_STATUS=complete")
     print(f"AUDIO_SHAPE={[report['candidate_count'], report['embedding_dimension']]}")
     print(f"CAPTION_SHAPE={[report['caption_count'], report['embedding_dimension']]}")
     return 0

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "backbone_id": "vanilla_qwen2_5_omni_3b",
+  "model": "Qwen2.5-Omni-3B",
+  "dataset": "MECAT-Caption 00A/test public 848-row short-all",
+  "experiment_prefix": "vanilla_qwen2_5_omni_3b_mecat_embeddings_seed42",
+  "seed": 42,
+  "seed_source": "[INFERRED] fixed reproducibility seed; the paper does not publish the vanilla evaluation seed",
+  "expected_examples": 848,
+  "caption_count_per_audio": 3,
+  "audio_batch_size": 1,
+  "text_batch_size": 1,
+  "batch_size_source": "[INFERRED] conservative formal run matching the completed Clotho and AudioCaps paths",
+  "base_model": {"repo_id": "Qwen/Qwen2.5-Omni-3B", "revision": "f75b40e3da2003cdd6e1829b1f420ca70797c34e", "local_subdir": "Qwen2.5-Omni-3B"},
+  "protocol": {
+    "text_prompt": {"value": "query:", "source": "[PAPER][CODE]", "runtime_join": "direct concatenation without an inserted separator", "runtime_form": "query:<caption>", "runtime_source": "[CODE] _build_text_messages strips the added trailing space before concatenation"},
+    "audio_prompt": {"runtime_value": "audio-only chat message; passage_prefix parameter is not inserted", "runtime_source": "[CODE]", "paper_value": "passage:", "paper_source": "[PAPER]", "status": "CONFLICT", "claim_boundary": "Public-code protocol only; do not label as a strict paper-protocol reproduction."},
+    "pooling": {"value": "attention-mask-aware mean of last hidden states", "source": "[CODE]"},
+    "normalization": {"value": "L2", "source": "[CODE]"},
+    "projection": {"value": "none; retain the backbone hidden dimension", "source": "[CODE] public base adapter returns pooled hidden states directly"}
+  },
+  "model_config": {
+    "query_prefix": {"value": "query:", "source": "[PAPER][CODE]"},
+    "passage_prefix": {"value": "passage:", "source": "[PAPER][CODE_PARAMETER]", "note": "The public audio-only message builder accepts but does not insert this parameter."},
+    "torch_dtype": {"value": "bfloat16", "source": "[PAPER][CODE]"},
+    "trust_remote_code": {"value": true, "source": "[CODE] public OmniEmbedAdapter and training path"},
+    "text_max_length": {"value": 512, "source": "[CODE] OmniEmbedAdapter default; all fixed MECAT short captions are shorter"},
+    "audio_max_length": {"value": 2048000, "source": "[CODE] OmniEmbedAdapter default attributed to paper Table 7"},
+    "attn_implementation": {"value": null, "source": "[INFERRED] portable pinned-environment path; no flash-attn requirement"}
+  }
+}
