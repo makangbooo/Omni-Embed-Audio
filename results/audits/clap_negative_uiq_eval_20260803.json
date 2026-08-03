@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "controlled_remote_negative_uiq_three_model_three_dataset_audit",
+  "paper_scope": [
+    "EXP-16 / Table 17 / LAION-CLAP, MGA-CLAP, Robust-CLAP / Negative UIQ standard retrieval",
+    "EXP-17 / Tables 4 and 17 / LAION-CLAP, MGA-CLAP, Robust-CLAP / hard-negative discrimination"
+  ],
+  "execution": {
+    "git_commit": "06e99ebc00c1ca0cbc5b98187ce555fed3f9042b",
+    "git_status_short": "",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "run_count": 9,
+    "complete_run_count": 9,
+    "failed_run_count": 0
+  },
+  "official_source": {
+    "oea_official_source_used": true,
+    "source_files": [
+      "AudioRetrieval/models/laion_clap_adapter.py",
+      "AudioRetrieval/models/mga_clap_adapter.py",
+      "AudioRetrieval/models/robust_clap_adapter.py",
+      "AudioRetrieval/preprocessing/embeddings/uiq_text.py",
+      "AudioRetrieval/evaluation/negative_canonical.py",
+      "AudioRetrieval/evaluation/negative_metrics.py",
+      "scripts/evaluate_negative_uiq_npz.py",
+      "scripts/run_clap_negative_uiq.sh"
+    ]
+  },
+  "protocol": {
+    "source": "INFERRED_DETERMINISTIC_RELEASED_CAPTION_IDENTITY",
+    "strict_paper_reproduction": false,
+    "pairing_audit_run": "negative_uiq_exact_pairing_audit_20260803_125256",
+    "pairing_audit_sha256": "6b157cfd2e3dd5ef3e267ff025cb3b84e14187bef344f5b1093b0aea9cd8ee7d",
+    "tie_policy": "optimistic_strict_greater",
+    "normalization_applied": true,
+    "aggregation": "unweighted arithmetic mean of the three dataset percentages",
+    "paper_metric_mapping": {"TFR@10": "implementation TFR-HN@10"},
+    "claim_boundary": "The released negative JSONL files omit explicit hard-negative audio IDs. The controlled deterministic caption-identity pairing is complete and uses no embedding or nearest-neighbor inference, but it is not claimed as the unpublished strict PAPER pairing. MECAT uses all 848 public candidates while PAPER reports 847. Robust-CLAP additionally uses the pinned upstream source with the standard LAION checkpoint because the PAPER row checkpoint identity is not public."
+  },
+  "models": {
+    "LAION-CLAP": {
+      "resource_binding": {
+        "package": "laion-clap==1.1.6",
+        "checkpoint": "630k-audioset-best.pt",
+        "checkpoint_sha256": "8053c9775516af2f4902e1e8281e356cc1bf7a85e8b761908170767b77c3f037",
+        "embedding_dimension": 512,
+        "strict_paper_checkpoint_identity": true
+      },
+      "datasets": {
+        "audiocaps": {
+          "run_id": "laion_clap_audiocaps_negative_uiq_20260803_134524",
+          "candidate_count": 975,
+          "query_count": 630,
+          "metrics_sha256": "8499ff0807c939af10b946d895e97f90fbb34280b5ada1b39ec79ec4fbd29e7c",
+          "audio_npz_sha256": "e665757073affad517590170a45fa5acdb4d9567dc1a02c3d7cb0e5c53e0589a",
+          "query_npz_sha256": "353957334f0d22a99d85362b8ab410d0a2b9cc9622ad95dd4c9d0dbb8429a1f1",
+          "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+          "metrics": {"R@5": 63.650793650793645, "R@10": 79.68253968253968, "Delta-Rank": 20.123809523809523, "HNSR": 78.0952380952381, "HNSR@10": 43.333333333333336, "TFR": 30.793650793650794, "TFR-HN@10": 16.666666666666664}
+        },
+        "clotho": {
+          "run_id": "laion_clap_clotho_negative_uiq_20260803_134344",
+          "candidate_count": 1045,
+          "query_count": 542,
+          "metrics_sha256": "a0426f53a72617ac5098ae7da530f6a378b14ac4af41d45b27b62172e6598138",
+          "audio_npz_sha256": "37c4aa660cc6ae62eabca24752a5f12989cfd6bcaf2ce88d6e1f72a9236be578",
+          "query_npz_sha256": "3a668d7c27bf0879a849ed70f3a8a8d7187cf65e973bb624a75f3cbe03877919",
+          "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+          "metrics": {"R@5": 37.269372693726936, "R@10": 54.05904059040591, "Delta-Rank": 36.56273062730627, "HNSR": 74.16974169741697, "HNSR@10": 33.94833948339483, "TFR": 12.730627306273062, "TFR-HN@10": 7.011070110701106}
+        },
+        "mecat": {
+          "run_id": "laion_clap_mecat_negative_uiq_20260803_134650",
+          "candidate_count": 848,
+          "paper_candidate_count": 847,
+          "query_count": 409,
+          "metrics_sha256": "d785045c5d5288181bffc373ca06e78270f0de9e60761009507fbba395c1d689",
+          "audio_npz_sha256": "8c7df959b9e60d530b4ae8668128b23305e1004d665c979d6be24905c1360227",
+          "query_npz_sha256": "ac035c1f8844289e898cceda1238d91b487d9772fb6c8d429d857bb9030a46d6",
+          "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+          "metrics": {"R@5": 11.7359413202934, "R@10": 21.76039119804401, "Delta-Rank": 16.6479217603912, "HNSR": 60.391198044009776, "HNSR@10": 15.403422982885084, "TFR": 3.4229828850855744, "TFR-HN@10": 2.2004889975550124}
+        }
+      },
+      "three_dataset_mean": {"R@5": 37.55203588827133, "R@10": 51.83399049032986, "Delta-Rank": 24.444820637169, "HNSR": 70.88539261222162, "HNSR@10": 30.895031933204418, "TFR": 15.649086995003143, "TFR-HN@10": 8.626075258307594},
+      "paper_values": {"R@5": 30.72, "R@10": 42.15, "Delta-Rank": 25.6, "HNSR": 68.7, "HNSR@10": 24.7, "TFR": 10.5, "TFR-HN@10": 4.9},
+      "comparison": {
+        "signed_delta": {"R@5": 6.832035888271328, "R@10": 9.683990490329862, "Delta-Rank": -1.155179362831003, "HNSR": 2.1853926122216194, "HNSR@10": 6.195031933204419, "TFR": 5.1490869950031435, "TFR-HN@10": 3.726075258307594},
+        "maximum_absolute_delta": 9.683990490329862,
+        "maximum_absolute_delta_metric": "R@10",
+        "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_UNAVAILABLE"
+      }
+    },
+    "MGA-CLAP": {
+      "resource_binding": {
+        "source_revision": "48ca5a5cd22cd34427e118bd8cf332090ec54770",
+        "checkpoint": "model.pt",
+        "checkpoint_sha256": "8703740b738e973a5b4d8a18a074ad56880e98f8ba21cd618d7d7ee5422d6e26",
+        "embedding_dimension": 1024,
+        "strict_paper_checkpoint_identity": true
+      },
+      "datasets": {
+        "audiocaps": {
+          "run_id": "mga_clap_audiocaps_negative_uiq_20260803_134939",
+          "candidate_count": 975,
+          "query_count": 630,
+          "metrics_sha256": "cc6c6a14dd7574879ad501f0645a8e1f3457e5f9f65dad619b4b4e86816621de",
+          "audio_npz_sha256": "ebf749d892dc2d9bf3473b6debf90541f8772c024a2b417ff60536b143f35d63",
+          "query_npz_sha256": "cf5ed2dbc639accc8264c1bb97e3a746114c5a4df95e24eec252bd84af595e9b",
+          "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+          "metrics": {"R@5": 73.80952380952381, "R@10": 87.93650793650794, "Delta-Rank": 9.768253968253969, "HNSR": 73.80952380952381, "HNSR@10": 33.96825396825397, "TFR": 38.88888888888889, "TFR-HN@10": 13.968253968253968}
+        },
+        "clotho": {
+          "run_id": "mga_clap_clotho_negative_uiq_20260803_134814",
+          "candidate_count": 1045,
+          "query_count": 542,
+          "metrics_sha256": "34c7ee9b6f2f69a67d86cced45e4af0480febf9edd3024f29a837e0476d4130e",
+          "audio_npz_sha256": "7398ca229ce214102f112d4c9f5eee38b9e8b426fcc83cdb53598647ef7ff42d",
+          "query_npz_sha256": "632be1aa3b46d4029cf517c61ca08fff6d880cc5e5dce26f94130578bb4dcd24",
+          "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+          "metrics": {"R@5": 47.0479704797048, "R@10": 62.73062730627307, "Delta-Rank": 24.854243542435423, "HNSR": 72.14022140221402, "HNSR@10": 38.00738007380074, "TFR": 17.52767527675277, "TFR-HN@10": 8.856088560885608}
+        },
+        "mecat": {
+          "run_id": "mga_clap_mecat_negative_uiq_20260803_135100",
+          "candidate_count": 848,
+          "paper_candidate_count": 847,
+          "query_count": 409,
+          "metrics_sha256": "434cfe24daab420ee78d3674b3341daf6004c0cc7e28d0214b5a70ee1f8d1818",
+          "audio_npz_sha256": "670eb8337dfec8279df17e18c5e4e750ec7cbaa7997000ad292802938fe2c624",
+          "query_npz_sha256": "a684602df49b0f34de2a9a5df156173520f05af934a35aea6f8aac0a8a2f0def",
+          "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+          "metrics": {"R@5": 12.95843520782396, "R@10": 18.337408312958438, "Delta-Rank": 12.750611246943766, "HNSR": 56.723716381418086, "HNSR@10": 10.024449877750612, "TFR": 3.4229828850855744, "TFR-HN@10": 0.7334963325183375}
+        }
+      },
+      "three_dataset_mean": {"R@5": 44.605309832350855, "R@10": 56.334847851913146, "Delta-Rank": 15.791036252544387, "HNSR": 67.55782053105197, "HNSR@10": 27.333361306601773, "TFR": 19.946515683575743, "TFR-HN@10": 7.852612953885973},
+      "paper_values": {"R@5": 36.75, "R@10": 48.92, "Delta-Rank": 15.1, "HNSR": 65.0, "HNSR@10": 21.2, "TFR": 12.9, "TFR-HN@10": 3.9},
+      "comparison": {
+        "signed_delta": {"R@5": 7.855309832350855, "R@10": 7.414847851913144, "Delta-Rank": 0.6910362525443876, "HNSR": 2.5578205310519735, "HNSR@10": 6.133361306601774, "TFR": 7.046515683575743, "TFR-HN@10": 3.9526129538859727},
+        "maximum_absolute_delta": 7.855309832350855,
+        "maximum_absolute_delta_metric": "R@5",
+        "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_UNAVAILABLE"
+      }
+    },
+    "Robust-CLAP": {
+      "resource_binding": {
+        "binding_name": "Robust-CLAP upstream source with standard LAION checkpoint",
+        "source_revision": "d08d0e3c545fa22df0930fc0d090741aaa9e2cc1",
+        "checkpoint": "630k-audioset-best.pt",
+        "checkpoint_sha256": "8053c9775516af2f4902e1e8281e356cc1bf7a85e8b761908170767b77c3f037",
+        "embedding_dimension": 512,
+        "strict_paper_checkpoint_identity": false
+      },
+      "datasets": {
+        "audiocaps": {
+          "run_id": "robust_clap_audiocaps_negative_uiq_20260803_135401",
+          "candidate_count": 975,
+          "query_count": 630,
+          "metrics_sha256": "4786c7b77d97d719827a5accc4ed0a43337da9d9dbf64c68af3aa96bc0870c71",
+          "audio_npz_sha256": "2ca5524bcd9eefb76bab3918f6fb442ea19842196707125a2af26cb019dd9a2f",
+          "query_npz_sha256": "353957334f0d22a99d85362b8ab410d0a2b9cc9622ad95dd4c9d0dbb8429a1f1",
+          "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+          "metrics": {"R@5": 68.25396825396825, "R@10": 79.68253968253968, "Delta-Rank": 19.915873015873014, "HNSR": 78.57142857142857, "HNSR@10": 42.698412698412696, "TFR": 30.158730158730158, "TFR-HN@10": 15.555555555555555}
+        },
+        "clotho": {
+          "run_id": "robust_clap_clotho_negative_uiq_20260803_135222",
+          "candidate_count": 1045,
+          "query_count": 542,
+          "metrics_sha256": "70471b8f63a4e9a8f40570b26a1828f9489c8a546782b75e9966c395fd1c5eee",
+          "audio_npz_sha256": "326ec269229ecf337f72b46b2d58e99996d2b3e18a9465bf6c2839013480c2b3",
+          "query_npz_sha256": "3a668d7c27bf0879a849ed70f3a8a8d7187cf65e973bb624a75f3cbe03877919",
+          "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+          "metrics": {"R@5": 39.11439114391143, "R@10": 54.79704797047971, "Delta-Rank": 38.35055350553505, "HNSR": 75.64575645756457, "HNSR@10": 36.162361623616235, "TFR": 14.391143911439114, "TFR-HN@10": 7.9335793357933575}
+        },
+        "mecat": {
+          "run_id": "robust_clap_mecat_negative_uiq_20260803_135523",
+          "candidate_count": 848,
+          "paper_candidate_count": 847,
+          "query_count": 409,
+          "metrics_sha256": "997532d89707a47f45b9770d4839213159032c977d10c559e57c6ac5ae2e8753",
+          "audio_npz_sha256": "2cd5ef7696c219d27ede565c4f75865e475f8db3cfb3121ac87e42fbb0568b8d",
+          "query_npz_sha256": "ac035c1f8844289e898cceda1238d91b487d9772fb6c8d429d857bb9030a46d6",
+          "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+          "metrics": {"R@5": 12.469437652811736, "R@10": 20.293398533007334, "Delta-Rank": 17.03911980440098, "HNSR": 60.63569682151589, "HNSR@10": 13.202933985330073, "TFR": 2.2004889975550124, "TFR-HN@10": 0.4889975550122249}
+        }
+      },
+      "three_dataset_mean": {"R@5": 39.94593235023047, "R@10": 51.59099539534225, "Delta-Rank": 25.101848775269684, "HNSR": 71.61762728350301, "HNSR@10": 30.68790276911967, "TFR": 15.583454355908096, "TFR-HN@10": 7.992710815453712},
+      "paper_values": {"R@5": 34.86, "R@10": 46.53, "Delta-Rank": 33.7, "HNSR": 69.6, "HNSR@10": 30.3, "TFR": 11.6, "TFR-HN@10": 6.9},
+      "comparison": {
+        "signed_delta": {"R@5": 5.085932350230472, "R@10": 5.060995395342246, "Delta-Rank": -8.59815122473032, "HNSR": 2.0176272835030176, "HNSR@10": 0.3879027691196697, "TFR": 3.983454355908096, "TFR-HN@10": 1.092710815453712},
+        "maximum_absolute_delta": 8.59815122473032,
+        "maximum_absolute_delta_metric": "Delta-Rank",
+        "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_AND_CHECKPOINT_UNAVAILABLE"
+      }
+    }
+  }
+}

@@ -113,6 +113,41 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
             self.by_key[m2d_negative]["evidence"],
             "results/audits/m2d_clap_negative_uiq_eval_20260803.json",
         )
+        for model in ("LAION-CLAP", "MGA-CLAP", "Robust-CLAP"):
+            for inventory, task in (
+                ("EXP-16", "Negative UIQ standard retrieval"),
+                ("EXP-17", "Negative UIQ hard-negative discrimination"),
+                ("EXP-17", "Negative UIQ strict metrics"),
+            ):
+                key = (
+                    inventory,
+                    "Table 17",
+                    model,
+                    "Mean across AudioCaps, Clotho, MECAT",
+                    task,
+                )
+                self.assertEqual(
+                    self.by_key[key]["reproduction_status"], "CONTROLLED_ONLY"
+                )
+                self.assertEqual(
+                    self.by_key[key]["evidence"],
+                    "results/audits/clap_negative_uiq_eval_20260803.json",
+                )
+            table4_key = (
+                "DER-02",
+                "Table 4",
+                model,
+                "Mean across AudioCaps, Clotho, MECAT",
+                "Negative UIQ hard-negative discrimination",
+            )
+            self.assertEqual(
+                self.by_key[table4_key]["reproduction_status"],
+                "CONTROLLED_ONLY",
+            )
+            self.assertEqual(
+                self.by_key[table4_key]["evidence"],
+                "results/audits/clap_negative_uiq_eval_20260803.json",
+            )
 
     def test_vanilla_qwen3b_clotho_main_cells_are_reproduced(self) -> None:
         for inventory, table, task in (
