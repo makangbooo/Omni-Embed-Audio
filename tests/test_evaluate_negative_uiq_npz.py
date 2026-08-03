@@ -49,7 +49,14 @@ class EvaluateNegativeUIQNPZTest(unittest.TestCase):
             np.savez_compressed(
                 audio_path,
                 embeddings=np.asarray([[1.0, 0.0], [0.0, 1.0], [-1.0, 0.0]]),
-                clip_ids=np.asarray(["target", "hard-negative", "other"], dtype=object),
+                clip_ids=np.asarray(
+                    ["clotho_eval_0000", "clotho_eval_0001", "clotho_eval_0002"],
+                    dtype=object,
+                ),
+                filenames=np.asarray(
+                    ["target.wav", "hard-negative.wav", "other.wav"],
+                    dtype=object,
+                ),
             )
             np.savez_compressed(
                 query_path,
@@ -60,8 +67,8 @@ class EvaluateNegativeUIQNPZTest(unittest.TestCase):
                 json.dumps(
                     {
                         "query_id": "q0",
-                        "target_id": "target",
-                        "hard_negative_id": "hard-negative",
+                        "target_id": "target.wav",
+                        "hard_negative_id": "hard-negative.wav",
                     }
                 )
                 + "\n",
@@ -88,6 +95,15 @@ class EvaluateNegativeUIQNPZTest(unittest.TestCase):
             self.assertEqual(report["metrics"]["HNSR"], 100.0)
             self.assertEqual(report["metrics"]["HNSR@1"], 100.0)
             self.assertEqual(report["metrics"]["TFR-HN@1"], 100.0)
+            self.assertEqual(
+                report["candidate_id_resolution"],
+                {
+                    "target_ids": {"unique_casefold_or_stem_filename": 1},
+                    "hard_negative_ids": {
+                        "unique_casefold_or_stem_filename": 1
+                    },
+                },
+            )
             self.assertTrue((output / "metrics.json").is_file())
             self.assertTrue((output / "per_query.jsonl").is_file())
 
@@ -131,6 +147,19 @@ class EvaluateNegativeUIQNPZTest(unittest.TestCase):
         self.assertEqual(resolved, ["target", "negative"])
         self.assertEqual(
             methods, {"unique_casefold_or_stem_candidate_id": 2}
+        )
+
+    def test_filename_alias_resolves_to_synthetic_candidate_id(self) -> None:
+        resolved, methods = resolve_pairing_candidate_ids(
+            ["target.wav", "negative.wav"],
+            ["clotho_eval_0000", "clotho_eval_0001", "clotho_eval_0002"],
+            label="fixture",
+            candidate_filenames=["target.wav", "negative.wav", "other.wav"],
+        )
+
+        self.assertEqual(resolved, ["clotho_eval_0000", "clotho_eval_0001"])
+        self.assertEqual(
+            methods, {"unique_casefold_or_stem_filename": 2}
         )
 
     def test_ambiguous_stem_alias_fails_closed(self) -> None:

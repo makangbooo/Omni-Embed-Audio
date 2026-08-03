@@ -71,16 +71,31 @@ def resolve_pairing_candidate_ids(
     candidate_ids: Sequence[str],
     *,
     label: str,
+    candidate_filenames: Sequence[str] | None = None,
 ) -> tuple[list[str], dict[str, int]]:
     """Resolve release IDs to candidate IDs using only unique ID aliases."""
 
+    if (
+        candidate_filenames is not None
+        and len(candidate_filenames) != len(candidate_ids)
+    ):
+        raise ValueError("candidate filenames and IDs must have equal lengths")
     exact = set(candidate_ids)
-    aliases: dict[str, list[str]] = defaultdict(list)
-    for candidate_id in candidate_ids:
+    aliases: dict[str, set[str]] = defaultdict(set)
+    alias_sources: dict[tuple[str, str], set[str]] = defaultdict(set)
+    for index, candidate_id in enumerate(candidate_ids):
         for alias in dict.fromkeys(
             (candidate_id.casefold(), Path(candidate_id).stem.casefold())
         ):
-            aliases[alias].append(candidate_id)
+            aliases[alias].add(candidate_id)
+            alias_sources[(alias, candidate_id)].add("candidate_id")
+        if candidate_filenames is not None:
+            filename = candidate_filenames[index]
+            for alias in dict.fromkeys(
+                (filename.casefold(), Path(filename).stem.casefold())
+            ):
+                aliases[alias].add(candidate_id)
+                alias_sources[(alias, candidate_id)].add("filename")
 
     resolved: list[str] = []
     methods: Counter[str] = Counter()
@@ -89,15 +104,26 @@ def resolve_pairing_candidate_ids(
             resolved.append(requested_id)
             methods["exact_candidate_id"] += 1
             continue
-        candidates = set(aliases.get(requested_id.casefold(), ()))
-        candidates.update(aliases.get(Path(requested_id).stem.casefold(), ()))
+        requested_aliases = set(
+            (requested_id.casefold(), Path(requested_id).stem.casefold())
+        )
+        candidates: set[str] = set()
+        for alias in requested_aliases:
+            candidates.update(aliases.get(alias, ()))
         if len(candidates) != 1:
             raise KeyError(
                 f"{label} row {index}: candidate alias count={len(candidates)} "
                 f"for {requested_id!r}; candidates={sorted(candidates)[:10]}"
             )
-        resolved.append(next(iter(candidates)))
-        methods["unique_casefold_or_stem_candidate_id"] += 1
+        candidate_id = next(iter(candidates))
+        sources = set()
+        for alias in requested_aliases:
+            sources.update(alias_sources.get((alias, candidate_id), ()))
+        resolved.append(candidate_id)
+        if "filename" in sources:
+            methods["unique_casefold_or_stem_filename"] += 1
+        else:
+            methods["unique_casefold_or_stem_candidate_id"] += 1
     return resolved, dict(sorted(methods.items()))
 
 
@@ -132,6 +158,11 @@ def run_evaluation(
     with np.load(audio_npz, allow_pickle=True) as audio:
         candidate_embeddings = np.asarray(audio["embeddings"], dtype=np.float32)
         candidate_ids = strings(np.asarray(audio["clip_ids"]), "audio clip_ids")
+        candidate_filenames = (
+            strings(np.asarray(audio["filenames"]), "audio filenames")
+            if "filenames" in audio
+            else None
+        )
     with np.load(query_npz, allow_pickle=True) as query:
         query_embeddings = np.asarray(query["embeddings"], dtype=np.float32)
 
@@ -164,11 +195,17 @@ def run_evaluation(
         raise ValueError("pairing query IDs are not unique")
 
     resolved_target_ids, target_id_resolution = resolve_pairing_candidate_ids(
-        target_ids, candidate_ids, label="target_id"
+        target_ids,
+        candidate_ids,
+        label="target_id",
+        candidate_filenames=candidate_filenames,
     )
     resolved_hard_negative_ids, hard_negative_id_resolution = (
         resolve_pairing_candidate_ids(
-            hard_negative_ids, candidate_ids, label="hard_negative_id"
+            hard_negative_ids,
+            candidate_ids,
+            label="hard_negative_id",
+            candidate_filenames=candidate_filenames,
         )
     )
     equal_rows = [
