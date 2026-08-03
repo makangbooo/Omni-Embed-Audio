@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "dataset": "Clotho v2.1 evaluation",
+  "hardware": "NVIDIA GeForce RTX 4090",
+  "timing_protocol": {
+    "batch_size": 1,
+    "warmup_iterations": 10,
+    "audio_measurement_count": 1045,
+    "text_measurement_count": 5225,
+    "sample_order": "canonical Clotho manifest order",
+    "timer": "time.perf_counter_ns with torch.cuda.synchronize before and after every encode",
+    "scope": "public adapter preprocessing, model forward, L2 normalization, and device-to-host copy",
+    "source": "INFERRED"
+  },
+  "paper_values": {
+    "laion_clap": {
+      "paper_model": "LAION-CLAP",
+      "audio_ms_per_clip": 107.7,
+      "text_ms_per_query": 0.53,
+      "peak_gpu_memory_gb": 0.6,
+      "trainable_parameters_m": 158.0
+    },
+    "mga_clap": {
+      "paper_model": "MGA-CLAP",
+      "audio_ms_per_clip": 31.7,
+      "text_ms_per_query": 0.72,
+      "peak_gpu_memory_gb": 0.6,
+      "trainable_parameters_m": 148.0
+    },
+    "m2d_clap": {
+      "paper_model": "M2D-CLAP",
+      "audio_ms_per_clip": 58.1,
+      "text_ms_per_query": 0.3,
+      "peak_gpu_memory_gb": 0.7,
+      "trainable_parameters_m": 89.0
+    }
+  }
+}
