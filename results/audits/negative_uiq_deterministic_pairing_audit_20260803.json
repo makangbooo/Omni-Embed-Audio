@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_released_uiq_deterministic_pairing_audit",
+  "paper_scope": "EXP-16/17 / Tables 4 and 17",
+  "git_commit": "fa00532b3e38937fc8551d4c69d5f768bf80bc1e",
+  "run_id": "negative_uiq_exact_pairing_audit_20260803_125256",
+  "run_rc": 0,
+  "gpu_used": false,
+  "strict_paper_pairing_reproduction": false,
+  "pairing_source": "INFERRED_DETERMINISTIC_RELEASED_CAPTION_IDENTITY",
+  "summary_sha256": "6b157cfd2e3dd5ef3e267ff025cb3b84e14187bef344f5b1093b0aea9cd8ee7d",
+  "total_negative_rows": 1581,
+  "total_matched_pairings": 1581,
+  "total_failed_pairings": 0,
+  "full_coverage": true,
+  "embedding_similarity_used": false,
+  "nearest_neighbor_inference_used": false,
+  "datasets": {
+    "clotho": {
+      "negative_rows": 542,
+      "matched_pairings": 542,
+      "failed_pairings": 0,
+      "target_match_methods": {
+        "unique_casefold_or_stem_audio_id": 540,
+        "unique_exact_original_caption_list": 2
+      },
+      "hard_negative_match_methods": {
+        "exact_ordered_caption_list": 542
+      },
+      "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+      "report_sha256": "9f5c62f9496390797c69d43fd94e8ad6fd6a1addb9ac95bd6006135f429afafd"
+    },
+    "audiocaps": {
+      "negative_rows": 630,
+      "matched_pairings": 630,
+      "failed_pairings": 0,
+      "target_match_methods": {
+        "exact_audio_id": 630
+      },
+      "hard_negative_match_methods": {
+        "exact_ordered_caption_list": 548,
+        "unique_normalized_deduplicated_caption_list": 82
+      },
+      "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+      "report_sha256": "6342e5347c04a34ffd8ec9136852c9f09c01ad2a16d79371989092ec34532fc9"
+    },
+    "mecat": {
+      "negative_rows": 409,
+      "matched_pairings": 409,
+      "failed_pairings": 0,
+      "target_match_methods": {
+        "exact_audio_id": 409
+      },
+      "hard_negative_match_methods": {
+        "unique_normalized_caption_subset": 409
+      },
+      "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+      "report_sha256": "7f440470c2839987e81c5cef5dc9a2a032f50d4ec0bbecaf79e5c43259d6d336"
+    }
+  },
+  "claim_boundary": "The released files omit explicit hard-negative audio IDs. All pairings are deterministic INFERRED mappings from released caption identity and are valid for controlled evaluation, but are not claimed as the unpublished strict PAPER pairing."
+}
