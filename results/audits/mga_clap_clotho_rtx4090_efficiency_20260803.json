@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_terminal_audit",
+  "experiment_id": "mga_clap_clotho_rtx4090_efficiency_20260803_115613",
+  "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/mga_clap_clotho_rtx4090_efficiency_20260803_115613",
+  "git_commit": "6962c100937d42469e11f3985be8b8e05b917caa",
+  "git_status_short": "",
+  "exit_code": 0,
+  "model": "MGA-CLAP",
+  "dataset": "Clotho v2.1 evaluation",
+  "checkpoint": {
+    "path": "/home/jg525/models/oea/mga-clap/pretrained_models/models/model.pt",
+    "sha256": "8703740b738e973a5b4d8a18a074ad56880e98f8ba21cd618d7d7ee5422d6e26"
+  },
+  "claim_scope": {
+    "source": "INFERRED",
+    "hardware_alignment": "hardware-mismatched",
+    "result_label": "INFERRED",
+    "allowed_claim": "same-RTX4090 controlled MGA-CLAP efficiency comparison",
+    "forbidden_claim": "same-hardware or exact-protocol reproduction of the PAPER A100 efficiency row"
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "gpu_total_memory_bytes": 25250627584,
+    "torch": "2.7.1+cu126",
+    "cuda": "12.6",
+    "driver": "580.76.05"
+  },
+  "protocol": {
+    "batch_size": 1,
+    "warmup_iterations": 10,
+    "audio_measurement_count": 1045,
+    "text_measurement_count": 5225,
+    "sample_order": "canonical Clotho manifest order",
+    "timer": "time.perf_counter_ns with torch.cuda.synchronize before and after every encode",
+    "scope": "public adapter preprocessing, model forward, L2 normalization, and device-to-host copy",
+    "source": "INFERRED"
+  },
+  "results": {
+    "audio": {
+      "count": 1045,
+      "mean_ms": 120.65627378564594,
+      "std_ms": 56.413613684947435,
+      "min_ms": 23.326448,
+      "p50_ms": 119.507096,
+      "p95_ms": 206.24599999999998,
+      "max_ms": 355.122594,
+      "throughput_queries_per_second": 8.28800665414687
+    },
+    "text": {
+      "count": 5225,
+      "mean_ms": 7.624492932057417,
+      "std_ms": 0.20193475954939585,
+      "min_ms": 7.419367,
+      "p50_ms": 7.593824,
+      "p95_ms": 7.7912175999999995,
+      "max_ms": 15.991327,
+      "throughput_queries_per_second": 131.15626296871088
+    },
+    "gpu_peak_allocated_bytes": 651325440,
+    "gpu_peak_reserved_bytes": 704643072,
+    "gpu_peak_allocated_gib": 0.6065940856933594,
+    "gpu_peak_reserved_gib": 0.65625,
+    "parameters": {
+      "all_parameters": 148092376,
+      "trainable_parameters": 147008920,
+      "all_parameters_m": 148.092376,
+      "trainable_parameters_m": 147.00892
+    }
+  },
+  "paper_reference": {
+    "source": "PAPER Table 5 / Appendix Table 16",
+    "hardware": "A100-SXM4-80GB",
+    "audio_ms_per_clip": 31.7,
+    "text_ms_per_query": 0.72,
+    "peak_gpu_memory_gb": 0.6,
+    "trainable_parameters_m": 148.0
+  },
+  "comparison_only": {
+    "status": "no strict reproduction status assigned",
+    "audio_mean_signed_delta_ms": 88.95627378564593,
+    "audio_mean_relative_delta_percent": 280.619160207085,
+    "text_mean_signed_delta_ms": 6.904492932057417,
+    "text_mean_relative_delta_percent": 958.9573516746412,
+    "requires_grad_parameter_signed_delta_m": -0.9910800000000108,
+    "all_parameter_signed_delta_m": 0.092376,
+    "note": "Both all-parameter and requires-grad counts are retained because PAPER does not define its 148M counting procedure. Latency and memory comparisons are hardware- and protocol-confounded."
+  },
+  "strict_paper_assessment": {
+    "status": "blocked",
+    "reasons": [
+      "PAPER uses A100-SXM4-80GB while this run uses RTX 4090.",
+      "PAPER does not publish warmup, repeat count, batch size, timer, cache state, or exact preprocessing and transfer timing boundary.",
+      "PAPER does not define allocated versus reserved peak memory or decimal GB versus GiB.",
+      "PAPER does not publish its trainable-parameter counting procedure."
+    ]
+  },
+  "artifacts": {
+    "metrics": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/mga_clap_clotho_rtx4090_efficiency_20260803_115613/metrics.json",
+      "sha256": "fb5c3e8e7dabf73e073c27930b17d4196a7a0aa144ba07bcc7a6e0b72b93b330"
+    },
+    "latencies": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/mga_clap_clotho_rtx4090_efficiency_20260803_115613/latencies.jsonl",
+      "size_bytes": 375998,
+      "sha256": "ce61a504d5a266eb4656717873017c862870af7bf5d84f3964811f083db5a414"
+    }
+  }
+}
