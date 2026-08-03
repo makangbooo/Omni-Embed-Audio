@@ -178,6 +178,13 @@ def assess_cell(
     if table == "Table 17" or (
         table == "Table 4" and "Negative UIQ" in task
     ):
+        if model == "M2D-CLAP":
+            return (
+                "CONTROLLED_ONLY",
+                0,
+                "results/audits/m2d_clap_negative_uiq_eval_20260803.json",
+                "All three public dataset runs are complete under deterministic inferred caption-identity pairing; PAPER does not publish strict target-HN audio IDs.",
+            )
         return (
             "BLOCKED",
             0,

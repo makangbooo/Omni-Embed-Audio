@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "controlled_remote_negative_uiq_three_dataset_audit",
+  "paper_scope": [
+    "EXP-16 / Table 17 / M2D-CLAP / Negative UIQ standard retrieval",
+    "EXP-17 / Tables 4 and 17 / M2D-CLAP / hard-negative discrimination"
+  ],
+  "model": {
+    "paper_name": "M2D-CLAP",
+    "checkpoint": "checkpoint-30.pth",
+    "checkpoint_sha256": "238521603c04862ab151cdd80980b591cb36ebe844d43203992fac9ef085c8a1",
+    "embedding_dimension": 768
+  },
+  "official_source": {
+    "oea_official_source_used": true,
+    "source_files": [
+      "AudioRetrieval/models/m2d_clap_adapter.py",
+      "AudioRetrieval/preprocessing/embeddings/uiq_text.py",
+      "AudioRetrieval/evaluation/negative_canonical.py",
+      "AudioRetrieval/evaluation/negative_metrics.py",
+      "scripts/evaluate_negative_uiq_npz.py"
+    ]
+  },
+  "protocol": {
+    "source": "INFERRED_DETERMINISTIC_RELEASED_CAPTION_IDENTITY",
+    "strict_paper_reproduction": false,
+    "pairing_audit_run": "negative_uiq_exact_pairing_audit_20260803_125256",
+    "pairing_audit_sha256": "6b157cfd2e3dd5ef3e267ff025cb3b84e14187bef344f5b1093b0aea9cd8ee7d",
+    "tie_policy": "optimistic_strict_greater",
+    "normalization_applied": true,
+    "aggregation": "unweighted arithmetic mean of the three dataset percentages",
+    "paper_metric_mapping": {"TFR@10": "implementation TFR-HN@10"},
+    "claim_boundary": "The released negative JSONL files omit explicit hard-negative audio IDs. The controlled deterministic caption-identity pairing is complete and uses no embedding or nearest-neighbor inference, but it is not claimed as the unpublished strict PAPER pairing."
+  },
+  "datasets": {
+    "audiocaps": {
+      "run_id": "m2d_clap_audiocaps_negative_uiq_20260803_130926",
+      "git_commit": "9852e4097baa6dc98d0ea26c537584c71b6460aa",
+      "candidate_count": 975,
+      "query_count": 630,
+      "metrics_sha256": "f31a4a2b1b4b3e6beaff404bf2e65a84b90132332d795f2d491ed41a031fa409",
+      "query_npz_sha256": "fcd461aa82dacc6f815c248aa704bd8a46110ff55c2f5ac9e57d853e1d93d9fa",
+      "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+      "metrics": {
+        "R@5": 67.77777777777779,
+        "R@10": 83.01587301587303,
+        "Delta-Rank": 7.738095238095238,
+        "HNSR": 68.88888888888889,
+        "HNSR@10": 30.793650793650794,
+        "TFR": 30.317460317460316,
+        "TFR-HN@10": 12.53968253968254
+      }
+    },
+    "clotho": {
+      "run_id": "m2d_clap_clotho_negative_uiq_cpu_retry_20260803_132531",
+      "git_commit": "45649e32c1753ed67429c75095dbbf0d1b97d56a",
+      "candidate_count": 1045,
+      "query_count": 542,
+      "metrics_sha256": "62bf0ba9268d5e60facaa10ec5ce0e45f082c469dea55478ebbe43c8351729ea",
+      "query_npz_sha256": "b7994f3531fb15bd871c8c76ea2c5628b2863ea8107974496e5e95391b7b5be1",
+      "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+      "candidate_id_resolution": {
+        "target_ids": {"unique_casefold_or_stem_filename": 542},
+        "hard_negative_ids": {"unique_casefold_or_stem_filename": 542}
+      },
+      "metrics": {
+        "R@5": 39.48339483394834,
+        "R@10": 55.1660516605166,
+        "Delta-Rank": 21.059040590405903,
+        "HNSR": 68.45018450184503,
+        "HNSR@10": 31.73431734317343,
+        "TFR": 12.915129151291513,
+        "TFR-HN@10": 6.273062730627306
+      }
+    },
+    "mecat": {
+      "run_id": "m2d_clap_mecat_negative_uiq_20260803_131034",
+      "git_commit": "9852e4097baa6dc98d0ea26c537584c71b6460aa",
+      "candidate_count": 848,
+      "paper_candidate_count": 847,
+      "strict_paper_candidate_protocol": false,
+      "query_count": 409,
+      "metrics_sha256": "321810da4e8bd4d8c3b4c14ac3538b3886c2b2046b19674fcc54cd2b08374086",
+      "query_npz_sha256": "aadbb6391b7e073d71758d4e5b31e94d8479f295f143f60ff7c40d38f80a526b",
+      "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+      "metrics": {
+        "R@5": 14.425427872860636,
+        "R@10": 20.78239608801956,
+        "Delta-Rank": 15.178484107579463,
+        "HNSR": 59.168704156479215,
+        "HNSR@10": 13.202933985330073,
+        "TFR": 3.1784841075794623,
+        "TFR-HN@10": 1.466992665036675
+      }
+    }
+  },
+  "three_dataset_mean": {
+    "R@5": 40.56220016152892,
+    "R@10": 52.98810692146973,
+    "Delta-Rank": 14.658539978693534,
+    "HNSR": 65.5025925157377,
+    "HNSR@10": 25.243634040718103,
+    "TFR": 15.470357858777097,
+    "TFR-HN@10": 6.759912645115507
+  },
+  "paper_values": {
+    "R@5": 41.56,
+    "R@10": 55.63,
+    "Delta-Rank": 18.6,
+    "HNSR": 68.0,
+    "HNSR@10": 30.3,
+    "TFR": 16.2,
+    "TFR-HN@10": 7.5
+  },
+  "comparison": {
+    "signed_delta": {
+      "R@5": -0.9977998384710816,
+      "R@10": -2.6418930785302734,
+      "Delta-Rank": -3.941460021306467,
+      "HNSR": -2.497407484262297,
+      "HNSR@10": -5.056365959281898,
+      "TFR": -0.7296421412229019,
+      "TFR-HN@10": -0.7400873548844933
+    },
+    "maximum_absolute_delta": 5.056365959281898,
+    "maximum_absolute_delta_metric": "HNSR@10",
+    "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_UNAVAILABLE"
+  }
+}

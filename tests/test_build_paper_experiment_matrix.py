@@ -98,6 +98,21 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
             self.by_key[controlled]["reproduction_status"], "CONTROLLED_ONLY"
         )
         self.assertEqual(self.by_key[negative]["reproduction_status"], "BLOCKED")
+        m2d_negative = (
+            "EXP-17",
+            "Table 17",
+            "M2D-CLAP",
+            "Mean across AudioCaps, Clotho, MECAT",
+            "Negative UIQ hard-negative discrimination",
+        )
+        self.assertEqual(
+            self.by_key[m2d_negative]["reproduction_status"],
+            "CONTROLLED_ONLY",
+        )
+        self.assertEqual(
+            self.by_key[m2d_negative]["evidence"],
+            "results/audits/m2d_clap_negative_uiq_eval_20260803.json",
+        )
 
     def test_vanilla_qwen3b_clotho_main_cells_are_reproduced(self) -> None:
         for inventory, table, task in (
