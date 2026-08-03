@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +18,27 @@ from scripts.evaluate_negative_uiq_npz import (
 
 
 class EvaluateNegativeUIQNPZTest(unittest.TestCase):
+    def test_script_runs_directly_without_pythonpath(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        environment = os.environ.copy()
+        environment.pop("PYTHONPATH", None)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(repository_root / "scripts/evaluate_negative_uiq_npz.py"),
+                    "--help",
+                ],
+                cwd=temporary_directory,
+                env=environment,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+
     def test_exact_metrics_from_npz_and_pairings(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
