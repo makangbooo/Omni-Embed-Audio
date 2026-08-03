@@ -16,7 +16,7 @@ START_TIME="$(date -Is)"
 GIT_COMMIT="$(git rev-parse HEAD)"
 GIT_STATUS="$(git status --short)"
 
-echo "EXPERIMENT_NAME=Negative UIQ exact-caption pairing audit"
+echo "EXPERIMENT_NAME=Negative UIQ deterministic-caption pairing audit"
 echo "PAPER_EXPERIMENTS=EXP-16/17 Tables 4 and 17"
 echo "GIT_COMMIT=${GIT_COMMIT}"
 echo "GPU_USED=no"
@@ -91,7 +91,7 @@ summary = {
     "started_at": os.environ["START_TIME"],
     "finished_at": datetime.now().astimezone().isoformat(),
     "strict_paper_pairing_reproduction": False,
-    "pairing_source": "INFERRED_EXACT_RELEASED_NEGATIVE_CAPTIONS",
+    "pairing_source": "INFERRED_DETERMINISTIC_RELEASED_CAPTION_IDENTITY",
     "datasets": datasets,
 }
 path = root / "summary.json"

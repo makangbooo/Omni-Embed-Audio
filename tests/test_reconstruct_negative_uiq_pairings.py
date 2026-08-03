@@ -16,6 +16,7 @@ class ReconstructNegativeUIQPairingsTest(unittest.TestCase):
                 "_release_line_number": 7,
                 "audio_id": "target",
                 "negative_query": "Target sound without the other sound.",
+                "original_captions": ["Target sound."],
                 "negative_captions": ["Other sound."],
             }
         ]
@@ -40,6 +41,7 @@ class ReconstructNegativeUIQPairingsTest(unittest.TestCase):
             {
                 "audio_id": "target",
                 "negative_query": "Target without duplicate.",
+                "original_captions": ["Target sound."],
                 "negative_captions": ["Duplicate."],
             }
         ]
@@ -62,6 +64,7 @@ class ReconstructNegativeUIQPairingsTest(unittest.TestCase):
             {
                 "audio_id": "same",
                 "negative_query": "Same without same.",
+                "original_captions": ["Same sound."],
                 "negative_captions": ["Same sound."],
             }
         ]
@@ -70,6 +73,67 @@ class ReconstructNegativeUIQPairingsTest(unittest.TestCase):
 
         self.assertEqual(report["status"], "incomplete")
         self.assertIn("target_equals_hard_negative", report["failures"][0]["reasons"])
+
+    def test_release_compatible_deduplication_is_unique(self) -> None:
+        positive = [
+            {"audio_id": "target", "original_captions": ["Target sound."]},
+            {
+                "audio_id": "negative",
+                "original_captions": ["A MAN SPEAKS", "A person burps"],
+            },
+        ]
+        negative = [
+            {
+                "audio_id": "target",
+                "negative_query": "Target without speech or burping.",
+                "original_captions": ["Target sound."],
+                "negative_captions": [
+                    "a man speaks",
+                    "A person  burps",
+                    "a man speaks",
+                ],
+            }
+        ]
+
+        report = reconstruct_pairings(negative, positive, dataset="audiocaps")
+
+        self.assertEqual(report["status"], "complete")
+        self.assertEqual(
+            report["pairings"][0]["hard_negative_match_method"],
+            "unique_normalized_deduplicated_caption_list",
+        )
+
+    def test_unique_caption_subset_and_target_caption_fallback(self) -> None:
+        positive = [
+            {
+                "audio_id": "canonical-target.wav",
+                "original_captions": ["Target one", "Target two"],
+            },
+            {
+                "audio_id": "negative.wav",
+                "original_captions": ["Negative one", "None", "Negative two"],
+            },
+        ]
+        negative = [
+            {
+                "audio_id": "non-canonical target name",
+                "negative_query": "Target without the negative.",
+                "original_captions": ["Target one", "Target two"],
+                "negative_captions": ["Negative one", "Negative two"],
+            }
+        ]
+
+        report = reconstruct_pairings(negative, positive, dataset="mecat")
+
+        self.assertEqual(report["status"], "complete")
+        self.assertEqual(
+            report["pairings"][0]["target_match_method"],
+            "unique_exact_original_caption_list",
+        )
+        self.assertEqual(
+            report["pairings"][0]["hard_negative_match_method"],
+            "unique_normalized_caption_subset",
+        )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "status": "incomplete",
+  "evidence_type": "remote_released_uiq_exact_caption_pairing_audit",
+  "paper_scope": "EXP-16/17 / Tables 4 and 17",
+  "git_commit": "05dd63233d1a6b972dab3d96f95abb5b0de5d27e",
+  "run_id": "negative_uiq_exact_pairing_audit_20260803_124042",
+  "run_rc": 2,
+  "gpu_used": false,
+  "strict_paper_pairing_reproduction": false,
+  "pairing_source": "INFERRED_EXACT_RELEASED_NEGATIVE_CAPTIONS",
+  "summary_sha256": "4afc2b9c5f9e4d6c7eae4d280dc6077179e5e67aeff59d7d7fa9e1ed0928597a",
+  "datasets": {
+    "clotho": {
+      "negative_rows": 542,
+      "matched_pairings": 540,
+      "failed_pairings": 2,
+      "failure_reason": "two released target audio_id values do not match candidate IDs",
+      "pairing_sha256": "8d07d28630453a61a60c2f02716cb1f660741a732a9fcc4dfea4b03da48ee9a8",
+      "report_sha256": "56ad87491c0ebd1f822c0ae561b8e5ecbbc366862ba74c66723587cddbda9d1e"
+    },
+    "audiocaps": {
+      "negative_rows": 630,
+      "matched_pairings": 548,
+      "failed_pairings": 82,
+      "failure_reason": "82 negative caption lists differ from the positive release after duplicate caption retention",
+      "pairing_sha256": "e020f88bc0dbd0efb79359cb00e3ad971a76aba4a4fe9416ddf67a6d99463f11",
+      "report_sha256": "92b4c45d743c4e47b2a2b8613b5fe3e0c351dafcb3a5fddfe261408a9a44d9b1"
+    },
+    "mecat": {
+      "negative_rows": 409,
+      "matched_pairings": 0,
+      "failed_pairings": 409,
+      "failure_reason": "released negative rows contain 12-caption subsets while positive rows contain 17-caption candidate records",
+      "pairing_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "report_sha256": "e17dd3d98b833f9e88e15e7c01f2766cd4c5e0ab1f371c4b16f0566a82554f52"
+    }
+  },
+  "followup_diagnostic": {
+    "source": "fixed Git blobs at 05dd632",
+    "embedding_similarity_used": false,
+    "nearest_neighbor_inference_used": false,
+    "clotho": "all 542 rows have a unique mapping after exact original-caption target fallback",
+    "audiocaps": "all 630 rows have a unique mapping after release-compatible whitespace/case normalization and order-preserving deduplication",
+    "mecat": "all 409 rows have a unique mapping when each normalized 12-caption negative list is required to be a subset of exactly one 17-caption candidate record"
+  },
+  "claim_boundary": "The first exact-list audit is incomplete. The deterministic follow-up strategies require a second remote full-file audit before any Table 17 metric run. A successful reconstruction remains INFERRED controlled evidence, not the unpublished PAPER pairing."
+}

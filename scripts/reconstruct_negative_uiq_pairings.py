@@ -87,6 +87,19 @@ def caption_tuple(row: Mapping[str, Any], field: str, context: str) -> tuple[str
     return tuple(item.strip() for item in value)
 
 
+def normalized_caption_tuple(captions: Sequence[str]) -> tuple[str, ...]:
+    """Apply release-compatible whitespace/case normalization and deduplication."""
+
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for caption in captions:
+        value = " ".join(caption.split()).casefold()
+        if value not in seen:
+            seen.add(value)
+            normalized.append(value)
+    return tuple(normalized)
+
+
 def _id_aliases(candidate_id: str) -> tuple[str, ...]:
     value = candidate_id.strip().casefold()
     stem = Path(value).stem
@@ -101,7 +114,8 @@ def reconstruct_pairings(
 ) -> dict[str, Any]:
     positive_ids: list[str] = []
     captions_to_ids: dict[tuple[str, ...], list[str]] = defaultdict(list)
-    casefold_captions_to_ids: dict[tuple[str, ...], list[str]] = defaultdict(list)
+    normalized_captions_to_ids: dict[tuple[str, ...], list[str]] = defaultdict(list)
+    normalized_caption_sets: list[tuple[str, frozenset[str]]] = []
     alias_to_ids: dict[str, list[str]] = defaultdict(list)
 
     for index, row in enumerate(positive_rows, start=1):
@@ -110,15 +124,16 @@ def reconstruct_pairings(
         captions = caption_tuple(row, "original_captions", context)
         positive_ids.append(candidate_id)
         captions_to_ids[captions].append(candidate_id)
-        casefold_captions_to_ids[
-            tuple(caption.casefold() for caption in captions)
-        ].append(candidate_id)
+        normalized = normalized_caption_tuple(captions)
+        normalized_captions_to_ids[normalized].append(candidate_id)
+        normalized_caption_sets.append((candidate_id, frozenset(normalized)))
         for alias in _id_aliases(candidate_id):
             alias_to_ids[alias].append(candidate_id)
 
     if len(set(positive_ids)) != len(positive_ids):
         raise ValueError("reference positive UIQ audio IDs are not unique")
 
+    positive_id_set = set(positive_ids)
     pairings: list[dict[str, Any]] = []
     queries: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
@@ -130,10 +145,11 @@ def reconstruct_pairings(
         context = f"negative row {line_number}"
         raw_target_id = required_string(row, "audio_id", context)
         query = required_string(row, "negative_query", context)
+        original_captions = caption_tuple(row, "original_captions", context)
         negative_captions = caption_tuple(row, "negative_captions", context)
         query_id = f"{dataset}:negative:{logical_index:06d}"
 
-        if raw_target_id in set(positive_ids):
+        if raw_target_id in positive_id_set:
             target_candidates = [raw_target_id]
             target_method = "exact_audio_id"
         else:
@@ -141,12 +157,34 @@ def reconstruct_pairings(
             if not target_candidates:
                 target_candidates = alias_to_ids.get(Path(raw_target_id).stem.casefold(), [])
             target_method = "unique_casefold_or_stem_audio_id"
+        if len(target_candidates) != 1:
+            target_candidates = captions_to_ids.get(original_captions, [])
+            target_method = "unique_exact_original_caption_list"
+        if len(target_candidates) != 1:
+            target_candidates = normalized_captions_to_ids.get(
+                normalized_caption_tuple(original_captions), []
+            )
+            target_method = "unique_normalized_original_caption_list"
 
         hard_negative_candidates = captions_to_ids.get(negative_captions, [])
         hard_negative_method = "exact_ordered_caption_list"
-        casefold_candidates = casefold_captions_to_ids.get(
-            tuple(caption.casefold() for caption in negative_captions), []
+        normalized_negative = normalized_caption_tuple(negative_captions)
+        normalized_negative_set = frozenset(normalized_negative)
+        normalized_candidates = normalized_captions_to_ids.get(
+            normalized_negative, []
         )
+        subset_candidates = [
+            candidate_id
+            for candidate_id, candidate_captions in normalized_caption_sets
+            if normalized_negative
+            and normalized_negative_set.issubset(candidate_captions)
+        ]
+        if len(hard_negative_candidates) != 1 and len(normalized_candidates) == 1:
+            hard_negative_candidates = normalized_candidates
+            hard_negative_method = "unique_normalized_deduplicated_caption_list"
+        if len(hard_negative_candidates) != 1 and len(subset_candidates) == 1:
+            hard_negative_candidates = subset_candidates
+            hard_negative_method = "unique_normalized_caption_subset"
 
         reasons: list[str] = []
         if len(target_candidates) != 1:
@@ -155,11 +193,6 @@ def reconstruct_pairings(
             reasons.append(
                 f"exact_hard_negative_candidate_count={len(hard_negative_candidates)}"
             )
-        if (
-            len(hard_negative_candidates) != 1
-            and len(casefold_candidates) == 1
-        ):
-            reasons.append("casefold_unique_but_exact_ordered_missing")
 
         if not reasons:
             target_id = target_candidates[0]
@@ -178,8 +211,11 @@ def reconstruct_pairings(
                     "exact_hard_negative_candidates": sorted(
                         set(hard_negative_candidates)
                     ),
-                    "casefold_hard_negative_candidates": sorted(
-                        set(casefold_candidates)
+                    "normalized_hard_negative_candidates": sorted(
+                        set(normalized_candidates)
+                    ),
+                    "subset_hard_negative_candidates": sorted(
+                        set(subset_candidates)
                     ),
                     "negative_captions": list(negative_captions),
                 }
@@ -194,7 +230,7 @@ def reconstruct_pairings(
                 "target_id": target_id,
                 "hard_negative_id": hard_negative_id,
                 "release_line_number": line_number,
-                "pairing_source": "INFERRED_EXACT_RELEASED_NEGATIVE_CAPTIONS",
+                "pairing_source": "INFERRED_DETERMINISTIC_RELEASED_CAPTION_IDENTITY",
                 "target_match_method": target_method,
                 "hard_negative_match_method": hard_negative_method,
             }
@@ -216,7 +252,7 @@ def reconstruct_pairings(
         "matched_pairing_count": len(pairings),
         "failed_pairing_count": len(failures),
         "full_coverage": len(pairings) == len(negative_rows),
-        "pairing_source": "INFERRED_EXACT_RELEASED_NEGATIVE_CAPTIONS",
+        "pairing_source": "INFERRED_DETERMINISTIC_RELEASED_CAPTION_IDENTITY",
         "target_match_methods": dict(sorted(target_methods.items())),
         "hard_negative_match_methods": dict(sorted(hard_negative_methods.items())),
         "pairings": pairings,
@@ -264,8 +300,11 @@ def run(
         "strict_paper_pairing_reproduction": False,
         "claim_boundary": (
             "The release omits hard-negative audio IDs. This reconstruction "
-            "uses only unique exact ordered matches between negative_captions "
-            "and the released positive UIQ original_captions."
+            "uses only unique deterministic caption identity: exact ordered "
+            "lists, release-compatible whitespace/case deduplication, or a "
+            "unique normalized negative-caption subset of released positive "
+            "UIQ original_captions. No embedding similarity or nearest-neighbor "
+            "inference is used."
         ),
         "inputs": {
             "negative_jsonl": file_identity(negative_jsonl),
