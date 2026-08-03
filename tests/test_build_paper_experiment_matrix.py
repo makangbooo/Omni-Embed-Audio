@@ -97,7 +97,13 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
         self.assertEqual(
             self.by_key[controlled]["reproduction_status"], "CONTROLLED_ONLY"
         )
-        self.assertEqual(self.by_key[negative]["reproduction_status"], "BLOCKED")
+        self.assertEqual(
+            self.by_key[negative]["reproduction_status"], "CONTROLLED_ONLY"
+        )
+        self.assertEqual(
+            self.by_key[negative]["evidence"],
+            "results/audits/oea_negative_uiq_eval_20260803.json",
+        )
         m2d_negative = (
             "EXP-17",
             "Table 17",
@@ -147,6 +153,47 @@ class BuildPaperExperimentMatrixTests(unittest.TestCase):
             self.assertEqual(
                 self.by_key[table4_key]["evidence"],
                 "results/audits/clap_negative_uiq_eval_20260803.json",
+            )
+        for model in (
+            "OEA-Nemo3B",
+            "OEA-Nemo3B (+Cl)",
+            "OEA-Qwen3B",
+            "OEA-Qwen3B (+Cl)",
+            "OEA-Qwen7B",
+            "OEA-Qwen7B (+Cl)",
+        ):
+            for inventory, task in (
+                ("EXP-16", "Negative UIQ standard retrieval"),
+                ("EXP-17", "Negative UIQ hard-negative discrimination"),
+                ("EXP-17", "Negative UIQ strict metrics"),
+            ):
+                row = self.by_key[
+                    (
+                        inventory,
+                        "Table 17",
+                        model,
+                        "Mean across AudioCaps, Clotho, MECAT",
+                        task,
+                    )
+                ]
+                self.assertEqual(row["reproduction_status"], "CONTROLLED_ONLY")
+                self.assertEqual(
+                    row["evidence"],
+                    "results/audits/oea_negative_uiq_eval_20260803.json",
+                )
+            table4 = self.by_key[
+                (
+                    "DER-02",
+                    "Table 4",
+                    model,
+                    "Mean across AudioCaps, Clotho, MECAT",
+                    "Negative UIQ hard-negative discrimination",
+                )
+            ]
+            self.assertEqual(table4["reproduction_status"], "CONTROLLED_ONLY")
+            self.assertEqual(
+                table4["evidence"],
+                "results/audits/oea_negative_uiq_eval_20260803.json",
             )
 
     def test_vanilla_qwen3b_clotho_main_cells_are_reproduced(self) -> None:

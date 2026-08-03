@@ -5,8 +5,8 @@
   "paper_cell_count": 374,
   "paper_metric_count": 910,
   "status_counts": {
-    "BLOCKED": 146,
-    "CONTROLLED_ONLY": 20,
+    "BLOCKED": 122,
+    "CONTROLLED_ONLY": 44,
     "PARTIAL": 15,
     "REPRODUCED_CLOSE": 60,
     "TODO": 133
@@ -25,7 +25,7 @@
   },
   "output": {
     "path": "results/tables/paper_experiment_matrix.csv",
-    "size_bytes": 80244,
-    "sha256": "57da70143dc2f8516a425d2c35372e61a17f63de05766d07cec028a1658a9a94"
+    "size_bytes": 82716,
+    "sha256": "3efdca5379c59f729f3fa175d0b8758195af433351348e822d27338260d8eac6"
   }
 }

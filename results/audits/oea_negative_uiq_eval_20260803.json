@@ -1,0 +1,617 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "controlled_remote_oea_negative_uiq_six_model_three_dataset_audit",
+  "paper_scope": [
+    "EXP-16 / Table 17 / six OEA models / Negative UIQ standard retrieval",
+    "EXP-17 / Tables 4 and 17 / six OEA models / hard-negative discrimination"
+  ],
+  "execution": {
+    "git_commit": "b89ed4627647fe7943a64603c2714e1d4a4211f9",
+    "git_status_short": "",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "model_run_count": 6,
+    "dataset_run_count": 18,
+    "complete_model_run_count": 6,
+    "failed_run_count": 0,
+    "run_rc": 0,
+    "matrix_status": "complete",
+    "batch_log": "/home/jg525/Omni-Embed-Audio/logs/oea_negative_matrix_20260803_144841.log",
+    "compact_log_sha256": "e38c1d4dafb715b8936364a1f90e1d75c84daca4a2193b794d563cc6edbf3388"
+  },
+  "official_source": {
+    "oea_official_source_used": true,
+    "source_files": [
+      "AudioRetrieval/preprocessing/embeddings/oea.py",
+      "AudioRetrieval/preprocessing/embeddings/uiq_text.py",
+      "AudioRetrieval/evaluation/negative_canonical.py",
+      "AudioRetrieval/evaluation/negative_metrics.py",
+      "scripts/evaluate_negative_uiq_npz.py",
+      "scripts/run_oea_negative_uiq.sh"
+    ]
+  },
+  "protocol": {
+    "source": "INFERRED_DETERMINISTIC_RELEASED_CAPTION_IDENTITY",
+    "strict_paper_reproduction": false,
+    "pairing_audit_run": "negative_uiq_exact_pairing_audit_20260803_125256",
+    "tie_policy": "optimistic_strict_greater",
+    "normalization_applied": true,
+    "aggregation": "unweighted arithmetic mean of the three dataset percentages",
+    "paper_metric_mapping": {
+      "TFR@10": "implementation TFR-HN@10"
+    },
+    "claim_boundary": "The released negative JSONL files omit explicit hard-negative audio IDs. The controlled deterministic caption-identity pairing is complete and uses no embedding or nearest-neighbor inference, but it is not claimed as the unpublished strict PAPER pairing. MECAT uses all 848 public candidates while PAPER reports 847."
+  },
+  "models": {
+    "OEA-Nemo3B": {
+      "variant": "oea_nemo3b",
+      "resource_binding": {
+        "checkpoint": "step_400_best.pt",
+        "checkpoint_sha256": "55579dfbd4f6621b5d842c5e731d6a1d37dbfd04b26b1c55bf8cdea980e67d25",
+        "strict_paper_checkpoint_identity": true
+      },
+      "run_id": "oea_nemo3b_negative_uiq_three_dataset_20260803_144841",
+      "artifact_manifest_sha256": "4086ffe9ea4d1cd173f3b8e3f68ff7e88bda97d7cda14ac14519441fa44cea13",
+      "datasets": {
+        "audiocaps": {
+          "audio_npz_sha256": "3e14773435536ff88059286be210b6e8323ffc2303d87e4d1fca4978cd1ff008",
+          "candidate_count": 975,
+          "metrics": {
+            "Delta-Rank": 20.726984126984128,
+            "HNSR": 81.9047619047619,
+            "HNSR@10": 49.36507936507937,
+            "R@10": 81.58730158730158,
+            "R@5": 70.7936507936508,
+            "TFR": 34.12698412698413,
+            "TFR-HN@10": 19.365079365079367
+          },
+          "metrics_sha256": "98edd69f8b9d7bcdeaa19b1ec898de3606a94313122200f6f4c337e8c44ef09e",
+          "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+          "query_count": 630,
+          "query_npz_sha256": "0f2fa279521c48a0c3e0b7909da82147723c75da2393df63241663d75b2002f8"
+        },
+        "clotho": {
+          "audio_npz_sha256": "053edec9b2e156b54df18f7a7ed6c52ce72ea2efd1f89a71fccc79f04398593a",
+          "candidate_count": 1045,
+          "metrics": {
+            "Delta-Rank": 49.89483394833948,
+            "HNSR": 76.75276752767527,
+            "HNSR@10": 36.715867158671585,
+            "R@10": 47.7859778597786,
+            "R@5": 33.579335793357934,
+            "TFR": 11.439114391143912,
+            "TFR-HN@10": 7.7490774907749085
+          },
+          "metrics_sha256": "7a0910e5fbf95019713b4fe272b4d0308148c96723f41afba02d22e2d23b5fe2",
+          "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+          "query_count": 542,
+          "query_npz_sha256": "6c7eca9408f761bc6b9c53457e838a297e77eabd9913ff574051bca06f6b4193"
+        },
+        "mecat": {
+          "audio_npz_sha256": "1c5864d94907f1f20c67d0d32460801e5a5f0b0d28d3324ca94e4ea2a5bbd749",
+          "candidate_count": 848,
+          "metrics": {
+            "Delta-Rank": 19.224938875305625,
+            "HNSR": 59.90220048899756,
+            "HNSR@10": 18.581907090464547,
+            "R@10": 24.69437652811736,
+            "R@5": 12.224938875305623,
+            "TFR": 2.689486552567237,
+            "TFR-HN@10": 0.9779951100244498
+          },
+          "metrics_sha256": "628ec42efc372c3f19cc43bb6a7a92439bd40256b6403e7477666e3c51478e77",
+          "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+          "query_count": 409,
+          "query_npz_sha256": "f68e6a09e816d031deeaaeb6fca3ab0c8445166da4a8b448cdf036aea7d885a7"
+        }
+      },
+      "three_dataset_mean": {
+        "Delta-Rank": 29.948918983543077,
+        "HNSR": 72.85324330714491,
+        "HNSR@10": 34.88761787140516,
+        "R@10": 51.355885325065834,
+        "R@5": 38.86597515410479,
+        "TFR": 16.085195023565092,
+        "TFR-HN@10": 9.364050655292909
+      },
+      "paper_values": {
+        "Delta-Rank": 21.1,
+        "HNSR": 68.6,
+        "HNSR@10": 32.9,
+        "R@10": 51.23,
+        "R@5": 39.64,
+        "TFR": 15.1,
+        "TFR-HN@10": 8.6
+      },
+      "comparison": {
+        "signed_delta": {
+          "R@5": -0.7740248458952124,
+          "R@10": 0.1258853250658376,
+          "Delta-Rank": 8.848918983543076,
+          "HNSR": 4.253243307144913,
+          "HNSR@10": 1.9876178714051633,
+          "TFR": 0.9851950235650921,
+          "TFR-HN@10": 0.7640506552929089
+        },
+        "maximum_absolute_delta": 8.848918983543076,
+        "maximum_absolute_delta_metric": "Delta-Rank",
+        "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_UNAVAILABLE"
+      }
+    },
+    "OEA-Nemo3B (+Cl)": {
+      "variant": "oea_nemo3b_cl",
+      "resource_binding": {
+        "checkpoint": "step_450_best_inference_only.pt",
+        "checkpoint_sha256": "2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+        "strict_paper_checkpoint_identity": true
+      },
+      "run_id": "oea_nemo3b_cl_negative_uiq_three_dataset_20260803_145224",
+      "artifact_manifest_sha256": "5b048a5eddaa4886976a9fe7dd3cf89a7ade0b606e9a77d91d828db6377c83a6",
+      "datasets": {
+        "audiocaps": {
+          "audio_npz_sha256": "fc4ee949903c7ea5a65954693536bc1205eb798adc961d97d6f1837726671cff",
+          "candidate_count": 975,
+          "metrics": {
+            "Delta-Rank": 26.615873015873017,
+            "HNSR": 80.15873015873017,
+            "HNSR@10": 48.57142857142857,
+            "R@10": 78.73015873015873,
+            "R@5": 67.77777777777779,
+            "TFR": 32.06349206349206,
+            "TFR-HN@10": 19.365079365079367
+          },
+          "metrics_sha256": "26bfa2cd2ab0bb549c267149b39f70dc93ff2ad7ac07ee06f8d5e1e509d7ac44",
+          "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+          "query_count": 630,
+          "query_npz_sha256": "5ef457759c7d34ace6958a4ce6c11655a89e4c77c2cb40d510218cfc34bdc11d"
+        },
+        "clotho": {
+          "audio_npz_sha256": "32629ee769cd6dfbad720a0aa5af0e2f0c47de430f609d32b7edb42c65dd2dc2",
+          "candidate_count": 1045,
+          "metrics": {
+            "Delta-Rank": 43.32472324723247,
+            "HNSR": 78.04428044280442,
+            "HNSR@10": 40.774907749077485,
+            "R@10": 57.564575645756456,
+            "R@5": 40.59040590405904,
+            "TFR": 16.974169741697416,
+            "TFR-HN@10": 11.254612546125461
+          },
+          "metrics_sha256": "7e8e654eee9c4ab447e9f70963d9e7e67e28235529fdadacb370b2c4bf324059",
+          "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+          "query_count": 542,
+          "query_npz_sha256": "29498d69886e35e1cd5f29087347b87f4f34bb408192020f317115a3ecdf5185"
+        },
+        "mecat": {
+          "audio_npz_sha256": "52c071c01fff64ff666fc5f994650795016f33b452ad52f15e6b33bff68d36f1",
+          "candidate_count": 848,
+          "metrics": {
+            "Delta-Rank": 13.232273838630807,
+            "HNSR": 58.924205378973106,
+            "HNSR@10": 14.425427872860636,
+            "R@10": 20.048899755501225,
+            "R@5": 12.224938875305623,
+            "TFR": 3.4229828850855744,
+            "TFR-HN@10": 1.466992665036675
+          },
+          "metrics_sha256": "77611472a6e0b9a5c8328251ba47795e41abb53f50f253b31b22cac1cbc3f469",
+          "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+          "query_count": 409,
+          "query_npz_sha256": "060366a5f3a1b763074194538b585f76db402c3a8ecd13960305d9c3a7333a36"
+        }
+      },
+      "three_dataset_mean": {
+        "Delta-Rank": 27.724290033912098,
+        "HNSR": 72.37573866016923,
+        "HNSR@10": 34.59058806445557,
+        "R@10": 52.11454471047214,
+        "R@5": 40.19770751904748,
+        "TFR": 17.48688156342502,
+        "TFR-HN@10": 10.695561525413835
+      },
+      "paper_values": {
+        "Delta-Rank": 17.9,
+        "HNSR": 69.2,
+        "HNSR@10": 32.5,
+        "R@10": 53.67,
+        "R@5": 41.48,
+        "TFR": 17.3,
+        "TFR-HN@10": 10.1
+      },
+      "comparison": {
+        "signed_delta": {
+          "R@5": -1.2822924809525134,
+          "R@10": -1.5554552895278633,
+          "Delta-Rank": 9.8242900339121,
+          "HNSR": 3.1757386601692303,
+          "HNSR@10": 2.0905880644555666,
+          "TFR": 0.18688156342501827,
+          "TFR-HN@10": 0.5955615254138351
+        },
+        "maximum_absolute_delta": 9.8242900339121,
+        "maximum_absolute_delta_metric": "Delta-Rank",
+        "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_UNAVAILABLE"
+      }
+    },
+    "OEA-Qwen3B": {
+      "variant": "oea_qwen3b",
+      "resource_binding": {
+        "checkpoint": "step_350_inference_only.pt",
+        "checkpoint_sha256": "b1d0f559711b70f5a80dbdeb8cd46d80ed7b38b8e5524b9a871878d8bcd5f101",
+        "strict_paper_checkpoint_identity": true
+      },
+      "run_id": "oea_qwen3b_negative_uiq_three_dataset_20260803_145420",
+      "artifact_manifest_sha256": "3ad0a45b1be52758524104b522d673f7a5d3b46d401bc9543db5f55cb8e60286",
+      "datasets": {
+        "audiocaps": {
+          "audio_npz_sha256": "671978a3e6ce634eeaf9e4fcd6e30396d4347365125358ef4b8eaa36a860997e",
+          "candidate_count": 975,
+          "metrics": {
+            "Delta-Rank": 13.247619047619047,
+            "HNSR": 76.66666666666667,
+            "HNSR@10": 43.17460317460318,
+            "R@10": 81.42857142857143,
+            "R@5": 68.57142857142857,
+            "TFR": 28.253968253968253,
+            "TFR-HN@10": 14.126984126984127
+          },
+          "metrics_sha256": "f34273b94ab435cb1af1a7f3be86be819b9bcef21ae7803a84fdb47c7307c347",
+          "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+          "query_count": 630,
+          "query_npz_sha256": "802bdff4ac4a901a193c1a69f4922724442f4695ff510817665b07f50cb7c60e"
+        },
+        "clotho": {
+          "audio_npz_sha256": "8e76dadd635df18d6222bd632cdb0accc422c39c15c7540bd44753ea0df5acab",
+          "candidate_count": 1045,
+          "metrics": {
+            "Delta-Rank": 32.55719557195572,
+            "HNSR": 73.24723247232473,
+            "HNSR@10": 31.18081180811808,
+            "R@10": 47.7859778597786,
+            "R@5": 32.656826568265686,
+            "TFR": 11.992619926199263,
+            "TFR-HN@10": 7.564575645756458
+          },
+          "metrics_sha256": "c57486f393a9255107a30f01836494ef086815176661167e1d88cbaf75b66ed4",
+          "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+          "query_count": 542,
+          "query_npz_sha256": "9bc58165c799d88e2833e04f9b45386759519555222acf5515f3d4c4569f53a8"
+        },
+        "mecat": {
+          "audio_npz_sha256": "48750fa0c5b3401e90e0046ad9332b5865fabedd973debedc05891a7366df49f",
+          "candidate_count": 848,
+          "metrics": {
+            "Delta-Rank": 14.992665036674817,
+            "HNSR": 59.41320293398533,
+            "HNSR@10": 16.13691931540342,
+            "R@10": 24.449877750611247,
+            "R@5": 13.691931540342297,
+            "TFR": 3.9119804400977993,
+            "TFR-HN@10": 2.2004889975550124
+          },
+          "metrics_sha256": "55190024d47c9fdc7c1acc9b1fac6cbd4bae1ea782258068f92f9443e186958f",
+          "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+          "query_count": 409,
+          "query_npz_sha256": "cb0f86538c712f5de109e061033fca020c99f76e25dedc77b5ef1b9b2b656b3c"
+        }
+      },
+      "three_dataset_mean": {
+        "Delta-Rank": 20.265826552083194,
+        "HNSR": 69.77570069099224,
+        "HNSR@10": 30.164111432708225,
+        "R@10": 51.221475679653764,
+        "R@5": 38.306728893345515,
+        "TFR": 14.719522873421772,
+        "TFR-HN@10": 7.964016256765198
+      },
+      "paper_values": {
+        "Delta-Rank": 18.8,
+        "HNSR": 67.5,
+        "HNSR@10": 31.6,
+        "R@10": 49.12,
+        "R@5": 37.49,
+        "TFR": 14.3,
+        "TFR-HN@10": 8.3
+      },
+      "comparison": {
+        "signed_delta": {
+          "R@5": 0.8167288933455126,
+          "R@10": 2.101475679653767,
+          "Delta-Rank": 1.4658265520831932,
+          "HNSR": 2.275700690992238,
+          "HNSR@10": -1.4358885672917765,
+          "TFR": 0.4195228734217711,
+          "TFR-HN@10": -0.3359837432348023
+        },
+        "maximum_absolute_delta": 2.275700690992238,
+        "maximum_absolute_delta_metric": "HNSR",
+        "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_UNAVAILABLE"
+      }
+    },
+    "OEA-Qwen3B (+Cl)": {
+      "variant": "oea_qwen3b_cl",
+      "resource_binding": {
+        "checkpoint": "step_40_inference_only.pt",
+        "checkpoint_sha256": "f084bf3c3ad645809e4c7e22cf148caef788cb96c019729576b881291268432a",
+        "strict_paper_checkpoint_identity": true
+      },
+      "run_id": "oea_qwen3b_cl_negative_uiq_three_dataset_20260803_145630",
+      "artifact_manifest_sha256": "ccd715629ffafffd340f293856e3553454af9b8a149f772df4b8145613359d73",
+      "datasets": {
+        "audiocaps": {
+          "audio_npz_sha256": "cc4f235e5c2a57c0e4af10b0d8c50c087470ea3a589aa79b7db07e87b9585361",
+          "candidate_count": 975,
+          "metrics": {
+            "Delta-Rank": 17.896825396825395,
+            "HNSR": 74.76190476190476,
+            "HNSR@10": 46.03174603174603,
+            "R@10": 80.7936507936508,
+            "R@5": 66.66666666666666,
+            "TFR": 27.460317460317462,
+            "TFR-HN@10": 15.238095238095239
+          },
+          "metrics_sha256": "391b30e25edc9c87051d7a70606b77bfedac4b20f43dbecdcbfa40d6f87d0071",
+          "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+          "query_count": 630,
+          "query_npz_sha256": "a46e3c2f67d0baeeb842ae11297f1d644f6ee29f4f76091de13321ed4e900658"
+        },
+        "clotho": {
+          "audio_npz_sha256": "13a89979676a1810c3766521cf9d19269cdb3d31dd62025c6855eda2bfbeac0d",
+          "candidate_count": 1045,
+          "metrics": {
+            "Delta-Rank": 27.8690036900369,
+            "HNSR": 74.90774907749078,
+            "HNSR@10": 37.63837638376384,
+            "R@10": 59.96309963099631,
+            "R@5": 46.86346863468634,
+            "TFR": 18.45018450184502,
+            "TFR-HN@10": 11.254612546125461
+          },
+          "metrics_sha256": "ad063f2403d89a8167dbb0b767d44730dd70e57f98b88e64410d144889c27832",
+          "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+          "query_count": 542,
+          "query_npz_sha256": "056f6026369b029666a9b074eca8db20bdf8a65e0885a15586adc63dbba79057"
+        },
+        "mecat": {
+          "audio_npz_sha256": "b60a865ff1ab84099520e0ae94d59cb0bae7c7d4b21ae754bfa505d40254c890",
+          "candidate_count": 848,
+          "metrics": {
+            "Delta-Rank": 11.17359413202934,
+            "HNSR": 58.679706601467,
+            "HNSR@10": 13.447432762836186,
+            "R@10": 22.00488997555012,
+            "R@5": 11.7359413202934,
+            "TFR": 4.400977995110025,
+            "TFR-HN@10": 2.444987775061125
+          },
+          "metrics_sha256": "8598897291cad6bca28dc3ffac4a095aaaa214aa226835e2b0bcfa2aaaddb7a3",
+          "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+          "query_count": 409,
+          "query_npz_sha256": "1c93e82a548531ff1721b4bfbafbca84048e6da3339043722da89afec1a83bb2"
+        }
+      },
+      "three_dataset_mean": {
+        "Delta-Rank": 18.979807739630544,
+        "HNSR": 69.44978681362085,
+        "HNSR@10": 32.37251839278202,
+        "R@10": 54.253880133399086,
+        "R@5": 41.75535887388213,
+        "TFR": 16.770493319090836,
+        "TFR-HN@10": 9.645898519760609
+      },
+      "paper_values": {
+        "Delta-Rank": 17.6,
+        "HNSR": 67.3,
+        "HNSR@10": 32.8,
+        "R@10": 53.89,
+        "R@5": 41.52,
+        "TFR": 16.4,
+        "TFR-HN@10": 10.0
+      },
+      "comparison": {
+        "signed_delta": {
+          "R@5": 0.23535887388212728,
+          "R@10": 0.36388013339908554,
+          "Delta-Rank": 1.379807739630543,
+          "HNSR": 2.1497868136208496,
+          "HNSR@10": -0.42748160721797746,
+          "TFR": 0.37049331909083705,
+          "TFR-HN@10": -0.35410148023939136
+        },
+        "maximum_absolute_delta": 2.1497868136208496,
+        "maximum_absolute_delta_metric": "HNSR",
+        "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_UNAVAILABLE"
+      }
+    },
+    "OEA-Qwen7B": {
+      "variant": "oea_qwen7b",
+      "resource_binding": {
+        "checkpoint": "step_300.pt",
+        "checkpoint_sha256": "cd751e3a71f0b47b9ecbbc0f5a11e4673097f0ebdbd80f610387f5778dd70a46",
+        "strict_paper_checkpoint_identity": true
+      },
+      "run_id": "oea_qwen7b_negative_uiq_three_dataset_20260803_145825",
+      "artifact_manifest_sha256": "9d9860d018b0f0e2b25e7489c8413cf4811d1d81400d21ba88a88c4d62ef3f09",
+      "datasets": {
+        "audiocaps": {
+          "audio_npz_sha256": "27ce560e237c1ae3baf40d4f3a18ad4643fcf7021bcbdbc559cca8c26cac2f2f",
+          "candidate_count": 975,
+          "metrics": {
+            "Delta-Rank": 17.86031746031746,
+            "HNSR": 79.68253968253968,
+            "HNSR@10": 46.98412698412698,
+            "R@10": 84.76190476190476,
+            "R@5": 70.0,
+            "TFR": 31.746031746031743,
+            "TFR-HN@10": 17.142857142857142
+          },
+          "metrics_sha256": "a473e3880f39cd83c1e8ed6ae47d85aa8d5044b78d61007ee500e66aa9ce43bd",
+          "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+          "query_count": 630,
+          "query_npz_sha256": "8fb75f2cc812e983c7073d0a1f8717c76160c793bb06f2cb01e20e3a7a4d22c5"
+        },
+        "clotho": {
+          "audio_npz_sha256": "671684c21ad936a16647f1697e6a106e150cba1dc010a9f7a5bf8eb856cb3887",
+          "candidate_count": 1045,
+          "metrics": {
+            "Delta-Rank": 33.678966789667896,
+            "HNSR": 76.01476014760148,
+            "HNSR@10": 34.686346863468636,
+            "R@10": 52.952029520295206,
+            "R@5": 37.45387453874539,
+            "TFR": 12.915129151291513,
+            "TFR-HN@10": 7.011070110701106
+          },
+          "metrics_sha256": "8d3920eb4d8cffed93ae9320b908918d632f696b9883f663bb3b7b4f2b82fc99",
+          "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+          "query_count": 542,
+          "query_npz_sha256": "6e3d4d4cc3994f1561e5441572091c05b2735d2f2dc0dc0f19c1b45cf52a92d0"
+        },
+        "mecat": {
+          "audio_npz_sha256": "d2d0203bd451423bba7a33851b7fe17f8101bc10dcb691b15330755bc96cb308",
+          "candidate_count": 848,
+          "metrics": {
+            "Delta-Rank": 19.574572127139366,
+            "HNSR": 62.10268948655256,
+            "HNSR@10": 14.66992665036675,
+            "R@10": 20.78239608801956,
+            "R@5": 11.491442542787286,
+            "TFR": 2.689486552567237,
+            "TFR-HN@10": 1.2224938875305624
+          },
+          "metrics_sha256": "8c10c9db960a5f40a99619bb4ae861b90eed07ac2b831b7336c5a048059ef6f2",
+          "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+          "query_count": 409,
+          "query_npz_sha256": "401d123c6f10bd32c8a9c7d286de78df37fe350e35aa91be173d3b4eef7b68e1"
+        }
+      },
+      "three_dataset_mean": {
+        "Delta-Rank": 23.704618792374905,
+        "HNSR": 72.5999964388979,
+        "HNSR@10": 32.11346683265412,
+        "R@10": 52.832110123406515,
+        "R@5": 39.64843902717756,
+        "TFR": 15.783549149963498,
+        "TFR-HN@10": 8.458807047029604
+      },
+      "paper_values": {
+        "Delta-Rank": 33.0,
+        "HNSR": 74.4,
+        "HNSR@10": 31.8,
+        "R@10": 50.45,
+        "R@5": 38.2,
+        "TFR": 15.8,
+        "TFR-HN@10": 9.5
+      },
+      "comparison": {
+        "signed_delta": {
+          "R@5": 1.4484390271775567,
+          "R@10": 2.3821101234065125,
+          "Delta-Rank": -9.295381207625095,
+          "HNSR": -1.800003561102102,
+          "HNSR@10": 0.3134668326541181,
+          "TFR": -0.016450850036502374,
+          "TFR-HN@10": -1.0411929529703965
+        },
+        "maximum_absolute_delta": 9.295381207625095,
+        "maximum_absolute_delta_metric": "Delta-Rank",
+        "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_UNAVAILABLE"
+      }
+    },
+    "OEA-Qwen7B (+Cl)": {
+      "variant": "oea_qwen7b_cl",
+      "resource_binding": {
+        "checkpoint": "step_330.pt",
+        "checkpoint_sha256": "09ce41af7e7ac23106fa74d25e45b7229a046d687774cbd4ab2c00c05097d92e",
+        "strict_paper_checkpoint_identity": true
+      },
+      "run_id": "oea_qwen7b_cl_negative_uiq_three_dataset_20260803_150327",
+      "artifact_manifest_sha256": "b85d810421f99e7ec8ef8a1cebcdaf2a0f50b2680efd42eedc39566cb5cdbe05",
+      "datasets": {
+        "audiocaps": {
+          "audio_npz_sha256": "a8cdced2e70ea5496b516c408b14857d373826a4f553b7273ce30a9219dc0216",
+          "candidate_count": 975,
+          "metrics": {
+            "Delta-Rank": 20.16984126984127,
+            "HNSR": 78.41269841269842,
+            "HNSR@10": 46.03174603174603,
+            "R@10": 77.93650793650794,
+            "R@5": 65.55555555555556,
+            "TFR": 28.095238095238095,
+            "TFR-HN@10": 15.396825396825397
+          },
+          "metrics_sha256": "51921a1ed81748b27f3f304fcfa700f285187e0311e63e85483e3cbe9aa0beae",
+          "pairing_sha256": "8a773c5cd8519214baf1ebd715df89dd1b75ee685e563ba4bf9c0c8cf1e7effa",
+          "query_count": 630,
+          "query_npz_sha256": "612a9023fb5550a3762ae5f9f53680ad51f46b1ae84bb7e13beb41b7606ceabd"
+        },
+        "clotho": {
+          "audio_npz_sha256": "b32060e5e98f840ec000cc3fb13f8bf372e7accf8c157278a8b817a28600701b",
+          "candidate_count": 1045,
+          "metrics": {
+            "Delta-Rank": 27.998154981549817,
+            "HNSR": 74.53874538745387,
+            "HNSR@10": 41.88191881918819,
+            "R@10": 62.91512915129152,
+            "R@5": 45.571955719557195,
+            "TFR": 18.634686346863468,
+            "TFR-HN@10": 10.70110701107011
+          },
+          "metrics_sha256": "bf3b4aab63c3ab1be35387652818fc31b4c25262f267e5b90ce0ffe4dd9dc8bf",
+          "pairing_sha256": "c05101e76d6343a1446a0132bb16b041c03dcca7e9d96a62d61710177c9fb177",
+          "query_count": 542,
+          "query_npz_sha256": "f46b9fe5aaa92d397cf5cd747b9eaf6c7bfe8ce5765f17c62a6963ec77739c1e"
+        },
+        "mecat": {
+          "audio_npz_sha256": "8d10e2afc2dc80b87f8c0b9745bec9d7eaa2d9840572d4afa58a34d066dc9dc2",
+          "candidate_count": 848,
+          "metrics": {
+            "Delta-Rank": 16.69926650366748,
+            "HNSR": 58.924205378973106,
+            "HNSR@10": 12.71393643031785,
+            "R@10": 18.581907090464547,
+            "R@5": 11.7359413202934,
+            "TFR": 4.645476772616137,
+            "TFR-HN@10": 3.4229828850855744
+          },
+          "metrics_sha256": "e176916255d76da666758730e89bd13df7c285012eff028bfb1e3ae9c020bc13",
+          "pairing_sha256": "e7c7311281681190f544c5d9d0eed348fd3378bbc4ce9c31358096da36bab8aa",
+          "query_count": 409,
+          "query_npz_sha256": "a4784d1404774db7d2dac338b997ce9924fceb0b759e9e8ab5e7b31b09178bb8"
+        }
+      },
+      "three_dataset_mean": {
+        "Delta-Rank": 21.622420918352855,
+        "HNSR": 70.6252163930418,
+        "HNSR@10": 33.542533760417356,
+        "R@10": 53.144514726088,
+        "R@5": 40.95448419846872,
+        "TFR": 17.12513373823923,
+        "TFR-HN@10": 9.84030509766036
+      },
+      "paper_values": {
+        "Delta-Rank": 29.8,
+        "HNSR": 73.9,
+        "HNSR@10": 34.6,
+        "R@10": 50.38,
+        "R@5": 38.14,
+        "TFR": 15.9,
+        "TFR-HN@10": 9.8
+      },
+      "comparison": {
+        "signed_delta": {
+          "R@5": 2.814484198468719,
+          "R@10": 2.764514726087995,
+          "Delta-Rank": -8.177579081647146,
+          "HNSR": -3.2747836069582092,
+          "HNSR@10": -1.057466239582645,
+          "TFR": 1.225133738239231,
+          "TFR-HN@10": 0.040305097660359834
+        },
+        "maximum_absolute_delta": 8.177579081647146,
+        "maximum_absolute_delta_metric": "Delta-Rank",
+        "assessment": "CONTROLLED_COMPLETE_STRICT_PAPER_PROTOCOL_UNAVAILABLE"
+      }
+    }
+  }
+}

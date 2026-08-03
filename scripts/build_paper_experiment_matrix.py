@@ -198,6 +198,22 @@ def assess_cell(
                 "All three public dataset runs are complete under deterministic inferred caption-identity pairing; PAPER does not publish strict target-HN audio IDs."
                 + checkpoint_boundary,
             )
+        if model in {
+            "OEA-Nemo3B",
+            "OEA-Nemo3B (+Cl)",
+            "OEA-Qwen3B",
+            "OEA-Qwen3B (+Cl)",
+            "OEA-Qwen7B",
+            "OEA-Qwen7B (+Cl)",
+        }:
+            return (
+                "CONTROLLED_ONLY",
+                0,
+                "results/audits/oea_negative_uiq_eval_20260803.json",
+                "All three public dataset runs are complete under deterministic inferred "
+                "caption-identity pairing; PAPER does not publish strict target-HN audio "
+                "IDs and MECAT uses public 848 rather than PAPER 847 candidates.",
+            )
         return (
             "BLOCKED",
             0,
