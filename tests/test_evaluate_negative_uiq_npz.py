@@ -8,7 +8,10 @@ from unittest import mock
 
 import numpy as np
 
-from scripts.evaluate_negative_uiq_npz import run_evaluation
+from scripts.evaluate_negative_uiq_npz import (
+    resolve_pairing_candidate_ids,
+    run_evaluation,
+)
 
 
 class EvaluateNegativeUIQNPZTest(unittest.TestCase):
@@ -93,6 +96,26 @@ class EvaluateNegativeUIQNPZTest(unittest.TestCase):
                         expected_candidates=2,
                         expected_queries=1,
                     )
+
+    def test_unique_suffix_alias_resolves_to_candidate_stem(self) -> None:
+        resolved, methods = resolve_pairing_candidate_ids(
+            ["target.wav", "negative.wav"],
+            ["target", "negative", "other"],
+            label="fixture",
+        )
+
+        self.assertEqual(resolved, ["target", "negative"])
+        self.assertEqual(
+            methods, {"unique_casefold_or_stem_candidate_id": 2}
+        )
+
+    def test_ambiguous_stem_alias_fails_closed(self) -> None:
+        with self.assertRaises(KeyError):
+            resolve_pairing_candidate_ids(
+                ["duplicate"],
+                ["duplicate.wav", "duplicate.mp3"],
+                label="fixture",
+            )
 
 
 if __name__ == "__main__":

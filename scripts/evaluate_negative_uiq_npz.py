@@ -6,9 +6,10 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 
@@ -60,6 +61,41 @@ def strings(array: np.ndarray, field: str) -> list[str]:
     if len(set(values)) != len(values):
         raise ValueError(f"{field} contains duplicate IDs")
     return values
+
+
+def resolve_pairing_candidate_ids(
+    requested_ids: Sequence[str],
+    candidate_ids: Sequence[str],
+    *,
+    label: str,
+) -> tuple[list[str], dict[str, int]]:
+    """Resolve release IDs to candidate IDs using only unique ID aliases."""
+
+    exact = set(candidate_ids)
+    aliases: dict[str, list[str]] = defaultdict(list)
+    for candidate_id in candidate_ids:
+        for alias in dict.fromkeys(
+            (candidate_id.casefold(), Path(candidate_id).stem.casefold())
+        ):
+            aliases[alias].append(candidate_id)
+
+    resolved: list[str] = []
+    methods: Counter[str] = Counter()
+    for index, requested_id in enumerate(requested_ids):
+        if requested_id in exact:
+            resolved.append(requested_id)
+            methods["exact_candidate_id"] += 1
+            continue
+        candidates = set(aliases.get(requested_id.casefold(), ()))
+        candidates.update(aliases.get(Path(requested_id).stem.casefold(), ()))
+        if len(candidates) != 1:
+            raise KeyError(
+                f"{label} row {index}: candidate alias count={len(candidates)} "
+                f"for {requested_id!r}; candidates={sorted(candidates)[:10]}"
+            )
+        resolved.append(next(iter(candidates)))
+        methods["unique_casefold_or_stem_candidate_id"] += 1
+    return resolved, dict(sorted(methods.items()))
 
 
 def run_evaluation(
@@ -124,13 +160,34 @@ def run_evaluation(
     if len(set(query_ids)) != len(query_ids):
         raise ValueError("pairing query IDs are not unique")
 
+    resolved_target_ids, target_id_resolution = resolve_pairing_candidate_ids(
+        target_ids, candidate_ids, label="target_id"
+    )
+    resolved_hard_negative_ids, hard_negative_id_resolution = (
+        resolve_pairing_candidate_ids(
+            hard_negative_ids, candidate_ids, label="hard_negative_id"
+        )
+    )
+    equal_rows = [
+        index
+        for index, (target_id, hard_negative_id) in enumerate(
+            zip(resolved_target_ids, resolved_hard_negative_ids)
+        )
+        if target_id == hard_negative_id
+    ]
+    if equal_rows:
+        raise ValueError(
+            "resolved target and hard-negative IDs must differ; rows="
+            f"{equal_rows[:10]}"
+        )
+
     result = evaluate_negative_id_retrieval(
         query_embeddings,
         query_ids,
         candidate_embeddings,
         candidate_ids,
-        target_ids,
-        hard_negative_ids,
+        resolved_target_ids,
+        resolved_hard_negative_ids,
         normalize=True,
         ks=(1, 5, 10),
     )
@@ -163,6 +220,10 @@ def run_evaluation(
         "protocol_source": "INFERRED",
         "strict_paper_reproduction": False,
         "pairing_contract": "deterministic_released_caption_identity",
+        "candidate_id_resolution": {
+            "target_ids": target_id_resolution,
+            "hard_negative_ids": hard_negative_id_resolution,
+        },
         "candidate_count": expected_candidates,
         "evaluated_query_count": expected_queries,
         "embedding_dimension": int(candidate_embeddings.shape[1]),
