@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "evidence_type": "remote_terminal_audit",
+  "experiment_id": "oea_nemo3b_clotho_rtx4090_efficiency_20260803_093004",
+  "remote_path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_rtx4090_efficiency_20260803_093004",
+  "git_commit": "d6778c4fd8aa8c685b25eab98107005a79351a6c",
+  "git_status_short": "",
+  "exit_code": 0,
+  "model": "OEA-Nemo3B (+Cl)",
+  "paper_model_label": "OEA-Nemo3B",
+  "dataset": "Clotho v2.1 evaluation",
+  "checkpoint": "JudeJiwoo/OEA-Nemo3B-Cl@9588912298afca0b11f5895b864ae28083f35022/step_450_best_inference_only.pt#sha256=2a5bee9039a28c0028cf205d1e2f4302fda540dd913f4cc1b08301edfc6680c4",
+  "claim_scope": {
+    "source": "INFERRED",
+    "hardware_alignment": "hardware-mismatched",
+    "result_label": "INFERRED",
+    "allowed_claim": "same-RTX4090 efficiency baseline for the ASR-uncertainty reranking study",
+    "forbidden_claim": "same-hardware or exact-protocol reproduction of the PAPER A100 efficiency row"
+  },
+  "hardware": {
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "gpu_total_memory_bytes": 25250627584,
+    "torch": "2.7.1+cu126",
+    "cuda": "12.6",
+    "driver": "580.76.05"
+  },
+  "protocol": {
+    "batch_size": 1,
+    "warmup_iterations": 10,
+    "audio_measurement_count": 1045,
+    "text_measurement_count": 5225,
+    "sample_order": "canonical Clotho manifest order",
+    "timer": "time.perf_counter_ns with torch.cuda.synchronize before and after every encode",
+    "scope": "public encode_batch preprocessing, model forward, projection, L2 normalization, and device-to-host copy",
+    "source": "INFERRED"
+  },
+  "results": {
+    "audio": {
+      "count": 1045,
+      "mean_ms": 530.3152055244019,
+      "std_ms": 387.2013058026661,
+      "min_ms": 108.727111,
+      "p50_ms": 404.926311,
+      "p95_ms": 1273.2933831999999,
+      "max_ms": 2021.73451,
+      "throughput_queries_per_second": 1.8856709926149497
+    },
+    "text": {
+      "count": 5225,
+      "mean_ms": 41.71248486660287,
+      "std_ms": 3.764516238976167,
+      "min_ms": 35.403381,
+      "p50_ms": 40.998402,
+      "p95_ms": 47.28297260000001,
+      "max_ms": 67.732051,
+      "throughput_queries_per_second": 23.973637705785556
+    },
+    "model_resident_allocated_bytes": 9593701888,
+    "model_resident_reserved_bytes": 9946791936,
+    "gpu_peak_allocated_bytes": 10079166976,
+    "gpu_peak_reserved_bytes": 11247026176,
+    "gpu_peak_allocated_gib": 9.38695573806763,
+    "gpu_peak_reserved_gib": 10.474609375,
+    "parameters": {
+      "lora_parameters": 12615680,
+      "audio_head_parameters": 1049600,
+      "text_head_parameters": 1049600,
+      "total_trainable_parameters": 14714880,
+      "total_trainable_parameters_m": 14.71488
+    }
+  },
+  "paper_reference": {
+    "source": "PAPER Table 5 / Appendix Table 16",
+    "hardware": "A100-SXM4-80GB",
+    "audio_ms_per_clip": 163.8,
+    "text_ms_per_query": 2.3,
+    "peak_gpu_memory_gb": 11.5,
+    "trainable_parameters_m": 13.7
+  },
+  "comparison_only": {
+    "status": "no strict reproduction status assigned",
+    "audio_mean_signed_delta_ms": 366.5152055244019,
+    "audio_mean_relative_delta_percent": 223.75775673040405,
+    "text_mean_signed_delta_ms": 39.412484866602874,
+    "text_mean_relative_delta_percent": 1713.5862985479512,
+    "peak_allocated_decimal_gb": 10.079166976,
+    "peak_reserved_decimal_gb": 11.247026176,
+    "allocated_decimal_gb_signed_delta": -1.4208330240000002,
+    "reserved_decimal_gb_signed_delta": -0.2529738239999997,
+    "released_checkpoint_parameter_signed_delta_m": 1.0148800000000016,
+    "released_checkpoint_parameter_relative_delta_percent": 7.407883211678843,
+    "note": "Latency and memory deltas are hardware- and protocol-confounded. PAPER does not publish timing scope, memory accounting, or parameter-counting procedures; the released +Cl checkpoint is retained as measured evidence without selecting a strict paper value."
+  },
+  "strict_paper_assessment": {
+    "status": "blocked",
+    "metrics": {
+      "audio_encoding_ms_per_clip": "blocked",
+      "text_encoding_ms_per_query": "blocked",
+      "peak_gpu_memory_gb": "blocked",
+      "trainable_parameters_m": "blocked"
+    },
+    "reasons": [
+      "PAPER uses A100-SXM4-80GB while this controlled run uses RTX 4090.",
+      "PAPER does not publish warmup, repeat count, batch size, timer, cache state, or exact preprocessing and transfer timing boundary.",
+      "PAPER does not define allocated versus reserved peak memory or decimal GB versus GiB.",
+      "PAPER does not publish its trainable-parameter counting procedure or identify the Base versus +Cl checkpoint used by the efficiency row."
+    ]
+  },
+  "artifacts": {
+    "metrics": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_rtx4090_efficiency_20260803_093004/metrics.json",
+      "sha256": "74b050b107af5e135da9f5d0e91ecec5801a7080840693a11361422aa4d5cc5b"
+    },
+    "latencies": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_rtx4090_efficiency_20260803_093004/latencies.jsonl",
+      "size_bytes": 426258,
+      "sha256": "32028787a10210c54a64496770cdbb161027eb4504274e09b818507c8787f36b"
+    },
+    "resolved_model_config": {
+      "path": "/home/jg525/Omni-Embed-Audio/results/raw/oea_nemo3b_clotho_rtx4090_efficiency_20260803_093004/resolved_model_config.json",
+      "sha256": "95a4522428215f5947df80e563a0199ccc109bd30842dac57e9adb427be5e7fb"
+    }
+  },
+  "warnings": {
+    "fatal": false,
+    "items": [
+      "The remote terminal reported only non-fatal runtime warnings; RUN_RC=0 and the result directory finalized successfully."
+    ]
+  }
+}
