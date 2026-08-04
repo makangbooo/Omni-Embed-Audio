@@ -22,8 +22,11 @@ PHASE2_CACHE_ROOT="${PHASE2_CACHE_ROOT:-/home/jg525/experiment_cache/asr_uncerta
 RESOLVED_MODEL_CONFIG="${PHASE2_CACHE_ROOT}/resolved_configs/oea_nemo3b_cl.json"
 FIQA_ROOT="${DATA_ROOT}/fiqa_mteb"
 SOURCE_MANIFEST="${DATA_ROOT}/squtr/manifests/squtr_en_fiqa_nq_audio_query_manifest.jsonl"
-QUERY_COUNT="${ASRUR_OEA_DIAGNOSTIC_QUERY_COUNT:-8}"
-NEGATIVE_COUNT="${ASRUR_OEA_DIAGNOSTIC_NEGATIVE_COUNT:-64}"
+QUERY_COUNT="${ASRUR_OEA_DIAGNOSTIC_QUERY_COUNT:-256}"
+NEGATIVE_COUNT="${ASRUR_OEA_DIAGNOSTIC_NEGATIVE_COUNT:-4096}"
+SAMPLE_SEED="${ASRUR_OEA_DIAGNOSTIC_SAMPLE_SEED:-20260805}"
+BOOTSTRAP_ITERATIONS="${ASRUR_OEA_DIAGNOSTIC_BOOTSTRAP_ITERATIONS:-10000}"
+BOOTSTRAP_SEED="${ASRUR_OEA_DIAGNOSTIC_BOOTSTRAP_SEED:-20260805}"
 RUN_ID="asrur_oea_collapse_diagnostic_$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ROOT_DIR}/logs/${RUN_ID}"
 START_EPOCH="$(date +%s)"
@@ -42,6 +45,9 @@ exec > >(tee "${RUN_DIR}/stdout.log") 2> >(tee "${RUN_DIR}/stderr.log" >&2)
 echo "===== ASRUR OEA COLLAPSE ATTRIBUTION ====="
 echo "query_count=${QUERY_COUNT}"
 echo "negative_document_count=${NEGATIVE_COUNT}"
+echo "sample_seed=${SAMPLE_SEED}"
+echo "bootstrap_iterations=${BOOTSTRAP_ITERATIONS}"
+echo "estimated_total_time=20-60 minutes on one RTX 4090"
 echo "run_dir=${RUN_DIR}"
 echo "formal_cache_mutation=disabled"
 echo "checkpoint_selection=disabled"
@@ -100,6 +106,9 @@ python scripts/diagnose_asrur_oea_collapse.py \
   --phase2-cache-root "${PHASE2_CACHE_ROOT}" \
   --query-count "${QUERY_COUNT}" \
   --negative-document-count "${NEGATIVE_COUNT}" \
+  --sample-seed "${SAMPLE_SEED}" \
+  --bootstrap-iterations "${BOOTSTRAP_ITERATIONS}" \
+  --bootstrap-seed "${BOOTSTRAP_SEED}" \
   --output "${RUN_DIR}/collapse_diagnostic.json"
 
 nvidia-smi > "${RUN_DIR}/gpu_final.txt"

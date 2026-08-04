@@ -58,8 +58,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fiqa-root", type=Path, required=True)
     parser.add_argument("--audio-manifest", type=Path, required=True)
     parser.add_argument("--phase2-cache-root", type=Path, required=True)
-    parser.add_argument("--query-count", type=int, default=8)
-    parser.add_argument("--negative-document-count", type=int, default=64)
+    parser.add_argument("--query-count", type=int, default=256)
+    parser.add_argument("--negative-document-count", type=int, default=4096)
+    parser.add_argument("--sample-seed", type=int, default=20260805)
+    parser.add_argument("--bootstrap-iterations", type=int, default=10000)
+    parser.add_argument("--bootstrap-seed", type=int, default=20260805)
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args()
 
@@ -211,6 +214,7 @@ def evaluate_space(
     positive_scores = []
     positive_ranks = []
     top1 = []
+    per_query = []
     recall = {1: 0, 5: 0, 10: 0}
     for query_index, query_id in enumerate(query_ids):
         positive_positions = {
@@ -234,6 +238,19 @@ def evaluate_space(
         top1.append(document_ids[int(ordering[0])])
         for cutoff in recall:
             recall[cutoff] += int(best_rank <= cutoff)
+        per_query.append(
+            {
+                "query_id": query_id,
+                "best_positive_rank": int(best_rank),
+                "reciprocal_rank": 1.0 / float(best_rank),
+                "positive_score": float(positive_scores[-1]),
+                "top1_document_id": top1[-1],
+                **{
+                    f"hit_at_{cutoff}": int(best_rank <= cutoff)
+                    for cutoff in sorted(recall)
+                },
+            }
+        )
     return {
         "dimension": int(audio_values.shape[1]),
         "query_count": len(query_ids),
@@ -253,7 +270,181 @@ def evaluate_space(
             f"Recall@{cutoff}": recall[cutoff] / len(query_ids)
             for cutoff in sorted(recall)
         },
+        "mean_reciprocal_rank": float(
+            np.mean([row["reciprocal_rank"] for row in per_query])
+        ),
+        "per_query": per_query,
     }
+
+
+def paired_bootstrap_delta(
+    method: Sequence[float],
+    baseline: Sequence[float],
+    *,
+    iterations: int,
+    seed: int,
+) -> dict[str, Any]:
+    """Estimate a paired mean delta without assuming normality."""
+
+    left = np.asarray(method, dtype=np.float64)
+    right = np.asarray(baseline, dtype=np.float64)
+    if left.ndim != 1 or right.ndim != 1 or left.shape != right.shape:
+        raise ValueError("paired bootstrap inputs must be equal one-dimensional arrays")
+    if left.size < 2 or iterations < 100:
+        raise ValueError("paired bootstrap needs at least two rows and 100 iterations")
+    if not np.isfinite(left).all() or not np.isfinite(right).all():
+        raise ValueError("paired bootstrap inputs contain non-finite values")
+    differences = left - right
+    generator = np.random.default_rng(seed)
+    draws = np.empty(iterations, dtype=np.float64)
+    for start in range(0, iterations, 1000):
+        stop = min(start + 1000, iterations)
+        indices = generator.integers(
+            0,
+            differences.size,
+            size=(stop - start, differences.size),
+        )
+        draws[start:stop] = differences[indices].mean(axis=1)
+    lower, upper = np.quantile(draws, [0.025, 0.975])
+    probability_nonpositive = float(np.mean(draws <= 0.0))
+    probability_nonnegative = float(np.mean(draws >= 0.0))
+    return {
+        "sample_count": int(differences.size),
+        "observed_mean_delta": float(differences.mean()),
+        "confidence_interval_95": [float(lower), float(upper)],
+        "probability_delta_positive": float(np.mean(draws > 0.0)),
+        "two_sided_p_value": float(
+            min(1.0, 2.0 * min(probability_nonpositive, probability_nonnegative))
+        ),
+        "iterations": iterations,
+        "seed": seed,
+    }
+
+
+def compare_spaces(
+    evaluations: Mapping[str, Mapping[str, Any]],
+    *,
+    baseline: str,
+    method: str,
+    iterations: int,
+    seed: int,
+) -> dict[str, Any]:
+    baseline_rows = evaluations[baseline]["per_query"]
+    method_rows = evaluations[method]["per_query"]
+    baseline_ids = [row["query_id"] for row in baseline_rows]
+    if baseline_ids != [row["query_id"] for row in method_rows]:
+        raise ValueError("space comparison query order differs")
+    fields = {
+        "Recall@1": "hit_at_1",
+        "Recall@5": "hit_at_5",
+        "Recall@10": "hit_at_10",
+        "MRR": "reciprocal_rank",
+    }
+    return {
+        "baseline": baseline,
+        "method": method,
+        "metrics": {
+            metric: paired_bootstrap_delta(
+                [float(row[field]) for row in method_rows],
+                [float(row[field]) for row in baseline_rows],
+                iterations=iterations,
+                seed=seed + index,
+            )
+            for index, (metric, field) in enumerate(fields.items())
+        },
+    }
+
+
+def factorial_component_effects(
+    evaluations: Mapping[str, Mapping[str, Any]],
+    *,
+    iterations: int,
+    seed: int,
+) -> dict[str, Any]:
+    """Estimate LoRA, projection-head, and interaction effects in a 2x2 design."""
+
+    fields = {
+        "Recall@1": "hit_at_1",
+        "Recall@5": "hit_at_5",
+        "Recall@10": "hit_at_10",
+        "MRR": "reciprocal_rank",
+    }
+    rows = {
+        name: evaluations[name]["per_query"]
+        for name in SPACE_NAMES
+    }
+    query_ids = [row["query_id"] for row in rows["base_hidden"]]
+    if any(
+        [row["query_id"] for row in rows[name]] != query_ids
+        for name in SPACE_NAMES[1:]
+    ):
+        raise ValueError("factorial attribution query order differs")
+    output = {}
+    for metric_index, (metric, field) in enumerate(fields.items()):
+        base = np.asarray(
+            [float(row[field]) for row in rows["base_hidden"]], dtype=np.float64
+        )
+        lora = np.asarray(
+            [float(row[field]) for row in rows["lora_hidden"]], dtype=np.float64
+        )
+        heads = np.asarray(
+            [float(row[field]) for row in rows["base_plus_oea_heads"]],
+            dtype=np.float64,
+        )
+        full = np.asarray(
+            [float(row[field]) for row in rows["lora_plus_oea_heads"]],
+            dtype=np.float64,
+        )
+        lora_main = 0.5 * ((lora - base) + (full - heads))
+        heads_main = 0.5 * ((heads - base) + (full - lora))
+        interaction = full - lora - heads + base
+        zero = np.zeros_like(base)
+        effect_seed = seed + metric_index * 10
+        output[metric] = {
+            "lora_main_effect": paired_bootstrap_delta(
+                lora_main, zero, iterations=iterations, seed=effect_seed
+            ),
+            "projection_head_main_effect": paired_bootstrap_delta(
+                heads_main, zero, iterations=iterations, seed=effect_seed + 1
+            ),
+            "lora_projection_interaction": paired_bootstrap_delta(
+                interaction, zero, iterations=iterations, seed=effect_seed + 2
+            ),
+            "lora_minus_projection_head_effect": paired_bootstrap_delta(
+                lora_main - heads_main,
+                zero,
+                iterations=iterations,
+                seed=effect_seed + 3,
+            ),
+        }
+    primary = output["MRR"]
+    contrast_interval = primary["lora_minus_projection_head_effect"][
+        "confidence_interval_95"
+    ]
+    if contrast_interval[1] < 0.0:
+        dominant = "lora"
+    elif contrast_interval[0] > 0.0:
+        dominant = "projection_heads"
+    else:
+        dominant = "statistically_unresolved"
+    output["predeclared_primary_decision"] = {
+        "metric": "MRR",
+        "lora_contributes_to_loss": primary["lora_main_effect"][
+            "confidence_interval_95"
+        ][1]
+        < 0.0,
+        "projection_heads_contribute_to_loss": primary[
+            "projection_head_main_effect"
+        ]["confidence_interval_95"][1]
+        < 0.0,
+        "dominant_component": dominant,
+        "decision_rule": (
+            "A component contributes when its MRR main-effect 95% CI is below "
+            "zero. Dominance requires the LoRA-minus-head MRR effect CI to "
+            "exclude zero; otherwise dominance is unresolved."
+        ),
+    }
+    return output
 
 
 def cached_rows(
@@ -287,6 +478,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 
     if args.query_count < 2 or args.negative_document_count <= 0:
         raise ValueError("query-count must be at least two and negatives positive")
+    if args.bootstrap_iterations < 100:
+        raise ValueError("bootstrap-iterations must be at least 100")
     config_path = args.resolved_model_config.resolve()
     model_root = args.model_root.resolve()
     fiqa_root = args.fiqa_root.resolve()
@@ -311,7 +504,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     record_by_query = {record.query_id: record for record in records}
     if len(record_by_query) != len(records):
         raise ValueError("duplicate Clean SQuTR-FiQA audio records")
-    query_ids = sorted(record_by_query)[: args.query_count]
+    query_ids = sorted(
+        record_by_query,
+        key=lambda query_id: hashlib.sha256(
+            f"{args.sample_seed}:{query_id}".encode("utf-8")
+        ).hexdigest(),
+    )[: args.query_count]
     if len(query_ids) != args.query_count:
         raise ValueError("insufficient Clean SQuTR-FiQA audio records")
     positive_ids = {
@@ -323,11 +521,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     missing_positive = sorted(positive_ids - set(corpus))
     if missing_positive:
         raise ValueError(f"qrels positives absent from corpus: {missing_positive[:20]}")
-    negative_ids = [
-        document_id
-        for document_id in sorted(corpus)
-        if document_id not in positive_ids
-    ][: args.negative_document_count]
+    negative_ids = sorted(
+        (
+            document_id
+            for document_id in corpus
+            if document_id not in positive_ids
+        ),
+        key=lambda document_id: hashlib.sha256(
+            f"{args.sample_seed}:negative:{document_id}".encode("utf-8")
+        ).hexdigest(),
+    )[: args.negative_document_count]
     document_ids = sorted(positive_ids) + negative_ids
     audio_paths = [Path(record_by_query[query_id].audio_path) for query_id in query_ids]
     document_texts = [corpus[document_id].constructed_text for document_id in document_ids]
@@ -420,6 +623,43 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         )
         for name, (audio, documents) in spaces.items()
     }
+    comparison_specs = (
+        ("base_hidden", "lora_hidden"),
+        ("base_hidden", "base_plus_oea_heads"),
+        ("lora_hidden", "lora_plus_oea_heads"),
+        ("base_plus_oea_heads", "lora_plus_oea_heads"),
+        ("base_hidden", "lora_plus_oea_heads"),
+    )
+    component_effects = {
+        f"{baseline}_to_{method}": compare_spaces(
+            evaluations,
+            baseline=baseline,
+            method=method,
+            iterations=args.bootstrap_iterations,
+            seed=args.bootstrap_seed + 10 * index,
+        )
+        for index, (baseline, method) in enumerate(comparison_specs)
+    }
+    factorial_effects = factorial_component_effects(
+        evaluations,
+        iterations=args.bootstrap_iterations,
+        seed=args.bootstrap_seed + 100,
+    )
+    full_loss = component_effects[
+        "base_hidden_to_lora_plus_oea_heads"
+    ]["metrics"]
+    capability_loss_decision = {
+        "primary_metric": "MRR",
+        "secondary_metric": "Recall@10",
+        "base_capability_loss_supported": (
+            full_loss["MRR"]["confidence_interval_95"][1] < 0.0
+            and full_loss["Recall@10"]["confidence_interval_95"][1] < 0.0
+        ),
+        "decision_rule": (
+            "Both full-OEA minus base-hidden MRR and Recall@10 paired-bootstrap "
+            "95% confidence intervals must be strictly below zero."
+        ),
+    }
     base_cached_audio = cached_rows(
         cache_root=cache_root,
         mode="vanilla",
@@ -461,7 +701,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "document_ids": document_ids,
         "positive_document_count": len(positive_ids),
         "negative_document_count": len(negative_ids),
+        "sampling": {
+            "method": "sha256_seeded_query_order",
+            "sample_seed": args.sample_seed,
+        },
         "spaces": evaluations,
+        "component_effects": component_effects,
+        "factorial_component_effects": factorial_effects,
+        "capability_loss_decision": capability_loss_decision,
         "cache_agreement": {
             "fresh_base_audio_vs_vanilla_cache": compare_embeddings(
                 spaces["base_hidden"][0],
