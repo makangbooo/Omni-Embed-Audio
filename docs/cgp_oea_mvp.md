@@ -13,8 +13,9 @@ input.  The trainable heads use
 where the KL term matches the teacher's row and column similarity distributions
 inside each batch.  The PCA anchor is a frozen 512-dimensional coordinate system
 fit from the training split's base hidden states; it prevents the student heads
-from learning an AudioCaps-only rotated geometry. Training data is AudioCaps or
-Clotho only; FiQA/NQ and all UIQ files are evaluation-only.
+from learning an AudioCaps-only rotated geometry. The RRD extension adds FiQA
+`train` query-positive pairs as text retrieval replay. FiQA test, NQ test, and
+all UIQ files remain evaluation-only.
 
 The intended order is:
 
@@ -23,11 +24,16 @@ The intended order is:
 2. Run `scripts/run_cgp_oea_projection_heads.sh --execute <variant>` for the
    head-only MVP.  Override `CGP_TRAIN_CSV`, `CGP_VAL_CSV`, and
    `CGP_AUDIO_DIR` if the remote AudioCaps layout differs.
+   Run `scripts/run_rrd_oea_projection_heads.sh --execute <variant>` for the
+   retrieval-replay version; it defaults to the pinned FiQA `train` split.
 3. Re-run the attribution matrix with `NEMO_CONFIG` or `QWEN_CONFIG` pointing
    to the generated `eval_config.json`.
 4. Use `scripts/summarize_cgp_oea_gate.py` to check recovery.  A minimum of
    half of the Base-hidden to Full-OEA MRR and Recall@10 gap must be recovered,
-   while validation recall may drop by at most two percentage points.
+while validation recall may drop by at most two percentage points.
+
+Replay hyperparameters are fixed before FiQA test or NQ evaluation. Test and
+holdout queries must never be replayed or used for checkpoint selection.
 
 Once a diagnostic subset has influenced method design, pass its JSON report to
 `--exclude-query-ids-json` and use a new seed for the final gate. This keeps the

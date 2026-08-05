@@ -4,8 +4,8 @@
 The official OEA backbone and its LoRA adapter are frozen.  Each positive
 audio-caption pair is encoded once in the base (teacher) and LoRA (student)
 hidden spaces.  Head training combines symmetric InfoNCE with KL distillation
-of the teacher's cross-modal similarity distribution.  No UIQ, FiQA, or NQ
-examples are used for training.
+of the teacher's cross-modal similarity distribution.  An optional retrieval
+replay split adds teacher ranking distillation without evaluation queries.
 """
 
 from __future__ import annotations
@@ -49,6 +49,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--distill-temperature", type=float, default=0.07)
     parser.add_argument("--geometry-lambda", type=float, default=0.5)
     parser.add_argument("--pca-anchor-lambda", type=float, default=0.25)
+    parser.add_argument(
+        "--replay-root",
+        type=Path,
+        help="MTEB-style root with corpus.jsonl, queries.jsonl and qrels/<split>.jsonl",
+    )
+    parser.add_argument("--replay-split", default="train")
+    parser.add_argument("--max-replay-examples", type=int, default=4096)
+    parser.add_argument("--replay-batch-size", type=int, default=32)
+    parser.add_argument("--replay-lambda", type=float, default=1.0)
+    parser.add_argument("--replay-nce-lambda", type=float, default=0.25)
     parser.add_argument("--seed", type=int, default=20260805)
     parser.add_argument("--device", default="cuda")
     return parser.parse_args()
@@ -83,6 +93,41 @@ def make_unique_batches(entries: Sequence[dict[str, Any]], batch_size: int, *, s
         rng.shuffle(round_items)
         batches.extend(round_items[start : start + batch_size] for start in range(0, len(round_items), batch_size))
         round_index += 1
+    return batches
+
+
+def make_replay_batches(
+    entries: Sequence[dict[str, Any]], batch_size: int, *, seed: int
+) -> list[list[int]]:
+    """Batch replay pairs without duplicate positive documents."""
+    if batch_size <= 0:
+        raise ValueError("batch_size must be positive")
+    groups: dict[str, list[int]] = {}
+    for index, entry in enumerate(entries):
+        groups.setdefault(str(entry["document_id"]), []).append(index)
+    rng = random.Random(seed)
+    order = list(groups)
+    rng.shuffle(order)
+    selected = [groups[document_id][rng.randrange(len(groups[document_id]))] for document_id in order]
+    rng.shuffle(selected)
+    batches: list[list[int]] = []
+    for index in selected:
+        entry = entries[index]
+        entry_positives = set(entry.get("positive_document_ids", [entry["document_id"]]))
+        for batch in batches:
+            if len(batch) >= batch_size:
+                continue
+            if any(
+                entry["document_id"]
+                in set(entries[other].get("positive_document_ids", [entries[other]["document_id"]]))
+                or entries[other]["document_id"] in entry_positives
+                for other in batch
+            ):
+                continue
+            batch.append(index)
+            break
+        else:
+            batches.append([index])
     return batches
 
 
@@ -147,6 +192,63 @@ def _entry_loader(dataset: str, csv_path: Path, audio_dir: Path) -> list[dict[st
     return _list_clotho_entries(csv_path, audio_dir)
 
 
+def _load_replay_entries(
+    root: Path, split: str, max_examples: int, seed: int
+) -> list[dict[str, Any]]:
+    from AudioRetrieval.asr_uncertainty_reranking.artifacts import load_unbounded_qrels
+    from AudioRetrieval.asr_uncertainty_reranking.data import load_corpus, load_text_queries
+
+    qrels = load_unbounded_qrels(root / "qrels" / f"{split}.jsonl")
+    queries = load_text_queries(root / "queries.jsonl")
+    corpus = load_corpus(root / "corpus.jsonl")
+    entries: list[dict[str, Any]] = []
+    for query_id in sorted(qrels):
+        if query_id not in queries:
+            continue
+        positives = sorted(
+            doc_id
+            for doc_id, score in qrels[query_id].items()
+            if float(score) > 0.0
+        )
+        if not positives:
+            continue
+        document_id = positives[0]
+        if document_id not in corpus:
+            raise ValueError(f"replay positive document missing: {document_id}")
+        entries.append(
+            {
+                "query_id": query_id,
+                "query": queries[query_id].text,
+                "document_id": document_id,
+                "positive_document_ids": positives,
+                "document": corpus[document_id].constructed_text,
+            }
+        )
+    if max_examples and len(entries) > max_examples:
+        order = sorted(
+            range(len(entries)),
+            key=lambda index: hashlib.sha256(
+                f"replay:{seed}:{index}".encode()
+            ).hexdigest(),
+        )
+        entries = [entries[index] for index in order[:max_examples]]
+    if len(entries) < 2:
+        raise ValueError("replay split must provide at least two query-document pairs")
+    return entries
+
+
+def _file_record(path: Path) -> dict[str, Any]:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while chunk := handle.read(8 * 1024 * 1024):
+            digest.update(chunk)
+    return {
+        "path": str(path.resolve()),
+        "size_bytes": path.stat().st_size,
+        "sha256": digest.hexdigest(),
+    }
+
+
 def _encode_hidden(adapter: Any, model: Any, entries: Sequence[dict[str, Any]], *, device: Any, texts: bool, disable_lora: bool, batch_size: int, label: str) -> Any:
     import contextlib
     import torch
@@ -170,6 +272,28 @@ def _encode_hidden(adapter: Any, model: Any, entries: Sequence[dict[str, Any]], 
                     flush=True,
                 )
     return torch.cat(values, dim=0)
+
+
+def _encode_text_values(
+    adapter: Any,
+    model: Any,
+    values: Sequence[str],
+    *,
+    device: Any,
+    disable_lora: bool,
+    batch_size: int,
+    label: str,
+) -> Any:
+    return _encode_hidden(
+        adapter,
+        model,
+        [{"caption": value} for value in values],
+        device=device,
+        texts=True,
+        disable_lora=disable_lora,
+        batch_size=batch_size,
+        label=label,
+    )
 
 
 def _load_model(config: dict[str, Any], model_root: Path, report_path: Path) -> tuple[Any, Any, Any, Any, Any, Any, dict[str, Any]]:
@@ -238,9 +362,18 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     import torch
     if args.max_train_examples < 0 or args.epochs <= 0:
         raise ValueError("max-train-examples must be non-negative and epochs positive")
-    if min(args.batch_size, args.text_encode_batch_size, args.audio_encode_batch_size) <= 0:
+    if min(args.batch_size, args.text_encode_batch_size, args.audio_encode_batch_size, args.replay_batch_size) <= 0:
         raise ValueError("all batch sizes must be positive")
-    if args.temperature <= 0 or args.distill_temperature <= 0 or args.geometry_lambda < 0 or args.pca_anchor_lambda < 0:
+    if args.max_replay_examples < 0:
+        raise ValueError("max-replay-examples must be non-negative")
+    if (
+        args.temperature <= 0
+        or args.distill_temperature <= 0
+        or args.geometry_lambda < 0
+        or args.pca_anchor_lambda < 0
+        or args.replay_lambda < 0
+        or args.replay_nce_lambda < 0
+    ):
         raise ValueError("temperatures must be positive and loss weights non-negative")
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -282,6 +415,36 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     train_lora_audio = _encode_hidden(adapter, model, train_audio_entries, device=device, texts=False, disable_lora=False, batch_size=args.audio_encode_batch_size, label="train_lora_audio")
     val_lora_text = _encode_hidden(adapter, model, val_entries, device=device, texts=True, disable_lora=False, batch_size=args.text_encode_batch_size, label="val_lora_text")
     val_lora_audio = _encode_hidden(adapter, model, val_audio_entries, device=device, texts=False, disable_lora=False, batch_size=args.audio_encode_batch_size, label="val_lora_audio")
+    replay_entries: list[dict[str, Any]] = []
+    replay_base_query = replay_lora_query = replay_base_document = replay_lora_document = None
+    if args.replay_root is not None:
+        replay_entries = _load_replay_entries(
+            args.replay_root.resolve(), args.replay_split,
+            args.max_replay_examples, args.seed,
+        )
+        print(
+            f"CGP_REPLAY split={args.replay_split} pairs={len(replay_entries)} "
+            f"root={args.replay_root.resolve()}",
+            flush=True,
+        )
+        replay_queries = [row["query"] for row in replay_entries]
+        replay_documents = [row["document"] for row in replay_entries]
+        replay_base_query = _encode_text_values(
+            adapter, model, replay_queries, device=device, disable_lora=True,
+            batch_size=args.text_encode_batch_size, label="replay_base_query",
+        )
+        replay_lora_query = _encode_text_values(
+            adapter, model, replay_queries, device=device, disable_lora=False,
+            batch_size=args.text_encode_batch_size, label="replay_lora_query",
+        )
+        replay_base_document = _encode_text_values(
+            adapter, model, replay_documents, device=device, disable_lora=True,
+            batch_size=args.text_encode_batch_size, label="replay_base_document",
+        )
+        replay_lora_document = _encode_text_values(
+            adapter, model, replay_documents, device=device, disable_lora=False,
+            batch_size=args.text_encode_batch_size, label="replay_lora_document",
+        )
     pca_mean, pca_components = fit_base_pca_anchor(
         train_base_text,
         train_base_audio,
@@ -315,6 +478,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         batches = make_unique_batches(train_entries, args.batch_size, seed=args.seed + epoch)
         random.shuffle(batches)
         running = 0.0
+        optimization_steps = 0
         for batch_indices in batches:
             if len(batch_indices) < 2:
                 continue
@@ -342,6 +506,34 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             optimizer.zero_grad(set_to_none=True)
             loss.backward(); optimizer.step()
             running += float(loss.detach().cpu())
+            optimization_steps += 1
+        if replay_entries and args.replay_lambda > 0:
+            replay_batches = make_replay_batches(
+                replay_entries, args.replay_batch_size,
+                seed=args.seed + 10000 + epoch,
+            )
+            for batch_indices in replay_batches:
+                if len(batch_indices) < 2:
+                    continue
+                idx = torch.tensor(batch_indices, device="cpu")
+                student_query = audio_head(replay_lora_query.index_select(0, idx).to(device))
+                student_document = text_head(replay_lora_document.index_select(0, idx).to(device))
+                teacher_query = replay_base_query.index_select(0, idx).to(device)
+                teacher_document = replay_base_document.index_select(0, idx).to(device)
+                loss_replay = relational_geometry_kl(
+                    student_query, student_document,
+                    teacher_query, teacher_document,
+                    args.distill_temperature,
+                )
+                if args.replay_nce_lambda > 0:
+                    loss_replay = loss_replay + args.replay_nce_lambda * symmetric_infonce(
+                        student_query, student_document, args.temperature,
+                    )
+                loss = args.replay_lambda * loss_replay
+                optimizer.zero_grad(set_to_none=True)
+                loss.backward(); optimizer.step()
+                running += float(loss.detach().cpu())
+                optimization_steps += 1
         text_head.eval(); audio_head.eval()
         metrics = _evaluate_cached(
             val_lora_text,
@@ -353,16 +545,24 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         )
         text_head.train(); audio_head.train()
         printable_metrics = {key: value for key, value in metrics.items() if key != "ranks"}
-        print(f"CGP_EPOCH={epoch + 1} loss={running / max(len(batches), 1):.6f} metrics={json.dumps(printable_metrics, sort_keys=True)}")
+        print(f"CGP_EPOCH={epoch + 1} loss={running / max(optimization_steps, 1):.6f} optimization_steps={optimization_steps} metrics={json.dumps(printable_metrics, sort_keys=True)}")
         if metrics["R@10"] > best["R@10"]:
             best = metrics
-            state = {"text_head": {k: v.detach().cpu() for k, v in text_head.state_dict().items()}, "audio_head": {k: v.detach().cpu() for k, v in audio_head.state_dict().items()}, "lora_state_dict": checkpoint["lora_state_dict"], "config": checkpoint.get("config", {}), "cgp_config": {"geometry_lambda": args.geometry_lambda, "pca_anchor_lambda": args.pca_anchor_lambda, "distill_temperature": args.distill_temperature, "train_dataset": args.dataset, "max_train_examples": len(train_entries), "pca_anchor": "shared_base_hidden_covariance_top_components"}, "metrics": metrics, "baseline_metrics": baseline, "global_step": epoch + 1}
+            state = {"text_head": {k: v.detach().cpu() for k, v in text_head.state_dict().items()}, "audio_head": {k: v.detach().cpu() for k, v in audio_head.state_dict().items()}, "lora_state_dict": checkpoint["lora_state_dict"], "config": checkpoint.get("config", {}), "cgp_config": {"geometry_lambda": args.geometry_lambda, "pca_anchor_lambda": args.pca_anchor_lambda, "distill_temperature": args.distill_temperature, "train_dataset": args.dataset, "max_train_examples": len(train_entries), "pca_anchor": "shared_base_hidden_covariance_top_components", "replay_root": str(args.replay_root.resolve()) if args.replay_root else None, "replay_split": args.replay_split if args.replay_root else None, "max_replay_examples": len(replay_entries), "replay_lambda": args.replay_lambda, "replay_nce_lambda": args.replay_nce_lambda}, "metrics": metrics, "baseline_metrics": baseline, "global_step": epoch + 1}
             temporary_checkpoint = best_path.with_suffix(".pt.tmp")
             torch.save(state, temporary_checkpoint)
             temporary_checkpoint.replace(best_path)
     eval_config = output_dir / "eval_config.json"
     _write_eval_config(config, best_path, model_root, eval_config)
-    summary = {"schema_version": 1, "status": "complete", "dataset": args.dataset, "train_pairs": len(train_entries), "train_audio_count": len(train_audio_entries), "validation_pairs": len(val_entries), "baseline_metrics": baseline, "best_metrics": best, "checkpoint": str(best_path), "eval_config": str(eval_config), "trainable_parameter_count": sum(p.numel() for p in audio_head.parameters()) + sum(p.numel() for p in text_head.parameters())}
+    replay_provenance = None
+    if args.replay_root:
+        replay_root = args.replay_root.resolve()
+        replay_provenance = {
+            "corpus": _file_record(replay_root / "corpus.jsonl"),
+            "queries": _file_record(replay_root / "queries.jsonl"),
+            "qrels": _file_record(replay_root / "qrels" / f"{args.replay_split}.jsonl"),
+        }
+    summary = {"schema_version": 1, "status": "complete", "variant": config.get("official_variant_id", config.get("model")), "dataset": args.dataset, "train_pairs": len(train_entries), "train_audio_count": len(train_audio_entries), "validation_pairs": len(val_entries), "replay_pairs": len(replay_entries), "replay_root": str(args.replay_root.resolve()) if args.replay_root else None, "replay_split": args.replay_split if args.replay_root else None, "replay_provenance": replay_provenance, "baseline_metrics": baseline, "best_metrics": best, "checkpoint": str(best_path), "eval_config": str(eval_config), "trainable_parameter_count": sum(p.numel() for p in audio_head.parameters()) + sum(p.numel() for p in text_head.parameters())}
     (output_dir / "training_summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return summary
 
