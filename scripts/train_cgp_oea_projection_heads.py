@@ -124,7 +124,7 @@ def _entry_loader(dataset: str, csv_path: Path, audio_dir: Path) -> list[dict[st
     return _list_clotho_entries(csv_path, audio_dir)
 
 
-def _encode_hidden(adapter: Any, model: Any, entries: Sequence[dict[str, Any]], *, device: Any, texts: bool, disable_lora: bool, batch_size: int) -> Any:
+def _encode_hidden(adapter: Any, model: Any, entries: Sequence[dict[str, Any]], *, device: Any, texts: bool, disable_lora: bool, batch_size: int, label: str) -> Any:
     import contextlib
     import torch
     from AudioRetrieval.training.oea.train_omniembed_lora import encode_batch
@@ -132,13 +132,20 @@ def _encode_hidden(adapter: Any, model: Any, entries: Sequence[dict[str, Any]], 
     values: list[Any] = []
     context = model.disable_adapter() if disable_lora else contextlib.nullcontext()
     inputs = [entry["caption"] for entry in entries] if texts else [Path(entry["audio_path"]) for entry in entries]
+    total_batches = (len(inputs) + batch_size - 1) // batch_size
+    print(f"CGP_ENCODING_START label={label} rows={len(inputs)} batches={total_batches}", flush=True)
     with context, torch.inference_mode():
-        for start in range(0, len(inputs), batch_size):
+        for batch_index, start in enumerate(range(0, len(inputs), batch_size), start=1):
             batch = inputs[start : start + batch_size]
             pooled, valid = encode_batch(adapter, model, adapter.processor, batch if texts else None, None if texts else batch, device)
             if pooled is None or valid != list(range(len(batch))):
                 raise RuntimeError(f"encoder skipped inputs in {start}:{start + len(batch)}")
             values.append(pooled.detach().float().cpu())
+            if batch_index == total_batches or batch_index % 100 == 0:
+                print(
+                    f"CGP_ENCODING_PROGRESS label={label} batch={batch_index}/{total_batches} rows={start + len(batch)}/{len(inputs)}",
+                    flush=True,
+                )
     return torch.cat(values, dim=0)
 
 
@@ -246,12 +253,12 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     train_audio_entries, train_audio_index = unique_entries(train_entries)
     val_audio_entries, val_audio_index = unique_entries(val_entries)
     print(f"CGP_DATASET={args.dataset} train_pairs={len(train_entries)} train_audios={len(train_audio_entries)} val_pairs={len(val_entries)}")
-    train_base_text = _encode_hidden(adapter, model, train_entries, device=device, texts=True, disable_lora=True, batch_size=args.text_encode_batch_size)
-    train_lora_text = _encode_hidden(adapter, model, train_entries, device=device, texts=True, disable_lora=False, batch_size=args.text_encode_batch_size)
-    train_base_audio = _encode_hidden(adapter, model, train_audio_entries, device=device, texts=False, disable_lora=True, batch_size=args.audio_encode_batch_size)
-    train_lora_audio = _encode_hidden(adapter, model, train_audio_entries, device=device, texts=False, disable_lora=False, batch_size=args.audio_encode_batch_size)
-    val_lora_text = _encode_hidden(adapter, model, val_entries, device=device, texts=True, disable_lora=False, batch_size=args.text_encode_batch_size)
-    val_lora_audio = _encode_hidden(adapter, model, val_audio_entries, device=device, texts=False, disable_lora=False, batch_size=args.audio_encode_batch_size)
+    train_base_text = _encode_hidden(adapter, model, train_entries, device=device, texts=True, disable_lora=True, batch_size=args.text_encode_batch_size, label="train_base_text")
+    train_lora_text = _encode_hidden(adapter, model, train_entries, device=device, texts=True, disable_lora=False, batch_size=args.text_encode_batch_size, label="train_lora_text")
+    train_base_audio = _encode_hidden(adapter, model, train_audio_entries, device=device, texts=False, disable_lora=True, batch_size=args.audio_encode_batch_size, label="train_base_audio")
+    train_lora_audio = _encode_hidden(adapter, model, train_audio_entries, device=device, texts=False, disable_lora=False, batch_size=args.audio_encode_batch_size, label="train_lora_audio")
+    val_lora_text = _encode_hidden(adapter, model, val_entries, device=device, texts=True, disable_lora=False, batch_size=args.text_encode_batch_size, label="val_lora_text")
+    val_lora_audio = _encode_hidden(adapter, model, val_audio_entries, device=device, texts=False, disable_lora=False, batch_size=args.audio_encode_batch_size, label="val_lora_audio")
 
     if args.head_init_checkpoint:
         init = torch.load(args.head_init_checkpoint.resolve(), map_location="cpu", weights_only=True)
