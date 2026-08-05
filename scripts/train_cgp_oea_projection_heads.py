@@ -48,6 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--temperature", type=float, default=0.07)
     parser.add_argument("--distill-temperature", type=float, default=0.07)
     parser.add_argument("--geometry-lambda", type=float, default=0.5)
+    parser.add_argument("--pca-anchor-lambda", type=float, default=0.25)
     parser.add_argument("--seed", type=int, default=20260805)
     parser.add_argument("--device", default="cuda")
     return parser.parse_args()
@@ -112,6 +113,28 @@ def relational_geometry_kl(
     row = F.kl_div(F.log_softmax(student / tau, dim=-1), F.softmax(teacher / tau, dim=-1), reduction="batchmean") * tau * tau
     col = F.kl_div(F.log_softmax(student.T / tau, dim=-1), F.softmax(teacher.T / tau, dim=-1), reduction="batchmean") * tau * tau
     return 0.5 * (row + col)
+
+
+def fit_base_pca_anchor(base_text: Any, base_audio: Any, projection_dim: int) -> tuple[Any, Any]:
+    """Fit a frozen shared coordinate system from base hidden states only."""
+    import torch
+    import torch.nn.functional as F
+
+    values = torch.cat((base_text.float().cpu(), base_audio.float().cpu()), dim=0)
+    mean = values.mean(dim=0)
+    centered = values - mean
+    covariance = centered.T @ centered / max(centered.shape[0] - 1, 1)
+    _, components = torch.linalg.eigh(covariance)
+    components = components[:, -projection_dim:]
+    # PCA signs are arbitrary; the fixed matrix is persisted for audit only.
+    components = F.normalize(components, dim=0)
+    return mean, components
+
+
+def apply_base_pca_anchor(values: Any, mean: Any, components: Any) -> Any:
+    import torch.nn.functional as F
+
+    return F.normalize((values.float().cpu() - mean) @ components, dim=-1)
 
 
 def _entry_loader(dataset: str, csv_path: Path, audio_dir: Path) -> list[dict[str, Any]]:
@@ -217,8 +240,8 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("max-train-examples must be non-negative and epochs positive")
     if min(args.batch_size, args.text_encode_batch_size, args.audio_encode_batch_size) <= 0:
         raise ValueError("all batch sizes must be positive")
-    if args.temperature <= 0 or args.distill_temperature <= 0 or args.geometry_lambda < 0:
-        raise ValueError("temperatures must be positive and geometry-lambda non-negative")
+    if args.temperature <= 0 or args.distill_temperature <= 0 or args.geometry_lambda < 0 or args.pca_anchor_lambda < 0:
+        raise ValueError("temperatures must be positive and loss weights non-negative")
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -259,6 +282,18 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
     train_lora_audio = _encode_hidden(adapter, model, train_audio_entries, device=device, texts=False, disable_lora=False, batch_size=args.audio_encode_batch_size, label="train_lora_audio")
     val_lora_text = _encode_hidden(adapter, model, val_entries, device=device, texts=True, disable_lora=False, batch_size=args.text_encode_batch_size, label="val_lora_text")
     val_lora_audio = _encode_hidden(adapter, model, val_audio_entries, device=device, texts=False, disable_lora=False, batch_size=args.audio_encode_batch_size, label="val_lora_audio")
+    pca_mean, pca_components = fit_base_pca_anchor(
+        train_base_text,
+        train_base_audio,
+        int(next(audio_head.parameters()).shape[0]),
+    )
+    train_base_text_anchor = apply_base_pca_anchor(train_base_text, pca_mean, pca_components)
+    train_base_audio_anchor = apply_base_pca_anchor(train_base_audio, pca_mean, pca_components)
+    print(
+        f"CGP_PCA_ANCHOR dimension={pca_components.shape[1]} "
+        f"lambda={args.pca_anchor_lambda}",
+        flush=True,
+    )
 
     if args.head_init_checkpoint:
         init = torch.load(args.head_init_checkpoint.resolve(), map_location="cpu", weights_only=True)
@@ -293,7 +328,17 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             projected_audio = audio_head(student_audio)
             loss_nce = symmetric_infonce(projected_text, projected_audio, args.temperature)
             loss_geo = relational_geometry_kl(projected_text, projected_audio, teacher_text, teacher_audio, args.distill_temperature)
-            loss = loss_nce + args.geometry_lambda * loss_geo
+            target_text = train_base_text_anchor.index_select(0, idx).to(device)
+            target_audio = train_base_audio_anchor.index_select(0, audio_idx).to(device)
+            loss_anchor = 1.0 - 0.5 * (
+                (projected_text * target_text).sum(dim=-1).mean()
+                + (projected_audio * target_audio).sum(dim=-1).mean()
+            )
+            loss = (
+                loss_nce
+                + args.geometry_lambda * loss_geo
+                + args.pca_anchor_lambda * loss_anchor
+            )
             optimizer.zero_grad(set_to_none=True)
             loss.backward(); optimizer.step()
             running += float(loss.detach().cpu())
@@ -311,7 +356,7 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         print(f"CGP_EPOCH={epoch + 1} loss={running / max(len(batches), 1):.6f} metrics={json.dumps(printable_metrics, sort_keys=True)}")
         if metrics["R@10"] > best["R@10"]:
             best = metrics
-            state = {"text_head": {k: v.detach().cpu() for k, v in text_head.state_dict().items()}, "audio_head": {k: v.detach().cpu() for k, v in audio_head.state_dict().items()}, "lora_state_dict": checkpoint["lora_state_dict"], "config": checkpoint.get("config", {}), "cgp_config": {"geometry_lambda": args.geometry_lambda, "distill_temperature": args.distill_temperature, "train_dataset": args.dataset, "max_train_examples": len(train_entries)}, "metrics": metrics, "baseline_metrics": baseline, "global_step": epoch + 1}
+            state = {"text_head": {k: v.detach().cpu() for k, v in text_head.state_dict().items()}, "audio_head": {k: v.detach().cpu() for k, v in audio_head.state_dict().items()}, "lora_state_dict": checkpoint["lora_state_dict"], "config": checkpoint.get("config", {}), "cgp_config": {"geometry_lambda": args.geometry_lambda, "pca_anchor_lambda": args.pca_anchor_lambda, "distill_temperature": args.distill_temperature, "train_dataset": args.dataset, "max_train_examples": len(train_entries), "pca_anchor": "shared_base_hidden_covariance_top_components"}, "metrics": metrics, "baseline_metrics": baseline, "global_step": epoch + 1}
             temporary_checkpoint = best_path.with_suffix(".pt.tmp")
             torch.save(state, temporary_checkpoint)
             temporary_checkpoint.replace(best_path)

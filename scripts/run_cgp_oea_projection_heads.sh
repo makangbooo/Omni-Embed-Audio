@@ -59,6 +59,7 @@ python scripts/train_cgp_oea_projection_heads.py \
   --batch-size "${CGP_BATCH_SIZE:-32}" \
   --epochs "${CGP_EPOCHS:-5}" \
   --geometry-lambda "${CGP_GEOMETRY_LAMBDA:-0.5}" \
+  --pca-anchor-lambda "${CGP_PCA_ANCHOR_LAMBDA:-0.25}" \
   --distill-temperature "${CGP_DISTILL_TEMPERATURE:-0.07}"
 
 echo "[INFO] CGP checkpoint: ${OUT}/best.pt"

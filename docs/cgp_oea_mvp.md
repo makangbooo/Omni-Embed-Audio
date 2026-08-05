@@ -8,11 +8,13 @@ For each positive audio-caption pair, the script records the frozen base
 hidden states as a teacher and the frozen LoRA hidden states as the student
 input.  The trainable heads use
 
-`symmetric InfoNCE + lambda * cross-modal geometry KL`
+`symmetric InfoNCE + lambda * cross-modal geometry KL + mu * base-PCA anchor`
 
 where the KL term matches the teacher's row and column similarity distributions
-inside each batch.  Training data is AudioCaps or Clotho only; FiQA/NQ and all
-UIQ files are evaluation-only.
+inside each batch.  The PCA anchor is a frozen 512-dimensional coordinate system
+fit from the training split's base hidden states; it prevents the student heads
+from learning an AudioCaps-only rotated geometry. Training data is AudioCaps or
+Clotho only; FiQA/NQ and all UIQ files are evaluation-only.
 
 The intended order is:
 
