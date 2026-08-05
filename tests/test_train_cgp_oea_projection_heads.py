@@ -26,6 +26,16 @@ class TrainCGPOEATest(unittest.TestCase):
             make_unique_batches(entries, 3, seed=11),
         )
 
+    def test_audio_path_prevents_audiocaps_false_negatives(self) -> None:
+        entries = [
+            {"clip_id": "caption-1", "audio_path": "shared.wav"},
+            {"clip_id": "caption-2", "audio_path": "shared.wav"},
+            {"clip_id": "caption-3", "audio_path": "other.wav"},
+        ]
+        for batch in make_unique_batches(entries, 3, seed=3):
+            paths = [entries[index]["audio_path"] for index in batch]
+            self.assertEqual(len(paths), len(set(paths)))
+
 
 if __name__ == "__main__":
     unittest.main()

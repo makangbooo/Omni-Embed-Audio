@@ -59,7 +59,10 @@ def make_unique_batches(entries: Sequence[dict[str, Any]], batch_size: int, *, s
         raise ValueError("batch_size must be positive")
     groups: dict[str, list[int]] = {}
     for index, entry in enumerate(entries):
-        groups.setdefault(str(entry["clip_id"]), []).append(index)
+        # AudioCaps audiocap_id identifies a caption row, so audio_path is the
+        # reliable positive-group identity when multiple captions share audio.
+        group_id = str(entry.get("audio_path") or entry["clip_id"])
+        groups.setdefault(group_id, []).append(index)
     rng = random.Random(seed)
     for values in groups.values():
         rng.shuffle(values)
