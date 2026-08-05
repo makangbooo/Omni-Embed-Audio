@@ -33,7 +33,7 @@ echo "===== ASRUR OEA FOUR-SPACE ATTRIBUTION MATRIX ====="
 echo "variants=oea_nemo3b_cl,oea_qwen3b_cl subsets=fiqa,nq"
 echo "query_count=${QUERY_COUNT} negative_document_count=${NEGATIVE_COUNT}"
 echo "run_dir=${RUN_DIR}"
-echo "training=disabled cache_mutation=disabled network=disabled"
+echo "training=disabled formal_cache_mutation=disabled checkpoint_selection=disabled network=disabled"
 
 CONDA_BASE="$(resolve_conda_base)"
 # shellcheck disable=SC1091

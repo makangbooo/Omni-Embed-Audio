@@ -587,7 +587,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     )
     document_ids = sorted(positive_ids) + negative_ids
     audio_paths = [Path(record_by_query[query_id].audio_path) for query_id in query_ids]
-    document_texts = [corpus[document_id].constructed_text for document_id in document_ids]
+    document_texts = [corpus[document_id] for document_id in document_ids]
 
     output.parent.mkdir(parents=True, exist_ok=True)
     model_load_report = {
