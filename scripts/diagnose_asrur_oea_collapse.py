@@ -64,6 +64,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--subset", choices=("fiqa", "nq"), default="fiqa")
     parser.add_argument("--audio-manifest", type=Path, required=True)
     parser.add_argument(
+        "--exclude-query-ids-json",
+        type=Path,
+        help="Optional prior diagnostic JSON or JSON list whose query IDs are excluded",
+    )
+    parser.add_argument(
         "--phase2-cache-root", type=Path,
         help="Optional immutable cache root used only for fresh/cache agreement",
     )
@@ -92,6 +97,21 @@ def file_record(path: Path) -> dict[str, Any]:
         "size_bytes": path.stat().st_size,
         "sha256": sha256(path),
     }
+
+
+def load_excluded_query_ids(path: Path | None) -> set[str]:
+    if path is None:
+        return set()
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(value, dict):
+        value = value.get("query_ids")
+    if not isinstance(value, list) or any(
+        not isinstance(item, str) or not item for item in value
+    ):
+        raise ValueError("excluded query artifact must contain a query_ids string list")
+    if len(value) != len(set(value)):
+        raise ValueError("excluded query IDs must be unique")
+    return set(value)
 
 
 def git_output(*arguments: str) -> str:
@@ -546,6 +566,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     model_root = args.model_root.resolve()
     dataset_root = args.dataset_root.resolve()
     audio_manifest_path = args.audio_manifest.resolve()
+    exclude_path = (
+        args.exclude_query_ids_json.resolve()
+        if args.exclude_query_ids_json is not None
+        else None
+    )
+    excluded_query_ids = load_excluded_query_ids(exclude_path)
     cache_root = args.phase2_cache_root.resolve() if args.phase2_cache_root else None
     output = args.output.resolve()
     config = json.loads(config_path.read_text(encoding="utf-8"))
@@ -561,6 +587,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         if squtr_subset_name(record.subset) == args.subset
         and record.condition == "clean"
         and record.query_id in qrels
+        and record.query_id not in excluded_query_ids
     ]
     record_by_query = {record.query_id: record for record in records}
     if len(record_by_query) != len(records):
@@ -748,6 +775,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "sampling": {
             "method": "sha256_seeded_query_order",
             "sample_seed": args.sample_seed,
+            "excluded_query_count": len(excluded_query_ids),
         },
         "spaces": evaluations,
         "component_effects": component_effects,
@@ -764,6 +792,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "dataset_root": file_record(corpus_path),
             "qrels": file_record(qrels_path),
             "audio_manifest": file_record(audio_manifest_path),
+            **(
+                {"excluded_query_ids": file_record(exclude_path)}
+                if exclude_path is not None
+                else {}
+            ),
             **({
                 "phase2_oea_manifest": file_record(cache_root / "oea/clean/cache_manifest.json"),
                 "phase2_vanilla_manifest": file_record(cache_root / "vanilla/clean/cache_manifest.json"),

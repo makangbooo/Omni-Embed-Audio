@@ -29,6 +29,10 @@ The intended order is:
    half of the Base-hidden to Full-OEA MRR and Recall@10 gap must be recovered,
    while validation recall may drop by at most two percentage points.
 
+Once a diagnostic subset has influenced method design, pass its JSON report to
+`--exclude-query-ids-json` and use a new seed for the final gate. This keeps the
+reported FiQA/NQ result disjoint from the query subset used to revise CGP.
+
 Negative UIQ loss is deliberately absent from this MVP.  It is allowed only
 after the gate passes for both model variants and both datasets.  The intent
 gate is the final ablation, after the negative-loss result is frozen.

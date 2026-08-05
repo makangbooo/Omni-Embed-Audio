@@ -14,10 +14,17 @@ from scripts.diagnose_asrur_oea_collapse import (
     off_diagonal_summary,
     paired_bootstrap_delta,
     select_corpus_rows,
+    load_excluded_query_ids,
 )
 
 
 class DiagnoseASRUROEACollapseTest(unittest.TestCase):
+    def test_load_excluded_query_ids_accepts_prior_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "prior.json"
+            path.write_text(json.dumps({"query_ids": ["q1", "q2"]}), encoding="utf-8")
+            self.assertEqual(load_excluded_query_ids(path), {"q1", "q2"})
+
     def test_streaming_corpus_selection_keeps_positives_and_seeded_negatives(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "corpus.jsonl"
