@@ -191,6 +191,7 @@ def _evaluate_cached(
                 sim / temperature, target
             ).item()
         ),
+        "ranks": [int(value) for value in ranks.detach().cpu().tolist()],
     }
 
 
@@ -299,7 +300,8 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             args.temperature,
         )
         text_head.train(); audio_head.train()
-        print(f"CGP_EPOCH={epoch + 1} loss={running / max(len(batches), 1):.6f} metrics={json.dumps(metrics, sort_keys=True)}")
+        printable_metrics = {key: value for key, value in metrics.items() if key != "ranks"}
+        print(f"CGP_EPOCH={epoch + 1} loss={running / max(len(batches), 1):.6f} metrics={json.dumps(printable_metrics, sort_keys=True)}")
         if metrics["R@10"] > best["R@10"]:
             best = metrics
             state = {"text_head": {k: v.detach().cpu() for k, v in text_head.state_dict().items()}, "audio_head": {k: v.detach().cpu() for k, v in audio_head.state_dict().items()}, "lora_state_dict": checkpoint["lora_state_dict"], "config": checkpoint.get("config", {}), "cgp_config": {"geometry_lambda": args.geometry_lambda, "distill_temperature": args.distill_temperature, "train_dataset": args.dataset, "max_train_examples": len(train_entries)}, "metrics": metrics, "baseline_metrics": baseline, "global_step": epoch + 1}
