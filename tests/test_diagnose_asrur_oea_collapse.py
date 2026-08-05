@@ -1,4 +1,6 @@
 import unittest
+import json
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -11,10 +13,33 @@ from scripts.diagnose_asrur_oea_collapse import (
     factorial_component_effects,
     off_diagonal_summary,
     paired_bootstrap_delta,
+    select_corpus_rows,
 )
 
 
 class DiagnoseASRUROEACollapseTest(unittest.TestCase):
+    def test_streaming_corpus_selection_keeps_positives_and_seeded_negatives(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "corpus.jsonl"
+            rows = [
+                {"_id": f"d{index}", "title": "", "text": f"text {index}"}
+                for index in range(10)
+            ]
+            path.write_text(
+                "".join(json.dumps(row) + "\n" for row in rows),
+                encoding="utf-8",
+            )
+            selected, negatives, positive_count = select_corpus_rows(
+                path,
+                positive_ids={"d2", "d7"},
+                negative_count=3,
+                sample_seed=5,
+            )
+            self.assertEqual(positive_count, 2)
+            self.assertEqual(len(negatives), 3)
+            self.assertEqual(set(selected), {"d2", "d7", *negatives})
+            self.assertEqual(selected["d2"], "text 2")
+
     def test_space_names_lock_component_attribution(self) -> None:
         self.assertEqual(
             SPACE_NAMES,

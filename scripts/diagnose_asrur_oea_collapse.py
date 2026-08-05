@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import hashlib
+import heapq
 import json
 import math
 import subprocess
@@ -37,8 +38,9 @@ from AudioRetrieval.asr_uncertainty_reranking.artifacts import (  # noqa: E402
     load_unbounded_qrels,
 )
 from AudioRetrieval.asr_uncertainty_reranking.data import (  # noqa: E402
-    load_corpus,
+    construct_document_text,
     load_squtr_audio_manifest,
+    read_jsonl,
     squtr_subset_name,
 )
 from scripts.diagnose_asrur_phase2_no_go import load_ids  # noqa: E402
@@ -55,9 +57,16 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--resolved-model-config", type=Path, required=True)
     parser.add_argument("--model-root", type=Path, required=True)
-    parser.add_argument("--fiqa-root", type=Path, required=True)
+    parser.add_argument(
+        "--dataset-root", "--fiqa-root", dest="dataset_root", type=Path, required=True,
+        help="MTEB-style dataset root containing corpus.jsonl and qrels/test.jsonl",
+    )
+    parser.add_argument("--subset", choices=("fiqa", "nq"), default="fiqa")
     parser.add_argument("--audio-manifest", type=Path, required=True)
-    parser.add_argument("--phase2-cache-root", type=Path, required=True)
+    parser.add_argument(
+        "--phase2-cache-root", type=Path,
+        help="Optional immutable cache root used only for fresh/cache agreement",
+    )
     parser.add_argument("--query-count", type=int, default=256)
     parser.add_argument("--negative-document-count", type=int, default=4096)
     parser.add_argument("--sample-seed", type=int, default=20260805)
@@ -473,6 +482,59 @@ def cached_rows(
     )
 
 
+def select_corpus_rows(
+    path: Path,
+    *,
+    positive_ids: set[str],
+    negative_count: int,
+    sample_seed: int,
+) -> tuple[dict[str, Any], list[str], int]:
+    """Select positives plus deterministic negatives without loading a huge corpus."""
+    if negative_count <= 0:
+        raise ValueError("negative_count must be positive")
+    negative_heap: list[tuple[int, str]] = []
+    positive_seen: set[str] = set()
+    for _, row in read_jsonl(path):
+        document_id = str(row.get("_id", "")).strip()
+        if not document_id:
+            raise ValueError(f"corpus row missing _id: {path}")
+        if document_id in positive_ids:
+            positive_seen.add(document_id)
+        else:
+            digest = int.from_bytes(hashlib.sha256(
+                f"{sample_seed}:negative:{document_id}".encode("utf-8")
+            ).digest(), byteorder="big")
+            item = (-digest, document_id)
+            if len(negative_heap) < negative_count:
+                heapq.heappush(negative_heap, item)
+            elif item > negative_heap[0]:
+                heapq.heapreplace(negative_heap, item)
+    missing = sorted(positive_ids - positive_seen)
+    if missing:
+        raise ValueError(f"qrels positives absent from corpus: {missing[:20]}")
+    negative_ids = [
+        document_id
+        for negative_digest, document_id in sorted(
+            negative_heap, key=lambda item: (-item[0], item[1])
+        )
+    ]
+    selected_ids = sorted(positive_ids) + negative_ids
+    selected = set(selected_ids)
+    rows: dict[str, Any] = {}
+    for line_number, row in read_jsonl(path):
+        document_id = str(row.get("_id", "")).strip()
+        if document_id not in selected:
+            continue
+        title = row.get("title", "")
+        text = row.get("text", "")
+        if not isinstance(title, str) or not isinstance(text, str):
+            raise TypeError(f"corpus title/text must be strings: {path}:{line_number}")
+        rows[document_id] = construct_document_text(title, text)
+    if set(rows) != selected:
+        raise ValueError("selected corpus rows changed between scans")
+    return rows, negative_ids, len(positive_seen)
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
     from scripts.generate_oea_embeddings import load_model_bundle
 
@@ -482,14 +544,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("bootstrap-iterations must be at least 100")
     config_path = args.resolved_model_config.resolve()
     model_root = args.model_root.resolve()
-    fiqa_root = args.fiqa_root.resolve()
+    dataset_root = args.dataset_root.resolve()
     audio_manifest_path = args.audio_manifest.resolve()
-    cache_root = args.phase2_cache_root.resolve()
+    cache_root = args.phase2_cache_root.resolve() if args.phase2_cache_root else None
     output = args.output.resolve()
     config = json.loads(config_path.read_text(encoding="utf-8"))
-    corpus_path = fiqa_root / "corpus.jsonl"
-    qrels_path = fiqa_root / "qrels/test.jsonl"
-    corpus = load_corpus(corpus_path)
+    corpus_path = dataset_root / "corpus.jsonl"
+    qrels_path = dataset_root / "qrels/test.jsonl"
     qrels = load_unbounded_qrels(qrels_path)
     records = [
         record
@@ -497,7 +558,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             audio_manifest_path,
             require_audio_files=True,
         ).values()
-        if squtr_subset_name(record.subset) == "fiqa"
+        if squtr_subset_name(record.subset) == args.subset
         and record.condition == "clean"
         and record.query_id in qrels
     ]
@@ -518,19 +579,12 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         for document_id, relevance in qrels[query_id].items()
         if relevance > 0.0
     }
-    missing_positive = sorted(positive_ids - set(corpus))
-    if missing_positive:
-        raise ValueError(f"qrels positives absent from corpus: {missing_positive[:20]}")
-    negative_ids = sorted(
-        (
-            document_id
-            for document_id in corpus
-            if document_id not in positive_ids
-        ),
-        key=lambda document_id: hashlib.sha256(
-            f"{args.sample_seed}:negative:{document_id}".encode("utf-8")
-        ).hexdigest(),
-    )[: args.negative_document_count]
+    corpus, negative_ids, _ = select_corpus_rows(
+        corpus_path,
+        positive_ids=positive_ids,
+        negative_count=args.negative_document_count,
+        sample_seed=args.sample_seed,
+    )
     document_ids = sorted(positive_ids) + negative_ids
     audio_paths = [Path(record_by_query[query_id].audio_path) for query_id in query_ids]
     document_texts = [corpus[document_id].constructed_text for document_id in document_ids]
@@ -660,30 +714,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "95% confidence intervals must be strictly below zero."
         ),
     }
-    base_cached_audio = cached_rows(
-        cache_root=cache_root,
-        mode="vanilla",
-        kind="audio",
-        identifiers=query_ids,
-    )
-    base_cached_documents = cached_rows(
-        cache_root=cache_root,
-        mode="vanilla",
-        kind="document",
-        identifiers=document_ids,
-    )
-    full_cached_audio = cached_rows(
-        cache_root=cache_root,
-        mode="oea",
-        kind="audio",
-        identifiers=query_ids,
-    )
-    full_cached_documents = cached_rows(
-        cache_root=cache_root,
-        mode="oea",
-        kind="document",
-        identifiers=document_ids,
-    )
+    cache_agreement = None
+    if cache_root is not None:
+        base_cached_audio = cached_rows(cache_root=cache_root, mode="vanilla", kind="audio", identifiers=query_ids)
+        base_cached_documents = cached_rows(cache_root=cache_root, mode="vanilla", kind="document", identifiers=document_ids)
+        full_cached_audio = cached_rows(cache_root=cache_root, mode="oea", kind="audio", identifiers=query_ids)
+        full_cached_documents = cached_rows(cache_root=cache_root, mode="oea", kind="document", identifiers=document_ids)
+        cache_agreement = {
+            "fresh_base_audio_vs_vanilla_cache": compare_embeddings(spaces["base_hidden"][0], base_cached_audio),
+            "fresh_base_text_vs_vanilla_cache": compare_embeddings(spaces["base_hidden"][1], base_cached_documents),
+            "fresh_full_audio_vs_oea_cache": compare_embeddings(spaces["lora_plus_oea_heads"][0], full_cached_audio),
+            "fresh_full_text_vs_oea_cache": compare_embeddings(spaces["lora_plus_oea_heads"][1], full_cached_documents),
+        }
     peak_allocated = int(torch_module.cuda.max_memory_allocated(device))
     peak_reserved = int(torch_module.cuda.max_memory_reserved(device))
     return {
@@ -697,6 +739,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "--short",
             "--untracked-files=all",
         ),
+        "variant": config.get("official_variant_id", config.get("model")),
+        "subset": args.subset,
         "query_ids": query_ids,
         "document_ids": document_ids,
         "positive_document_count": len(positive_ids),
@@ -709,24 +753,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "component_effects": component_effects,
         "factorial_component_effects": factorial_effects,
         "capability_loss_decision": capability_loss_decision,
-        "cache_agreement": {
-            "fresh_base_audio_vs_vanilla_cache": compare_embeddings(
-                spaces["base_hidden"][0],
-                base_cached_audio,
-            ),
-            "fresh_base_text_vs_vanilla_cache": compare_embeddings(
-                spaces["base_hidden"][1],
-                base_cached_documents,
-            ),
-            "fresh_full_audio_vs_oea_cache": compare_embeddings(
-                spaces["lora_plus_oea_heads"][0],
-                full_cached_audio,
-            ),
-            "fresh_full_text_vs_oea_cache": compare_embeddings(
-                spaces["lora_plus_oea_heads"][1],
-                full_cached_documents,
-            ),
-        },
+        "cache_agreement": cache_agreement,
         "gpu": {
             "name": torch_module.cuda.get_device_name(device),
             "peak_allocated_bytes": peak_allocated,
@@ -734,15 +761,13 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         },
         "provenance": {
             "resolved_model_config": file_record(config_path),
-            "corpus": file_record(corpus_path),
+            "dataset_root": file_record(corpus_path),
             "qrels": file_record(qrels_path),
             "audio_manifest": file_record(audio_manifest_path),
-            "phase2_oea_manifest": file_record(
-                cache_root / "oea/clean/cache_manifest.json"
-            ),
-            "phase2_vanilla_manifest": file_record(
-                cache_root / "vanilla/clean/cache_manifest.json"
-            ),
+            **({
+                "phase2_oea_manifest": file_record(cache_root / "oea/clean/cache_manifest.json"),
+                "phase2_vanilla_manifest": file_record(cache_root / "vanilla/clean/cache_manifest.json"),
+            } if cache_root is not None else {}),
         },
         "interpretation_rules": {
             "projection_head_failure": (
