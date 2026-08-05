@@ -43,8 +43,9 @@ echo "GPU_USED=yes; CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}"
 echo "TRAINABLE_COMPONENT=query-side rank-16 residual adapter only"
 echo "AUDIO_EMBEDDINGS=frozen and hash-verified"
 echo "AUDIO_INDEX_REBUILT=no"
-echo "SPLIT=5-fold connected-component grouping; audio IDs disjoint"
-echo "TOTAL_WORKLOAD=5 adapters over 1,581 controlled pairs"
+echo "SPLIT_FOLDS=${FIXED_INDEX_PROBE_FOLDS:-2}"
+echo "SPLIT=connected-component grouping; audio IDs disjoint"
+echo "TOTAL_WORKLOAD=${FIXED_INDEX_PROBE_FOLDS:-2} adapters over 1,581 controlled pairs"
 echo "ESTIMATED_TOTAL_TIME=2-8 minutes"
 echo "DOWNLOADS_REQUIRED=no"
 echo "OEA_OFFICIAL_SOURCE_USED=yes; reuses completed official-source embeddings"
@@ -71,6 +72,8 @@ python scripts/probe_fixed_index_negative_uiq.py \
   --dataset-metrics "${SOURCE_RUN}/metrics/clotho/metrics.json" \
   --dataset-metrics "${SOURCE_RUN}/metrics/mecat/metrics.json" \
   --output-dir "${RESULT_DIR}" \
+  --folds "${FIXED_INDEX_PROBE_FOLDS:-2}" \
+  --maximum-fold-imbalance "${FIXED_INDEX_PROBE_MAX_IMBALANCE:-4.0}" \
   --device cuda
 RUN_RC=$?
 set -e
@@ -97,5 +100,6 @@ print("FIXED_INDEX_PROBE_COMPACT=" + json.dumps({
     "pass": report["overall"]["predeclared_pass_rule"],
     "metrics_path": str(path),
 }, sort_keys=True))
+PY
 fi
 exit "${RUN_RC}"

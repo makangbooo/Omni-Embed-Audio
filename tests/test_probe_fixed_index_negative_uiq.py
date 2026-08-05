@@ -145,6 +145,8 @@ class FixedIndexNegativeUIQWrapperTest(unittest.TestCase):
         self.assertIn("AUDIO_EMBEDDINGS=frozen and hash-verified", source)
         self.assertIn("AUDIO_INDEX_REBUILT=no", source)
         self.assertIn("CUBLAS_WORKSPACE_CONFIG=:4096:8", source)
+        self.assertIn('--folds "${FIXED_INDEX_PROBE_FOLDS:-2}"', source)
+        self.assertIn("PY\nfi", source)
         self.assertNotIn("nohup", source)
 
 
