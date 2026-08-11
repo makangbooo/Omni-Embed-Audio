@@ -374,27 +374,6 @@ def synthetic_vanilla_embedding_directory(root: Path) -> Path:
 
 
 class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
-    def test_fixed_a2t_config_is_public_code_extension(self) -> None:
-        repository_root = Path(__file__).resolve().parents[1]
-        config = load_suite_config(
-            repository_root / "configs/eval/qwen3b_cl_clotho_a2t_suite.json"
-        )
-        self.assertEqual(config["model"], "OEA-Qwen3B (+Cl)")
-        self.assertEqual(len(config["protocols"]), 1)
-        protocol = config["protocols"][0]
-        self.assertEqual(protocol["task"], "a2t")
-        self.assertEqual(protocol["query_selection"], "all")
-        self.assertEqual(protocol["protocol_source"], "CODE")
-        self.assertIn("not paper-reported", protocol["paper_table"])
-        self.assertEqual(protocol["expected_evaluated_queries"], 1045)
-        self.assertEqual(
-            file_identity(
-                repository_root
-                / "configs/eval/qwen3b_cl_clotho_embeddings.json"
-            )["sha256"],
-            config["expected_generation_protocol_sha256"],
-        )
-
     def test_fixed_config_separates_all_public_code_protocols(self) -> None:
         repository_root = Path(__file__).resolve().parents[1]
         config = load_suite_config(
@@ -453,30 +432,6 @@ class PrepareEmbeddingEvaluationSuiteTest(unittest.TestCase):
             {"R@1": 21.57, "R@5": 47.16, "R@10": 60.36},
         )
         self.assertEqual(config["paper_reference"]["caption_selection"], "MISSING")
-        self.assertEqual(
-            file_identity(
-                repository_root / "configs/eval/nemo3b_cl_clotho_embeddings.json"
-            )["sha256"],
-            config["expected_generation_protocol_sha256"],
-        )
-
-    def test_nemo3b_cl_a2t_suite_is_multi_positive_and_lock_bound(self) -> None:
-        repository_root = Path(__file__).resolve().parents[1]
-        config = load_suite_config(
-            repository_root / "configs/eval/nemo3b_cl_clotho_a2t_suite.json"
-        )
-        self.assertEqual(config["model"], "OEA-Nemo3B (+Cl)")
-        self.assertEqual(config["official_variant_id"], "oea_nemo3b_cl")
-        self.assertEqual(
-            config["official_model_lock_path"],
-            "results/model_locks/oea_nemo3b_cl.json",
-        )
-        self.assertEqual(len(config["protocols"]), 1)
-        protocol = config["protocols"][0]
-        self.assertEqual(protocol["task"], "a2t")
-        self.assertEqual(protocol["query_selection"], "all")
-        self.assertEqual(protocol["expected_evaluated_queries"], 1045)
-        self.assertIn("not paper-reported", protocol["paper_table"])
         self.assertEqual(
             file_identity(
                 repository_root / "configs/eval/nemo3b_cl_clotho_embeddings.json"

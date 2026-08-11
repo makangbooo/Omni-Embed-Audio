@@ -9,7 +9,7 @@
 - 来源标签：`[PAPER]` 论文明确给出；`[CODE]` 官方代码、配置、官方模型仓库或发布数据给出；`[INFERRED]` 为待验证推断；`[MISSING]` 论文和代码均未给出。
 - 可复现性：A=官方代码和数据完整；B=需要额外公开资源或小型兼容补丁；C=缺少配置/映射，只能近似或需作者补充；D=人工评测或闭源 API，不能完全自动复现。
 
-截至 2026-08-03 的提交内证据计数为：`COMPLETED=4`、`IN_PROGRESS=13`、`TODO=4`、`BLOCKED=10`，总计 31；整行实验完成度为 `4/31 = 12.9%`。Table 2/3/12–15 的 public controlled cell 已执行完毕，DER-01 的 controlled Table 11 均值也已生成；negative UIQ 的 deterministic controlled pairing 已达到 `1,581/1,581`，模型评测进行中；MECAT 847-row/caption 等严格输入仍缺失，因此这些整行实验不得提前标记 `COMPLETED`。该计数不包含 SpeechXBT-OEA、FiQA、NQ、SQuTR、ASR reranker 或 A2T 扩展。910 个论文指标聚合后的模型×数据集×任务矩阵见 `results/tables/paper_experiment_matrix.csv`；其中 `PAPER` 与复现状态分列，避免把论文转录值误写成复现值。
+截至 2026-08-03 的提交内证据计数为：`COMPLETED=4`、`IN_PROGRESS=13`、`TODO=4`、`BLOCKED=10`，总计 31；整行实验完成度为 `4/31 = 12.9%`。Table 2/3/12–15 的 public controlled cell 已执行完毕，DER-01 的 controlled Table 11 均值也已生成；negative UIQ 的 deterministic controlled pairing 已达到 `1,581/1,581`，模型评测进行中；MECAT 847-row/caption 等严格输入仍缺失，因此这些整行实验不得提前标记 `COMPLETED`。该计数只覆盖 OEA 论文实验，不包含任何论文之外的扩展。910 个论文指标聚合后的模型×数据集×任务矩阵见 `results/tables/paper_experiment_matrix.csv`；其中 `PAPER` 与复现状态分列，避免把论文转录值误写成复现值。
 
 ## 全量清单
 

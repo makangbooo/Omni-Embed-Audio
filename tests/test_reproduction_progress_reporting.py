@@ -36,9 +36,9 @@ class ReproductionProgressReportingTests(unittest.TestCase):
             self.counts,
             {
                 "COMPLETED": 4,
-                "IN_PROGRESS": 11,
+                "IN_PROGRESS": 13,
                 "TODO": 4,
-                "BLOCKED": 12,
+                "BLOCKED": 10,
             },
         )
         self.assertEqual(f"{self.counts['COMPLETED'] / 31 * 100:.1f}%", "12.9%")

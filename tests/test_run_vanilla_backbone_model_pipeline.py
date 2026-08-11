@@ -79,18 +79,9 @@ class RunVanillaBackboneModelPipelineTest(unittest.TestCase):
         self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
         self.assertIn("requires a clean Git worktree", wrapper)
         self.assertIn("Refusing to overwrite", wrapper)
-        asrur_wrapper = (
-            REPOSITORY_ROOT / "scripts/run_asrur_vanilla_nemo_phase2_audit.sh"
-        ).read_text(encoding="utf-8")
-        self.assertIn("--portable-lock-evidence", asrur_wrapper)
-        self.assertIn('export CUDA_VISIBLE_DEVICES=""', asrur_wrapper)
-        self.assertIn("fixed-revision Hugging Face metadata API only", asrur_wrapper)
-        self.assertIn("unset HF_HUB_OFFLINE", asrur_wrapper)
-        self.assertIn("No model or dataset download is performed", asrur_wrapper)
         for forbidden in ("rm -rf", "snapshot_download", "git reset"):
             self.assertNotIn(forbidden, implementation)
             self.assertNotIn(forbidden, wrapper)
-            self.assertNotIn(forbidden, asrur_wrapper)
 
 
 if __name__ == "__main__":

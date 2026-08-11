@@ -48,10 +48,6 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "download_data06_audiocaps_v2_metadata.sh",
             "run_data07_audiocaps_v2_metadata_validation.sh",
             "download_data08_wavcaps_metadata.sh",
-            "download_data12_squtr.sh",
-            "run_data13_squtr_archive_audit.sh",
-            "run_data13b_squtr_validation.sh",
-            "run_data13d_squtr_fiqa_nq_validation.sh",
             "run_data09_wavcaps_metadata_audit.sh",
             "run_data10_clotho_trainval_validation.sh",
             "run_model03_model04_audit.sh",
@@ -63,7 +59,6 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             "run_qwen3b_ac_clotho_positive_uiq_embeddings.sh",
             "run_qwen3b_ac_clotho_positive_uiq_suite.sh",
             "run_official_checkpoint_preparation.sh",
-            "run_asrur_nemo_phase1_audit.sh",
             "run_qwen3b_clotho_embeddings.sh",
             "run_reproduction.sh",
         )
@@ -147,83 +142,6 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
         self.assertNotIn("snapshot_download", source)
         self.assertNotIn("rm -rf", source)
 
-    def test_squtr_download_is_pinned_cpu_only_and_does_not_extract(self) -> None:
-        source = (
-            REPOSITORY_ROOT / "scripts/download_data12_squtr.sh"
-        ).read_text(encoding="utf-8")
-        manifest = (
-            REPOSITORY_ROOT / "configs/resources/data12_squtr.json"
-        ).read_text(encoding="utf-8")
-        self.assertIn('export CUDA_VISIBLE_DEVICES=""', source)
-        self.assertIn("download_http_assets.py", source)
-        self.assertIn("21069841248", source)
-        self.assertIn("does not extract", source)
-        self.assertIn("2f1b041e2e98e0d28ed68fbcf22126ef247eb719", manifest)
-        self.assertIn(
-            "8956bf938de3f9ce168a1e7daf2ff61b0b7fe603fa5c3d7dc6a4314617c6997c",
-            manifest,
-        )
-        self.assertNotIn("unzip", source)
-        self.assertNotIn("rm -rf", source)
-
-    def test_squtr_archive_audit_is_read_only_and_does_not_extract(self) -> None:
-        wrapper = (
-            REPOSITORY_ROOT / "scripts/run_data13_squtr_archive_audit.sh"
-        ).read_text(encoding="utf-8")
-        auditor = (
-            REPOSITORY_ROOT / "scripts/audit_squtr_archive.py"
-        ).read_text(encoding="utf-8")
-        self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
-        self.assertIn("configs/resources/data13_squtr_structure.json", wrapper)
-        self.assertIn("extraction_performed", auditor)
-        self.assertNotIn("extractall", auditor)
-        self.assertNotIn("unzip", wrapper)
-        self.assertNotIn("rm -rf", wrapper)
-
-    def test_squtr_content_validation_is_cpu_only_resumable_and_non_overwriting(
-        self,
-    ) -> None:
-        wrapper = (
-            REPOSITORY_ROOT / "scripts/run_data13b_squtr_validation.sh"
-        ).read_text(encoding="utf-8")
-        extractor = (
-            REPOSITORY_ROOT / "scripts/extract_squtr_archive.py"
-        ).read_text(encoding="utf-8")
-        validator = (
-            REPOSITORY_ROOT / "scripts/validate_squtr_extracted.py"
-        ).read_text(encoding="utf-8")
-        self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
-        self.assertIn("40000000000", wrapper)
-        self.assertIn("extract_squtr_archive.py", wrapper)
-        self.assertIn("validate_squtr_extracted.py", wrapper)
-        self.assertIn(".data13b.part", extractor)
-        self.assertIn("refusing to overwrite", extractor)
-        self.assertIn("qrels references unknown corpus ID", validator)
-        self.assertIn("first_and_last_frame", validator)
-        self.assertNotIn("extractall", extractor)
-        self.assertNotIn("unzip", wrapper)
-        self.assertNotIn("rm -rf", wrapper)
-        self.assertNotIn("rm -rf", extractor)
-        self.assertNotIn("rm -rf", validator)
-
-    def test_squtr_target_subset_validation_uses_an_independent_scoped_lock(
-        self,
-    ) -> None:
-        wrapper = (
-            REPOSITORY_ROOT
-            / "scripts/run_data13d_squtr_fiqa_nq_validation.sh"
-        ).read_text(encoding="utf-8")
-        self.assertIn('export CUDA_VISIBLE_DEVICES=""', wrapper)
-        self.assertIn("--subset en/fiqa", wrapper)
-        self.assertIn("--subset en/nq", wrapper)
-        self.assertIn(".data13d_en_fiqa_nq.lock", wrapper)
-        self.assertIn(".data13c_content_recovery.lock", wrapper)
-        self.assertIn("evidence only and will not be modified", wrapper)
-        self.assertIn("verify_squtr_extraction_completion.py", wrapper)
-        self.assertIn("audit_asrur_fiqa_data.py", wrapper)
-        self.assertNotIn("rm -rf", wrapper)
-        self.assertNotIn("extract_squtr_archive.py", wrapper)
-
     def test_qwen3b_retrieval_suite_is_cpu_only_and_non_overwriting(self) -> None:
         source = (
             REPOSITORY_ROOT / "scripts/run_qwen3b_clotho_retrieval_suite.sh"
@@ -268,21 +186,6 @@ class ShellEnvironmentGuardsTest(unittest.TestCase):
             nemo_source,
         )
         self.assertNotIn("rm -rf", nemo_source)
-
-        nemo_a2t_source = (
-            REPOSITORY_ROOT
-            / "scripts/run_nemo3b_cl_clotho_a2t_suite.sh"
-        ).read_text(encoding="utf-8")
-        self.assertIn(
-            "configs/eval/nemo3b_cl_clotho_a2t_suite.json",
-            nemo_a2t_source,
-        )
-        self.assertIn(
-            "oea_nemo3b_clotho_a2t_suite_seed42",
-            nemo_a2t_source,
-        )
-        self.assertIn("run_qwen3b_clotho_retrieval_suite.sh", nemo_a2t_source)
-        self.assertNotIn("rm -rf", nemo_a2t_source)
 
     def test_positive_uiq_suite_is_cpu_only_and_non_overwriting(self) -> None:
         wrappers = (

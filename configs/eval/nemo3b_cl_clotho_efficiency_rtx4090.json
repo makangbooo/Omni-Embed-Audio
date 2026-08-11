@@ -7,7 +7,7 @@
   "claim_scope": {
     "hardware_alignment": "hardware-mismatched",
     "result_label": "INFERRED",
-    "allowed_claim": "same-RTX4090 efficiency baseline for the ASR-uncertainty reranking study",
+    "allowed_claim": "same-RTX4090 controlled OEA efficiency evidence",
     "forbidden_claim": "same-hardware or exact-protocol reproduction of the PAPER A100 efficiency row"
   },
   "hardware": {

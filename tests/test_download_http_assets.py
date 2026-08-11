@@ -172,11 +172,11 @@ class DownloadHttpAssetsTest(unittest.TestCase):
         payload = b"pinned-lfs-payload"
         specification = {
             "schema_version": 1,
-            "local_subdir": "squtr/source",
+            "local_subdir": "large_archive/source",
             "files": [
                 {
-                    "name": "source_data.zip",
-                    "url": "https://example.invalid/source_data.zip",
+                    "name": "corpus.zip",
+                    "url": "https://example.invalid/corpus.zip",
                     "sha256": hashlib.sha256(payload).hexdigest(),
                     "size_bytes": len(payload),
                 }
@@ -184,7 +184,7 @@ class DownloadHttpAssetsTest(unittest.TestCase):
         }
         validate_specification(specification)
         with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "source_data.zip"
+            path = Path(directory) / "corpus.zip"
             path.write_bytes(payload)
             self.assertEqual(
                 verify_asset_file(path, specification["files"][0]),
@@ -197,45 +197,16 @@ class DownloadHttpAssetsTest(unittest.TestCase):
     def test_asset_without_checksum_is_rejected(self) -> None:
         specification = {
             "schema_version": 1,
-            "local_subdir": "squtr/source",
+            "local_subdir": "large_archive/source",
             "files": [
                 {
-                    "name": "source_data.zip",
-                    "url": "https://example.invalid/source_data.zip",
+                    "name": "corpus.zip",
+                    "url": "https://example.invalid/corpus.zip",
                 }
             ],
         }
         with self.assertRaisesRegex(ValueError, "at least one checksum"):
             validate_specification(specification)
-
-    def test_squtr_manifest_pins_the_official_archive(self) -> None:
-        manifest = REPOSITORY_ROOT / "configs/resources/data12_squtr.json"
-        specification = json.loads(manifest.read_text(encoding="utf-8"))
-        validate_specification(specification)
-        self.assertEqual(specification["dataset"], "SQuTR")
-        self.assertEqual(specification["expected_examples"], 149268)
-        self.assertEqual(specification["expected_unique_queries"], 37317)
-        self.assertEqual(specification["local_subdir"], "squtr/source")
-        self.assertEqual(
-            specification["version"],
-            "HF revision 2f1b041e2e98e0d28ed68fbcf22126ef247eb719",
-        )
-        self.assertEqual(
-            specification["files"],
-            [
-                {
-                    "name": "source_data.zip",
-                    "kind": "dataset_archive",
-                    "url": "https://huggingface.co/datasets/SLLMCommunity/SQuTR/resolve/2f1b041e2e98e0d28ed68fbcf22126ef247eb719/source_data.zip?download=true",
-                    "size_bytes": 21069841248,
-                    "sha256": "8956bf938de3f9ce168a1e7daf2ff61b0b7fe603fa5c3d7dc6a4314617c6997c",
-                    "lfs_sha256": "8956bf938de3f9ce168a1e7daf2ff61b0b7fe603fa5c3d7dc6a4314617c6997c",
-                    "hf_git_oid": "aaf0e262d68125b74fd0ee36b667f9fa3ff0dcd3",
-                    "xet_hash": "a6d503861db7dee7727211024ea71e778f037bf1c588a2316063af15f520683c",
-                }
-            ],
-        )
-
 
 if __name__ == "__main__":
     unittest.main()

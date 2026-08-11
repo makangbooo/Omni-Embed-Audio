@@ -1,152 +1,135 @@
-# Data preparation
+# OEA data preparation
 
-## Clotho evaluation
+This document covers only datasets required by the OEA paper reproduction.
+All generated audio, manifests, and embeddings live outside Git; the
+repository stores scripts, fixed resource metadata, and compact audits.
 
-### DATA-01: immutable source download
+## Clotho v2.1
 
-- `[INFERRED]` The paper names Clotho v2 but does not publish an archive checksum. The reproduction uses the repaired official Clotho v2.1 release from Zenodo record 4783391 and reports this version choice.
-- `[PAPER][CODE]` The evaluation split contains 1,045 clips with five captions each.
-- `[MISSING]` Archive checksums are absent from the paper and official code. DATA-01 pins the MD5 values published by the official Zenodo record.
-- The three verified source files live outside Git at `/home/jg525/datasets/oea/clotho_v2.1/source/`.
-- DATA-01 completed once with `downloaded_and_verified`; two repeat runs returned `verified_existing` and did not create duplicate copies.
+### Evaluation split
 
-### DATA-02: extraction and integrity validation
+The reproduction uses the repaired official Clotho v2.1 release from Zenodo
+record 4783391. The paper names Clotho v2 but does not publish archive hashes,
+so the Zenodo MD5 values are treated as the public immutable source identity.
 
-`scripts/run_data02_clotho_validation.sh` performs the following CPU-only steps:
+Run in order:
 
-1. Rechecks the 1.2 GB archive MD5 before extraction.
-2. Detects `7zz`, `7z`, or `7za`; it does not install software automatically.
-3. Extracts into a unique staging directory and refuses to overwrite an existing unmarked extraction.
-4. Requires exactly 1,045 WAV files before atomically promoting the staging directory.
-5. Requires exact 1,045-row captions and metadata CSV schemas and filename sets.
-6. Fully decodes every WAV with SoundFile, checking frame count and finite samples.
-7. Requires exact filename-set alignment for the 1,045 question, imperative, paraphrase, and tagging UIQ rows.
-8. Audits the 542 negative UIQ rows separately.
+```bash
+bash scripts/download_data01_clotho_evaluation.sh
+bash scripts/run_data02_clotho_validation.sh
+```
 
-The released negative JSONL has 542 rows but 247 unique raw `audio_id` values. The raw values omit `.wav`; appending the suffix aligns all 542 rows to positive Clotho filenames. This mapping is marked `[INFERRED]` and is not treated as an officially published target/hard-negative pairing.
+The validator rechecks the archive, extracts through a staging directory,
+requires exactly 1,045 WAV files and five captions per clip, fully decodes
+every WAV, and verifies exact filename alignment for the four positive UIQ
+sets. It audits the 542 Negative UIQ rows separately.
 
-The canonical generated manifest is stored outside Git at:
+The canonical external manifest is:
 
 `/home/jg525/datasets/oea/clotho_v2.1/manifests/clotho_evaluation_manifest.jsonl`
 
-Each row records the sample ID, absolute and relative audio path, five captions, split, duration, sample rate, channels, frames, format/subtype, existence/decode status, training inclusion status, filtering reason, and leakage-blocklist applicability. Evaluation samples are explicitly excluded from training; leakage blocklist status is `NOT_APPLICABLE_EVALUATION_SPLIT`, not an unsupported claim of no overlap.
+Each row records IDs, absolute/relative paths, captions, duration, sample
+rate, channels, frames, decode status, and evaluation-only status.
 
-## SQuTR
+### Training and validation archives
 
-### DATA-12: immutable archive download
+The optional Clotho train/validation inputs are prepared by:
 
-- `[CODE]` The official `SLLMCommunity/SQuTR` dataset is pinned to Hugging Face
-  revision `2f1b041e2e98e0d28ed68fbcf22126ef247eb719`.
-- The only archive is exactly 21,069,841,248 bytes with SHA256
-  `8956bf938de3f9ce168a1e7daf2ff61b0b7fe603fa5c3d7dc6a4314617c6997c`.
-- The remote download completed with both wrapper and downloader exit code 0.
-  DATA-12 never extracts the archive.
+```bash
+bash scripts/download_data03_clotho_trainval.sh
+bash scripts/run_data10_clotho_trainval_validation.sh
+```
 
-### DATA-13A: read-only ZIP audit
+They are needed only for reproducing training or train/validation audits, not
+for official-checkpoint evaluation. This project has not completed the paper's
+from-scratch training reproduction.
 
-The remote run `data13_squtr_archive_audit_20260726_135100` completed with exit
-code 0. It found 149,349 ZIP records: 149,310 files, 39 directories, 42 JSONL
-files, and 149,268 WAV files. The sum of uncompressed member sizes is
-28,422,366,590 bytes. All six official subsets and all four acoustic
-conditions match their expected query counts. No traversal, absolute path,
-encrypted member, link, special member, duplicate path, or case-insensitive
-collision was found.
+## AudioCaps v2
 
-`[OBSERVED]` All `queries_with_audio_*.jsonl` files are at the subset root and
-all qrels are at `qrels/test.jsonl`. This resolves the public README/runner
-path discrepancy from the actual pinned archive rather than by choosing the
-more convenient code path.
+Prepare and validate pinned metadata with:
 
-### DATA-13B: resumable extraction and content audit
+```bash
+bash scripts/download_data06_audiocaps_v2_metadata.sh
+bash scripts/run_data07_audiocaps_v2_metadata_validation.sh
+bash scripts/run_audiocaps_raw_audio_validation.sh
+```
 
-`scripts/run_data13b_squtr_validation.sh` is CPU-only and performs:
+The evaluation protocol expects 975 test clips and 4,875 captions. Raw audio
+is kept outside Git and must be decoded before embedding generation. The
+public loader/manifest yields 91,254 training rows while the paper reports
+91,256. Do not synthesize two rows or relabel the public manifest as the exact
+paper training split.
 
-1. A second exact archive size/SHA256 check.
-2. Safe streaming extraction with per-member CRC validation and atomic file
-   promotion.
-3. Exact reuse of valid existing files after an interruption; only
-   tool-owned `.data13b.part` files may be restarted.
-4. Refusal to overwrite any mismatched final file or traverse a symbolic-link
-   directory.
-5. Strict JSONL parsing, unique corpus/query IDs, qrels query/corpus closure,
-   and full query coverage.
-6. Exact four-condition audio filename/query-ID set equality, noisy-condition
-   SNR/noise metadata checks, and first/last-frame WAV decoding after the full
-   ZIP CRC pass.
-7. An evaluation-only manifest with duration, sample rate, channels, path,
-   original/normalized query text, condition, and audit fields.
+Relevant compact evidence is under `results/audits/` with the
+`audiocaps_*_20260802.json` names.
 
-Query-text differences are reported rather than silently rewritten: the
-official benchmark documents a text-normalization stage, so exact equality
-with the original text query is not assumed. The formal OEA-5 protocol remains
-gated on a successful remote DATA-13B report.
+## MECAT
 
-#### DATA-13B attempt 1 and recovery
+Prepare the public `00A/test` data with:
 
-`[OBSERVED]` Attempt `data13b_squtr_validation_20260726_141640` at commit
-`cd29099` completed extraction with exit code 0: all 149,310 files were
-extracted, every ZIP member passed CRC, and no unexpected or partial file
-remained. Content validation then stopped before audio probing with exit code
-1 at `en/fiqa/corpus.jsonl:742`, where both the document title and text are
-empty. The wrapper also returned 1, no final manifest was published, and the
-failed candidate was preserved. The exact failure is committed in
-`results/audits/squtr_data13b_attempt1_failure_20260726.json`.
+```bash
+bash scripts/download_data04_mecat_00a_test.sh
+bash scripts/run_data05_mecat_validation.sh
+```
 
-This is a validator-policy mismatch, not evidence of archive corruption.
-`[CODE]` The pinned SQuTR `CustomAudioRetrieval` loader at commit
-`cc3fb31fc0dc44fef3a44c569b344516bbaee79c` preserves every corpus row and
-constructs `title + "\n" + text` when title exists, otherwise `text`; it does
-not reject empty constructed text. Commit `c3c2c6f` therefore makes the
-minimal non-semantic repair: preserve the row and empty text exactly, record
-the count, up to 20 ID/line examples, and a SHA256 of the complete empty-ID
-sequence, then continue qrels closure and audio validation. It does not delete
-the document, inject placeholder text, alter qrels, or change candidate
-membership.
+The public release contains 848 decodable FLAC files and aligns exactly with
+the four released positive UIQ ID sets. The paper reports 847 pairs but does
+not disclose the excluded sample or exact retrieval-caption construction.
+Formal outputs must therefore be named `public848` and must not be presented
+as the strict paper 847-row protocol.
 
-The recovery run must reuse the successful extraction marker, retain the
-attempt-1 failure directory, and create a new run directory. DATA-13B remains
-incomplete until extraction/validation/wrapper exit codes are all zero.
+See `docs/mecat_data_audit.md` and
+`results/audits/data04_data05_mecat_remote_20260729.json`.
 
-Commit `0212431` adds the dedicated CPU-only recovery entry point
-`scripts/run_data13c_squtr_content_recovery.sh`. It verifies that the existing
-completion marker exactly matches the pinned archive and structure manifests,
-checks every subset's core paths, and then skips the redundant 21 GB archive
-hash plus 28 GB extracted-tree CRC reread. Audio probes are appended to
-`.squtr_audio_probe_cache_v1.jsonl`; the cache identity includes the extraction
-marker hash, structure hash, probe protocol, absolute root, and producer Git
-commit. It is fsynced every 1,000 audio files. A restart at the same commit
-reuses exact path/size/mtime-matched probes, while a different cache identity
-is rejected instead of silently reused. The recovery uses `flock`, requires a
-clean worktree, never removes the attempt-1 candidate, and does not overwrite
-an incompatible final manifest.
+## WavCaps
 
-#### DATA-13C attempt 2 and qrels score representation
+WavCaps is required to audit the paper training-data description and potential
+source overlap with evaluation data. Prepare metadata only with:
 
-`[OBSERVED]` Recovery `data13c_squtr_content_recovery_20260726_155758` at
-commit `68aa615` verified the extraction completion marker and all 66 core
-paths with reuse exit code 0. It performed neither extraction nor a redundant
-full-tree reread. Validation then stopped before audio probing at
-`en/fiqa/qrels/test.jsonl:1`; validation and wrapper exit codes were both 1.
-No final manifest was published, the random candidate was preserved, and the
-v1 probe cache contains only its 475-byte identity record. The exact failure
-is committed in
-`results/audits/squtr_data13c_attempt2_failure_20260726.json`.
+```bash
+bash scripts/download_data08_wavcaps_metadata.sh
+bash scripts/run_data09_wavcaps_metadata_audit.sh
+bash scripts/run_data11_mecat_wavcaps_provenance.sh
+```
 
-This is another local schema-policy mismatch, not evidence of archive damage.
-`[CODE]` The pinned SQuTR loader at commit
-`cc3fb31fc0dc44fef3a44c569b344516bbaee79c` parses qrel relevance using
-`int(item.get("score", 1))`. The immutable `mteb/fiqa` test qrels fixed for
-this project at revision `5e59eeb3a7df6b85882112b747008547c21587ea`
-has the already pinned size 98,588 bytes and SHA256
-`2bccf36cea9efefcc14ae500f11bf89d50182b78b4636d73ca2eda5c1993c5c5`;
-all 1,706 rows store score as the JSON string `"1"`.
+The audit fixes source identities, duration-filter counts, and potential
+same-video candidates. A common source video does not by itself prove audio
+content overlap. The paper's exact training filter and post-blocklist manifest
+remain separate from the public controlled inputs.
 
-The minimal repair accepts integer JSON numbers and base-10 integer strings
-without changing their integer relevance. It rejects booleans, non-integral
-floats, decimal strings, missing score fields, and all lossy conversions. The
-validation report now records each actual SQuTR qrels file's size, SHA256,
-raw score-type counts, normalized score counts, and string-coercion count.
-It does not rewrite qrels or change query/candidate membership. Because the
-identity-only v1 cache is bound to commit `68aa615`, the next run preserves it
-and uses `.squtr_audio_probe_cache_v2.jsonl` rather than deleting or silently
-relabeling prior evidence.
+See `docs/wavcaps_data_audit.md` and the `data08_*`, `data11_*` audits.
+
+## UIQ
+
+The repository contains the released UIQ JSONL files under `data/UIQ/`:
+
+| Dataset | Positive UIQ | Negative UIQ |
+|---|---:|---:|
+| AudioCaps | 3,900 | 630 |
+| Clotho | 4,180 | 542 |
+| MECAT public | 3,392 | 409 |
+| Total | 11,472 | 1,581 |
+
+Positive UIQ has four forms: question, imperative, paraphrase, and
+keyphrase/tagging. Negative UIQ does not publish the complete exact
+target/hard-negative audio pairing used in the paper.
+
+The controlled reproduction reconstructs candidate aliases and caption
+identity deterministically:
+
+```bash
+bash scripts/run_negative_uiq_pairing_audit.sh
+```
+
+Embedding similarity must never be used to guess the missing official pairing.
+The controlled and strict pairing claims remain separate.
+
+## Integrity rules
+
+1. Pin source revision, filename, byte size, and available checksum before use.
+2. Extract to a staging path and do not overwrite an incompatible final tree.
+3. Decode every evaluation audio file and reject non-finite samples.
+4. Require exact ID-set closure between audio, captions, queries, and qrels.
+5. Record public/paper count differences rather than repairing them silently.
+6. Keep raw data and embeddings outside Git; commit only manifests, hashes,
+   configs, and compact audit evidence.

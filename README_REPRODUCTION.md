@@ -2,7 +2,8 @@
 
 本文件是持续更新的复现入口，不是“已经全部复现”的声明。当前真实进度、阻塞项和下一步以
 [`docs/reproduction_status.md`](docs/reproduction_status.md) 为准；论文全部实验清单见
-[`docs/paper_experiment_inventory.md`](docs/paper_experiment_inventory.md)。论文与代码均未公开的配置始终标为
+[`docs/paper_experiment_inventory.md`](docs/paper_experiment_inventory.md)；完整复现过程、阶段工作和问题处理见
+[`docs/reproduction_project_report.md`](docs/reproduction_project_report.md)。论文与代码均未公开的配置始终标为
 `[MISSING]`，根据实现作出的选择标为 `[INFERRED]`。
 
 ## 基本原则

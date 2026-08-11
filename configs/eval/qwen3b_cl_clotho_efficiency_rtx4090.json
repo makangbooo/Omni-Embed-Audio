@@ -7,7 +7,7 @@
   "claim_scope": {
     "hardware_alignment": "hardware-mismatched",
     "result_label": "INFERRED",
-    "allowed_claim": "cross-hardware engineering comparison and same-RTX4090 SpeechXBT baseline",
+    "allowed_claim": "cross-hardware engineering comparison and same-RTX4090 controlled OEA efficiency evidence",
     "forbidden_claim": "same-hardware reproduction of PAPER A100 latency, throughput, or peak memory"
   },
   "hardware": {

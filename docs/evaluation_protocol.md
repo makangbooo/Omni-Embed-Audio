@@ -51,56 +51,6 @@ dataset, or random-number side effects.
 9. Formal paper-table runs must save the explicit query indices, candidate
    IDs, positive indices, embeddings, rankings, metrics, and Git commit.
 
-### Audio-to-text extension for SpeechXBT-OEA
-
-`[CODE]` The public baseline and precomputed-embedding runners also implement
-audio-to-text (A2T), although the paper does not report an A2T table. For
-Clotho, every one of the 1,045 audio embeddings is a query, all 5,225 caption
-embeddings form the frozen text candidate bank, and all five captions with the
-same exact clip ID are positives. Rank uses the best-scoring positive under
-the same optimistic strict-greater tie policy. Missing target groups, duplicate
-audio query IDs, count drift, and implicit query filtering are errors.
-
-The fixed official-checkpoint entrypoint is:
-
-```bash
-bash scripts/run_qwen3b_cl_clotho_a2t_suite.sh \
-  /absolute/path/to/completed_qwen3b_cl_embedding_directory
-```
-
-This CPU-only suite reuses the already generated, lock-bound Qwen3B-Cl Clotho
-embeddings. It writes all similarities, rankings, multi-positive mappings,
-input/output SHA256 values, Git state, environment, commands, logs, and final
-R@1/5/10, MRR, and DCG. Its `paper_table` is explicitly
-`OEA-4 extension (not paper-reported)`; it must not be presented as a missing
-OEA paper value.
-
-### Frozen target-corpus index contract
-
-`scripts/evaluate_frozen_text_index.py` is the dataset-agnostic OEA-5
-evaluator. It requires unique explicit query/document IDs and an external
-JSONL qrels file; missing queries, missing documents, duplicate qrels, and
-non-positive relevance grades are hard errors. It reports R@1/5/10, MRR@10,
-and graded nDCG@10 with deterministic candidate-index tie breaking.
-
-The candidate embedding and metadata files are the frozen text index. Their
-byte sizes and SHA256 values are checked before and after scoring; a change
-during evaluation fails the run. Large index files are referenced by identity
-rather than duplicated in every result directory. The result retains the
-index identity, top ranking indices/scores, per-query evidence, qrels/input
-hashes, Git state, command, logs, and failure traceback. The runnable wrapper
-is:
-
-```bash
-bash scripts/run_frozen_text_index_evaluation.sh \
-  /absolute/path/to/fixed_config.json \
-  /absolute/path/to/new_output_directory
-```
-
-`configs/eval/frozen_text_index_example.json` is intentionally non-runnable:
-the target corpus, split, document construction, qrels semantics, and absolute
-artifact paths remain `[MISSING]` until they are explicitly frozen.
-
 ### OEA-Qwen3B efficiency benchmark
 
 `[PAPER]` Table 5 and Appendix Table 16 report OEA-Qwen3B on Clotho and an
@@ -141,9 +91,9 @@ bash scripts/run_qwen3b_cl_clotho_efficiency_rtx4090.sh
 
 Its config is
 `configs/eval/qwen3b_cl_clotho_efficiency_rtx4090.json`. The result is labelled
-`[INFERRED] hardware-mismatched`: it may be shown beside the paper values and
-used as the same-RTX4090 SpeechXBT baseline, but its latency, throughput, and
-peak-memory deltas cannot determine whether the A100 paper result was reproduced.
+`[INFERRED] hardware-mismatched`: it may be shown beside the paper values, but
+its latency, throughput, and peak-memory deltas cannot determine whether the
+A100 paper result was reproduced.
 The A100 entrypoint and hardware guard remain unchanged.
 
 ## Required protocol resolution
