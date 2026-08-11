@@ -112,8 +112,10 @@ bash scripts/run_reproduction.sh \
 | Qwen3B 训练 | BLOCKED | 缺 world size、seed、精确 AudioCaps manifest、完整 stage 配置和 Clotho early-stop split |
 | 基线 | BLOCKED | 7 个非 OEA 模型中 5 个具备完整静态代码入口、3 个具备固定资源身份、0 个可正式评测；三个 vanilla 仍缺真实锁与 GPU smoke |
 
-基线逐模型代码入口、外部目录假设和资源身份审计见
-[`docs/baseline_readiness.md`](docs/baseline_readiness.md)。该审计只读取源文件和本地文件元数据，不会安装依赖或下载权重。
+基线的正式执行入口保留在 `scripts/run_*clap*`、
+`scripts/run_vanilla_*` 与对应的固定资源配置中。早期 readiness 探针和
+metadata-only presence 检查已从最小复现包移除；它们不再作为实验入口，
+已完成运行的审计 JSON 和正式模型锁仍保留在 `results/` 下。
 
 ## 证据链
 

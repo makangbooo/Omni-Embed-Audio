@@ -52,7 +52,6 @@ display alias for `TFR-HN@10`, not as a separate formula.
   inputs fail explicitly.
 
 Implementation: `AudioRetrieval/evaluation/negative_metrics.py`.
-Tests: `tests/test_negative_metrics.py`.
 
 ## Explicit-pair embedding evaluator
 
@@ -116,7 +115,7 @@ and delta; aggregate metrics; resolved config; command; environment; Git
 state; stdout/stderr; and exit code. Failed runs retain `metrics.json` with the
 exception and traceback.
 
-Tests: `tests/test_evaluate_negative_embedding_artifacts.py`. Synthetic cases
-verify exact metrics, explicit-ID alignment independent of pairing row order,
-failure on absent HN IDs, exact pairing coverage, duplicate rejection,
-target/HN inequality, deterministic ties, and non-overwrite behavior.
+The evaluator itself enforces explicit-ID alignment, exact pairing coverage,
+duplicate rejection, target/HN inequality, deterministic ties, and
+non-overwrite behavior. Completed run evidence is retained under
+`results/audits/` and `results/raw/`.

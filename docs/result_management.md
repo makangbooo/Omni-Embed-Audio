@@ -76,16 +76,14 @@ decimal places. Delta fields remain blank when no reproduced value exists.
 ## Build and validation
 
 Run from the repository root in the `oea-repro` environment. These commands
-are CPU-only and do not download anything. The first two maintain the generated
-registry; the summary builder writes only the two small result-table artifacts.
+are CPU-only and do not download anything. They maintain the generated
+registry and write only the two small result-table artifacts.
 
 ```bash
 conda activate oea-repro
 export CUDA_VISIBLE_DEVICES=""
 python scripts/build_paper_metric_registry.py --check
 python scripts/build_reproduction_summary.py
-python -m unittest tests.test_build_paper_metric_registry \
-  tests.test_build_reproduction_summary -v
 ```
 
 When the pinned paper PDF is locally available, rerun the independent

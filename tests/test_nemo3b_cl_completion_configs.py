@@ -77,52 +77,5 @@ class Nemo3BClCompletionConfigsTests(unittest.TestCase):
         ):
             self.assertIn(field, line)
 
-    def test_tmux_wrapper_retains_pane_and_final_summary(self) -> None:
-        source = (
-            REPOSITORY_ROOT
-            / "scripts/run_nemo3b_cl_clotho_positive_uiq_tmux.sh"
-        ).read_text(encoding="utf-8")
-        self.assertIn('[[ -z "${TMUX:-}" ]]', source)
-        self.assertIn("TOTAL_WORKLOAD=4,180", source)
-        self.assertIn("ESTIMATED_TOTAL_TIME=8-25 minutes", source)
-        self.assertIn("FINAL_RUN_RC=", source)
-        self.assertIn("METRICS_PATH=", source)
-        self.assertIn("FAILED_STAGE=", source)
-        self.assertIn("exec bash -i", source)
-        self.assertIn('tee -a "${LOG_FILE}"', source)
-        self.assertNotIn("nohup", source)
-        self.assertNotIn("rm -rf", source)
-
-    def test_t2t_tmux_wrapper_retains_pane_and_reports_progress(self) -> None:
-        wrapper = (
-            REPOSITORY_ROOT / "scripts/run_nemo3b_cl_clotho_t2t_tmux.sh"
-        ).read_text(encoding="utf-8")
-        retrieval_runner = (
-            REPOSITORY_ROOT / "scripts/run_qwen3b_clotho_retrieval_suite.sh"
-        ).read_text(encoding="utf-8")
-        for field in (
-            '[[ -z "${TMUX:-}" ]]',
-            "TOTAL_WORKLOAD=2",
-            "ESTIMATED_TOTAL_TIME=5-15 minutes",
-            "FINAL_RUN_RC=",
-            "METRICS_PATH=",
-            "FAILED_STAGE=",
-            "exec bash -i",
-            'tee -a "${LOG_FILE}"',
-        ):
-            self.assertIn(field, wrapper)
-        for field in (
-            "stage_elapsed=",
-            "overall_elapsed=",
-            "throughput=",
-            "stage_remaining=",
-            "overall_remaining=",
-            "expected_completion=",
-        ):
-            self.assertIn(field, retrieval_runner)
-        self.assertNotIn("nohup", wrapper)
-        self.assertNotIn("rm -rf", wrapper)
-
-
 if __name__ == "__main__":
     unittest.main()

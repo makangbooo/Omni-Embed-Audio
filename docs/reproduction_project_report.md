@@ -194,8 +194,24 @@ Figure 2 或模型锁，不能按文件名前缀删除。
 4. 按各数据审计文档准备 Clotho、AudioCaps、MECAT 和 WavCaps/UIQ。
 5. 先运行模型/数据 smoke，再生成完整 embedding。
 6. 运行 T2A/T2T、正向 UIQ、Negative UIQ 和基线矩阵。
-7. 用 `scripts/build_reproduction_summary.py`、
-   `scripts/build_paper_experiment_matrix.py` 和测试重新生成/核对小型结果。
+7. 用 `scripts/build_reproduction_summary.py` 和
+   `scripts/build_paper_experiment_matrix.py` 重新生成/核对小型结果。
 
 当前仓库的目标是让这条官方论文复现链条保持清楚、可检查、可再次执行，
 不再承担任何后续创新实验。
+
+## 9. 最终最小化清理
+
+2026-08-12 的第二轮清理删除了两类不参与正式实验执行的文件：一类是只对
+已提交结果做重复断言的 evidence 测试；另一类是早期资源 presence/probe、
+服务器接管和 tmux 调度包装。相同实验的正式数据、模型锁、embedding、评测
+和汇总入口均保留。
+
+没有删除全部测试。核心指标、UIQ schema、模型锁、checkpoint 安全、数据
+校验、embedding 生成/评测和统一复现入口的测试仍保留，用于防止清理破坏
+主流程。也没有按名称批量删除 `validate_*` 或 `audit_*`：凡是被数据准备、
+正式 GPU wrapper、基线 runner 或结果汇总调用的校验器都属于复现依赖。
+
+历史 `logs/`、`results/audits/` 和主实验 `results/raw/` 继续保留。它们记录
+成功运行、失败重试、输入哈希、退出码和协议边界，是复现过程证据而不是
+待清理的创新实验产物。
